@@ -1,6 +1,5 @@
 "use client";
 import { MapPin, ArrowLeft, Play, Share2, Edit3, MessageSquare } from "lucide-react";
-import JobsTooltip from "./JobsTooltip";
 
 type Screen = "home" | "discover" | "upload" | "messages" | "profile" | "own-profile" | "auth" | "chat" | "client-profile";
 
@@ -120,12 +119,7 @@ export default function ProfileScreen({ variant = "other", onNavigate }: Profile
             <p className="text-sm text-[#4a4a4a] leading-relaxed">{bio}</p>
           </div>
 
-          {/* Jobs Done tooltip row — only for skilled users */}
-          {!isClient && (
-            <div className="mt-2 mb-1">
-              <JobsTooltip count={jobsDone} />
-            </div>
-          )}
+
 
           {/* Action buttons */}
           <div className="flex gap-2.5 mt-4">
