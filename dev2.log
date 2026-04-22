@@ -11,3 +11,7 @@
  ○ Compiling / ...
  ✓ Compiled / in 2.6s
  GET /?_cb=1776828091983 200 in 2847ms
+ GET /?_cb=1776828139007 200 in 44ms
+ GET /?_cb=1776828140280 200 in 39ms
+ ⚠ Blocked cross-origin request from 3000-f2f73adf-0989-4382-9078-19b300a9f2d6.orchids.cloud to /_next/* resource. To allow this, configure "allowedDevOrigins" in next.config
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
