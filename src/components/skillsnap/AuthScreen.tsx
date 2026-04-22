@@ -1,7 +1,7 @@
 "use client";
 // ─────────────────────────────────────────────
 // SkillSnap — Auth / Onboarding Screen
-// Supabase Auth: signUp / logIn → dispatch SET_AUTH → navigate "home"
+// Supports: Google OAuth + email/password (Supabase Auth)
 // ─────────────────────────────────────────────
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
@@ -16,6 +16,44 @@ interface AuthScreenProps {
 
 type AuthMode = "landing" | "signup" | "login";
 
+// ── Google Icon SVG ───────────────────────────
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.859-3.048.859-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+      <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+    </svg>
+  );
+}
+
+// ── "Continue with Google" button ────────────
+function GoogleButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={loading}
+      className="w-full h-14 rounded-2xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-60 shadow-sm hover:border-[#d0ccc8] hover:shadow-md"
+    >
+      {loading ? <Loader2 size={18} className="animate-spin text-[#7a7570]" /> : <GoogleIcon />}
+      Continue with Google
+    </button>
+  );
+}
+
+// ── "or" divider ─────────────────────────────
+function OrDivider() {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex-1 h-px bg-[#e8e4df]" />
+      <span className="text-xs text-[#b0aaa5] font-medium">or</span>
+      <div className="flex-1 h-px bg-[#e8e4df]" />
+    </div>
+  );
+}
+
 export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>("landing");
   const [email, setEmail] = useState("");
@@ -23,14 +61,30 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   const [displayName, setDisplayName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { dispatch } = useAppState();
+
+  async function handleGoogleSignIn() {
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      const result = await authService.signInWithGoogle();
+      if (result.error) {
+        setError(result.error);
+        setGoogleLoading(false);
+      }
+      // On success the browser redirects to /auth/callback — no further action needed here
+    } catch {
+      setError("Google sign-in failed. Please try again.");
+      setGoogleLoading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
-
     try {
       const result =
         mode === "signup"
@@ -40,9 +94,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
       if (!result.success) {
         setError(result.error ?? "Something went wrong. Please try again.");
       } else {
-        if (result.user) {
-          dispatch({ type: "SET_AUTH", user: result.user });
-        }
+        if (result.user) dispatch({ type: "SET_AUTH", user: result.user });
         onNavigate("home");
       }
     } catch {
@@ -52,6 +104,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
     }
   }
 
+  // ── Sign-up / Login form view ─────────────────
   if (mode !== "landing") {
     return (
       <div className="flex flex-col min-h-screen bg-white">
@@ -70,95 +123,100 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col px-6 pt-6 gap-4">
-          {/* Display name — sign up only */}
-          {mode === "signup" && (
+        <div className="flex-1 flex flex-col px-6 pt-4 gap-4">
+          {/* Google button — top of form */}
+          <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} />
+
+          <OrDivider />
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Display name — sign up only */}
+            {mode === "signup" && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Your name</label>
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="e.g. Marcus Thompson"
+                  autoComplete="name"
+                  className="h-12 rounded-xl border border-[#e8e4df] px-4 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
+                />
+              </div>
+            )}
+
+            {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Your name</label>
+              <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Email</label>
               <input
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="e.g. Marcus Thompson"
-                autoComplete="name"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@email.com"
+                autoComplete={mode === "signup" ? "email" : "username"}
+                required
                 className="h-12 rounded-xl border border-[#e8e4df] px-4 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
               />
             </div>
-          )}
 
-          {/* Email */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@email.com"
-              autoComplete={mode === "signup" ? "email" : "username"}
-              required
-              className="h-12 rounded-xl border border-[#e8e4df] px-4 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
-            />
-          </div>
+            {/* Password */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={mode === "signup" ? "Min 6 characters" : "Your password"}
+                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                  required
+                  minLength={6}
+                  className="w-full h-12 rounded-xl border border-[#e8e4df] px-4 pr-12 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#b0aaa5] hover:text-[#7a7570]"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
 
-          {/* Password */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={mode === "signup" ? "Min 6 characters" : "Your password"}
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                required
-                minLength={6}
-                className="w-full h-12 rounded-xl border border-[#e8e4df] px-4 pr-12 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
-              />
+            {/* Error */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading || !email || !password}
+              className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+            >
+              {loading ? (
+                <Loader2 size={20} className="animate-spin" />
+              ) : (
+                mode === "signup" ? "Create account" : "Log in"
+              )}
+            </button>
+
+            {/* Toggle mode */}
+            <p className="text-center text-sm text-[#7a7570] pb-8">
+              {mode === "signup" ? "Already have an account? " : "Don't have an account? "}
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#b0aaa5] hover:text-[#7a7570]"
+                onClick={() => { setMode(mode === "signup" ? "login" : "signup"); setError(null); }}
+                className="text-[#6c47ff] font-semibold"
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {mode === "signup" ? "Log in" : "Sign up"}
               </button>
-            </div>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
-
-          <div className="flex-1" />
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading || !email || !password}
-            className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2 mb-6"
-            style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
-          >
-            {loading ? (
-              <Loader2 size={20} className="animate-spin" />
-            ) : (
-              mode === "signup" ? "Create account" : "Log in"
-            )}
-          </button>
-
-          {/* Toggle mode */}
-          <p className="text-center text-sm text-[#7a7570] pb-8">
-            {mode === "signup" ? "Already have an account? " : "Don't have an account? "}
-            <button
-              type="button"
-              onClick={() => { setMode(mode === "signup" ? "login" : "signup"); setError(null); }}
-              className="text-[#6c47ff] font-semibold"
-            >
-              {mode === "signup" ? "Log in" : "Sign up"}
-            </button>
-          </p>
-        </form>
+            </p>
+          </form>
+        </div>
       </div>
     );
   }
@@ -208,21 +266,35 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         </div>
       </div>
 
-      {/* CTA buttons */}
-      <div className="px-6 pt-8 pb-12 flex flex-col gap-3 bg-white">
+      {/* CTA section */}
+      <div className="px-6 pt-6 pb-10 flex flex-col gap-3 bg-white">
+        {/* Google — primary OAuth option */}
+        <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} />
+
+        <OrDivider />
+
+        {/* Email options */}
         <button
           onClick={() => setMode("signup")}
           className="w-full h-14 rounded-2xl font-semibold text-base text-white transition-all active:scale-[0.98]"
           style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
         >
-          Sign up
+          Sign up with email
         </button>
         <button
           onClick={() => setMode("login")}
           className="w-full h-14 rounded-2xl font-semibold text-base text-[#6c47ff] border border-[#e8e4df] bg-white transition-all active:scale-[0.98]"
         >
-          Log in
+          Log in with email
         </button>
+
+        {/* Error from failed OAuth redirect */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <p className="text-sm text-red-600 text-center">{error}</p>
+          </div>
+        )}
+
         <p className="text-center text-xs text-[#b0aaa5] mt-1">
           By continuing, you agree to our Terms &amp; Privacy Policy
         </p>

@@ -42,6 +42,30 @@ async function fetchProfile(userId: string): Promise<User | null> {
 }
 
 export const authService = {
+  // ── Google OAuth ────────────────────────────────────────────────────────
+  // Starts the Google OAuth flow. Supabase redirects back to /auth/callback,
+  // which exchanges the code for a session and redirects into the app.
+  async signInWithGoogle(): Promise<{ error?: string }> {
+    const sb = getSupabase();
+    const redirectTo =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/auth/callback`
+        : `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/auth/callback`;
+
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
+    });
+    if (error) return { error: error.message };
+    return {};
+  },
+
   async signUp(email: string, password: string, displayName?: string): Promise<AuthResult> {
     const sb = getSupabase();
     const { data, error } = await sb.auth.signUp({
