@@ -1,14 +1,13 @@
 "use client";
 // ─────────────────────────────────────────────
 // SkillSnap — Profile Screen
-// variant="own"    → current user's own profile
-// variant="other"  → another skilled user
-// variant="client" → a client/viewer user
+// variant="own"    → My Profile (current user)
+// variant="client" → Client Profile (public view)
 // Data: userService.getUser(id) via useProfile hook
 // ─────────────────────────────────────────────
 import { MapPin, ArrowLeft, Play, Share2, Edit3 } from "lucide-react";
 import type { Screen, ProfileVariant } from "@/types";
-import { MOCK_WORK_GRID, MOCK_SAVED_GRID } from "@/mock-data/posts";
+import { MOCK_WORK_GRID } from "@/mock-data/posts";
 import { useProfile } from "@/hooks/useProfile";
 import UserAvatar from "./shared/UserAvatar";
 import ConnectButton from "./shared/ConnectButton";
@@ -18,9 +17,8 @@ interface ProfileScreenProps {
   onNavigate: (s: Screen) => void;
 }
 
-export default function ProfileScreen({ variant = "other", onNavigate }: ProfileScreenProps) {
+export default function ProfileScreen({ variant = "client", onNavigate }: ProfileScreenProps) {
   const isOwn = variant === "own";
-  const isClient = variant === "client";
 
   const { user, isFollowing, toggleFollow } = useProfile(variant);
 
@@ -32,7 +30,6 @@ export default function ProfileScreen({ variant = "other", onNavigate }: Profile
     );
   }
 
-  const jobsDone = user.jobsDone;
   const followers = user.followers >= 1000
     ? `${(user.followers / 1000).toFixed(1)}k`
     : String(user.followers);
@@ -50,33 +47,24 @@ export default function ProfileScreen({ variant = "other", onNavigate }: Profile
           style={
             isOwn
               ? { background: "#ede9fe", color: "#5b3dd8" }
-              : isClient
-              ? { background: "#d1fae5", color: "#065f46" }
-              : { background: "#ede9fe", color: "#5b3dd8" }
+              : { background: "#d1fae5", color: "#065f46" }
           }
         >
-          {isOwn ? "Your Profile" : isClient ? "Client" : "Pro"}
+          {isOwn ? "Your Profile" : "Client"}
         </span>
       </header>
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
-        {/* Profile card */}
+        {/* Profile card — identical layout for both variants */}
         <div className="bg-white px-5 pt-6 pb-5 border-b border-[#e8e4df]">
           <div className="flex items-start gap-4 mb-4">
             {/* Avatar */}
-            <UserAvatar user={user} size="lg" showVerified={!isClient} />
+            <UserAvatar user={user} size="lg" showVerified={isOwn} />
 
             {/* Stats: Posts · Jobs Done · Followers */}
             <div className="flex-1 grid grid-cols-3 gap-1 pt-2">
-              <Stat
-                value={isClient ? "—" : String(user.postCount)}
-                label={isClient ? "Saved" : "Posts"}
-              />
-              <Stat
-                value={isClient ? "—" : String(jobsDone)}
-                label="Jobs Done"
-                highlight={!isClient}
-              />
+              <Stat value={String(user.postCount)} label="Posts" />
+              <Stat value={String(user.jobsDone)} label="Jobs Done" highlight />
               <Stat value={followers} label="Followers" />
             </div>
           </div>
@@ -98,7 +86,7 @@ export default function ProfileScreen({ variant = "other", onNavigate }: Profile
             <p className="text-sm text-[#4a4a4a] leading-relaxed">{user.bio}</p>
           </div>
 
-          {/* Action buttons */}
+          {/* Action buttons — same placement, different labels per variant */}
           <div className="flex gap-2.5 mt-4">
             {isOwn ? (
               <>
@@ -113,7 +101,7 @@ export default function ProfileScreen({ variant = "other", onNavigate }: Profile
               </>
             ) : (
               <>
-                {/* Connect — strict label with message icon */}
+                {/* Connect — message icon + label, strict rule */}
                 <div className="flex-1">
                   <ConnectButton onClick={() => onNavigate("chat")} fullWidth />
                 </div>
@@ -132,19 +120,15 @@ export default function ProfileScreen({ variant = "other", onNavigate }: Profile
           </div>
         </div>
 
-        {/* Work / Saved grid */}
+        {/* Work grid — same grid for both variants */}
         <div className="px-1 pt-3">
           <div className="flex items-center justify-between px-4 mb-3">
-            <h3 className="text-sm font-bold text-[#1a1a1a]">
-              {isClient ? "Saved Posts" : "My Work"}
-            </h3>
-            {!isClient && (
-              <span className="text-xs text-[#7a7570]">{MOCK_WORK_GRID.length} posts</span>
-            )}
+            <h3 className="text-sm font-bold text-[#1a1a1a]">My Work</h3>
+            <span className="text-xs text-[#7a7570]">{MOCK_WORK_GRID.length} posts</span>
           </div>
 
           <div className="grid grid-cols-3 gap-0.5 px-0.5">
-            {(isClient ? MOCK_SAVED_GRID : MOCK_WORK_GRID).map((item, i) => (
+            {MOCK_WORK_GRID.map((item, i) => (
               <div key={i} className="aspect-square relative overflow-hidden">
                 <div className="absolute inset-0" style={{ background: item.gradient }} />
                 {item.hasVideo && (
@@ -152,14 +136,6 @@ export default function ProfileScreen({ variant = "other", onNavigate }: Profile
                     <div className="w-8 h-8 rounded-full bg-white/25 flex items-center justify-center">
                       <Play size={12} fill="white" color="white" />
                     </div>
-                  </div>
-                )}
-                {isClient && (item as typeof MOCK_SAVED_GRID[0]).label && (
-                  <div className="absolute bottom-1.5 left-1.5">
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full text-white"
-                      style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}>
-                      {(item as typeof MOCK_SAVED_GRID[0]).label}
-                    </span>
                   </div>
                 )}
               </div>

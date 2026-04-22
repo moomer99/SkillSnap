@@ -3,7 +3,7 @@
 // Replace with API-shaped DTOs when backend is ready
 // ─────────────────────────────────────────────
 
-export type ProfileVariant = "own" | "other" | "client";
+export type ProfileVariant = "own" | "client";
 
 export type SkillCategory =
   | "Barber"
@@ -129,7 +129,6 @@ export type Screen =
   | "upload"
   | "messages"
   | "chat"
-  | "profile"       // other user
-  | "own-profile"   // current user
-  | "client-profile"
+  | "own-profile"      // My Profile
+  | "client-profile"   // Client Profile
   | "edit-profile";

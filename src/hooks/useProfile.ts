@@ -15,8 +15,10 @@ export function useProfile(variant: ProfileVariant) {
   useEffect(() => {
     if (variant === "own") {
       userService.getCurrentUser().then(setUser);
-    } else if (state.viewingUserId) {
-      userService.getUser(state.viewingUserId).then((u) => setUser(u ?? null));
+    } else {
+      // client variant — resolve via viewingUserId or fall back to first mock user
+      const id = state.viewingUserId ?? "user_priya";
+      userService.getUser(id).then((u) => setUser(u ?? null));
     }
   }, [variant, state.viewingUserId]);
 

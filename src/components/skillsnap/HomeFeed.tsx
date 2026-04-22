@@ -26,7 +26,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
 
   function handleProfileClick(userId: string) {
     dispatch({ type: "SET_VIEWING_USER", userId });
-    onNavigate("profile");
+    onNavigate("client-profile");
   }
 
   return (

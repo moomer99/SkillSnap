@@ -39,7 +39,6 @@ function SkillSnapRouter() {
         {screen === "auth"           && <AuthScreen    onNavigate={navigate} />}
         {screen === "home"           && <HomeFeed      onNavigate={navigate} />}
         {screen === "discover"       && <DiscoverScreen onNavigate={navigate} />}
-        {screen === "profile"        && <ProfileScreen  variant="other"  onNavigate={navigate} />}
         {screen === "own-profile"    && <ProfileScreen  variant="own"    onNavigate={navigate} />}
         {screen === "client-profile" && <ProfileScreen  variant="client" onNavigate={navigate} />}
         {screen === "upload"         && <UploadScreen   onNavigate={navigate} />}
@@ -60,8 +59,7 @@ function SkillSnapRouter() {
             ["home",           "Feed"],
             ["discover",       "Discover"],
             ["own-profile",    "My Profile"],
-            ["profile",        "Other Profile"],
-            ["client-profile", "Client"],
+            ["client-profile", "Client Profile"],
             ["upload",         "Upload"],
             ["messages",       "Messages"],
             ["chat",           "Chat"],

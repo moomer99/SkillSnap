@@ -32,7 +32,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           <ArrowLeft size={20} />
         </button>
         <button
-          onClick={() => onNavigate("profile")}
+          onClick={() => onNavigate("client-profile")}
           className="flex items-center gap-2.5 flex-1"
         >
           <UserAvatar user={participant} size="sm" />
