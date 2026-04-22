@@ -21,7 +21,7 @@ const NAV_SCREENS: Screen[] = ["home", "discover", "upload", "messages", "own-pr
 
 function SkillSnapRouter() {
   const { state, navigate } = useAppState();
-  const { screen } = state;
+  const { screen, authLoading } = state;
 
   const showBottomNav = NAV_SCREENS.includes(screen);
 
@@ -35,6 +35,21 @@ function SkillSnapRouter() {
         className="relative w-full bg-[#f8f7f5] overflow-hidden"
         style={{ maxWidth: 390, minHeight: "100dvh", boxShadow: "0 0 80px rgba(0,0,0,0.12)" }}
       >
+        {/* Auth loading splash — shown while session resolves */}
+        {authLoading && (
+          <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
+            <div
+              className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4"
+              style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
+            >
+              <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+                <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="2.5" fill="none" />
+                <circle cx="20" cy="20" r="5" fill="white" />
+              </svg>
+            </div>
+            <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
+          </div>
+        )}
         {/* Screen renderer */}
         {screen === "auth"           && <AuthScreen    onNavigate={navigate} />}
         {screen === "home"           && <HomeFeed      onNavigate={navigate} />}

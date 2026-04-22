@@ -1,8 +1,10 @@
 // ─────────────────────────────────────────────
-// SkillSnap — Discovery / Map Service
-// Integration point: swap for location-based API
-// (PostGIS / Mapbox / Google Maps Places)
+// SkillSnap — Discovery / Map Service (Supabase)
+// Map integration: replace SVG with Mapbox/Google
+// when NEXT_PUBLIC_MAP_KEY is set.
 // ─────────────────────────────────────────────
+import { getSupabase } from "@/lib/supabase";
+import { mapProfile } from "./authService";
 import type { DiscoveryPin, SkillCategory } from "@/types";
 import type { DiscoveryFilter } from "@/mock-data/discovery";
 import { MOCK_DISCOVERY_PINS } from "@/mock-data/discovery";
@@ -12,32 +14,74 @@ export interface LocationCoords {
   lng: number;
 }
 
+// Map pin positions are UI-only for now (no PostGIS yet).
+// We keep stable positions from mock data and hydrate with real profile data.
+const PIN_COLORS: Record<string, string> = {
+  Barber: "#6c47ff",
+  "Makeup Artist": "#f5576c",
+  Tiler: "#4facfe",
+  Cleaning: "#43e97b",
+  "Fitness / PT": "#fa709a",
+  Plumber: "#a18cd1",
+  default: "#6c47ff",
+};
+
+function pinColor(skill: string): string {
+  return PIN_COLORS[skill] ?? PIN_COLORS.default;
+}
+
+function profileToPin(row: Record<string, unknown>, index: number): DiscoveryPin {
+  const mockPin = MOCK_DISCOVERY_PINS[index % MOCK_DISCOVERY_PINS.length];
+  return {
+    id: row.id as string,
+    userId: row.id as string,
+    name: row.display_name as string,
+    skill: (row.skill as SkillCategory) ?? "Other",
+    color: pinColor(row.skill as string ?? ""),
+    rating: 5,
+    jobsDone: Number(row.jobs_done ?? 0),
+    x: mockPin.x,
+    y: mockPin.y,
+  };
+}
+
+async function queryProfiles(filter: DiscoveryFilter, limit = 12): Promise<DiscoveryPin[]> {
+  const sb = getSupabase();
+  let query = sb.from("profiles").select("*").eq("is_client", false).limit(limit);
+
+  if (filter !== "All" && filter !== "Nearby" && filter !== "Top Rated") {
+    query = query.ilike("skill", `%${filter}%`);
+  } else if (filter === "Top Rated") {
+    query = query.order("jobs_done", { ascending: false });
+  }
+
+  const { data } = await query;
+  if (!data?.length) return MOCK_DISCOVERY_PINS; // graceful fallback to mock
+  return data.map((row, i) => profileToPin(row as Record<string, unknown>, i));
+}
+
 export const discoveryService = {
   async getNearbyUsers(_coords: LocationCoords, _radiusKm = 10): Promise<DiscoveryPin[]> {
-    // TODO: GET /discovery/nearby?lat=&lng=&radius=
-    return MOCK_DISCOVERY_PINS;
+    return queryProfiles("All");
   },
 
   async filterUsers(filter: DiscoveryFilter): Promise<DiscoveryPin[]> {
-    // TODO: GET /discovery/nearby?skill=filter
-    if (filter === "All") return MOCK_DISCOVERY_PINS;
-    if (filter === "Nearby") return MOCK_DISCOVERY_PINS.slice(0, 4);
-    if (filter === "Top Rated") return [...MOCK_DISCOVERY_PINS].sort((a, b) => b.rating - a.rating);
-    return MOCK_DISCOVERY_PINS.filter((p) =>
-      p.skill.toLowerCase().includes(filter.toLowerCase())
-    );
+    return queryProfiles(filter);
   },
 
-  async searchBySkillAndLocation(
-    _skill: SkillCategory | "",
-    _location: string
-  ): Promise<DiscoveryPin[]> {
-    // TODO: GET /discovery/search?skill=&location=
-    return MOCK_DISCOVERY_PINS;
+  async searchBySkillAndLocation(skill: SkillCategory | "", location: string): Promise<DiscoveryPin[]> {
+    const sb = getSupabase();
+    let query = sb.from("profiles").select("*").eq("is_client", false).limit(20);
+    if (skill) query = query.eq("skill", skill);
+    if (location) query = query.ilike("location", `%${location}%`);
+    const { data } = await query;
+    if (!data?.length) return MOCK_DISCOVERY_PINS;
+    return data.map((row, i) => profileToPin(row as Record<string, unknown>, i));
   },
 
   async getUserLocation(): Promise<LocationCoords | null> {
-    // TODO: browser Geolocation API + reverse geocode
     return { lat: -33.9214, lng: 150.9224 };
   },
 };
+
+export { mapProfile };

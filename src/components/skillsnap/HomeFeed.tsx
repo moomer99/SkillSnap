@@ -83,8 +83,12 @@ function FeedCard({
 
   return (
     <div className="relative w-full aspect-[9/16] max-h-[85vh] overflow-hidden bg-gray-900 mb-2">
-      {/* Video thumbnail */}
-      <div className="absolute inset-0" style={{ background: post.thumbnailGradient }} />
+      {/* Video thumbnail — real image or gradient placeholder */}
+      {post.thumbnailUrl ? (
+        <img src={post.thumbnailUrl} alt={post.caption} className="absolute inset-0 w-full h-full object-cover" />
+      ) : (
+        <div className="absolute inset-0" style={{ background: post.thumbnailGradient }} />
+      )}
 
       {/* Play button */}
       <div className="absolute inset-0 flex items-center justify-center">

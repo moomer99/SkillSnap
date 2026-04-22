@@ -1,11 +1,11 @@
 // ─────────────────────────────────────────────
-// SkillSnap — Search Service
-// Integration point: swap for full-text search API
-// (Algolia / Meilisearch / Postgres full-text)
+// SkillSnap — Search Service (Supabase)
+// Uses pg_trgm ILIKE for people, skills, locations.
 // ─────────────────────────────────────────────
+import { getSupabase } from "@/lib/supabase";
+import { mapProfile } from "./authService";
+import { mapPost } from "./postService";
 import type { User, Post } from "@/types";
-import { MOCK_USERS } from "@/mock-data/users";
-import { MOCK_POSTS } from "@/mock-data/posts";
 
 export interface SearchResults {
   users: User[];
@@ -14,23 +14,29 @@ export interface SearchResults {
 
 export const searchService = {
   async search(query: string): Promise<SearchResults> {
-    // TODO: GET /search?q=query
-    const q = query.toLowerCase().trim();
+    const q = query.trim();
     if (!q) return { users: [], posts: [] };
 
-    const users = MOCK_USERS.filter(
-      (u) =>
-        u.displayName.toLowerCase().includes(q) ||
-        u.username.toLowerCase().includes(q) ||
-        u.skill?.toLowerCase().includes(q) ||
-        u.location.toLowerCase().includes(q)
-    );
+    const sb = getSupabase();
 
-    const posts = MOCK_POSTS.filter(
-      (p) =>
-        p.caption.toLowerCase().includes(q) ||
-        p.author.skill?.toLowerCase().includes(q) ||
-        p.author.location.toLowerCase().includes(q)
+    const [usersRes, postsRes] = await Promise.all([
+      sb
+        .from("profiles")
+        .select("*")
+        .or(`username.ilike.%${q}%,display_name.ilike.%${q}%,skill.ilike.%${q}%,location.ilike.%${q}%`)
+        .limit(10),
+      sb
+        .from("posts")
+        .select("*, profiles(*)")
+        .or(`caption.ilike.%${q}%,skill.ilike.%${q}%,location.ilike.%${q}%`)
+        .limit(10),
+    ]);
+
+    const users: User[] = (usersRes.data ?? []).map((row) =>
+      mapProfile(row as Record<string, unknown>)
+    );
+    const posts: Post[] = (postsRes.data ?? []).map((row) =>
+      mapPost(row as Record<string, unknown>, new Set(), new Set())
     );
 
     return { users, posts };

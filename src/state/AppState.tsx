@@ -1,49 +1,44 @@
 "use client";
 // ─────────────────────────────────────────────
 // SkillSnap — Centralized App State
-// Uses React Context + useReducer pattern.
-// Replace with Zustand / Redux Toolkit when complexity grows.
+// Auth: hydrated from Supabase session on mount.
+// onAuthStateChange keeps session in sync.
 // ─────────────────────────────────────────────
-import { createContext, useContext, useReducer, type ReactNode } from "react";
+import { createContext, useContext, useReducer, useEffect, type ReactNode } from "react";
 import type { User, Post, MessageThread, Screen } from "@/types";
 import type { DiscoveryFilter } from "@/mock-data/discovery";
+import { getSupabase } from "@/lib/supabase";
+import { mapProfile } from "@/services/authService";
 
 // ── State Shape ──────────────────────────────
 interface AppStateShape {
-  // Auth
   currentUser: User | null;
   isAuthenticated: boolean;
+  authLoading: boolean; // true while session is being resolved on mount
 
-  // Navigation
   screen: Screen;
 
-  // Feed
   posts: Post[];
   feedLoading: boolean;
 
-  // Profile context (which user we're viewing)
   viewingUserId: string | null;
 
-  // Messages
   threads: MessageThread[];
   activeThreadId: string | null;
 
-  // Discovery
   discoveryFilter: DiscoveryFilter;
 
-  // UI
   likedPosts: Set<string>;
   savedPosts: Set<string>;
   followedUsers: Set<string>;
-  modals: {
-    jobsDoneInfo: boolean;
-  };
+  modals: { jobsDoneInfo: boolean };
 }
 
 // ── Actions ──────────────────────────────────
 type Action =
   | { type: "SET_AUTH"; user: User }
   | { type: "CLEAR_AUTH" }
+  | { type: "SET_AUTH_LOADING"; loading: boolean }
   | { type: "NAVIGATE"; screen: Screen }
   | { type: "SET_POSTS"; posts: Post[] }
   | { type: "SET_FEED_LOADING"; loading: boolean }
@@ -61,6 +56,7 @@ type Action =
 const initialState: AppStateShape = {
   currentUser: null,
   isAuthenticated: false,
+  authLoading: true, // start true — resolve on mount
   screen: "auth",
   posts: [],
   feedLoading: false,
@@ -78,9 +74,17 @@ const initialState: AppStateShape = {
 function appReducer(state: AppStateShape, action: Action): AppStateShape {
   switch (action.type) {
     case "SET_AUTH":
-      return { ...state, currentUser: action.user, isAuthenticated: true };
+      return {
+        ...state,
+        currentUser: action.user,
+        isAuthenticated: true,
+        authLoading: false,
+        screen: state.screen === "auth" ? "home" : state.screen,
+      };
     case "CLEAR_AUTH":
-      return { ...initialState };
+      return { ...initialState, authLoading: false };
+    case "SET_AUTH_LOADING":
+      return { ...state, authLoading: action.loading };
     case "NAVIGATE":
       return { ...state, screen: action.screen };
     case "SET_POSTS":
@@ -130,6 +134,48 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
+
+  // Hydrate auth state from Supabase session on mount
+  useEffect(() => {
+    const sb = getSupabase();
+
+    // Resolve initial session
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        sb.from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single()
+          .then(({ data }) => {
+            if (data) {
+              dispatch({ type: "SET_AUTH", user: mapProfile(data as Record<string, unknown>) });
+            } else {
+              dispatch({ type: "SET_AUTH_LOADING", loading: false });
+            }
+          });
+      } else {
+        dispatch({ type: "SET_AUTH_LOADING", loading: false });
+      }
+    });
+
+    // Keep session in sync across tabs and token refresh
+    const { data: { subscription } } = sb.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_OUT" || !session) {
+        dispatch({ type: "CLEAR_AUTH" });
+      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        const { data } = await sb
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+        if (data) {
+          dispatch({ type: "SET_AUTH", user: mapProfile(data as Record<string, unknown>) });
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   function navigate(screen: Screen) {
     dispatch({ type: "NAVIGATE", screen });

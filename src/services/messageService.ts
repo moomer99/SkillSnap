@@ -1,47 +1,216 @@
 // ─────────────────────────────────────────────
-// SkillSnap — Message Service
-// Integration point: swap for real-time chat API
-// (Supabase Realtime / Socket.io / Ably)
+// SkillSnap — Message Service (Supabase + Realtime)
+// Connect flow: Connect button → getOrCreateConversation()
+// Realtime: subscribeToMessages() returns an unsubscribe fn.
 // ─────────────────────────────────────────────
+import { getSupabase } from "@/lib/supabase";
+import { mapProfile } from "./authService";
 import type { MessageThread, Message } from "@/types";
-import { MOCK_THREADS, MOCK_MESSAGES, getThreadMessages } from "@/mock-data/messages";
+
+function mapThread(
+  conv: Record<string, unknown>,
+  currentUserId: string,
+  members: Record<string, unknown>[]
+): MessageThread {
+  // Find the other participant
+  const otherMember = members.find((m) => m.user_id !== currentUserId);
+  const participant = otherMember?.profiles
+    ? mapProfile(otherMember.profiles as Record<string, unknown>)
+    : null;
+
+  return {
+    id: conv.id as string,
+    participant: participant!,
+    lastMessage: (conv.last_message_text as string) ?? "",
+    lastMessageTime: conv.last_message_at
+      ? new Date(conv.last_message_at as string).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      : "",
+    unreadCount: Number(
+      (members.find((m) => m.user_id === currentUserId) as Record<string, unknown>)?.unread_count ?? 0
+    ),
+  };
+}
+
+function mapMessage(row: Record<string, unknown>, currentUserId: string): Message {
+  return {
+    id: row.id as string,
+    threadId: row.conversation_id as string,
+    from: row.sender_id === currentUserId ? "me" : "them",
+    text: row.text as string,
+    time: new Date(row.created_at as string).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  };
+}
+
+async function getCurrentUserId(): Promise<string | null> {
+  const { data: { session } } = await getSupabase().auth.getSession();
+  return session?.user.id ?? null;
+}
 
 export const messageService = {
   async getThreads(): Promise<MessageThread[]> {
-    // TODO: GET /messages/threads
-    return MOCK_THREADS;
+    const userId = await getCurrentUserId();
+    if (!userId) return [];
+
+    const sb = getSupabase();
+    // Get all conversations the current user is a member of
+    const { data: memberRows } = await sb
+      .from("conversation_members")
+      .select("conversation_id")
+      .eq("user_id", userId);
+
+    if (!memberRows?.length) return [];
+    const conversationIds = memberRows.map((r) => r.conversation_id);
+
+    const { data: conversations } = await sb
+      .from("conversations")
+      .select("*")
+      .in("id", conversationIds)
+      .order("last_message_at", { ascending: false, nullsFirst: false });
+
+    if (!conversations?.length) return [];
+
+    // Load all members (with profiles) for these conversations
+    const { data: members } = await sb
+      .from("conversation_members")
+      .select("*, profiles(*)")
+      .in("conversation_id", conversationIds);
+
+    return conversations
+      .map((conv) => {
+        const convMembers = (members ?? []).filter(
+          (m) => m.conversation_id === conv.id
+        );
+        return mapThread(
+          conv as Record<string, unknown>,
+          userId,
+          convMembers as Record<string, unknown>[]
+        );
+      })
+      .filter((t) => t.participant != null);
   },
 
-  async getMessages(threadId: string): Promise<Message[]> {
-    // TODO: GET /messages/threads/:id/messages
-    return getThreadMessages(threadId);
+  async getMessages(conversationId: string): Promise<Message[]> {
+    const userId = await getCurrentUserId();
+    if (!userId) return [];
+
+    const { data } = await getSupabase()
+      .from("messages")
+      .select("*")
+      .eq("conversation_id", conversationId)
+      .order("created_at", { ascending: true });
+
+    return (data ?? []).map((row) => mapMessage(row as Record<string, unknown>, userId));
   },
 
-  async sendMessage(_threadId: string, _text: string): Promise<Message> {
-    // TODO: POST /messages/threads/:id/messages
-    // TODO: trigger real-time broadcast
-    const msg: Message = {
-      id: `msg_${Date.now()}`,
-      threadId: _threadId,
-      from: "me",
-      text: _text,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
-    return msg;
+  async sendMessage(conversationId: string, text: string): Promise<Message> {
+    const userId = await getCurrentUserId();
+    const sb = getSupabase();
+
+    const { data, error } = await sb
+      .from("messages")
+      .insert({ conversation_id: conversationId, sender_id: userId!, text })
+      .select()
+      .single();
+
+    if (error || !data) {
+      // Optimistic fallback
+      return {
+        id: `msg_${Date.now()}`,
+        threadId: conversationId,
+        from: "me",
+        text,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+    }
+    return mapMessage(data as Record<string, unknown>, userId!);
   },
 
-  async markThreadRead(_threadId: string): Promise<void> {
-    // TODO: PATCH /messages/threads/:id/read
+  // Reset unread count when user opens a conversation
+  async markThreadRead(conversationId: string): Promise<void> {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    await getSupabase()
+      .from("conversation_members")
+      .update({ unread_count: 0 })
+      .eq("conversation_id", conversationId)
+      .eq("user_id", userId);
   },
 
-  async startThread(_participantId: string): Promise<MessageThread> {
-    // TODO: POST /messages/threads { participantId }
-    return MOCK_THREADS[0];
+  // Called when user taps Connect — finds existing or creates new conversation
+  async getOrCreateConversation(participantId: string): Promise<string> {
+    const userId = await getCurrentUserId();
+    if (!userId) throw new Error("Not authenticated");
+    const sb = getSupabase();
+
+    // Check if conversation already exists between these two users
+    const { data: existingMemberships } = await sb
+      .from("conversation_members")
+      .select("conversation_id")
+      .eq("user_id", userId);
+
+    if (existingMemberships?.length) {
+      const ids = existingMemberships.map((m) => m.conversation_id);
+      const { data: shared } = await sb
+        .from("conversation_members")
+        .select("conversation_id")
+        .eq("user_id", participantId)
+        .in("conversation_id", ids)
+        .maybeSingle();
+
+      if (shared) return shared.conversation_id;
+    }
+
+    // Create new conversation
+    const { data: conv } = await sb
+      .from("conversations")
+      .insert({})
+      .select()
+      .single();
+
+    if (!conv) throw new Error("Failed to create conversation");
+
+    await sb.from("conversation_members").insert([
+      { conversation_id: conv.id, user_id: userId },
+      { conversation_id: conv.id, user_id: participantId },
+    ]);
+
+    return conv.id;
   },
 
-  // Jobs Done verification request — sent via chat
-  async sendJobCompletionRequest(_threadId: string): Promise<void> {
-    // TODO: POST /jobs/request { threadId }
-    // Both parties must confirm → increments jobsDone
+  // Supabase Realtime subscription — returns unsubscribe function
+  subscribeToMessages(conversationId: string, onMessage: (msg: Message) => void): () => void {
+    let currentUserId = "";
+    getCurrentUserId().then((id) => { currentUserId = id ?? ""; });
+
+    const channel = getSupabase()
+      .channel(`messages:${conversationId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const msg = mapMessage(payload.new as Record<string, unknown>, currentUserId);
+          onMessage(msg);
+        }
+      )
+      .subscribe();
+
+    return () => { getSupabase().removeChannel(channel); };
+  },
+
+  // Jobs Done verification request sent via chat
+  async sendJobCompletionRequest(_conversationId: string): Promise<void> {
+    // TODO: insert jobs_done record with skiller_confirmed=true
+    // The client sees a verification prompt in the chat UI
+  },
+
+  // Legacy compat alias
+  async startThread(participantId: string): Promise<{ id: string }> {
+    const convId = await messageService.getOrCreateConversation(participantId);
+    return { id: convId };
   },
 };

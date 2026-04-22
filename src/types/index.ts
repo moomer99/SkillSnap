@@ -22,7 +22,8 @@ export interface User {
   id: string;
   username: string;
   displayName: string;
-  avatarGradient: string;
+  avatarUrl?: string;          // real image URL from Supabase Storage
+  avatarGradient: string;      // fallback gradient when no image
   avatarInitial: string;
   location: string;
   bio: string;
@@ -43,7 +44,9 @@ export interface Post {
   authorId: string;
   author: User;
   type: PostType;
-  thumbnailGradient: string; // placeholder; replace with media URL
+  mediaUrl?: string;          // real media URL from Supabase Storage
+  thumbnailUrl?: string;      // thumbnail image URL
+  thumbnailGradient: string;  // gradient fallback when no media
   caption: string;
   likes: number;
   likedByMe: boolean;
