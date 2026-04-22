@@ -30,3 +30,4 @@ Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allow
  GET /?_cb=1776829428066 200 in 36ms
  GET /?_cb=1776829447894 200 in 42ms
  GET /?_cb=1776829450073 200 in 37ms
+ GET /?_cb=1776830259410 200 in 132ms
