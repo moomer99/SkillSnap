@@ -21,7 +21,6 @@ export function useFeed() {
     dispatch({ type: "SET_FEED_LOADING", loading: true });
 
     if (!SUPABASE_CONFIGURED) {
-      // Dev mode — no Supabase credentials
       dispatch({ type: "SET_POSTS", posts: MOCK_POSTS });
       dispatch({ type: "SET_FEED_LOADING", loading: false });
       return;
@@ -30,18 +29,16 @@ export function useFeed() {
     postService
       .getFeed()
       .then(({ posts, likedIds, savedIds }) => {
-        // Use real DB posts; only fall back to mock when the DB is genuinely empty
         dispatch({ type: "SET_POSTS", posts: posts.length ? posts : MOCK_POSTS });
-        // Seed liked/saved interaction state from the DB so buttons render correctly
         dispatch({ type: "SET_INTERACTIONS", likedIds, savedIds });
         dispatch({ type: "SET_FEED_LOADING", loading: false });
       })
       .catch(() => {
-        // Network/auth error — show mock so the feed isn't blank
         dispatch({ type: "SET_POSTS", posts: MOCK_POSTS });
         dispatch({ type: "SET_FEED_LOADING", loading: false });
       });
-  }, [dispatch]);
+  // feedVersion increments after a new post is created, triggering a reload
+  }, [dispatch, state.feedVersion]);
 
   const toggleLike = useCallback(
     (postId: string) => {

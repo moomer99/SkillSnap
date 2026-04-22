@@ -6,12 +6,19 @@
 // Data: userService.getUser(id) via useProfile hook
 // ─────────────────────────────────────────────
 import { MapPin, ArrowLeft, Play, Share2, Edit3 } from "lucide-react";
-import type { Screen, ProfileVariant } from "@/types";
+import { useState, useEffect } from "react";
+import type { Screen, ProfileVariant, Post } from "@/types";
 import { MOCK_WORK_GRID } from "@/mock-data/posts";
 import { useProfile } from "@/hooks/useProfile";
 import { useMessages } from "@/hooks/useMessages";
+import { useAppState } from "@/state/AppState";
 import UserAvatar from "./shared/UserAvatar";
 import ConnectButton from "./shared/ConnectButton";
+
+const SUPABASE_CONFIGURED =
+  typeof process !== "undefined" &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref");
 
 interface ProfileScreenProps {
   variant?: ProfileVariant;
@@ -23,6 +30,32 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
 
   const { user, isFollowing, toggleFollow } = useProfile(variant);
   const { connectTo, connecting } = useMessages();
+  const { state } = useAppState();
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [gridLoading, setGridLoading] = useState(true);
+
+  // Load the user's posts for the work grid
+  useEffect(() => {
+    if (!user) return;
+    setGridLoading(true);
+
+    if (!SUPABASE_CONFIGURED) {
+      setPosts([]);
+      setGridLoading(false);
+      return;
+    }
+
+    import("@/services/postService").then(({ postService }) => {
+      postService.getUserPosts(user.id).then((p) => {
+        setPosts(p);
+        setGridLoading(false);
+      }).catch(() => {
+        setPosts([]);
+        setGridLoading(false);
+      });
+    });
+  // feedVersion triggers a grid refresh after the user posts something new
+  }, [user, state.feedVersion]);
 
   if (!user) {
     return (
@@ -126,26 +159,56 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           </div>
         </div>
 
-        {/* Work grid — same grid for both variants */}
+        {/* Work grid — real posts from DB, mock fallback in dev */}
         <div className="px-1 pt-3">
           <div className="flex items-center justify-between px-4 mb-3">
             <h3 className="text-sm font-bold text-[#1a1a1a]">My Work</h3>
-            <span className="text-xs text-[#7a7570]">{MOCK_WORK_GRID.length} posts</span>
+            <span className="text-xs text-[#7a7570]">
+              {gridLoading ? "…" : `${posts.length > 0 ? posts.length : MOCK_WORK_GRID.length} posts`}
+            </span>
           </div>
 
           <div className="grid grid-cols-3 gap-0.5 px-0.5">
-            {MOCK_WORK_GRID.map((item, i) => (
-              <div key={i} className="aspect-square relative overflow-hidden">
-                <div className="absolute inset-0" style={{ background: item.gradient }} />
-                {item.hasVideo && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-8 h-8 rounded-full bg-white/25 flex items-center justify-center">
-                      <Play size={12} fill="white" color="white" />
+            {gridLoading ? (
+              // Skeleton tiles while loading
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="aspect-square bg-gray-200 animate-pulse" />
+              ))
+            ) : posts.length > 0 ? (
+              // Real posts from Supabase
+              posts.map((post) => (
+                <div key={post.id} className="aspect-square relative overflow-hidden">
+                  {post.thumbnailUrl ? (
+                    <img src={post.thumbnailUrl} alt={post.caption} className="absolute inset-0 w-full h-full object-cover" />
+                  ) : post.mediaUrl && post.type === "photo" ? (
+                    <img src={post.mediaUrl} alt={post.caption} className="absolute inset-0 w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0" style={{ background: post.thumbnailGradient }} />
+                  )}
+                  {post.type === "video" && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-white/25 flex items-center justify-center">
+                        <Play size={12} fill="white" color="white" />
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              ))
+            ) : (
+              // Mock grid for dev mode / empty profile
+              MOCK_WORK_GRID.map((item, i) => (
+                <div key={i} className="aspect-square relative overflow-hidden">
+                  <div className="absolute inset-0" style={{ background: item.gradient }} />
+                  {item.hasVideo && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-white/25 flex items-center justify-center">
+                        <Play size={12} fill="white" color="white" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

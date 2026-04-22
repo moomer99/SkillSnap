@@ -20,6 +20,7 @@ interface AppStateShape {
 
   posts: Post[];
   feedLoading: boolean;
+  feedVersion: number; // increment to trigger a feed reload
 
   viewingUserId: string | null;
 
@@ -44,6 +45,7 @@ type Action =
   | { type: "SET_POSTS"; posts: Post[] }
   | { type: "SET_FEED_LOADING"; loading: boolean }
   | { type: "SET_INTERACTIONS"; likedIds: Set<string>; savedIds: Set<string> }
+  | { type: "REFRESH_FEED" }
   | { type: "SET_VIEWING_USER"; userId: string }
   | { type: "SET_THREADS"; threads: MessageThread[] }
   | { type: "SET_ACTIVE_THREAD"; threadId: string; participantId?: string }
@@ -62,6 +64,7 @@ const initialState: AppStateShape = {
   screen: "auth",
   posts: [],
   feedLoading: false,
+  feedVersion: 0,
   viewingUserId: null,
   threads: [],
   activeThreadId: null,
@@ -94,6 +97,8 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       return { ...state, posts: action.posts };
     case "SET_FEED_LOADING":
       return { ...state, feedLoading: action.loading };
+    case "REFRESH_FEED":
+      return { ...state, feedVersion: state.feedVersion + 1 };
     case "SET_INTERACTIONS":
       return { ...state, likedPosts: action.likedIds, savedPosts: action.savedIds };
     case "SET_VIEWING_USER":

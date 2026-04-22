@@ -8,6 +8,7 @@ import { Video, Image as ImageIcon, ChevronDown, ArrowLeft, Loader2, CheckCircle
 import type { Screen, SkillCategory } from "@/types";
 import { SKILL_CATEGORIES, MAP_CONFIG } from "@/constants/config";
 import { uploadService } from "@/services/uploadService";
+import { useAppState } from "@/state/AppState";
 
 interface UploadScreenProps {
   onNavigate: (s: Screen) => void;
@@ -16,6 +17,7 @@ interface UploadScreenProps {
 type ContentType = "video" | "photo" | "social";
 
 export default function UploadScreen({ onNavigate }: UploadScreenProps) {
+  const { dispatch } = useAppState();
   const [contentType, setContentType] = useState<ContentType>("video");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -58,10 +60,14 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         skill: skill,
         location,
       });
+      // Signal feed and profile to reload with the new post
+      dispatch({ type: "REFRESH_FEED" });
       setPosted(true);
-      setTimeout(() => onNavigate("home"), 1200);
-    } catch {
-      setError("Failed to post. Please try again.");
+      // Navigate to own profile so the new post is visible in the grid
+      setTimeout(() => onNavigate("own-profile"), 1400);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to post. Please try again.";
+      setError(msg);
     } finally {
       setLoading(false);
     }

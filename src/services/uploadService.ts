@@ -56,50 +56,59 @@ export const uploadService = {
   async createPost(payload: UploadPayload): Promise<Post | null> {
     const sb = getSupabase();
     const { data: { session } } = await sb.auth.getSession();
-    if (!session) return null;
+    if (!session) throw new Error("Not authenticated");
 
+    // 1. Upload media first (if provided)
     let mediaUrl: string | undefined;
     let thumbnailUrl: string | undefined;
 
     if (payload.file) {
-      try {
-        mediaUrl = await uploadService.uploadMedia(payload.file);
-        if (payload.file.type.startsWith("image/")) thumbnailUrl = mediaUrl;
-      } catch {
-        // Continue without media upload; can retry later
-      }
+      mediaUrl = await uploadService.uploadMedia(payload.file);
+      // For images the media URL doubles as the thumbnail
+      if (payload.file.type.startsWith("image/")) thumbnailUrl = mediaUrl;
     }
 
-    const isVideo = payload.file?.type.startsWith("video/") ?? true;
+    const isVideo = payload.file?.type.startsWith("video/") ?? false;
 
-    const { data, error } = await sb
+    // 2. Insert the post row
+    const { data: inserted, error: insertError } = await sb
       .from("posts")
       .insert({
         author_id: session.user.id,
         type: isVideo ? "video" : "photo",
-        media_url: mediaUrl,
-        thumbnail_url: thumbnailUrl,
+        media_url: mediaUrl ?? null,
+        thumbnail_url: thumbnailUrl ?? null,
         thumbnail_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
         caption: payload.caption,
         skill: payload.skill || null,
         location: payload.location || null,
       })
-      .select("*, profiles(*)")
+      .select("id")
       .single();
 
-    if (error || !data) return null;
+    if (insertError || !inserted) throw insertError ?? new Error("Insert failed");
 
-    // Insert into post_media for multi-media support
+    // 3. Track in post_media table for multi-media support
     if (mediaUrl) {
       await sb.from("post_media").insert({
-        post_id: data.id,
+        post_id: inserted.id,
         url: mediaUrl,
         type: isVideo ? "video" : "photo",
-      });
+        order_index: 0,
+      }).then(() => {}); // fire-and-forget, non-fatal
     }
 
+    // 4. Fetch the full row with author profile (separate query is more reliable than insert+join)
+    const { data: fullPost } = await sb
+      .from("posts")
+      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles(*)")
+      .eq("id", inserted.id)
+      .single();
+
+    if (!fullPost) return null;
+
     const { mapPost } = await import("./postService");
-    return mapPost(data as Record<string, unknown>, new Set(), new Set());
+    return mapPost(fullPost as Record<string, unknown>, new Set(), new Set());
   },
 
   async importFromSocial(_platform: "instagram" | "tiktok" | "facebook"): Promise<void> {
