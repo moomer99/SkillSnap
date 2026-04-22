@@ -1,5 +1,6 @@
 "use client";
-import { Heart, MessageCircle, Share2, MapPin, Bookmark } from "lucide-react";
+import { Heart, Share2, MapPin, Bookmark, Search, MessageSquare } from "lucide-react";
+import JobsTooltip from "./JobsTooltip";
 
 type Screen = "home" | "discover" | "upload" | "messages" | "profile" | "auth" | "chat" | "client-profile";
 
@@ -16,7 +17,7 @@ const feedItems = [
     location: "Liverpool, NSW",
     caption: "Fresh fade for the weekend 🔥 Skin fade with razor sharp lines — book me for your next cut!",
     likes: "2.4k",
-    comments: "184",
+    jobsCompleted: 47,
     gradient: "linear-gradient(160deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)",
     avatarGradient: "linear-gradient(135deg, #667eea, #764ba2)",
     avatarInitial: "M",
@@ -30,7 +31,7 @@ const feedItems = [
     location: "Parramatta, NSW",
     caption: "Bridal look for Sarah's big day 💕 Full glam, soft glitter eye, and flawless base. DM to book!",
     likes: "5.1k",
-    comments: "302",
+    jobsCompleted: 83,
     gradient: "linear-gradient(160deg, #2d1b33 0%, #4a1942 50%, #6b2d6b 100%)",
     avatarGradient: "linear-gradient(135deg, #f093fb, #f5576c)",
     avatarInitial: "P",
@@ -44,7 +45,7 @@ const feedItems = [
     location: "Penrith, NSW",
     caption: "Herringbone bathroom reno complete ✅ 12 sqm transformation — client was stoked. Ask me for a free quote.",
     likes: "1.8k",
-    comments: "97",
+    jobsCompleted: 29,
     gradient: "linear-gradient(160deg, #0d2137 0%, #1a3a5c 50%, #1e5680 100%)",
     avatarGradient: "linear-gradient(135deg, #4facfe, #00f2fe)",
     avatarInitial: "J",
@@ -56,26 +57,34 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center justify-between px-4 h-14">
-        <div className="flex items-center gap-1.5">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}>
-            <svg width="14" height="14" viewBox="0 0 40 40" fill="none">
-              <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="3" fill="none" />
-              <circle cx="20" cy="20" r="5" fill="white" />
-            </svg>
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-3">
+        {/* Brand row */}
+        <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center gap-1.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}>
+              <svg width="14" height="14" viewBox="0 0 40 40" fill="none">
+                <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="3" fill="none" />
+                <circle cx="20" cy="20" r="5" fill="white" />
+              </svg>
+            </div>
+            <span className="text-lg font-bold text-[#1a1a1a] tracking-tight">SkillSnap</span>
           </div>
-          <span className="text-lg font-bold text-[#1a1a1a] tracking-tight">SkillSnap</span>
+          <button className="p-1.5 text-[#7a7570]">
+            <Bookmark size={20} />
+          </button>
         </div>
-        <button className="p-2 text-[#7a7570]">
-          <Bookmark size={20} />
-        </button>
+        {/* Search bar */}
+        <div className="flex items-center gap-2.5 bg-[#f0eeea] rounded-2xl px-4 h-10">
+          <Search size={15} className="text-[#b0aaa5] flex-shrink-0" />
+          <span className="text-[#b0aaa5] text-sm">Search skills, people, or location</span>
+        </div>
       </header>
 
       {/* Feed */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
         {feedItems.map((item) => (
-          <FeedCard key={item.id} item={item} onProfileClick={() => onNavigate("profile")} />
+          <FeedCard key={item.id} item={item} onProfileClick={() => onNavigate("profile")} onChatClick={() => onNavigate("chat")} />
         ))}
       </div>
     </div>
@@ -85,9 +94,11 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
 function FeedCard({
   item,
   onProfileClick,
+  onChatClick,
 }: {
   item: (typeof feedItems)[0];
   onProfileClick: () => void;
+  onChatClick: () => void;
 }) {
   return (
     <div className="relative w-full aspect-[9/16] max-h-[85vh] overflow-hidden bg-gray-900 mb-2">
@@ -104,10 +115,10 @@ function FeedCard({
         </div>
       </div>
 
-      {/* Right side actions */}
+      {/* Right side actions — Like, Chat, Share */}
       <div className="absolute right-3 bottom-36 flex flex-col items-center gap-5">
         <ActionBtn icon={<Heart size={24} />} count={item.likes} />
-        <ActionBtn icon={<MessageCircle size={24} />} count={item.comments} />
+        <ActionBtn icon={<MessageSquare size={24} />} count="Chat" onClick={onChatClick} />
         <ActionBtn icon={<Share2 size={24} />} count="Share" />
       </div>
 
@@ -117,7 +128,7 @@ function FeedCard({
         style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 60%, transparent 100%)" }}
       >
         {/* User info row */}
-        <div className="flex items-center gap-2.5 mb-2">
+        <div className="flex items-center gap-2.5 mb-1.5">
           <button
             onClick={onProfileClick}
             className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 ring-2 ring-white/40"
@@ -136,7 +147,7 @@ function FeedCard({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1 mt-0.5">
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-[#6c47ff]"
                 style={{ background: "rgba(108,71,255,0.2)", backdropFilter: "blur(4px)" }}>
                 {item.skill}
@@ -149,28 +160,34 @@ function FeedCard({
           </div>
         </div>
 
+        {/* Jobs Completed trust signal */}
+        <div className="mb-2">
+          <JobsTooltip count={item.jobsCompleted} dark size="xs" />
+        </div>
+
         {/* Caption */}
         <p className="text-white/90 text-sm leading-snug mb-3 line-clamp-2">{item.caption}</p>
 
-        {/* Connect button */}
+        {/* Chat CTA — replaces Connect */}
         <button
+          onClick={onChatClick}
           className="w-full h-11 rounded-2xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
           style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 12.07a19.79 19.79 0 01-3.07-8.67A2 2 0 011.95 1.5h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
-          </svg>
-          Connect
+          <MessageSquare size={16} strokeWidth={2.5} />
+          Message
         </button>
       </div>
     </div>
   );
 }
 
-function ActionBtn({ icon, count }: { icon: React.ReactNode; count: string }) {
+function ActionBtn({ icon, count, onClick }: { icon: React.ReactNode; count: string; onClick?: () => void }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <button className="w-10 h-10 rounded-full flex items-center justify-center text-white"
+      <button
+        onClick={onClick}
+        className="w-10 h-10 rounded-full flex items-center justify-center text-white"
         style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)" }}>
         {icon}
       </button>

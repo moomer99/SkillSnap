@@ -79,7 +79,7 @@ export default function MessagesScreen({ onNavigate }: MessagesScreenProps) {
         {/* Search */}
         <div className="flex items-center gap-2.5 bg-[#f0eeea] rounded-2xl px-4 h-10">
           <Search size={15} className="text-[#b0aaa5] flex-shrink-0" />
-          <span className="text-[#b0aaa5] text-sm">Search messages...</span>
+          <span className="text-[#b0aaa5] text-sm">Search skills, people, or location</span>
         </div>
       </header>
 

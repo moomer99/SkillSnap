@@ -1,5 +1,6 @@
 "use client";
 import { Search, MapPin, Star, ChevronUp } from "lucide-react";
+import JobsTooltip from "./JobsTooltip";
 
 type Screen = "home" | "discover" | "upload" | "messages" | "profile" | "auth" | "chat" | "client-profile";
 
@@ -10,12 +11,12 @@ interface DiscoverScreenProps {
 const filters = ["All", "Nearby", "Top Rated", "Barber", "Cleaning", "Fitness", "Tiler", "Beauty"];
 
 const mapPins = [
-  { id: 1, skill: "Barber", x: "22%", y: "28%", color: "#6c47ff", rating: 4.9, name: "Marcus T." },
-  { id: 2, skill: "Makeup", x: "55%", y: "18%", color: "#f5576c", rating: 5.0, name: "Priya K." },
-  { id: 3, skill: "Tiler", x: "70%", y: "42%", color: "#4facfe", rating: 4.7, name: "Jake R." },
-  { id: 4, skill: "PT", x: "38%", y: "52%", color: "#00b894", rating: 4.8, name: "Sam W." },
-  { id: 5, skill: "Cleaner", x: "18%", y: "60%", color: "#fdcb6e", rating: 4.6, name: "Ana M." },
-  { id: 6, skill: "Barber", x: "62%", y: "68%", color: "#6c47ff", rating: 4.5, name: "Leo P." },
+  { id: 1, skill: "Barber", x: "22%", y: "28%", color: "#6c47ff", rating: 4.9, name: "Marcus T.", jobs: 47 },
+  { id: 2, skill: "Makeup", x: "55%", y: "18%", color: "#f5576c", rating: 5.0, name: "Priya K.", jobs: 83 },
+  { id: 3, skill: "Tiler", x: "70%", y: "42%", color: "#4facfe", rating: 4.7, name: "Jake R.", jobs: 29 },
+  { id: 4, skill: "PT", x: "38%", y: "52%", color: "#00b894", rating: 4.8, name: "Sam W.", jobs: 61 },
+  { id: 5, skill: "Cleaner", x: "18%", y: "60%", color: "#fdcb6e", rating: 4.6, name: "Ana M.", jobs: 38 },
+  { id: 6, skill: "Barber", x: "62%", y: "68%", color: "#6c47ff", rating: 4.5, name: "Leo P.", jobs: 12 },
 ];
 
 export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
@@ -26,7 +27,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
         {/* Search bar */}
         <div className="flex items-center gap-2.5 bg-[#f0eeea] rounded-2xl px-4 h-11 mb-3">
           <Search size={17} className="text-[#b0aaa5] flex-shrink-0" />
-          <span className="text-[#b0aaa5] text-sm">Search skills or location...</span>
+          <span className="text-[#b0aaa5] text-sm">Search skills, people, or location</span>
         </div>
 
         {/* Filter chips */}
@@ -123,7 +124,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
             <button
               key={pin.id}
               onClick={() => {}}
-              className="flex-shrink-0 bg-[#f8f7f5] rounded-2xl p-3 flex flex-col items-center gap-1.5 w-[100px] border border-[#e8e4df]"
+              className="flex-shrink-0 bg-[#f8f7f5] rounded-2xl p-3 flex flex-col items-center gap-1.5 w-[110px] border border-[#e8e4df]"
             >
               <div
                 className="w-11 h-11 rounded-full flex items-center justify-center text-white text-base font-bold"
@@ -141,6 +142,9 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
               <div className="flex items-center gap-0.5">
                 <Star size={10} fill="#f59e0b" color="#f59e0b" />
                 <span className="text-[10px] text-[#7a7570] font-medium">{pin.rating}</span>
+              </div>
+              <div className="w-full pt-0.5 border-t border-[#e8e4df]">
+                <JobsTooltip count={pin.jobs} size="xs" />
               </div>
             </button>
           ))}

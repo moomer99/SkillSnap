@@ -1,5 +1,6 @@
 "use client";
 import { MapPin, ArrowLeft, Play } from "lucide-react";
+import JobsTooltip from "./JobsTooltip";
 
 type Screen = "home" | "discover" | "upload" | "messages" | "profile" | "auth" | "chat" | "client-profile";
 
@@ -45,6 +46,7 @@ export default function ProfileScreen({ isClient = false, onNavigate }: ProfileS
   const postCount = isClient ? "—" : "47";
   const followers = isClient ? "12" : "1.2k";
   const following = isClient ? "89" : "234";
+  const jobsCompleted = isClient ? 0 : 47;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
@@ -99,10 +101,15 @@ export default function ProfileScreen({ isClient = false, onNavigate }: ProfileS
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1 text-[#7a7570] text-xs mb-2">
+            <div className="flex items-center gap-1 text-[#7a7570] text-xs mb-1.5">
               <MapPin size={11} />
               <span>{location}</span>
             </div>
+            {!isClient && (
+              <div className="mb-2">
+                <JobsTooltip count={jobsCompleted} />
+              </div>
+            )}
             <p className="text-sm text-[#4a4a4a] leading-relaxed">{bio}</p>
           </div>
 
