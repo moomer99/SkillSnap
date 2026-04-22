@@ -47,16 +47,24 @@ function profileToPin(row: Record<string, unknown>, index: number): DiscoveryPin
 
 async function queryProfiles(filter: DiscoveryFilter, limit = 12): Promise<DiscoveryPin[]> {
   const sb = getSupabase();
-  let query = sb.from("profiles").select("*").eq("is_client", false).limit(limit);
+  let query = sb
+    .from("profiles")
+    .select("id, display_name, skill, jobs_done, is_client, location")
+    .eq("is_client", false)
+    .limit(limit);
 
   if (filter !== "All" && filter !== "Nearby" && filter !== "Top Rated") {
     query = query.ilike("skill", `%${filter}%`);
   } else if (filter === "Top Rated") {
     query = query.order("jobs_done", { ascending: false });
+  } else {
+    query = query.order("jobs_done", { ascending: false });
   }
 
-  const { data } = await query;
-  if (!data?.length) return MOCK_DISCOVERY_PINS; // graceful fallback to mock
+  const { data, error } = await query;
+  if (error) throw error;
+  // Return empty array if no results — callers decide whether to show mock fallback
+  if (!data?.length) return [];
   return data.map((row, i) => profileToPin(row as Record<string, unknown>, i));
 }
 

@@ -35,16 +35,19 @@ export function useProfile(variant: ProfileVariant) {
     }
 
     if (variant === "own") {
-      if (state.currentUser) {
-        setUser(state.currentUser);
-      } else {
-        userService.getCurrentUser().then((u) => setUser(u ?? MOCK_CURRENT_USER));
-      }
+      // Always fetch fresh from DB so counts (jobs_done, post_count, followers) are current.
+      // feedVersion changes after uploads/verifications, keeping the stat row up-to-date.
+      userService.getCurrentUser().then((u) => {
+        if (!u) return;
+        setUser(u);
+        dispatch({ type: "UPDATE_CURRENT_USER", patch: u });
+      });
     } else {
       const id = state.viewingUserId ?? "user_priya";
       userService.getUser(id).then((u) => setUser(u ?? MOCK_USERS[1]));
     }
-  }, [variant, state.viewingUserId, state.currentUser]);
+  // feedVersion triggers a re-fetch after uploads and job verifications
+  }, [variant, state.viewingUserId, state.feedVersion]);
 
   // ── Seed follow state from DB once per session ─
   // Run when the own profile loads (current user is known) and followedUsers is empty.

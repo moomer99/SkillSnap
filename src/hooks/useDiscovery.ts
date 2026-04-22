@@ -28,7 +28,10 @@ export function useDiscovery() {
     setLoading(true);
     discoveryService
       .getNearbyUsers({ lat: -33.9214, lng: 150.9224 })
-      .then((results) => setPins(results.length ? results : MOCK_DISCOVERY_PINS))
+      .then((results) => {
+        // Fall back to mock only when the DB has no skillers at all (fresh/empty project)
+        setPins(results.length ? results : MOCK_DISCOVERY_PINS);
+      })
       .catch(() => setPins(MOCK_DISCOVERY_PINS))
       .finally(() => setLoading(false));
   }, []);
@@ -44,6 +47,7 @@ export function useDiscovery() {
       setLoading(true);
       try {
         const results = await discoveryService.filterUsers(filter);
+        // Empty filter result is valid — don't substitute mock data
         setPins(results.length ? results : MOCK_DISCOVERY_PINS);
       } catch {
         setPins(MOCK_DISCOVERY_PINS);
