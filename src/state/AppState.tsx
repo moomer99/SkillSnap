@@ -17,6 +17,7 @@ interface AppStateShape {
   authLoading: boolean; // true while session is being resolved on mount
 
   screen: Screen;
+  previousScreen: Screen | null;
 
   posts: Post[];
   feedLoading: boolean;
@@ -64,6 +65,7 @@ const initialState: AppStateShape = {
   isAuthenticated: false,
   authLoading: true, // start true — resolve on mount
   screen: "auth",
+  previousScreen: null,
   posts: [],
   feedLoading: false,
   feedVersion: 0,
@@ -94,7 +96,7 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
     case "SET_AUTH_LOADING":
       return { ...state, authLoading: action.loading };
     case "NAVIGATE":
-      return { ...state, screen: action.screen };
+      return { ...state, previousScreen: state.screen, screen: action.screen };
     case "SET_POSTS":
       return { ...state, posts: action.posts };
     case "SET_FEED_LOADING":

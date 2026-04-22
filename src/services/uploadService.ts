@@ -88,14 +88,18 @@ export const uploadService = {
 
     if (insertError || !inserted) throw insertError ?? new Error("Insert failed");
 
-    // 3. Track in post_media table for multi-media support
+    // 3. Track in post_media table for multi-media support (non-fatal if table absent)
     if (mediaUrl) {
-      await sb.from("post_media").insert({
-        post_id: inserted.id,
-        url: mediaUrl,
-        type: isVideo ? "video" : "photo",
-        order_index: 0,
-      }).then(() => {}); // fire-and-forget, non-fatal
+      try {
+        await sb.from("post_media").insert({
+          post_id: inserted.id,
+          url: mediaUrl,
+          type: isVideo ? "video" : "photo",
+          order_index: 0,
+        });
+      } catch {
+        // Table may not exist in this deployment — safe to skip
+      }
     }
 
     // 4. Fetch the full row with author profile (separate query is more reliable than insert+join)

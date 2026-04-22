@@ -22,7 +22,7 @@ const SUPABASE_CONFIGURED =
 
 export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const { state } = useAppState();
-  const { messages, inputText, setInputText, sending, sendMessage } = useChat();
+  const { messages, inputText, setInputText, sending, sendMessage, bottomRef } = useChat();
   const [participant, setParticipant] = useState<User | null>(null);
 
   const participantId = state.activeThreadParticipantId ?? state.viewingUserId;
@@ -115,6 +115,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             </div>
           </div>
         ))}
+        {/* Scroll anchor — useChat scrolls this into view on new messages */}
+        <div ref={bottomRef} />
       </div>
 
       {/* Jobs Done verification request */}

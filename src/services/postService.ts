@@ -75,7 +75,11 @@ export const postService = {
     const sb = getSupabase();
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return;
-    await sb.from("likes").insert({ user_id: session.user.id, post_id: postId });
+    // upsert avoids duplicate-key error on double-tap
+    await sb.from("likes").upsert(
+      { user_id: session.user.id, post_id: postId },
+      { onConflict: "user_id,post_id", ignoreDuplicates: true }
+    );
   },
 
   async unlikePost(postId: string): Promise<void> {
@@ -91,7 +95,10 @@ export const postService = {
     const sb = getSupabase();
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return;
-    await sb.from("saved_posts").insert({ user_id: session.user.id, post_id: postId });
+    await sb.from("saved_posts").upsert(
+      { user_id: session.user.id, post_id: postId },
+      { onConflict: "user_id,post_id", ignoreDuplicates: true }
+    );
   },
 
   async unsavePost(postId: string): Promise<void> {

@@ -177,29 +177,38 @@ export const messageService = {
     return conv.id;
   },
 
-  // Supabase Realtime subscription — returns unsubscribe function
+  // Supabase Realtime subscription — returns unsubscribe function.
+  // Resolves current user ID before subscribing to guarantee correct from/them mapping.
   subscribeToMessages(conversationId: string, onMessage: (msg: Message) => void): () => void {
-    let currentUserId = "";
-    getCurrentUserId().then((id) => { currentUserId = id ?? ""; });
+    let channel: ReturnType<ReturnType<typeof getSupabase>["channel"]> | null = null;
+    let cancelled = false;
 
-    const channel = getSupabase()
-      .channel(`messages:${conversationId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          const msg = mapMessage(payload.new as Record<string, unknown>, currentUserId);
-          onMessage(msg);
-        }
-      )
-      .subscribe();
+    getCurrentUserId().then((currentUserId) => {
+      if (cancelled) return;
+      const resolvedId = currentUserId ?? "";
 
-    return () => { getSupabase().removeChannel(channel); };
+      channel = getSupabase()
+        .channel(`messages:${conversationId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+            filter: `conversation_id=eq.${conversationId}`,
+          },
+          (payload) => {
+            const msg = mapMessage(payload.new as Record<string, unknown>, resolvedId);
+            onMessage(msg);
+          }
+        )
+        .subscribe();
+    });
+
+    return () => {
+      cancelled = true;
+      if (channel) getSupabase().removeChannel(channel);
+    };
   },
 
   // Jobs Done verification request sent via chat

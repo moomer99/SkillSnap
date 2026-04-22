@@ -30,7 +30,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
 
   const { user, isFollowing, toggleFollow } = useProfile(variant);
   const { connectTo, connecting } = useMessages();
-  const { state } = useAppState();
+  const { state, navigate } = useAppState();
   const [posts, setPosts] = useState<Post[]>([]);
   const [gridLoading, setGridLoading] = useState(true);
 
@@ -73,7 +73,10 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center gap-3 px-4 h-14">
-        <button onClick={() => onNavigate("home")} className="text-[#7a7570]">
+        <button
+          onClick={() => navigate(state.previousScreen ?? "home")}
+          className="text-[#7a7570]"
+        >
           <ArrowLeft size={20} />
         </button>
         <span className="font-semibold text-[#1a1a1a] text-sm flex-1">{user.username}</span>

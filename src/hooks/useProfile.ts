@@ -50,19 +50,17 @@ export function useProfile(variant: ProfileVariant) {
   }, [variant, state.viewingUserId, state.feedVersion]);
 
   // ── Seed follow state from DB once per session ─
-  // Run when the own profile loads (current user is known) and followedUsers is empty.
-  // This ensures the Follow button reflects real DB state after login.
+  // Runs once per authenticated session using a window flag as a guard.
+  // Always dispatches the result (even an empty set) so the Follow button
+  // reflects real DB state regardless of whether the user has any follows.
   useEffect(() => {
     if (!SUPABASE_CONFIGURED) return;
-    if (state.followedUsers.size > 0) return; // already seeded
-    if (!(window as unknown as Record<string, unknown>)[followsSeedKey]) {
-      (window as unknown as Record<string, unknown>)[followsSeedKey] = true;
-      userService.getFollowedUserIds().then((ids) => {
-        if (ids.size > 0) {
-          dispatch({ type: "SET_FOLLOWED_USERS", userIds: ids });
-        }
-      }).catch(() => {});
-    }
+    if (!state.isAuthenticated) return;
+    if ((window as unknown as Record<string, unknown>)[followsSeedKey]) return;
+    (window as unknown as Record<string, unknown>)[followsSeedKey] = true;
+    userService.getFollowedUserIds().then((ids) => {
+      dispatch({ type: "SET_FOLLOWED_USERS", userIds: ids });
+    }).catch(() => {});
   // Only needs to run once — depend on auth state changing
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isAuthenticated]);

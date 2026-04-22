@@ -2,11 +2,18 @@
 // ─────────────────────────────────────────────
 // useChat — loads messages for the active thread via Supabase,
 // subscribes to Realtime for live updates.
+// Falls back to MOCK_MESSAGES in dev mode (no Supabase).
 // ─────────────────────────────────────────────
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useAppState } from "@/state/AppState";
 import { messageService } from "@/services/messageService";
+import { MOCK_MESSAGES } from "@/mock-data/messages";
 import type { Message } from "@/types";
+
+const SUPABASE_CONFIGURED =
+  typeof process !== "undefined" &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref");
 
 export function useChat() {
   const { state } = useAppState();
@@ -15,8 +22,14 @@ export function useChat() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const unsubRef = useRef<(() => void) | null>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const threadId = state.activeThreadId ?? "";
+
+  // Auto-scroll to bottom whenever messages change
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   useEffect(() => {
     if (!threadId) {
@@ -24,9 +37,20 @@ export function useChat() {
       return;
     }
 
+    if (!SUPABASE_CONFIGURED) {
+      // Dev mode: show mock messages for the active thread (or all if thread not in mock)
+      const mock = MOCK_MESSAGES.filter((m) => m.threadId === threadId);
+      setMessages(mock.length ? mock : MOCK_MESSAGES);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     messageService.getMessages(threadId).then((msgs) => {
       setMessages(msgs);
+      setLoading(false);
+    }).catch(() => {
+      setMessages([]);
       setLoading(false);
     });
 
@@ -61,6 +85,11 @@ export function useChat() {
     };
     setMessages((prev) => [...prev, optimistic]);
 
+    if (!SUPABASE_CONFIGURED) {
+      setSending(false);
+      return;
+    }
+
     const confirmed = await messageService.sendMessage(threadId, text);
     // Replace optimistic with confirmed
     setMessages((prev) =>
@@ -77,5 +106,6 @@ export function useChat() {
     loading,
     sendMessage,
     threadId,
+    bottomRef,
   };
 }

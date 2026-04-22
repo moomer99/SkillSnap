@@ -24,9 +24,10 @@ export function useMessages() {
       return;
     }
     messageService.getThreads().then((threads) => {
-      dispatch({ type: "SET_THREADS", threads: threads.length ? threads : MOCK_THREADS });
+      // Show real threads (even if empty) — don't inject mock data into real accounts
+      dispatch({ type: "SET_THREADS", threads });
     }).catch(() => {
-      dispatch({ type: "SET_THREADS", threads: MOCK_THREADS });
+      dispatch({ type: "SET_THREADS", threads: [] });
     });
   }, [dispatch]);
 
