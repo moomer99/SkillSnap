@@ -3,6 +3,7 @@
 // ─────────────────────────────────────────────
 import { getSupabase } from "@/lib/supabase";
 import type { User } from "@/types";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 export interface AuthResult {
   success: boolean;
@@ -38,6 +39,57 @@ async function fetchProfile(userId: string): Promise<User | null> {
     .eq("id", userId)
     .single();
   if (error || !data) return null;
+  return mapProfile(data as Record<string, unknown>);
+}
+
+// Upserts a profile row from Supabase auth user data.
+// Safe to call on every login — uses ON CONFLICT to prevent duplicates.
+async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
+  const sb = getSupabase();
+  const meta = authUser.user_metadata ?? {};
+
+  const displayName: string =
+    (meta.full_name as string) ||
+    (meta.name as string) ||
+    (meta.display_name as string) ||
+    (authUser.email?.split("@")[0] ?? "User");
+
+  const rawUsername =
+    (meta.username as string) ||
+    displayName.toLowerCase().replace(/[^a-z0-9_]/g, "_");
+  // Make username unique by appending first 4 chars of the user id
+  const username = rawUsername.slice(0, 26) + "_" + authUser.id.replace(/-/g, "").slice(0, 4);
+
+  const avatarUrl: string | null =
+    (meta.avatar_url as string) || (meta.picture as string) || null;
+
+  const avatarInitial = displayName.charAt(0).toUpperCase();
+
+  const { data, error } = await sb
+    .from("profiles")
+    .upsert(
+      {
+        id: authUser.id,
+        username,
+        display_name: displayName,
+        email: authUser.email ?? null,
+        avatar_url: avatarUrl,
+        avatar_initial: avatarInitial,
+        avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+      },
+      {
+        onConflict: "id",
+        // For returning users: refresh avatar and name from the provider
+        ignoreDuplicates: false,
+      }
+    )
+    .select("*")
+    .single();
+
+  if (error || !data) {
+    // Upsert failed — try plain fetch in case the row exists
+    return fetchProfile(authUser.id);
+  }
   return mapProfile(data as Record<string, unknown>);
 }
 
@@ -81,8 +133,8 @@ export const authService = {
     if (error) return { success: false, error: error.message };
     if (!data.user) return { success: false, error: "No user returned" };
 
-    // Profile auto-created by DB trigger; fetch it
-    const user = await fetchProfile(data.user.id);
+    // Ensure profile exists — DB trigger may not fire immediately for email signups
+    const user = await ensureProfile(data.user);
     return { success: true, user: user ?? undefined };
   },
 
@@ -91,7 +143,8 @@ export const authService = {
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) return { success: false, error: error.message };
     if (!data.user) return { success: false, error: "No user returned" };
-    const user = await fetchProfile(data.user.id);
+    // Ensure profile row exists (handles users created before migration or via admin)
+    const user = await ensureProfile(data.user);
     return { success: true, user: user ?? undefined };
   },
 
@@ -117,5 +170,5 @@ export const authService = {
   },
 };
 
-// Re-export mapProfile for use in other services
-export { mapProfile };
+// Re-export helpers for use in other services and AppState
+export { mapProfile, ensureProfile };

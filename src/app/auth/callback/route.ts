@@ -36,33 +36,41 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.user) {
-      // Ensure the profile row exists — handles first-time Google login.
-      // The DB trigger should have created it, but we upsert as a safety net,
-      // pre-filling name and avatar from Google's OAuth metadata.
-      const meta = data.user.user_metadata ?? {};
-      const displayName: string =
-        (meta.full_name as string) ||
-        (meta.name as string) ||
-        (data.user.email?.split("@")[0] ?? "User");
-      const avatarUrl: string | null = (meta.avatar_url as string) || (meta.picture as string) || null;
-      const username = displayName.toLowerCase().replace(/[^a-z0-9_]/g, "_").slice(0, 30);
+      // Ensure the profile row exists — safety net for Google and any OAuth provider.
+      // DB trigger handles this too, but upsert guarantees it even if trigger is absent.
+      try {
+        const meta = data.user.user_metadata ?? {};
+        const displayName: string =
+          (meta.full_name as string) ||
+          (meta.name as string) ||
+          (meta.display_name as string) ||
+          (data.user.email?.split("@")[0] ?? "User");
+        const avatarUrl: string | null =
+          (meta.avatar_url as string) || (meta.picture as string) || null;
+        const rawUsername = displayName.toLowerCase().replace(/[^a-z0-9_]/g, "_");
+        const username =
+          rawUsername.slice(0, 26) + "_" + data.user.id.replace(/-/g, "").slice(0, 4);
 
-      await supabase.from("profiles").upsert(
-        {
-          id: data.user.id,
-          username,
-          display_name: displayName,
-          avatar_url: avatarUrl,
-          avatar_initial: displayName.charAt(0).toUpperCase(),
-          avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
-        },
-        {
-          onConflict: "id",
-          ignoreDuplicates: false, // update avatar/name if returning user
-        }
-      );
+        await supabase.from("profiles").upsert(
+          {
+            id: data.user.id,
+            username,
+            display_name: displayName,
+            email: data.user.email ?? null,
+            avatar_url: avatarUrl,
+            avatar_initial: displayName.charAt(0).toUpperCase(),
+            avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+          },
+          {
+            onConflict: "id",
+            ignoreDuplicates: false, // refresh avatar/name for returning users
+          }
+        );
+      } catch {
+        // Profile upsert failed — non-fatal. AppState will retry on SIGNED_IN event.
+      }
 
-      // Redirect into the app — client AppState will hydrate the session
+      // Redirect into the app — client AppState hydrates the session and loads the profile
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
