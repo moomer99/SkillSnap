@@ -3,7 +3,7 @@
 // SkillSnap — Chat Thread Screen
 // Participant resolved from: active thread → viewingUserId → mock fallback
 // ─────────────────────────────────────────────
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Phone, MoreVertical, Send, Paperclip, Info } from "lucide-react";
 import type { Screen, User } from "@/types";
 import { MOCK_USERS } from "@/mock-data/users";
@@ -56,11 +56,13 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   }, [participantId, state.threads, state.activeThreadId]);
 
   const displayParticipant = participant ?? MOCK_USERS[0];
+  const inputRef = useRef<HTMLInputElement>(null);
+  const attachRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
+    <div className="flex flex-col h-screen bg-[#f8f7f5]">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center gap-3 px-4 h-14">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center gap-3 px-4 h-14 flex-shrink-0">
         <button onClick={() => onNavigate("messages")} className="text-[#7a7570]">
           <ArrowLeft size={20} />
         </button>
@@ -86,7 +88,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         </div>
       </header>
 
-      {/* Messages */}
+      {/* Messages — flex-1 so it fills space above the input bar */}
       <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 pb-6 flex flex-col gap-2.5">
         <div className="flex items-center gap-2 my-2">
           <div className="flex-1 h-px bg-[#e8e4df]" />
@@ -134,21 +136,44 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
 
       {/* Input bar */}
       <div
-        className="sticky bottom-0 bg-white border-t border-[#e8e4df] px-4 py-3 flex items-center gap-3"
+        className="flex-shrink-0 bg-white border-t border-[#e8e4df] px-4 py-3 flex items-center gap-3"
         style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
       >
-        <button className="text-[#7a7570] flex-shrink-0">
+        {/* Hidden file input for attachments */}
+        <input
+          ref={attachRef}
+          type="file"
+          accept="image/*,video/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              // Placeholder: show filename in message input until upload is wired up
+              setInputText(`[Attachment: ${file.name}]`);
+              inputRef.current?.focus();
+            }
+            e.target.value = "";
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => attachRef.current?.click()}
+          className="text-[#7a7570] flex-shrink-0 active:text-[#6c47ff] transition-colors"
+        >
           <Paperclip size={20} />
         </button>
         <input
+          ref={inputRef}
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
           placeholder="Message..."
-          className="flex-1 bg-[#f0eeea] rounded-2xl px-4 py-2.5 min-h-[40px] text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none"
+          autoComplete="off"
+          className="flex-1 bg-[#f0eeea] rounded-2xl px-4 py-2.5 min-h-[40px] text-sm text-[#1a1a1a] placeholder-[#b0aaa5] focus:outline-none focus:ring-2 focus:ring-[#6c47ff]/30"
         />
         <button
+          type="button"
           onClick={sendMessage}
           disabled={!inputText.trim() || sending}
           className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0 transition-opacity disabled:opacity-40"

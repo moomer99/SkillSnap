@@ -59,6 +59,14 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
               onSave={() => toggleSave(post.id)}
               onProfileClick={() => handleProfileClick(post.authorId)}
               onConnectClick={() => connectTo(post.authorId)}
+              onShare={() => {
+                const text = post.caption || "Check out this skill on SkillSnap!";
+                if (navigator.share) {
+                  navigator.share({ title: "SkillSnap", text }).catch(() => {});
+                } else {
+                  navigator.clipboard?.writeText(text).catch(() => {});
+                }
+              }}
               connecting={connecting}
             />
           ))
@@ -76,6 +84,7 @@ function FeedCard({
   onSave,
   onProfileClick,
   onConnectClick,
+  onShare,
   connecting,
 }: {
   post: Post;
@@ -85,6 +94,7 @@ function FeedCard({
   onSave: () => void;
   onProfileClick: () => void;
   onConnectClick: () => void;
+  onShare: () => void;
   connecting: boolean;
 }) {
   const { author } = post;
@@ -120,7 +130,7 @@ function FeedCard({
           onClick={onLike}
           active={isLiked}
         />
-        <ActionBtn icon={<Share2 size={24} />} count="Share" />
+        <ActionBtn icon={<Share2 size={24} />} count="Share" onClick={onShare} />
       </div>
 
       {/* Bottom overlay */}
