@@ -7,7 +7,6 @@
 import { Edit, MessageSquare } from "lucide-react";
 import type { Screen } from "@/types";
 import { useMessages } from "@/hooks/useMessages";
-import { useAppState } from "@/state/AppState";
 import SearchBar from "./shared/SearchBar";
 import MessageThreadItem from "./shared/MessageThreadItem";
 
@@ -16,12 +15,8 @@ interface MessagesScreenProps {
 }
 
 export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScreenProps) {
-  const { threads, openThread } = useMessages();
-  const { state } = useAppState();
-
-  // threads is an empty array both while loading and when truly empty;
-  // use auth state to infer a brief loading phase on first mount.
-  const isLoading = state.authLoading;
+  const { threads, threadsLoading, openThread } = useMessages();
+  const isLoading = threadsLoading;
 
   return (
     <div className="flex flex-col min-h-screen bg-white">

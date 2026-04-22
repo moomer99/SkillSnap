@@ -4,7 +4,7 @@
 // Falls back to MOCK_THREADS when Supabase is not configured.
 // connectTo creates/finds a conversation (Connect flow).
 // ─────────────────────────────────────────────
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { useAppState } from "@/state/AppState";
 import { messageService } from "@/services/messageService";
 import { MOCK_THREADS } from "@/mock-data/messages";
@@ -17,41 +17,52 @@ const SUPABASE_CONFIGURED =
 export function useMessages() {
   const { state, dispatch, navigate } = useAppState();
   const [connecting, setConnecting] = useState(false);
+  const [threadsLoading, setThreadsLoading] = useState(true);
+  // Track thread IDs for the Realtime subscription without causing re-subscription loops
+  const threadIdsRef = useRef<string[]>([]);
 
   const loadThreads = useCallback(async () => {
     if (!SUPABASE_CONFIGURED) {
       dispatch({ type: "SET_THREADS", threads: MOCK_THREADS });
+      setThreadsLoading(false);
       return;
     }
     try {
       const threads = await messageService.getThreads();
       dispatch({ type: "SET_THREADS", threads });
+      threadIdsRef.current = threads.map((t) => t.id);
     } catch {
       dispatch({ type: "SET_THREADS", threads: [] });
+    } finally {
+      setThreadsLoading(false);
     }
-  }, [dispatch]);
+  // dispatch is stable — this callback never changes after mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Initial load
+  // Load threads once on mount
   useEffect(() => {
     loadThreads();
   }, [loadThreads]);
 
-  // Subscribe to conversation updates so the thread list stays fresh after messages are sent
+  // Subscribe to conversation updates so the thread list stays fresh after messages are sent.
+  // Uses a ref for thread IDs so the subscription isn't torn down and re-created on every load.
   useEffect(() => {
     if (!SUPABASE_CONFIGURED) return;
-    if (!state.threads.length) return;
 
-    const ids = state.threads.map((t) => t.id);
-    const unsub = messageService.subscribeToConversationUpdates(ids, () => {
-      loadThreads();
-    });
+    const unsub = messageService.subscribeToConversationUpdates(
+      // getter fn so Realtime callback always sees the latest IDs without re-subscribing
+      threadIdsRef,
+      () => { loadThreads(); }
+    );
 
     return unsub;
-  }, [state.threads.length, loadThreads]);
+  // Only subscribe once — loadThreads is stable
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const openThread = useCallback(
     (threadId: string) => {
-      // Resolve the participant from the already-loaded threads list
       const thread = state.threads.find((t) => t.id === threadId);
       const participantId = thread?.participant?.id;
       dispatch({ type: "SET_ACTIVE_THREAD", threadId, participantId });
@@ -61,7 +72,6 @@ export function useMessages() {
     [dispatch, navigate, state.threads]
   );
 
-  // Called when user taps Connect — finds or creates a conversation, then navigates to chat
   const connectTo = useCallback(
     async (participantId: string) => {
       setConnecting(true);
@@ -73,13 +83,14 @@ export function useMessages() {
       }
       try {
         const conversationId = await messageService.getOrCreateConversation(participantId);
-        // Refresh threads list so the new conversation appears in messages
+        // Refresh threads so the new conversation appears in the list
         const threads = await messageService.getThreads();
         dispatch({ type: "SET_THREADS", threads });
+        threadIdsRef.current = threads.map((t) => t.id);
         dispatch({ type: "SET_ACTIVE_THREAD", threadId: conversationId, participantId });
         navigate("chat");
       } catch {
-        // Auth/network failure — navigate anyway so UX isn't dead
+        // Auth/network failure — navigate to chat anyway; user sees empty thread
         dispatch({ type: "SET_ACTIVE_THREAD", threadId: "", participantId });
         navigate("chat");
       } finally {
@@ -91,6 +102,7 @@ export function useMessages() {
 
   return {
     threads: state.threads,
+    threadsLoading,
     activeThreadId: state.activeThreadId,
     openThread,
     connectTo,

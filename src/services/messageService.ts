@@ -104,25 +104,18 @@ export const messageService = {
 
   async sendMessage(conversationId: string, text: string): Promise<Message> {
     const userId = await getCurrentUserId();
+    if (!userId) throw new Error("Not authenticated");
     const sb = getSupabase();
 
     const { data, error } = await sb
       .from("messages")
-      .insert({ conversation_id: conversationId, sender_id: userId!, text })
+      .insert({ conversation_id: conversationId, sender_id: userId, text })
       .select()
       .single();
 
-    if (error || !data) {
-      // Optimistic fallback
-      return {
-        id: `msg_${Date.now()}`,
-        threadId: conversationId,
-        from: "me",
-        text,
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
-    }
-    return mapMessage(data as Record<string, unknown>, userId!);
+    if (error) throw error;
+    if (!data) throw new Error("No data returned from insert");
+    return mapMessage(data as Record<string, unknown>, userId);
   },
 
   // Reset unread count when user opens a conversation
@@ -211,25 +204,20 @@ export const messageService = {
     };
   },
 
-  // Subscribe to conversation updates (last_message_text changes) so the thread list stays fresh.
-  // Calls onUpdate whenever any conversation the current user is in is updated.
+  // Subscribe to conversation updates so the thread list stays fresh after messages are sent.
+  // Accepts a React ref to avoid re-subscribing when the conversation list grows.
   subscribeToConversationUpdates(
-    conversationIds: string[],
+    idsRef: { current: string[] },
     onUpdate: () => void
   ): () => void {
-    if (!conversationIds.length) return () => {};
-
     const channel = getSupabase()
-      .channel(`conversations:${conversationIds[0]}`)
+      .channel("conversations:updates")
       .on(
         "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "conversations",
-        },
+        { event: "UPDATE", schema: "public", table: "conversations" },
         (payload) => {
-          if (conversationIds.includes((payload.new as Record<string, unknown>).id as string)) {
+          const updatedId = (payload.new as Record<string, unknown>).id as string;
+          if (idsRef.current.includes(updatedId)) {
             onUpdate();
           }
         }

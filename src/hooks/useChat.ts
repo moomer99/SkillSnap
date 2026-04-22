@@ -76,8 +76,9 @@ export function useChat() {
     setInputText("");
 
     // Optimistic append
+    const optimisticId = `optimistic_${Date.now()}`;
     const optimistic: Message = {
-      id: `optimistic_${Date.now()}`,
+      id: optimisticId,
       threadId,
       from: "me",
       text,
@@ -90,12 +91,19 @@ export function useChat() {
       return;
     }
 
-    const confirmed = await messageService.sendMessage(threadId, text);
-    // Replace optimistic with confirmed
-    setMessages((prev) =>
-      prev.map((m) => (m.id === optimistic.id ? confirmed : m))
-    );
-    setSending(false);
+    try {
+      const confirmed = await messageService.sendMessage(threadId, text);
+      // Replace optimistic with confirmed DB row (has real id + timestamp)
+      setMessages((prev) =>
+        prev.map((m) => (m.id === optimisticId ? confirmed : m))
+      );
+    } catch {
+      // Roll back optimistic message on failure; restore the input text
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
+      setInputText(text);
+    } finally {
+      setSending(false);
+    }
   }, [inputText, threadId]);
 
   return {
