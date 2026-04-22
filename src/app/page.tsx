@@ -15,11 +15,12 @@ type Screen =
   | "upload"
   | "messages"
   | "profile"
+  | "own-profile"
   | "auth"
   | "chat"
   | "client-profile";
 
-const NAV_SCREENS: Screen[] = ["home", "discover", "upload", "messages", "profile"];
+const NAV_SCREENS: Screen[] = ["home", "discover", "upload", "messages", "own-profile"];
 
 export default function SkillSnapApp() {
   const [screen, setScreen] = useState<Screen>("auth");
@@ -48,13 +49,14 @@ export default function SkillSnapApp() {
         {screen === "auth" && <AuthScreen onNavigate={navigate} />}
         {screen === "home" && <HomeFeed onNavigate={navigate} />}
         {screen === "discover" && <DiscoverScreen onNavigate={navigate} />}
-        {screen === "profile" && <ProfileScreen onNavigate={navigate} />}
-        {screen === "client-profile" && <ProfileScreen isClient onNavigate={navigate} />}
+        {screen === "profile" && <ProfileScreen variant="other" onNavigate={navigate} />}
+        {screen === "own-profile" && <ProfileScreen variant="own" onNavigate={navigate} />}
+        {screen === "client-profile" && <ProfileScreen variant="client" onNavigate={navigate} />}
         {screen === "upload" && <UploadScreen onNavigate={navigate} />}
         {screen === "messages" && <MessagesScreen onNavigate={navigate} />}
         {screen === "chat" && <ChatScreen onNavigate={navigate} />}
 
-        {/* Bottom Nav */}
+        {/* Bottom Nav — Profile tab goes to own profile */}
         {showBottomNav && (
           <BottomNav active={screen} onNavigate={navigate} />
         )}
@@ -68,7 +70,8 @@ export default function SkillSnapApp() {
             ["auth", "Auth"],
             ["home", "Feed"],
             ["discover", "Discover"],
-            ["profile", "Profile"],
+            ["own-profile", "My Profile"],
+            ["profile", "Other Profile"],
             ["client-profile", "Client"],
             ["upload", "Upload"],
             ["messages", "Messages"],

@@ -26,7 +26,7 @@ export default function JobsTooltip({ count, dark = false, size = "sm" }: JobsTo
           <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
           <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
         </svg>
-        {count} Jobs Completed
+        {count} Jobs Done
         <span className={iconColor}>
           <Info size={size === "xs" ? 10 : 11} />
         </span>
@@ -54,7 +54,7 @@ export default function JobsTooltip({ count, dark = false, size = "sm" }: JobsTo
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm text-[#1a1a1a]">Jobs Completed</h3>
+                  <h3 className="font-bold text-sm text-[#1a1a1a]">Jobs Done</h3>
                   <p className="text-xs text-[#6c47ff] font-semibold">{count} verified jobs</p>
                 </div>
               </div>
@@ -66,7 +66,7 @@ export default function JobsTooltip({ count, dark = false, size = "sm" }: JobsTo
             <div className="h-px bg-[#e8e4df] mb-4" />
 
             <p className="text-sm text-[#4a4a4a] leading-relaxed">
-              Jobs Completed are confirmed after both users complete a job and verify it through chat. This reflects real work done, not ratings.
+              Jobs Done are confirmed after both users complete a job and verify it through chat. This reflects real work done — not ratings or reviews.
             </p>
 
             <div className="mt-4 flex items-center gap-2 bg-[#f8f7f5] rounded-2xl px-4 py-3">

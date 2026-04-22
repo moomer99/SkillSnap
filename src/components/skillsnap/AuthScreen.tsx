@@ -1,6 +1,6 @@
 "use client";
 
-type Screen = "home" | "discover" | "upload" | "messages" | "profile" | "auth" | "chat" | "client-profile";
+type Screen = "home" | "discover" | "upload" | "messages" | "profile" | "own-profile" | "auth" | "chat" | "client-profile";
 
 interface AuthScreenProps {
   onNavigate: (s: Screen) => void;

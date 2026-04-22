@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
       }
     }
   },
-  allowedDevOrigins: ['*.orchids.page'],
+  allowedDevOrigins: ['*.orchids.page', '*.orchids.cloud'],
 } as NextConfig;
 
 export default nextConfig;

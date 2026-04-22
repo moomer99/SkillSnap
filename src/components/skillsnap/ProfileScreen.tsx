@@ -1,11 +1,11 @@
 "use client";
-import { MapPin, ArrowLeft, Play } from "lucide-react";
+import { MapPin, ArrowLeft, Play, Share2, Edit3, MessageSquare } from "lucide-react";
 import JobsTooltip from "./JobsTooltip";
 
-type Screen = "home" | "discover" | "upload" | "messages" | "profile" | "auth" | "chat" | "client-profile";
+type Screen = "home" | "discover" | "upload" | "messages" | "profile" | "own-profile" | "auth" | "chat" | "client-profile";
 
 interface ProfileScreenProps {
-  isClient?: boolean;
+  variant?: "own" | "other" | "client";
   onNavigate: (s: Screen) => void;
 }
 
@@ -30,23 +30,24 @@ const savedItems = [
   { gradient: "linear-gradient(135deg, #a18cd1, #fbc2eb)", hasVideo: true, label: "Nails" },
 ];
 
-export default function ProfileScreen({ isClient = false, onNavigate }: ProfileScreenProps) {
+export default function ProfileScreen({ variant = "other", onNavigate }: ProfileScreenProps) {
+  const isOwn = variant === "own";
+  const isClient = variant === "client";
+
   const name = isClient ? "Jordan Lee" : "Marcus Thompson";
   const username = isClient ? "@jordan_lee" : "@Marcus_Cuts";
   const skill = isClient ? null : "Barber";
   const location = "Liverpool, NSW";
   const bio = isClient
     ? "Love discovering talented locals. Always looking for quality tradies and stylists in the area."
-    : "Professional barber with 8+ years experience. Specialising in fades, skin fades & modern cuts. Book via SkillSnap!";
+    : "Professional barber with 8+ years experience. Specialising in fades, skin fades & modern cuts.";
   const avatarGradient = isClient
     ? "linear-gradient(135deg, #43e97b, #38f9d7)"
     : "linear-gradient(135deg, #667eea, #764ba2)";
   const initial = isClient ? "J" : "M";
 
-  const postCount = isClient ? "—" : "47";
+  const jobsDone = isClient ? 0 : 47;
   const followers = isClient ? "12" : "1.2k";
-  const following = isClient ? "89" : "234";
-  const jobsCompleted = isClient ? 0 : 47;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
@@ -56,10 +57,16 @@ export default function ProfileScreen({ isClient = false, onNavigate }: ProfileS
           <ArrowLeft size={20} />
         </button>
         <span className="font-semibold text-[#1a1a1a] text-sm flex-1">{username}</span>
-        <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
-          style={{ background: isClient ? "#d1fae5" : "#ede9fe", color: isClient ? "#065f46" : "#5b3dd8" }}>
-          {isClient ? "Client" : "Pro"}
-        </span>
+        {isOwn ? (
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-[#ede9fe] text-[#5b3dd8]">
+            Your Profile
+          </span>
+        ) : (
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+            style={{ background: isClient ? "#d1fae5" : "#ede9fe", color: isClient ? "#065f46" : "#5b3dd8" }}>
+            {isClient ? "Client" : "Pro"}
+          </span>
+        )}
       </header>
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
@@ -69,8 +76,8 @@ export default function ProfileScreen({ isClient = false, onNavigate }: ProfileS
             {/* Avatar */}
             <div className="relative flex-shrink-0">
               <div
-                className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold ring-3 ring-[#ede9fe]"
-                style={{ background: avatarGradient }}
+                className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+                style={{ background: avatarGradient, boxShadow: "0 0 0 3px #ede9fe" }}
               >
                 {initial}
               </div>
@@ -83,16 +90,21 @@ export default function ProfileScreen({ isClient = false, onNavigate }: ProfileS
               )}
             </div>
 
-            {/* Stats */}
+            {/* Stats: Posts / Jobs Done / Followers */}
             <div className="flex-1 grid grid-cols-3 gap-1 pt-2">
-              <Stat value={postCount} label={isClient ? "Saved" : "Posts"} />
+              {isClient ? (
+                <Stat value="—" label="Saved" />
+              ) : (
+                <Stat value={String(workItems.length)} label="Posts" />
+              )}
+              {!isClient && <Stat value={String(jobsDone)} label="Jobs Done" highlight />}
+              {isClient && <Stat value="—" label="Jobs Done" />}
               <Stat value={followers} label="Followers" />
-              <Stat value={following} label="Following" />
             </div>
           </div>
 
-          {/* Name + skill */}
-          <div className="mb-1.5">
+          {/* Name + skill + location */}
+          <div className="mb-1">
             <div className="flex items-center gap-2 mb-1">
               <h2 className="font-bold text-base text-[#1a1a1a]">{name}</h2>
               {skill && (
@@ -101,30 +113,48 @@ export default function ProfileScreen({ isClient = false, onNavigate }: ProfileS
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1 text-[#7a7570] text-xs mb-1.5">
+            <div className="flex items-center gap-1 text-[#7a7570] text-xs mb-2">
               <MapPin size={11} />
               <span>{location}</span>
             </div>
-            {!isClient && (
-              <div className="mb-2">
-                <JobsTooltip count={jobsCompleted} />
-              </div>
-            )}
             <p className="text-sm text-[#4a4a4a] leading-relaxed">{bio}</p>
           </div>
 
+          {/* Jobs Done tooltip row — only for skilled users */}
+          {!isClient && (
+            <div className="mt-2 mb-1">
+              <JobsTooltip count={jobsDone} />
+            </div>
+          )}
+
           {/* Action buttons */}
           <div className="flex gap-2.5 mt-4">
-            <button
-              onClick={() => onNavigate("chat")}
-              className="flex-1 h-10 rounded-xl font-semibold text-sm text-white transition-all active:scale-[0.98]"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
-            >
-              Message
-            </button>
-            <button className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#6c47ff] border-2 border-[#6c47ff] bg-white transition-all active:scale-[0.98]">
-              Follow
-            </button>
+            {isOwn ? (
+              <>
+                <button className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
+                  <Edit3 size={14} />
+                  Edit Profile
+                </button>
+                <button className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
+                  <Share2 size={14} />
+                  Share
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => onNavigate("chat")}
+                  className="flex-1 h-10 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+                  style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+                >
+                  <MessageSquare size={14} strokeWidth={2.5} />
+                  Connect
+                </button>
+                <button className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#6c47ff] border-2 border-[#6c47ff] bg-white transition-all active:scale-[0.98]">
+                  Follow
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -135,9 +165,7 @@ export default function ProfileScreen({ isClient = false, onNavigate }: ProfileS
               {isClient ? "Saved Posts" : "My Work"}
             </h3>
             {!isClient && (
-              <span className="text-xs text-[#7a7570]">
-                {workItems.length} posts
-              </span>
+              <span className="text-xs text-[#7a7570]">{workItems.length} posts</span>
             )}
           </div>
 
@@ -170,10 +198,10 @@ export default function ProfileScreen({ isClient = false, onNavigate }: ProfileS
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+function Stat({ value, label, highlight }: { value: string; label: string; highlight?: boolean }) {
   return (
     <div className="flex flex-col items-center gap-0.5">
-      <span className="font-bold text-base text-[#1a1a1a]">{value}</span>
+      <span className={`font-bold text-base ${highlight ? "text-[#6c47ff]" : "text-[#1a1a1a]"}`}>{value}</span>
       <span className="text-[11px] text-[#7a7570]">{label}</span>
     </div>
   );

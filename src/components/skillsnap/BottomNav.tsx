@@ -7,6 +7,7 @@ type Screen =
   | "upload"
   | "messages"
   | "profile"
+  | "own-profile"
   | "auth"
   | "chat"
   | "client-profile";
@@ -57,8 +58,8 @@ export default function BottomNav({ active, onNavigate }: BottomNavProps) {
       <NavItem
         icon={<User size={22} />}
         label="Profile"
-        active={active === "profile"}
-        onClick={() => onNavigate("profile")}
+        active={active === "own-profile"}
+        onClick={() => onNavigate("own-profile")}
       />
     </nav>
   );

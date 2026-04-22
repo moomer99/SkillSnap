@@ -1,5 +1,5 @@
 "use client";
-import { Heart, Share2, MapPin, Bookmark, Search, MessageSquare } from "lucide-react";
+import { Heart, Share2, MapPin, Bookmark, Search, MessageSquare, Briefcase } from "lucide-react";
 import JobsTooltip from "./JobsTooltip";
 
 type Screen = "home" | "discover" | "upload" | "messages" | "profile" | "auth" | "chat" | "client-profile";
@@ -84,7 +84,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
       {/* Feed */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
         {feedItems.map((item) => (
-          <FeedCard key={item.id} item={item} onProfileClick={() => onNavigate("profile")} onChatClick={() => onNavigate("chat")} />
+          <FeedCard key={item.id} item={item} onProfileClick={() => onNavigate("profile")} onConnectClick={() => onNavigate("chat")} />
         ))}
       </div>
     </div>
@@ -94,11 +94,11 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
 function FeedCard({
   item,
   onProfileClick,
-  onChatClick,
+  onConnectClick,
 }: {
   item: (typeof feedItems)[0];
   onProfileClick: () => void;
-  onChatClick: () => void;
+  onConnectClick: () => void;
 }) {
   return (
     <div className="relative w-full aspect-[9/16] max-h-[85vh] overflow-hidden bg-gray-900 mb-2">
@@ -115,10 +115,9 @@ function FeedCard({
         </div>
       </div>
 
-      {/* Right side actions — Like, Chat, Share */}
+      {/* Right side actions — Like, Share only */}
       <div className="absolute right-3 bottom-36 flex flex-col items-center gap-5">
         <ActionBtn icon={<Heart size={24} />} count={item.likes} />
-        <ActionBtn icon={<MessageSquare size={24} />} count="Chat" onClick={onChatClick} />
         <ActionBtn icon={<Share2 size={24} />} count="Share" />
       </div>
 
@@ -137,7 +136,7 @@ function FeedCard({
             {item.avatarInitial}
           </button>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-white font-semibold text-sm leading-tight">{item.username}</span>
               {item.verified && (
                 <span className="w-4 h-4 rounded-full bg-[#6c47ff] flex items-center justify-center flex-shrink-0">
@@ -146,6 +145,11 @@ function FeedCard({
                   </svg>
                 </span>
               )}
+              {/* Jobs Done badge — near username */}
+              <span className="flex items-center gap-0.5 text-[10px] font-medium text-white/75">
+                <Briefcase size={10} />
+                {item.jobsCompleted} Jobs Done
+              </span>
             </div>
             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-[#6c47ff]"
@@ -160,22 +164,17 @@ function FeedCard({
           </div>
         </div>
 
-        {/* Jobs Completed trust signal */}
-        <div className="mb-2">
-          <JobsTooltip count={item.jobsCompleted} dark size="xs" />
-        </div>
-
         {/* Caption */}
         <p className="text-white/90 text-sm leading-snug mb-3 line-clamp-2">{item.caption}</p>
 
-        {/* Chat CTA — replaces Connect */}
+        {/* Connect CTA with message bubble icon */}
         <button
-          onClick={onChatClick}
+          onClick={onConnectClick}
           className="w-full h-11 rounded-2xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
           style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
         >
           <MessageSquare size={16} strokeWidth={2.5} />
-          Message
+          Connect
         </button>
       </div>
     </div>
