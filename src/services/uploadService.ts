@@ -68,14 +68,18 @@ export const uploadService = {
       if (payload.file.type.startsWith("image/")) thumbnailUrl = mediaUrl;
     }
 
-    const isVideo = payload.file?.type.startsWith("video/") ?? false;
+    // Derive type from actual file MIME — never trust a UI state variable
+    const isVideo = payload.file
+      ? payload.file.type.startsWith("video/")
+      : false;
+    const postType: "video" | "photo" = isVideo ? "video" : "photo";
 
     // 2. Insert the post row
     const { data: inserted, error: insertError } = await sb
       .from("posts")
       .insert({
         author_id: session.user.id,
-        type: isVideo ? "video" : "photo",
+        type: postType,
         media_url: mediaUrl ?? null,
         thumbnail_url: thumbnailUrl ?? null,
         thumbnail_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
@@ -94,7 +98,7 @@ export const uploadService = {
         await sb.from("post_media").insert({
           post_id: inserted.id,
           url: mediaUrl,
-          type: isVideo ? "video" : "photo",
+          type: postType,
           order_index: 0,
         });
       } catch {
@@ -111,8 +115,19 @@ export const uploadService = {
 
     if (!fullPost) return null;
 
+    // If the profile join returned null (race condition), inject the profile row separately
+    const postRow = fullPost as Record<string, unknown>;
+    if (!postRow.profiles) {
+      const { data: profileRow } = await sb
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .single();
+      if (profileRow) postRow.profiles = profileRow;
+    }
+
     const { mapPost } = await import("./postService");
-    return mapPost(fullPost as Record<string, unknown>, new Set(), new Set());
+    return mapPost(postRow, new Set(), new Set());
   },
 
   async importFromSocial(_platform: "instagram" | "tiktok" | "facebook"): Promise<void> {

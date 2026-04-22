@@ -5,8 +5,25 @@ import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
 import type { Post } from "@/types";
 
+const FALLBACK_PROFILE: Record<string, unknown> = {
+  id: "",
+  username: "unknown",
+  display_name: "Unknown User",
+  avatar_initial: "?",
+  avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+  location: "",
+  bio: "",
+  skill: null,
+  is_verified: false,
+  jobs_done: 0,
+  followers_count: 0,
+  following_count: 0,
+  post_count: 0,
+  is_client: false,
+};
+
 function mapPost(row: Record<string, unknown>, likedIds: Set<string>, savedIds: Set<string>): Post {
-  const author = mapProfile(row.profiles as Record<string, unknown>);
+  const author = mapProfile((row.profiles as Record<string, unknown>) ?? FALLBACK_PROFILE);
   return {
     id: row.id as string,
     authorId: row.author_id as string,

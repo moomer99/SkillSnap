@@ -32,6 +32,15 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validate file size
+    const maxMB = file.type.startsWith("video/") ? 60 : 10;
+    if (file.size > maxMB * 1024 * 1024) {
+      setError(`File too large. Maximum size is ${maxMB}MB.`);
+      e.target.value = "";
+      return;
+    }
+
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
     setError(null);
@@ -41,9 +50,23 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     setContentType(type);
     setSelectedFile(null);
     setPreviewUrl(null);
-    if (type !== "social" && fileInputRef.current) {
+    // Always reset the input value so re-selecting the same type re-opens the picker
+    if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  }
+
+  function openPicker(type: ContentType) {
+    // Set the correct accept attribute synchronously by writing it directly on the element
+    // before calling click(), because React state updates are async
+    if (fileInputRef.current) {
+      fileInputRef.current.accept =
+        type === "video" ? "video/mp4,video/quicktime,video/*" : "image/jpeg,image/png,image/webp,image/*";
+      fileInputRef.current.value = "";
+    }
+    handleTypeSelect(type);
+    // Defer the click so the input is reset first
+    setTimeout(() => fileInputRef.current?.click(), 0);
   }
 
   async function handlePost() {
@@ -72,11 +95,6 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
       setLoading(false);
     }
   }
-
-  const acceptTypes =
-    contentType === "video"
-      ? "video/mp4,video/quicktime"
-      : "image/jpeg,image/png,image/webp";
 
   if (posted) {
     return (
@@ -111,14 +129,14 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
               title="Upload Video"
               subtitle="MP4, MOV up to 60 seconds"
               active={contentType === "video"}
-              onClick={() => { handleTypeSelect("video"); fileInputRef.current?.click(); }}
+              onClick={() => openPicker("video")}
             />
             <UploadButton
               icon={<ImageIcon size={22} className="text-[#6c47ff]" />}
               title="Upload Photo"
               subtitle="JPG, PNG up to 10MB"
               active={contentType === "photo"}
-              onClick={() => { handleTypeSelect("photo"); fileInputRef.current?.click(); }}
+              onClick={() => openPicker("photo")}
             />
             <UploadButton
               icon={
@@ -141,11 +159,11 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
               onClick={() => handleTypeSelect("social")}
             />
           </div>
-          {/* Hidden file input */}
+          {/* Hidden file input — accept attribute set dynamically in openPicker() */}
           <input
             ref={fileInputRef}
             type="file"
-            accept={acceptTypes}
+            accept="video/*,image/*"
             className="hidden"
             onChange={handleFileSelect}
           />
@@ -173,7 +191,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
           </div>
         ) : (
           <button
-            onClick={() => contentType !== "social" && fileInputRef.current?.click()}
+            onClick={() => contentType !== "social" && openPicker(contentType as "video" | "photo")}
             className="bg-white rounded-2xl border border-dashed border-[#c4b5fd] p-6 flex flex-col items-center gap-3 w-full"
           >
             <div className="w-14 h-14 rounded-2xl bg-[#ede9fe] flex items-center justify-center">

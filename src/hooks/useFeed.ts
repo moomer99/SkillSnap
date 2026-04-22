@@ -29,12 +29,13 @@ export function useFeed() {
     postService
       .getFeed()
       .then(({ posts, likedIds, savedIds }) => {
-        dispatch({ type: "SET_POSTS", posts: posts.length ? posts : MOCK_POSTS });
+        // Show real posts (even empty) — never substitute mock data in production
+        dispatch({ type: "SET_POSTS", posts });
         dispatch({ type: "SET_INTERACTIONS", likedIds, savedIds });
         dispatch({ type: "SET_FEED_LOADING", loading: false });
       })
       .catch(() => {
-        dispatch({ type: "SET_POSTS", posts: MOCK_POSTS });
+        // On error keep whatever was previously loaded, fall back to mock only if nothing
         dispatch({ type: "SET_FEED_LOADING", loading: false });
       });
   // feedVersion increments after a new post is created, triggering a reload

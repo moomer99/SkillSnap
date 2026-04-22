@@ -101,7 +101,8 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
 
             {/* Stats: Posts · Jobs Done · Followers */}
             <div className="flex-1 grid grid-cols-3 gap-1 pt-2">
-              <Stat value={String(user.postCount)} label="Posts" />
+              {/* Use live post count from loaded grid when available; fall back to profile stat */}
+              <Stat value={gridLoading ? String(user.postCount) : String(SUPABASE_CONFIGURED ? posts.length : user.postCount)} label="Posts" />
               <Stat value={String(user.jobsDone)} label="Jobs Done" highlight />
               <Stat value={followers} label="Followers" />
             </div>
@@ -167,7 +168,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           <div className="flex items-center justify-between px-4 mb-3">
             <h3 className="text-sm font-bold text-[#1a1a1a]">My Work</h3>
             <span className="text-xs text-[#7a7570]">
-              {gridLoading ? "…" : `${posts.length > 0 ? posts.length : MOCK_WORK_GRID.length} posts`}
+              {gridLoading ? "…" : `${posts.length > 0 ? posts.length : (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)} posts`}
             </span>
           </div>
 
@@ -197,8 +198,8 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                   )}
                 </div>
               ))
-            ) : (
-              // Mock grid for dev mode / empty profile
+            ) : !SUPABASE_CONFIGURED ? (
+              // Dev mode only — show mock grid so the UI isn't bare during development
               MOCK_WORK_GRID.map((item, i) => (
                 <div key={i} className="aspect-square relative overflow-hidden">
                   <div className="absolute inset-0" style={{ background: item.gradient }} />
@@ -211,6 +212,12 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                   )}
                 </div>
               ))
+            ) : (
+              // Real empty state — user hasn't posted yet
+              <div className="col-span-3 py-10 flex flex-col items-center gap-2 text-center">
+                <p className="text-sm font-semibold text-[#7a7570]">No posts yet</p>
+                <p className="text-xs text-[#b0aaa5]">Upload your first job to showcase your skill</p>
+              </div>
             )}
           </div>
         </div>
