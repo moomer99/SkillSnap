@@ -1,0 +1,92 @@
+// ─────────────────────────────────────────────
+// SkillSnap — App Config & Environment Placeholders
+// Replace values with real env vars when backend is connected
+// ─────────────────────────────────────────────
+
+export const APP_CONFIG = {
+  name: "SkillSnap",
+  tagline: "Watch. Trust. Connect.",
+  subtitle: "Discover real skills near you",
+  version: "1.0.0",
+} as const;
+
+// API — swap BASE_URL with process.env.NEXT_PUBLIC_API_URL
+export const API_CONFIG = {
+  BASE_URL: "", // e.g. "https://api.skillsnap.app/v1"
+  TIMEOUT_MS: 10_000,
+} as const;
+
+// Auth — swap with real provider config (Supabase / Firebase / Auth0)
+export const AUTH_CONFIG = {
+  PROVIDER: "", // e.g. "supabase"
+  AUTH_URL: "", // e.g. process.env.NEXT_PUBLIC_SUPABASE_URL
+  ANON_KEY: "", // e.g. process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+} as const;
+
+// Database — swap with real DB connection details
+export const DB_CONFIG = {
+  PROVIDER: "", // e.g. "supabase" | "planetscale" | "neon"
+  URL: "",
+} as const;
+
+// Maps — swap with real maps SDK key
+export const MAP_CONFIG = {
+  PROVIDER: "", // e.g. "mapbox" | "google"
+  API_KEY: "", // e.g. process.env.NEXT_PUBLIC_MAP_KEY
+  DEFAULT_LAT: -33.9214,
+  DEFAULT_LNG: 150.9224,
+  DEFAULT_ZOOM: 13,
+  DEFAULT_LOCATION_LABEL: "Liverpool, NSW",
+} as const;
+
+// Media storage — swap with real storage bucket config
+export const MEDIA_CONFIG = {
+  PROVIDER: "", // e.g. "supabase-storage" | "s3" | "cloudinary"
+  BUCKET_URL: "",
+  MAX_VIDEO_SIZE_MB: 60,
+  MAX_PHOTO_SIZE_MB: 10,
+  ACCEPTED_VIDEO_TYPES: ["video/mp4", "video/quicktime"],
+  ACCEPTED_IMAGE_TYPES: ["image/jpeg", "image/png", "image/webp"],
+} as const;
+
+// Feature flags — flip to true as features ship
+export const FEATURES = {
+  REAL_AUTH: false,
+  REAL_FEED: false,
+  REAL_MESSAGES: false,
+  REAL_DISCOVERY: false,
+  REAL_UPLOAD: false,
+  NOTIFICATIONS: false,
+} as const;
+
+// Jobs Done trust system
+export const JOBS_DONE_CONFIG = {
+  TOOLTIP_TEXT:
+    "Jobs Done are confirmed after users complete work and verify it through chat. This reflects real work done, not ratings.",
+  TRUST_NOTE: "Verified by both parties — no self-reporting",
+} as const;
+
+// Brand colors (used in dynamic styles)
+export const BRAND = {
+  PRIMARY: "#6c47ff",
+  PRIMARY_DARK: "#5b3dd8",
+  PRIMARY_LIGHT: "#8b6af5",
+  PRIMARY_BG: "#ede9fe",
+  SURFACE: "#f8f7f5",
+  BORDER: "#e8e4df",
+  MUTED: "#7a7570",
+  MUTED_LIGHT: "#b0aaa5",
+} as const;
+
+export const SKILL_CATEGORIES = [
+  "Barber",
+  "Tiler",
+  "Makeup Artist",
+  "Cleaning",
+  "Fitness / PT",
+  "Plumber",
+  "Electrician",
+  "Landscaping",
+  "Nails",
+  "Other",
+] as const;

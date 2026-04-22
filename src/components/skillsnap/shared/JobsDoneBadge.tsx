@@ -1,19 +1,42 @@
 "use client";
+// ─────────────────────────────────────────────
+// SkillSnap — Jobs Done Badge + Info Tooltip
+// Terminology rule: ONLY "Jobs Done" — never
+// "Jobs Completed", "Reviews", or "Ratings"
+// ─────────────────────────────────────────────
 import { useState } from "react";
-import { Info, X } from "lucide-react";
+import { Info, X, Briefcase } from "lucide-react";
+import { JOBS_DONE_CONFIG } from "@/constants/config";
 
-interface JobsTooltipProps {
+interface JobsDoneBadgeProps {
   count: number;
-  dark?: boolean; // for use on dark overlays (feed card)
+  dark?: boolean;       // for dark video overlays
   size?: "sm" | "xs";
+  inline?: boolean;     // compact inline badge (no modal trigger)
 }
 
-export default function JobsTooltip({ count, dark = false, size = "sm" }: JobsTooltipProps) {
+export default function JobsDoneBadge({
+  count,
+  dark = false,
+  size = "sm",
+  inline = false,
+}: JobsDoneBadgeProps) {
   const [open, setOpen] = useState(false);
 
   const textColor = dark ? "text-white/80" : "text-[#7a7570]";
-  const iconColor = dark ? "text-white/50" : "text-[#b0aaa5]";
+  const iconColor = dark ? "rgba(255,255,255,0.5)" : "#b0aaa5";
+  const iconStroke = dark ? "rgba(255,255,255,0.6)" : "#7a7570";
   const fontSize = size === "xs" ? "text-[10px]" : "text-xs";
+  const iconSize = size === "xs" ? 10 : 12;
+
+  if (inline) {
+    return (
+      <span className={`flex items-center gap-0.5 ${fontSize} font-medium ${textColor}`}>
+        <Briefcase size={iconSize} />
+        {count} Jobs Done
+      </span>
+    );
+  }
 
   return (
     <>
@@ -21,18 +44,17 @@ export default function JobsTooltip({ count, dark = false, size = "sm" }: JobsTo
         className={`flex items-center gap-1 ${fontSize} font-medium ${textColor}`}
         onClick={(e) => { e.stopPropagation(); setOpen(true); }}
       >
-        <svg width={size === "xs" ? 11 : 12} height={size === "xs" ? 11 : 12} viewBox="0 0 24 24" fill="none"
-          stroke={dark ? "rgba(255,255,255,0.6)" : "#7a7570"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
-          <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
+        {/* Briefcase icon */}
+        <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none"
+          stroke={iconStroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" />
+          <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
         </svg>
         {count} Jobs Done
-        <span className={iconColor}>
-          <Info size={size === "xs" ? 10 : 11} />
-        </span>
+        <Info size={iconSize} color={iconColor} />
       </button>
 
-      {/* Modal overlay */}
+      {/* Info modal */}
       {open && (
         <div
           className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-8"
@@ -43,19 +65,18 @@ export default function JobsTooltip({ count, dark = false, size = "sm" }: JobsTo
             className="w-full max-w-[358px] bg-white rounded-3xl p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="w-9 h-9 rounded-xl bg-[#ede9fe] flex items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="#6c47ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
-                    <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
+                    <rect x="2" y="7" width="20" height="14" rx="2" />
+                    <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
                   </svg>
                 </div>
                 <div>
                   <h3 className="font-bold text-sm text-[#1a1a1a]">Jobs Done</h3>
-                  <p className="text-xs text-[#6c47ff] font-semibold">{count} verified jobs</p>
+                  <p className="text-xs text-[#6c47ff] font-semibold">{count} verified</p>
                 </div>
               </div>
               <button onClick={() => setOpen(false)} className="text-[#b0aaa5] p-1">
@@ -66,16 +87,15 @@ export default function JobsTooltip({ count, dark = false, size = "sm" }: JobsTo
             <div className="h-px bg-[#e8e4df] mb-4" />
 
             <p className="text-sm text-[#4a4a4a] leading-relaxed">
-              Jobs Done are confirmed after both users complete a job and verify it through chat. This reflects real work done — not ratings or reviews.
+              {JOBS_DONE_CONFIG.TOOLTIP_TEXT}
             </p>
 
             <div className="mt-4 flex items-center gap-2 bg-[#f8f7f5] rounded-2xl px-4 py-3">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
-              <p className="text-xs text-[#7a7570]">
-                Verified by both parties — no self-reporting
-              </p>
+              <p className="text-xs text-[#7a7570]">{JOBS_DONE_CONFIG.TRUST_NOTE}</p>
             </div>
 
             <button

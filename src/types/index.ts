@@ -1,0 +1,135 @@
+// ─────────────────────────────────────────────
+// SkillSnap — Core Data Models
+// Replace with API-shaped DTOs when backend is ready
+// ─────────────────────────────────────────────
+
+export type ProfileVariant = "own" | "other" | "client";
+
+export type SkillCategory =
+  | "Barber"
+  | "Makeup Artist"
+  | "Tiler"
+  | "Cleaning"
+  | "Fitness / PT"
+  | "Plumber"
+  | "Electrician"
+  | "Landscaping"
+  | "Nails"
+  | "Other";
+
+// ── User / Profile ──────────────────────────
+export interface User {
+  id: string;
+  username: string;
+  displayName: string;
+  avatarGradient: string;
+  avatarInitial: string;
+  location: string;
+  bio: string;
+  skill: SkillCategory | null; // null = client/viewer
+  isVerified: boolean;
+  jobsDone: number;
+  followers: number;
+  following: number;
+  postCount: number;
+  isClient: boolean;
+}
+
+// ── Post / Feed ──────────────────────────────
+export type PostType = "video" | "photo";
+
+export interface Post {
+  id: string;
+  authorId: string;
+  author: User;
+  type: PostType;
+  thumbnailGradient: string; // placeholder; replace with media URL
+  caption: string;
+  likes: number;
+  likedByMe: boolean;
+  savedByMe: boolean;
+  createdAt: string; // ISO date string
+}
+
+// ── Message / Chat ───────────────────────────
+export type MessageSender = "me" | "them";
+
+export interface Message {
+  id: string;
+  threadId: string;
+  from: MessageSender;
+  text: string;
+  time: string; // display string; replace with ISO when real-time
+}
+
+export interface MessageThread {
+  id: string;
+  participant: User;
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount: number;
+}
+
+// ── Discovery / Map ──────────────────────────
+export interface DiscoveryPin {
+  id: string;
+  userId: string;
+  name: string;
+  skill: SkillCategory;
+  color: string;
+  rating: number;
+  jobsDone: number;
+  x: string; // map % position
+  y: string;
+}
+
+// ── Jobs Done ────────────────────────────────
+export interface JobRecord {
+  id: string;
+  skillerId: string;
+  clientId: string;
+  description: string;
+  verifiedAt: string; // ISO date
+}
+
+// ── Follow / Like / Save ─────────────────────
+export interface FollowRelationship {
+  followerId: string;
+  followingId: string;
+}
+
+export interface LikeState {
+  postId: string;
+  userId: string;
+}
+
+export interface SavedPost {
+  postId: string;
+  userId: string;
+}
+
+// ── Notification ─────────────────────────────
+export type NotificationType = "like" | "follow" | "message" | "job_verified";
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  fromUser: Pick<User, "id" | "displayName" | "avatarInitial" | "avatarGradient">;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
+// ── Navigation ───────────────────────────────
+export type Screen =
+  | "auth"
+  | "home"
+  | "discover"
+  | "search"
+  | "upload"
+  | "messages"
+  | "chat"
+  | "profile"       // other user
+  | "own-profile"   // current user
+  | "client-profile"
+  | "edit-profile";
