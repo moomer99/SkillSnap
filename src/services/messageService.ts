@@ -211,6 +211,36 @@ export const messageService = {
     };
   },
 
+  // Subscribe to conversation updates (last_message_text changes) so the thread list stays fresh.
+  // Calls onUpdate whenever any conversation the current user is in is updated.
+  subscribeToConversationUpdates(
+    conversationIds: string[],
+    onUpdate: () => void
+  ): () => void {
+    if (!conversationIds.length) return () => {};
+
+    const channel = getSupabase()
+      .channel(`conversations:${conversationIds[0]}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "conversations",
+        },
+        (payload) => {
+          if (conversationIds.includes((payload.new as Record<string, unknown>).id as string)) {
+            onUpdate();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      getSupabase().removeChannel(channel);
+    };
+  },
+
   // Jobs Done verification request sent via chat
   async sendJobCompletionRequest(_conversationId: string): Promise<void> {
     // TODO: insert jobs_done record with skiller_confirmed=true

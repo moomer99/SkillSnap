@@ -22,21 +22,21 @@ const SUPABASE_CONFIGURED =
 
 export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const { state } = useAppState();
-  const { messages, inputText, setInputText, sending, sendMessage, bottomRef } = useChat();
+  const { messages, inputText, setInputText, sending, loading, sendMessage, bottomRef } = useChat();
   const [participant, setParticipant] = useState<User | null>(null);
 
   const participantId = state.activeThreadParticipantId ?? state.viewingUserId;
 
   useEffect(() => {
-    if (!participantId) {
-      setParticipant(MOCK_USERS[0]);
-      return;
-    }
-
-    // Try resolving from the active thread's participant data first
+    // Resolve participant from already-loaded threads first (fastest, no extra fetch)
     const threadParticipant = state.threads.find((t) => t.id === state.activeThreadId)?.participant;
     if (threadParticipant) {
       setParticipant(threadParticipant);
+      return;
+    }
+
+    if (!participantId) {
+      setParticipant(MOCK_USERS[0]);
       return;
     }
 
@@ -47,7 +47,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       return;
     }
 
-    // Fetch from DB if Supabase is configured
+    // Fetch from DB if Supabase is configured and participant not in local state
     import("@/services/userService").then(({ userService }) => {
       userService.getUser(participantId).then((u) => {
         setParticipant(u ?? MOCK_USERS[0]);
@@ -96,25 +96,45 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           <div className="flex-1 h-px bg-[#e8e4df]" />
         </div>
 
-        {messages.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"}`}>
-            <div className="max-w-[78%] flex flex-col gap-0.5">
-              <div
-                className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                  msg.from === "me"
-                    ? "text-white rounded-br-sm"
-                    : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
-                }`}
-                style={msg.from === "me" ? { background: "linear-gradient(135deg, #6c47ff, #8b6af5)" } : {}}
-              >
-                {msg.text}
+        {loading ? (
+          // Loading skeleton
+          <div className="flex flex-col gap-3 mt-2">
+            {[false, true, false, true, false].map((isMe, i) => (
+              <div key={i} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`h-9 rounded-2xl animate-pulse ${isMe ? "bg-[#d4c9ff]" : "bg-gray-200"}`}
+                  style={{ width: `${40 + (i * 13) % 35}%` }}
+                />
               </div>
-              <span className={`text-[10px] text-[#b0aaa5] ${msg.from === "me" ? "text-right" : "text-left"} px-1`}>
-                {msg.time}
-              </span>
-            </div>
+            ))}
           </div>
-        ))}
+        ) : messages.length === 0 ? (
+          // Empty state — new conversation
+          <div className="flex flex-col items-center justify-center flex-1 text-center py-8">
+            <p className="text-sm font-semibold text-[#1a1a1a] mb-1">Start the conversation</p>
+            <p className="text-xs text-[#b0aaa5]">Say hello to {displayParticipant.displayName} 👋</p>
+          </div>
+        ) : (
+          messages.map((msg) => (
+            <div key={msg.id} className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"}`}>
+              <div className="max-w-[78%] flex flex-col gap-0.5">
+                <div
+                  className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                    msg.from === "me"
+                      ? "text-white rounded-br-sm"
+                      : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
+                  }`}
+                  style={msg.from === "me" ? { background: "linear-gradient(135deg, #6c47ff, #8b6af5)" } : {}}
+                >
+                  {msg.text}
+                </div>
+                <span className={`text-[10px] text-[#b0aaa5] ${msg.from === "me" ? "text-right" : "text-left"} px-1`}>
+                  {msg.time}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
         {/* Scroll anchor — useChat scrolls this into view on new messages */}
         <div ref={bottomRef} />
       </div>
@@ -150,8 +170,9 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) {
-              // Placeholder: show filename in message input until upload is wired up
-              setInputText(`[Attachment: ${file.name}]`);
+              // Show filename as a placeholder in the input so the user sees the selection;
+              // sending this text is intentional — it acts as a text caption until real upload is wired.
+              setInputText(file.name);
               inputRef.current?.focus();
             }
             e.target.value = "";
