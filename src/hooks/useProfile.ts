@@ -1,7 +1,9 @@
 "use client";
 // ─────────────────────────────────────────────
 // useProfile — resolves the correct user to display via userService (Supabase).
-// Falls back to MOCK_CURRENT_USER / MOCK_USERS when Supabase is not configured.
+// Seeds followedUsers set in AppState from DB on first load.
+// Optimistically updates follower count and follow state on toggle.
+// Falls back to mock data when Supabase is not configured.
 // ─────────────────────────────────────────────
 import { useState, useEffect, useCallback } from "react";
 import { useAppState } from "@/state/AppState";
@@ -17,10 +19,12 @@ const SUPABASE_CONFIGURED =
 export function useProfile(variant: ProfileVariant) {
   const { state, dispatch } = useAppState();
   const [user, setUser] = useState<User | null>(null);
+  // Track whether we've already seeded follow state this session
+  const followsSeedKey = "followsSeedDone";
 
+  // ── Resolve which user to display ────────────
   useEffect(() => {
     if (!SUPABASE_CONFIGURED) {
-      // Dev fallback
       if (variant === "own") {
         setUser(MOCK_CURRENT_USER);
       } else {
@@ -31,7 +35,6 @@ export function useProfile(variant: ProfileVariant) {
     }
 
     if (variant === "own") {
-      // Prefer AppState currentUser (already loaded) to avoid a round-trip
       if (state.currentUser) {
         setUser(state.currentUser);
       } else {
@@ -43,16 +46,57 @@ export function useProfile(variant: ProfileVariant) {
     }
   }, [variant, state.viewingUserId, state.currentUser]);
 
+  // ── Seed follow state from DB once per session ─
+  // Run when the own profile loads (current user is known) and followedUsers is empty.
+  // This ensures the Follow button reflects real DB state after login.
+  useEffect(() => {
+    if (!SUPABASE_CONFIGURED) return;
+    if (state.followedUsers.size > 0) return; // already seeded
+    if (!(window as unknown as Record<string, unknown>)[followsSeedKey]) {
+      (window as unknown as Record<string, unknown>)[followsSeedKey] = true;
+      userService.getFollowedUserIds().then((ids) => {
+        if (ids.size > 0) {
+          dispatch({ type: "SET_FOLLOWED_USERS", userIds: ids });
+        }
+      }).catch(() => {});
+    }
+  // Only needs to run once — depend on auth state changing
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.isAuthenticated]);
+
+  // ── Toggle follow with optimistic UI ─────────
   const toggleFollow = useCallback(
     async (userId: string) => {
-      const isFollowing = state.followedUsers.has(userId);
+      if (!SUPABASE_CONFIGURED) {
+        dispatch({ type: "TOGGLE_FOLLOW", userId });
+        return;
+      }
+
+      const wasFollowing = state.followedUsers.has(userId);
+
+      // 1. Optimistic update — flip button instantly
       dispatch({ type: "TOGGLE_FOLLOW", userId });
-      if (SUPABASE_CONFIGURED) {
-        if (isFollowing) {
-          userService.unfollowUser(userId).catch(() => {});
+
+      // 2. Optimistically update the displayed follower count
+      setUser((prev) => {
+        if (!prev || prev.id !== userId) return prev;
+        return { ...prev, followers: prev.followers + (wasFollowing ? -1 : 1) };
+      });
+
+      // 3. Persist to DB
+      try {
+        if (wasFollowing) {
+          await userService.unfollowUser(userId);
         } else {
-          userService.followUser(userId).catch(() => {});
+          await userService.followUser(userId);
         }
+      } catch {
+        // Rollback on failure
+        dispatch({ type: "TOGGLE_FOLLOW", userId });
+        setUser((prev) => {
+          if (!prev || prev.id !== userId) return prev;
+          return { ...prev, followers: prev.followers + (wasFollowing ? 1 : -1) };
+        });
       }
     },
     [state.followedUsers, dispatch]

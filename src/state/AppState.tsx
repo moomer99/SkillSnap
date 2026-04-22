@@ -53,6 +53,7 @@ type Action =
   | { type: "TOGGLE_LIKE"; postId: string }
   | { type: "TOGGLE_SAVE"; postId: string }
   | { type: "TOGGLE_FOLLOW"; userId: string }
+  | { type: "SET_FOLLOWED_USERS"; userIds: Set<string> }
   | { type: "OPEN_JOBS_DONE_MODAL" }
   | { type: "CLOSE_JOBS_DONE_MODAL" };
 
@@ -128,6 +129,8 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       followed.has(action.userId) ? followed.delete(action.userId) : followed.add(action.userId);
       return { ...state, followedUsers: followed };
     }
+    case "SET_FOLLOWED_USERS":
+      return { ...state, followedUsers: action.userIds };
     case "OPEN_JOBS_DONE_MODAL":
       return { ...state, modals: { ...state.modals, jobsDoneInfo: true } };
     case "CLOSE_JOBS_DONE_MODAL":

@@ -39,17 +39,34 @@ export const userService = {
     return (data ?? []).map((row) => mapProfile(row as Record<string, unknown>));
   },
 
+  // Returns all user IDs the current user is following — used to seed AppState on login
+  async getFollowedUserIds(): Promise<Set<string>> {
+    const sb = getSupabase();
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return new Set();
+    const { data } = await sb
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", session.user.id);
+    return new Set((data ?? []).map((r) => r.following_id as string));
+  },
+
   async followUser(targetId: string): Promise<void> {
     const sb = getSupabase();
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return;
-    await sb.from("follows").insert({ follower_id: session.user.id, following_id: targetId });
+    // upsert prevents duplicate-key errors if the user double-taps
+    await sb.from("follows").upsert(
+      { follower_id: session.user.id, following_id: targetId },
+      { onConflict: "follower_id,following_id", ignoreDuplicates: true }
+    );
   },
 
   async unfollowUser(targetId: string): Promise<void> {
     const sb = getSupabase();
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return;
+    // Ignore "row not found" errors — idempotent unfollow
     await sb.from("follows")
       .delete()
       .eq("follower_id", session.user.id)
