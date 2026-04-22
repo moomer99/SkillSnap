@@ -137,6 +137,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Hydrate auth state from Supabase session on mount
   useEffect(() => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+    if (!supabaseUrl || supabaseUrl.includes("your-project-ref")) {
+      // Supabase not configured — skip auth and stay on auth screen
+      dispatch({ type: "SET_AUTH_LOADING", loading: false });
+      return;
+    }
+
     const sb = getSupabase();
 
     // Resolve initial session
