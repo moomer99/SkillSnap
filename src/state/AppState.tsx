@@ -42,6 +42,7 @@ type Action =
   | { type: "NAVIGATE"; screen: Screen }
   | { type: "SET_POSTS"; posts: Post[] }
   | { type: "SET_FEED_LOADING"; loading: boolean }
+  | { type: "SET_INTERACTIONS"; likedIds: Set<string>; savedIds: Set<string> }
   | { type: "SET_VIEWING_USER"; userId: string }
   | { type: "SET_THREADS"; threads: MessageThread[] }
   | { type: "SET_ACTIVE_THREAD"; threadId: string }
@@ -91,6 +92,8 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       return { ...state, posts: action.posts };
     case "SET_FEED_LOADING":
       return { ...state, feedLoading: action.loading };
+    case "SET_INTERACTIONS":
+      return { ...state, likedPosts: action.likedIds, savedPosts: action.savedIds };
     case "SET_VIEWING_USER":
       return { ...state, viewingUserId: action.userId };
     case "SET_THREADS":

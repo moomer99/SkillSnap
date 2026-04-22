@@ -48,6 +48,8 @@ export interface Post {
   thumbnailUrl?: string;      // thumbnail image URL
   thumbnailGradient: string;  // gradient fallback when no media
   caption: string;
+  skill?: SkillCategory | null;  // post-level skill tag
+  location?: string | null;      // post-level location (overrides author location in UI)
   likes: number;
   likedByMe: boolean;
   savedByMe: boolean;

@@ -21,7 +21,7 @@ interface HomeFeedProps {
 }
 
 export default function HomeFeed({ onNavigate }: HomeFeedProps) {
-  const { posts, likedPosts, savedPosts, toggleLike, toggleSave } = useFeed();
+  const { posts, loading, likedPosts, savedPosts, toggleLike, toggleSave } = useFeed();
   const { dispatch } = useAppState();
 
   function handleProfileClick(userId: string) {
@@ -44,18 +44,23 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
 
       {/* Feed */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
-        {posts.map((post) => (
-          <FeedCard
-            key={post.id}
-            post={post}
-            isLiked={likedPosts.has(post.id)}
-            isSaved={savedPosts.has(post.id)}
-            onLike={() => toggleLike(post.id)}
-            onSave={() => toggleSave(post.id)}
-            onProfileClick={() => handleProfileClick(post.authorId)}
-            onConnectClick={() => onNavigate("chat")}
-          />
-        ))}
+        {loading && posts.length === 0 ? (
+          // Loading skeleton — same aspect ratio as a feed card
+          <div className="w-full aspect-[9/16] max-h-[85vh] bg-gray-200 animate-pulse mb-2" />
+        ) : (
+          posts.map((post) => (
+            <FeedCard
+              key={post.id}
+              post={post}
+              isLiked={likedPosts.has(post.id)}
+              isSaved={savedPosts.has(post.id)}
+              onLike={() => toggleLike(post.id)}
+              onSave={() => toggleSave(post.id)}
+              onProfileClick={() => handleProfileClick(post.authorId)}
+              onConnectClick={() => onNavigate("chat")}
+            />
+          ))
+        )}
       </div>
     </div>
   );
@@ -80,6 +85,9 @@ function FeedCard({
 }) {
   const { author } = post;
   const displayLikes = formatLikes(post.likes + (isLiked ? 1 : 0));
+  // Post-level fields take precedence; fall back to author profile values
+  const displaySkill = post.skill ?? author.skill;
+  const displayLocation = post.location ?? author.location;
 
   return (
     <div className="relative w-full aspect-[9/16] max-h-[85vh] overflow-hidden bg-gray-900 mb-2">
@@ -139,16 +147,18 @@ function FeedCard({
               <JobsDoneBadge count={author.jobsDone} dark size="xs" inline />
             </div>
             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-              {author.skill && (
+              {displaySkill && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-[#6c47ff]"
                   style={{ background: "rgba(108,71,255,0.2)", backdropFilter: "blur(4px)" }}>
-                  {author.skill}
+                  {displaySkill}
                 </span>
               )}
-              <span className="flex items-center gap-0.5 text-white/70 text-xs">
-                <MapPin size={10} />
-                {author.location}
-              </span>
+              {displayLocation && (
+                <span className="flex items-center gap-0.5 text-white/70 text-xs">
+                  <MapPin size={10} />
+                  {displayLocation}
+                </span>
+              )}
             </div>
           </div>
         </div>

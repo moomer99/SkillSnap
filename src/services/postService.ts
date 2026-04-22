@@ -11,11 +11,13 @@ function mapPost(row: Record<string, unknown>, likedIds: Set<string>, savedIds: 
     id: row.id as string,
     authorId: row.author_id as string,
     author,
-    type: row.type as Post["type"],
+    type: (row.type as Post["type"]) ?? "video",
     mediaUrl: (row.media_url as string | null) ?? undefined,
     thumbnailUrl: (row.thumbnail_url as string | null) ?? undefined,
-    thumbnailGradient: row.thumbnail_gradient as string,
-    caption: row.caption as string,
+    thumbnailGradient: (row.thumbnail_gradient as string) || "linear-gradient(135deg, #6c47ff, #a78bfa)",
+    caption: (row.caption as string) ?? "",
+    skill: (row.skill as Post["skill"]) ?? null,
+    location: (row.location as string | null) ?? null,
     likes: Number(row.likes_count ?? 0),
     likedByMe: likedIds.has(row.id as string),
     savedByMe: savedIds.has(row.id as string),
@@ -40,23 +42,26 @@ async function getUserInteractionSets(postIds: string[]): Promise<{ likedIds: Se
 }
 
 export const postService = {
-  async getFeed(limit = 20, offset = 0): Promise<Post[]> {
-    const { data } = await getSupabase()
+  async getFeed(limit = 20, offset = 0): Promise<{ posts: Post[]; likedIds: Set<string>; savedIds: Set<string> }> {
+    const { data, error } = await getSupabase()
       .from("posts")
-      .select("*, profiles(*)")
+      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles(*)")
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
-    if (!data?.length) return [];
+    if (error) throw error;
+    if (!data?.length) return { posts: [], likedIds: new Set(), savedIds: new Set() };
+
     const postIds = data.map((p) => p.id as string);
     const { likedIds, savedIds } = await getUserInteractionSets(postIds);
-    return data.map((row) => mapPost(row as Record<string, unknown>, likedIds, savedIds));
+    const posts = data.map((row) => mapPost(row as Record<string, unknown>, likedIds, savedIds));
+    return { posts, likedIds, savedIds };
   },
 
   async getUserPosts(userId: string): Promise<Post[]> {
     const { data } = await getSupabase()
       .from("posts")
-      .select("*, profiles(*)")
+      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles(*)")
       .eq("author_id", userId)
       .order("created_at", { ascending: false });
 

@@ -1,7 +1,8 @@
 "use client";
 // ─────────────────────────────────────────────
 // useFeed — loads the home feed via postService (Supabase).
-// Falls back to MOCK_POSTS when Supabase is not configured.
+// Falls back to MOCK_POSTS only when Supabase is not configured.
+// Seeds likedPosts/savedPosts in AppState from the DB response.
 // ─────────────────────────────────────────────
 import { useEffect, useCallback } from "react";
 import { useAppState } from "@/state/AppState";
@@ -20,27 +21,34 @@ export function useFeed() {
     dispatch({ type: "SET_FEED_LOADING", loading: true });
 
     if (!SUPABASE_CONFIGURED) {
-      // Dev fallback: use mock data while Supabase is not wired up
+      // Dev mode — no Supabase credentials
       dispatch({ type: "SET_POSTS", posts: MOCK_POSTS });
       dispatch({ type: "SET_FEED_LOADING", loading: false });
       return;
     }
 
-    postService.getFeed().then((posts) => {
-      // If Supabase returned nothing (empty DB), fall back to mock
-      dispatch({ type: "SET_POSTS", posts: posts.length ? posts : MOCK_POSTS });
-      dispatch({ type: "SET_FEED_LOADING", loading: false });
-    }).catch(() => {
-      dispatch({ type: "SET_POSTS", posts: MOCK_POSTS });
-      dispatch({ type: "SET_FEED_LOADING", loading: false });
-    });
+    postService
+      .getFeed()
+      .then(({ posts, likedIds, savedIds }) => {
+        // Use real DB posts; only fall back to mock when the DB is genuinely empty
+        dispatch({ type: "SET_POSTS", posts: posts.length ? posts : MOCK_POSTS });
+        // Seed liked/saved interaction state from the DB so buttons render correctly
+        dispatch({ type: "SET_INTERACTIONS", likedIds, savedIds });
+        dispatch({ type: "SET_FEED_LOADING", loading: false });
+      })
+      .catch(() => {
+        // Network/auth error — show mock so the feed isn't blank
+        dispatch({ type: "SET_POSTS", posts: MOCK_POSTS });
+        dispatch({ type: "SET_FEED_LOADING", loading: false });
+      });
   }, [dispatch]);
 
   const toggleLike = useCallback(
-    async (postId: string) => {
-      dispatch({ type: "TOGGLE_LIKE", postId });
+    (postId: string) => {
       const isLiked = state.likedPosts.has(postId);
-      // Fire-and-forget — optimistic update already done above
+      // Optimistic update first
+      dispatch({ type: "TOGGLE_LIKE", postId });
+      // Fire-and-forget DB sync
       if (isLiked) {
         postService.unlikePost(postId).catch(() => {});
       } else {
@@ -51,9 +59,9 @@ export function useFeed() {
   );
 
   const toggleSave = useCallback(
-    async (postId: string) => {
-      dispatch({ type: "TOGGLE_SAVE", postId });
+    (postId: string) => {
       const isSaved = state.savedPosts.has(postId);
+      dispatch({ type: "TOGGLE_SAVE", postId });
       if (isSaved) {
         postService.unsavePost(postId).catch(() => {});
       } else {
