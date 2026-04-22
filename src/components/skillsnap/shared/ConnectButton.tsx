@@ -5,12 +5,13 @@
 // Icon: MessageSquare bubble beside the word
 // Never rename to "Chat" or "Message"
 // ─────────────────────────────────────────────
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Loader2 } from "lucide-react";
 
 interface ConnectButtonProps {
   onClick: () => void;
   fullWidth?: boolean;
   size?: "sm" | "md";
+  loading?: boolean;
   className?: string;
 }
 
@@ -18,6 +19,7 @@ export default function ConnectButton({
   onClick,
   fullWidth = false,
   size = "md",
+  loading = false,
   className = "",
 }: ConnectButtonProps) {
   const height = size === "sm" ? "h-9 text-xs" : "h-11 text-sm";
@@ -26,10 +28,14 @@ export default function ConnectButton({
   return (
     <button
       onClick={onClick}
-      className={`${fullWidth ? "w-full" : "px-5"} ${height} rounded-2xl font-semibold text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${className}`}
+      disabled={loading}
+      className={`${fullWidth ? "w-full" : "px-5"} ${height} rounded-2xl font-semibold text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 ${className}`}
       style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
     >
-      <MessageSquare size={iconSize} strokeWidth={2.5} />
+      {loading
+        ? <Loader2 size={iconSize} className="animate-spin" />
+        : <MessageSquare size={iconSize} strokeWidth={2.5} />
+      }
       Connect
     </button>
   );

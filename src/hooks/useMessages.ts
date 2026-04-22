@@ -4,7 +4,7 @@
 // Falls back to MOCK_THREADS when Supabase is not configured.
 // connectTo creates/finds a conversation (Connect flow).
 // ─────────────────────────────────────────────
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useAppState } from "@/state/AppState";
 import { messageService } from "@/services/messageService";
 import { MOCK_THREADS } from "@/mock-data/messages";
@@ -16,6 +16,7 @@ const SUPABASE_CONFIGURED =
 
 export function useMessages() {
   const { state, dispatch, navigate } = useAppState();
+  const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
     if (!SUPABASE_CONFIGURED) {
@@ -38,22 +39,26 @@ export function useMessages() {
     [dispatch, navigate]
   );
 
-  // Called when user taps Connect on a profile or feed card
+  // Called when user taps Connect — finds or creates a conversation, then navigates to chat
   const connectTo = useCallback(
     async (participantId: string) => {
+      setConnecting(true);
       if (!SUPABASE_CONFIGURED) {
-        // Dev fallback: just navigate to chat with mock thread
-        dispatch({ type: "SET_ACTIVE_THREAD", threadId: "thread_1" });
+        dispatch({ type: "SET_ACTIVE_THREAD", threadId: "thread_1", participantId });
         navigate("chat");
+        setConnecting(false);
         return;
       }
       try {
         const conversationId = await messageService.getOrCreateConversation(participantId);
-        dispatch({ type: "SET_ACTIVE_THREAD", threadId: conversationId });
+        dispatch({ type: "SET_ACTIVE_THREAD", threadId: conversationId, participantId });
         navigate("chat");
       } catch {
-        dispatch({ type: "SET_ACTIVE_THREAD", threadId: "thread_1" });
+        // Auth/network failure — navigate anyway so UX isn't dead
+        dispatch({ type: "SET_ACTIVE_THREAD", threadId: "thread_1", participantId });
         navigate("chat");
+      } finally {
+        setConnecting(false);
       }
     },
     [dispatch, navigate]
@@ -64,5 +69,6 @@ export function useMessages() {
     activeThreadId: state.activeThreadId,
     openThread,
     connectTo,
+    connecting,
   };
 }

@@ -9,6 +9,7 @@ import { MapPin, ArrowLeft, Play, Share2, Edit3 } from "lucide-react";
 import type { Screen, ProfileVariant } from "@/types";
 import { MOCK_WORK_GRID } from "@/mock-data/posts";
 import { useProfile } from "@/hooks/useProfile";
+import { useMessages } from "@/hooks/useMessages";
 import UserAvatar from "./shared/UserAvatar";
 import ConnectButton from "./shared/ConnectButton";
 
@@ -21,6 +22,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
   const isOwn = variant === "own";
 
   const { user, isFollowing, toggleFollow } = useProfile(variant);
+  const { connectTo, connecting } = useMessages();
 
   if (!user) {
     return (
@@ -101,9 +103,13 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
               </>
             ) : (
               <>
-                {/* Connect — message icon + label, strict rule */}
+                {/* Connect — opens/creates conversation then navigates to chat */}
                 <div className="flex-1">
-                  <ConnectButton onClick={() => onNavigate("chat")} fullWidth />
+                  <ConnectButton
+                    onClick={() => connectTo(user.id)}
+                    fullWidth
+                    loading={connecting}
+                  />
                 </div>
                 <button
                   onClick={() => toggleFollow(user.id)}

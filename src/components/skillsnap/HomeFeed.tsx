@@ -9,6 +9,7 @@ import type { Post } from "@/types";
 import type { Screen } from "@/types";
 import { formatLikes } from "@/mock-data/posts";
 import { useFeed } from "@/hooks/useFeed";
+import { useMessages } from "@/hooks/useMessages";
 import { useAppState } from "@/state/AppState";
 import SearchBar from "./shared/SearchBar";
 import JobsDoneBadge from "./shared/JobsDoneBadge";
@@ -22,6 +23,7 @@ interface HomeFeedProps {
 
 export default function HomeFeed({ onNavigate }: HomeFeedProps) {
   const { posts, loading, likedPosts, savedPosts, toggleLike, toggleSave } = useFeed();
+  const { connectTo, connecting } = useMessages();
   const { dispatch } = useAppState();
 
   function handleProfileClick(userId: string) {
@@ -45,7 +47,6 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
       {/* Feed */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
         {loading && posts.length === 0 ? (
-          // Loading skeleton — same aspect ratio as a feed card
           <div className="w-full aspect-[9/16] max-h-[85vh] bg-gray-200 animate-pulse mb-2" />
         ) : (
           posts.map((post) => (
@@ -57,7 +58,8 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
               onLike={() => toggleLike(post.id)}
               onSave={() => toggleSave(post.id)}
               onProfileClick={() => handleProfileClick(post.authorId)}
-              onConnectClick={() => onNavigate("chat")}
+              onConnectClick={() => connectTo(post.authorId)}
+              connecting={connecting}
             />
           ))
         )}
@@ -74,6 +76,7 @@ function FeedCard({
   onSave,
   onProfileClick,
   onConnectClick,
+  connecting,
 }: {
   post: Post;
   isLiked: boolean;
@@ -82,6 +85,7 @@ function FeedCard({
   onSave: () => void;
   onProfileClick: () => void;
   onConnectClick: () => void;
+  connecting: boolean;
 }) {
   const { author } = post;
   const displayLikes = formatLikes(post.likes + (isLiked ? 1 : 0));
@@ -167,7 +171,7 @@ function FeedCard({
         <p className="text-white/90 text-sm leading-snug mb-3 line-clamp-2">{post.caption}</p>
 
         {/* Connect CTA */}
-        <ConnectButton onClick={onConnectClick} fullWidth />
+        <ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />
       </div>
     </div>
   );

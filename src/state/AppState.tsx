@@ -25,6 +25,7 @@ interface AppStateShape {
 
   threads: MessageThread[];
   activeThreadId: string | null;
+  activeThreadParticipantId: string | null;
 
   discoveryFilter: DiscoveryFilter;
 
@@ -45,7 +46,7 @@ type Action =
   | { type: "SET_INTERACTIONS"; likedIds: Set<string>; savedIds: Set<string> }
   | { type: "SET_VIEWING_USER"; userId: string }
   | { type: "SET_THREADS"; threads: MessageThread[] }
-  | { type: "SET_ACTIVE_THREAD"; threadId: string }
+  | { type: "SET_ACTIVE_THREAD"; threadId: string; participantId?: string }
   | { type: "SET_DISCOVERY_FILTER"; filter: DiscoveryFilter }
   | { type: "TOGGLE_LIKE"; postId: string }
   | { type: "TOGGLE_SAVE"; postId: string }
@@ -64,6 +65,7 @@ const initialState: AppStateShape = {
   viewingUserId: null,
   threads: [],
   activeThreadId: null,
+  activeThreadParticipantId: null,
   discoveryFilter: "All",
   likedPosts: new Set(),
   savedPosts: new Set(),
@@ -99,7 +101,11 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
     case "SET_THREADS":
       return { ...state, threads: action.threads };
     case "SET_ACTIVE_THREAD":
-      return { ...state, activeThreadId: action.threadId };
+      return {
+        ...state,
+        activeThreadId: action.threadId,
+        activeThreadParticipantId: action.participantId ?? state.activeThreadParticipantId,
+      };
     case "SET_DISCOVERY_FILTER":
       return { ...state, discoveryFilter: action.filter };
     case "TOGGLE_LIKE": {

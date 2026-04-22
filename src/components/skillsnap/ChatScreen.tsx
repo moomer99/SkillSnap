@@ -1,12 +1,11 @@
 "use client";
 // ─────────────────────────────────────────────
 // SkillSnap — Chat Thread Screen
-// Data: messageService.getMessages(threadId) via useChat hook
-// Integration: real-time via Supabase Realtime / Socket.io
-// Jobs Done: jobsDoneService.requestVerification(threadId)
+// Participant resolved from: active thread → viewingUserId → mock fallback
 // ─────────────────────────────────────────────
+import { useEffect, useState } from "react";
 import { ArrowLeft, Phone, MoreVertical, Send, Paperclip, Info } from "lucide-react";
-import type { Screen } from "@/types";
+import type { Screen, User } from "@/types";
 import { MOCK_USERS } from "@/mock-data/users";
 import { useAppState } from "@/state/AppState";
 import { useChat } from "@/hooks/useChat";
@@ -16,13 +15,47 @@ interface ChatScreenProps {
   onNavigate: (s: Screen) => void;
 }
 
+const SUPABASE_CONFIGURED =
+  typeof process !== "undefined" &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref");
+
 export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const { state } = useAppState();
   const { messages, inputText, setInputText, sending, sendMessage } = useChat();
+  const [participant, setParticipant] = useState<User | null>(null);
 
-  // Resolve participant: use viewingUserId if set, else fall back to first mock user
-  const participant =
-    MOCK_USERS.find((u) => u.id === state.viewingUserId) ?? MOCK_USERS[0];
+  const participantId = state.activeThreadParticipantId ?? state.viewingUserId;
+
+  useEffect(() => {
+    if (!participantId) {
+      setParticipant(MOCK_USERS[0]);
+      return;
+    }
+
+    // Try resolving from the active thread's participant data first
+    const threadParticipant = state.threads.find((t) => t.id === state.activeThreadId)?.participant;
+    if (threadParticipant) {
+      setParticipant(threadParticipant);
+      return;
+    }
+
+    // Fall back to mock for dev mode or if threads haven't loaded yet
+    const mockUser = MOCK_USERS.find((u) => u.id === participantId);
+    if (mockUser || !SUPABASE_CONFIGURED) {
+      setParticipant(mockUser ?? MOCK_USERS[0]);
+      return;
+    }
+
+    // Fetch from DB if Supabase is configured
+    import("@/services/userService").then(({ userService }) => {
+      userService.getUser(participantId).then((u) => {
+        setParticipant(u ?? MOCK_USERS[0]);
+      });
+    });
+  }, [participantId, state.threads, state.activeThreadId]);
+
+  const displayParticipant = participant ?? MOCK_USERS[0];
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
@@ -35,11 +68,11 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           onClick={() => onNavigate("client-profile")}
           className="flex items-center gap-2.5 flex-1"
         >
-          <UserAvatar user={participant} size="sm" />
+          <UserAvatar user={displayParticipant} size="sm" />
           <div>
-            <p className="text-sm font-bold text-[#1a1a1a] leading-tight">{participant.displayName}</p>
+            <p className="text-sm font-bold text-[#1a1a1a] leading-tight">{displayParticipant.displayName}</p>
             <p className="text-[11px] text-[#6c47ff] font-medium">
-              {participant.skill} · {participant.location}
+              {[displayParticipant.skill, displayParticipant.location].filter(Boolean).join(" · ")}
             </p>
           </div>
         </button>
@@ -82,7 +115,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         ))}
       </div>
 
-      {/* Jobs Done verification request (disabled until interaction threshold) */}
+      {/* Jobs Done verification request */}
       <div className="px-4 pb-2">
         <button
           disabled
