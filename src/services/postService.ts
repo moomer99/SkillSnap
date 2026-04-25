@@ -44,7 +44,7 @@ function mapPost(row: Record<string, unknown>, likedIds: Set<string>, savedIds: 
 
 async function getUserInteractionSets(postIds: string[]): Promise<{ likedIds: Set<string>; savedIds: Set<string> }> {
   const sb = getSupabase();
-  const { data: { session } } = await sb.auth.getSession();
+  const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
   if (!session || postIds.length === 0) return { likedIds: new Set(), savedIds: new Set() };
 
   const [likesRes, savedRes] = await Promise.all([
@@ -90,7 +90,7 @@ export const postService = {
 
   async likePost(postId: string): Promise<void> {
     const sb = getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
+    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
     if (!session) return;
     // upsert avoids duplicate-key error on double-tap
     await sb.from("likes").upsert(
@@ -101,7 +101,7 @@ export const postService = {
 
   async unlikePost(postId: string): Promise<void> {
     const sb = getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
+    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
     if (!session) return;
     await sb.from("likes").delete()
       .eq("user_id", session.user.id)
@@ -110,7 +110,7 @@ export const postService = {
 
   async savePost(postId: string): Promise<void> {
     const sb = getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
+    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
     if (!session) return;
     await sb.from("saved_posts").upsert(
       { user_id: session.user.id, post_id: postId },
@@ -120,7 +120,7 @@ export const postService = {
 
   async unsavePost(postId: string): Promise<void> {
     const sb = getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
+    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
     if (!session) return;
     await sb.from("saved_posts").delete()
       .eq("user_id", session.user.id)

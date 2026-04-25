@@ -42,8 +42,8 @@ function mapMessage(row: Record<string, unknown>, currentUserId: string): Messag
 }
 
 async function getCurrentUserId(): Promise<string | null> {
-  const { data: { session } } = await getSupabase().auth.getSession();
-  return session?.user.id ?? null;
+  const { data: { user } } = await getSupabase().auth.getUser();
+  return user?.id ?? null;
 }
 
 export const messageService = {

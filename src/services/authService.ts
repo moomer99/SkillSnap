@@ -154,13 +154,13 @@ export const authService = {
 
   async getCurrentUser(): Promise<User | null> {
     const sb = getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
+    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
     if (!session?.user) return null;
     return fetchProfile(session.user.id);
   },
 
   async getSession() {
-    const { data: { session } } = await getSupabase().auth.getSession();
+    const { data: { user: _authUser } } = await getSupabase().auth.getUser(); const session = _authUser ? { user: _authUser } : null;
     return session;
   },
 

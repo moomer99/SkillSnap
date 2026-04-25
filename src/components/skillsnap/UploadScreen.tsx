@@ -276,7 +276,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
       </div>
 
       {/* Post button */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] px-4 pb-6 pt-3 bg-white/95 backdrop-blur-sm border-t border-[#e8e4df]">
+      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[390px] px-4 pb-4 pt-3 bg-white/95 backdrop-blur-sm border-t border-[#e8e4df]">
         <button
           onClick={handlePost}
           disabled={loading}

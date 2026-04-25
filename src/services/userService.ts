@@ -18,7 +18,7 @@ export const userService = {
 
   async getCurrentUser(): Promise<User | null> {
     const sb = getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
+    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
     if (!session?.user) return null;
     const { data, error } = await sb
       .from("profiles")
@@ -42,7 +42,7 @@ export const userService = {
   // Returns all user IDs the current user is following — used to seed AppState on login
   async getFollowedUserIds(): Promise<Set<string>> {
     const sb = getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
+    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
     if (!session) return new Set();
     const { data } = await sb
       .from("follows")
@@ -53,7 +53,7 @@ export const userService = {
 
   async followUser(targetId: string): Promise<void> {
     const sb = getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
+    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
     if (!session) return;
     // upsert prevents duplicate-key errors if the user double-taps
     await sb.from("follows").upsert(
@@ -64,7 +64,7 @@ export const userService = {
 
   async unfollowUser(targetId: string): Promise<void> {
     const sb = getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
+    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
     if (!session) return;
     // Ignore "row not found" errors — idempotent unfollow
     await sb.from("follows")
@@ -75,7 +75,7 @@ export const userService = {
 
   async isFollowing(targetId: string): Promise<boolean> {
     const sb = getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
+    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
     if (!session) return false;
     const { data } = await sb
       .from("follows")
@@ -88,7 +88,7 @@ export const userService = {
 
   async updateProfile(patch: Partial<User>): Promise<User | null> {
     const sb = getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
+    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
     if (!session) return null;
 
     const dbPatch: Record<string, unknown> = {};

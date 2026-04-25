@@ -17,7 +17,7 @@ function mapJob(row: Record<string, unknown>): JobRecord {
 }
 
 async function getCurrentUserId(): Promise<string | null> {
-  const { data: { session } } = await getSupabase().auth.getSession();
+  const { data: { user: _authUser } } = await getSupabase().auth.getUser(); const session = _authUser ? { user: _authUser } : null;
   return session?.user.id ?? null;
 }
 
