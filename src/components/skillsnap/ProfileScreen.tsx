@@ -5,10 +5,11 @@
 // variant="client" → Client Profile (public view)
 // Data: userService.getUser(id) via useProfile hook
 // ─────────────────────────────────────────────
-import { MapPin, ArrowLeft, Play, Share2, Edit3, X } from "lucide-react";
+import { MapPin, ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import type { Screen, ProfileVariant, Post } from "@/types";
+import type { Screen, ProfileVariant, Post, SkillCategory } from "@/types";
 import { MOCK_WORK_GRID } from "@/mock-data/posts";
+import { SKILL_CATEGORIES } from "@/constants/config";
 import { useProfile } from "@/hooks/useProfile";
 import { useMessages } from "@/hooks/useMessages";
 import { useAppState } from "@/state/AppState";
@@ -230,15 +231,44 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
 
       {/* Full-screen media viewer */}
       {viewingPost && (
-        <MediaViewer post={viewingPost} onClose={() => setViewingPost(null)} />
+        <MediaViewer
+          post={viewingPost}
+          isOwn={isOwn}
+          onClose={() => setViewingPost(null)}
+          onDelete={(postId) => {
+            setPosts((prev) => prev.filter((p) => p.id !== postId));
+            setViewingPost(null);
+          }}
+          onUpdate={(updated) => {
+            setPosts((prev) => prev.map((p) => p.id === updated.id ? updated : p));
+            setViewingPost(updated);
+          }}
+        />
       )}
     </div>
   );
 }
 
-function MediaViewer({ post, onClose }: { post: Post; onClose: () => void }) {
+function MediaViewer({
+  post, isOwn, onClose, onDelete, onUpdate,
+}: {
+  post: Post;
+  isOwn: boolean;
+  onClose: () => void;
+  onDelete: (postId: string) => void;
+  onUpdate: (post: Post) => void;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Edit form state — pre-filled with current post values
+  const [caption, setCaption] = useState(post.caption);
+  const [skill, setSkill] = useState<SkillCategory | "">(post.skill ?? "");
+  const [location, setLocation] = useState(post.location ?? "");
+  const [saving, setSaving] = useState(false);
 
   function handlePlayToggle() {
     if (!videoRef.current) return;
@@ -251,23 +281,46 @@ function MediaViewer({ post, onClose }: { post: Post; onClose: () => void }) {
     }
   }
 
+  async function handleSave() {
+    setSaving(true);
+    // In production: call postService.updatePost(post.id, { caption, skill, location })
+    await new Promise((r) => setTimeout(r, 600)); // simulate network
+    onUpdate({ ...post, caption, skill: skill as SkillCategory, location });
+    setSaving(false);
+    setShowEdit(false);
+  }
+
+  async function handleDelete() {
+    setSaving(true);
+    // In production: call postService.deletePost(post.id)
+    await new Promise((r) => setTimeout(r, 600));
+    onDelete(post.id);
+  }
+
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black flex flex-col"
-      onClick={onClose}
-    >
-      {/* Close button */}
-      <button
-        className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-black/50 flex items-center justify-center text-white"
-        onClick={(e) => { e.stopPropagation(); onClose(); }}
-      >
-        <X size={18} />
-      </button>
+    <div className="fixed inset-0 z-50 bg-black flex flex-col">
+      {/* Top bar */}
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 pt-4">
+        <button
+          className="w-9 h-9 rounded-full bg-black/50 flex items-center justify-center text-white"
+          onClick={onClose}
+        >
+          <X size={18} />
+        </button>
+        {isOwn && (
+          <button
+            className="w-9 h-9 rounded-full bg-black/50 flex items-center justify-center text-white"
+            onClick={() => setShowMenu(true)}
+          >
+            <MoreVertical size={18} />
+          </button>
+        )}
+      </div>
 
       {/* Media */}
       <div
         className="flex-1 flex items-center justify-center"
-        onClick={(e) => { e.stopPropagation(); if (post.type === "video") handlePlayToggle(); }}
+        onClick={() => { if (post.type === "video") handlePlayToggle(); }}
       >
         {post.type === "video" && post.mediaUrl ? (
           <>
@@ -295,7 +348,6 @@ function MediaViewer({ post, onClose }: { post: Post; onClose: () => void }) {
             )}
           </>
         ) : post.type === "video" ? (
-          // Video post but no real URL — show gradient placeholder
           <div className="w-full h-full flex items-center justify-center" style={{ background: post.thumbnailGradient }}>
             <div className="w-16 h-16 rounded-full flex items-center justify-center"
               style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.3)" }}>
@@ -313,13 +365,173 @@ function MediaViewer({ post, onClose }: { post: Post; onClose: () => void }) {
         )}
       </div>
 
-      {/* Caption */}
+      {/* Caption bar */}
       {post.caption && (
-        <div
-          className="px-4 py-3 bg-black/70"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="px-4 py-3 bg-black/70">
           <p className="text-white text-sm leading-snug">{post.caption}</p>
+          {post.skill && (
+            <span className="inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full text-[#c4b5fd]"
+              style={{ background: "rgba(108,71,255,0.25)" }}>
+              {post.skill}
+            </span>
+          )}
+          {post.location && (
+            <span className="inline-block ml-2 mt-1 text-xs text-white/60">· {post.location}</span>
+          )}
+        </div>
+      )}
+
+      {/* Action menu overlay */}
+      {showMenu && (
+        <div className="fixed inset-0 z-60 flex items-end" onClick={() => setShowMenu(false)}>
+          <div
+            className="w-full bg-[#1a1a1a] rounded-t-2xl pb-8 pt-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-4" />
+            <button
+              className="w-full flex items-center gap-4 px-5 py-4 text-white text-sm font-medium active:bg-white/5"
+              onClick={() => { setShowMenu(false); setShowEdit(true); }}
+            >
+              <Edit3 size={18} className="text-[#a78bfa]" />
+              Edit Post
+            </button>
+            <div className="h-px bg-white/10 mx-5" />
+            <button
+              className="w-full flex items-center gap-4 px-5 py-4 text-red-400 text-sm font-medium active:bg-white/5"
+              onClick={() => { setShowMenu(false); setShowDeleteConfirm(true); }}
+            >
+              <Trash2 size={18} />
+              Delete Post
+            </button>
+            <div className="h-px bg-white/10 mx-5" />
+            <button
+              className="w-full flex items-center gap-4 px-5 py-4 text-white/60 text-sm font-medium active:bg-white/5"
+              onClick={() => setShowMenu(false)}
+            >
+              <X size={18} />
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirm overlay */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-60 flex items-end" onClick={() => setShowDeleteConfirm(false)}>
+          <div
+            className="w-full bg-[#1a1a1a] rounded-t-2xl pb-8 pt-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-4" />
+            <div className="px-5 pb-4">
+              <p className="text-white font-bold text-base mb-1">Delete this post?</p>
+              <p className="text-white/50 text-sm">This action can't be undone.</p>
+            </div>
+            <button
+              disabled={saving}
+              className="w-full flex items-center justify-center gap-2 px-5 py-4 text-red-400 text-sm font-bold active:bg-white/5 disabled:opacity-50"
+              onClick={handleDelete}
+            >
+              {saving ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+              {saving ? "Deleting..." : "Delete Post"}
+            </button>
+            <div className="h-px bg-white/10 mx-5" />
+            <button
+              className="w-full px-5 py-4 text-white/60 text-sm font-medium active:bg-white/5"
+              onClick={() => setShowDeleteConfirm(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Edit post sheet */}
+      {showEdit && (
+        <div className="fixed inset-0 z-60 flex items-end" onClick={() => setShowEdit(false)}>
+          <div
+            className="w-full bg-[#1a1a1a] rounded-t-2xl pb-8 pt-2 max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-3" />
+            <div className="flex items-center justify-between px-5 mb-5">
+              <p className="text-white font-bold text-base">Edit Post</p>
+              <button onClick={() => setShowEdit(false)} className="text-white/50">
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Caption */}
+            <div className="px-5 mb-4">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2 block">Caption</label>
+              <textarea
+                value={caption}
+                onChange={(e) => setCaption(e.target.value.slice(0, 150))}
+                rows={3}
+                className="w-full bg-white/10 rounded-xl border border-white/10 p-3.5 text-sm text-white placeholder-white/30 resize-none outline-none focus:border-[#6c47ff] transition-colors leading-relaxed"
+                placeholder="Describe your work..."
+              />
+              <p className="text-right text-xs text-white/30 mt-1">{caption.length} / 150</p>
+            </div>
+
+            {/* Skill */}
+            <div className="px-5 mb-4">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2 block">Skill Category</label>
+              <div className="bg-white/10 rounded-xl border border-white/10 px-4 h-12 flex items-center justify-between relative">
+                <select
+                  value={skill}
+                  onChange={(e) => setSkill(e.target.value as SkillCategory | "")}
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                >
+                  <option value="">Select skill...</option>
+                  {SKILL_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+                <span className={`text-sm ${skill ? "text-white" : "text-white/30"}`}>{skill || "Select skill..."}</span>
+                <ChevronDown size={16} className="text-white/30" />
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2.5">
+                {SKILL_CATEGORIES.slice(0, 6).map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSkill(skill === cat ? "" : cat)}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
+                      skill === cat
+                        ? "bg-[#6c47ff] text-white border-[#6c47ff]"
+                        : "bg-white/10 text-white/60 border-white/10"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Location */}
+            <div className="px-5 mb-6">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2 block">Location</label>
+              <input
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="e.g. Sydney CBD"
+                className="w-full bg-white/10 rounded-xl border border-white/10 px-4 h-12 text-sm text-white placeholder-white/30 outline-none focus:border-[#6c47ff] transition-colors"
+              />
+            </div>
+
+            {/* Save */}
+            <div className="px-5">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="w-full h-13 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2 py-3.5"
+                style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+              >
+                {saving ? <><Loader2 size={18} className="animate-spin" /> Saving...</> : "Save Changes"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -7,14 +7,36 @@ import { MOCK_USERS } from "./users";
 
 const [marcus, priya, jake, sam, ana] = MOCK_USERS;
 
+// Vivid gradient palette — used as thumbnail placeholders
+const THUMB_GRADIENTS = [
+  "linear-gradient(160deg, #6c47ff 0%, #a855f7 60%, #ec4899 100%)",
+  "linear-gradient(160deg, #0ea5e9 0%, #6366f1 60%, #8b5cf6 100%)",
+  "linear-gradient(160deg, #f59e0b 0%, #ef4444 60%, #ec4899 100%)",
+  "linear-gradient(160deg, #10b981 0%, #0ea5e9 60%, #6366f1 100%)",
+  "linear-gradient(160deg, #f97316 0%, #eab308 60%, #84cc16 100%)",
+  "linear-gradient(160deg, #ec4899 0%, #f43f5e 60%, #ef4444 100%)",
+  "linear-gradient(160deg, #14b8a6 0%, #06b6d4 60%, #3b82f6 100%)",
+  "linear-gradient(160deg, #a855f7 0%, #ec4899 60%, #f97316 100%)",
+  "linear-gradient(160deg, #22c55e 0%, #16a34a 60%, #065f46 100%)",
+];
+
+export function randomGradient(seed: string): string {
+  // Deterministic pick from seed so it's stable across renders
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  return THUMB_GRADIENTS[hash % THUMB_GRADIENTS.length];
+}
+
 export const MOCK_POSTS: Post[] = [
   {
     id: "post_1",
     authorId: marcus.id,
     author: marcus,
     type: "video",
-    thumbnailGradient: "linear-gradient(160deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)",
+    thumbnailGradient: randomGradient("post_1"),
     caption: "Fresh fade for the weekend 🔥 Skin fade with razor sharp lines — book me for your next cut!",
+    skill: "Barber",
+    location: "Sydney CBD",
     likes: 2400,
     likedByMe: false,
     savedByMe: false,
@@ -25,8 +47,10 @@ export const MOCK_POSTS: Post[] = [
     authorId: priya.id,
     author: priya,
     type: "video",
-    thumbnailGradient: "linear-gradient(160deg, #2d1b33 0%, #4a1942 50%, #6b2d6b 100%)",
+    thumbnailGradient: randomGradient("post_2"),
     caption: "Bridal look for Sarah's big day 💕 Full glam, soft glitter eye, and flawless base. DM to book!",
+    skill: "Makeup Artist",
+    location: "Melbourne",
     likes: 5100,
     likedByMe: true,
     savedByMe: false,
@@ -37,8 +61,10 @@ export const MOCK_POSTS: Post[] = [
     authorId: jake.id,
     author: jake,
     type: "video",
-    thumbnailGradient: "linear-gradient(160deg, #0d2137 0%, #1a3a5c 50%, #1e5680 100%)",
+    thumbnailGradient: randomGradient("post_3"),
     caption: "Herringbone bathroom reno complete ✅ 12 sqm transformation — client was stoked. Ask me for a free quote.",
+    skill: "Tiler",
+    location: "Brisbane",
     likes: 1800,
     likedByMe: false,
     savedByMe: false,
@@ -49,8 +75,10 @@ export const MOCK_POSTS: Post[] = [
     authorId: sam.id,
     author: sam,
     type: "video",
-    thumbnailGradient: "linear-gradient(160deg, #0d3320 0%, #1a5c3a 50%, #1e8060 100%)",
+    thumbnailGradient: randomGradient("post_4"),
     caption: "6-week transformation 💪 Consistency, discipline, and the right program. DM for online coaching.",
+    skill: "Fitness / PT",
+    location: "Perth",
     likes: 3200,
     likedByMe: false,
     savedByMe: true,
@@ -61,8 +89,10 @@ export const MOCK_POSTS: Post[] = [
     authorId: ana.id,
     author: ana,
     type: "photo",
-    thumbnailGradient: "linear-gradient(160deg, #3a2010 0%, #7a4520 50%, #a86030 100%)",
+    thumbnailGradient: randomGradient("post_5"),
     caption: "Before & after kitchen deep clean ✨ Sparkle guaranteed. Book weekly or fortnightly service.",
+    skill: "Cleaning",
+    location: "Adelaide",
     likes: 940,
     likedByMe: false,
     savedByMe: false,
@@ -72,15 +102,15 @@ export const MOCK_POSTS: Post[] = [
 
 // Work grid items per user (placeholder thumbnails)
 export const MOCK_WORK_GRID = [
-  { gradient: "linear-gradient(135deg, #1a1a2e, #0f3460)", hasVideo: true },
-  { gradient: "linear-gradient(135deg, #2d1b33, #6b2d6b)", hasVideo: true },
-  { gradient: "linear-gradient(135deg, #0d2137, #1e5680)", hasVideo: false },
-  { gradient: "linear-gradient(135deg, #1a3a1a, #2d6b2d)", hasVideo: true },
-  { gradient: "linear-gradient(135deg, #3a1a1a, #8b3333)", hasVideo: false },
-  { gradient: "linear-gradient(135deg, #2a1a3a, #5b3dd8)", hasVideo: true },
-  { gradient: "linear-gradient(135deg, #1a2a3a, #1e4d7a)", hasVideo: true },
-  { gradient: "linear-gradient(135deg, #3a2a1a, #7a5228)", hasVideo: false },
-  { gradient: "linear-gradient(135deg, #1a3a2a, #2d7a5b)", hasVideo: true },
+  { gradient: randomGradient("wg0"), hasVideo: true },
+  { gradient: randomGradient("wg1"), hasVideo: true },
+  { gradient: randomGradient("wg2"), hasVideo: false },
+  { gradient: randomGradient("wg3"), hasVideo: true },
+  { gradient: randomGradient("wg4"), hasVideo: false },
+  { gradient: randomGradient("wg5"), hasVideo: true },
+  { gradient: randomGradient("wg6"), hasVideo: true },
+  { gradient: randomGradient("wg7"), hasVideo: false },
+  { gradient: randomGradient("wg8"), hasVideo: true },
 ];
 
 export const MOCK_SAVED_GRID = [
