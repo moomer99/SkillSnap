@@ -5,6 +5,18 @@ import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
 import type { Post } from "@/types";
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+
+// Rewrite Supabase storage URLs to go through our local proxy in the browser,
+// since the sandbox blocks direct browser requests to external domains.
+function proxyMediaUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  if (typeof window !== "undefined" && url.startsWith(SUPABASE_URL)) {
+    return url.replace(SUPABASE_URL, `${window.location.origin}/supabase`);
+  }
+  return url;
+}
+
 const FALLBACK_PROFILE: Record<string, unknown> = {
   id: "",
   username: "unknown",
@@ -29,8 +41,8 @@ function mapPost(row: Record<string, unknown>, likedIds: Set<string>, savedIds: 
     authorId: row.author_id as string,
     author,
     type: (row.type as Post["type"]) ?? "video",
-    mediaUrl: (row.media_url as string | null) ?? undefined,
-    thumbnailUrl: (row.thumbnail_url as string | null) ?? undefined,
+    mediaUrl: proxyMediaUrl(row.media_url as string | null),
+    thumbnailUrl: proxyMediaUrl(row.thumbnail_url as string | null),
     thumbnailGradient: (row.thumbnail_gradient as string) || "linear-gradient(135deg, #6c47ff, #a78bfa)",
     caption: (row.caption as string) ?? "",
     skill: (row.skill as Post["skill"]) ?? null,
