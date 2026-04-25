@@ -5,7 +5,7 @@
 // variant="client" → Client Profile (public view)
 // Data: userService.getUser(id) via useProfile hook
 // ─────────────────────────────────────────────
-import { MapPin, ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, Loader2 } from "lucide-react";
+import { MapPin, ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, Loader2, Bookmark } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import type { Screen, ProfileVariant, Post, SkillCategory } from "@/types";
 import { MOCK_WORK_GRID } from "@/mock-data/posts";
@@ -15,6 +15,7 @@ import { useMessages } from "@/hooks/useMessages";
 import { useAppState } from "@/state/AppState";
 import UserAvatar from "./shared/UserAvatar";
 import ConnectButton from "./shared/ConnectButton";
+import FeedbackModal from "./FeedbackModal";
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -35,6 +36,14 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
   const [posts, setPosts] = useState<Post[]>([]);
   const [gridLoading, setGridLoading] = useState(true);
   const [viewingPost, setViewingPost] = useState<Post | null>(null);
+  const [activeTab, setActiveTab] = useState<"work" | "saved">("work");
+  const [showFeedback, setShowFeedback] = useState(false);
+
+  // Saved posts — resolved from global savedPosts set + all known posts
+  const allKnownPosts = [...state.posts, ...posts];
+  const savedPostsList = allKnownPosts.filter(
+    (p, i, arr) => state.savedPosts.has(p.id) && arr.findIndex((x) => x.id === p.id) === i
+  );
 
   // Load the user's posts for the work grid
   useEffect(() => {
@@ -101,11 +110,11 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             {/* Avatar */}
             <UserAvatar user={user} size="lg" showVerified={isOwn} />
 
-            {/* Stats: Posts · Jobs Done · Followers */}
-            <div className="flex-1 grid grid-cols-3 gap-1 pt-2">
-              {/* Use live post count from loaded grid when available; fall back to profile stat */}
+            {/* Stats: Posts · Jobs Done · Happy · Followers */}
+            <div className="flex-1 grid grid-cols-4 gap-0.5 pt-2">
               <Stat value={gridLoading ? String(user.postCount) : String(SUPABASE_CONFIGURED ? posts.length : user.postCount)} label="Posts" />
-              <Stat value={String(user.jobsDone)} label="Jobs Done" highlight />
+              <Stat value={user.jobsDone >= 1000 ? `${(user.jobsDone/1000).toFixed(0)}k` : String(user.jobsDone)} label="Jobs" highlight />
+              <Stat value={`${user.happyPercent}%`} label="Happy" emoji="😊" />
               <Stat value={followers} label="Followers" />
             </div>
           </div>
@@ -163,69 +172,112 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
               </>
             )}
           </div>
+
+          {/* Job Done feedback CTA — only on client viewing a skiller's profile */}
+          {!isOwn && user.skill && (
+            <button
+              onClick={() => setShowFeedback(true)}
+              className="mt-3 w-full h-11 rounded-2xl font-semibold text-sm border border-[#e8e4df] bg-[#f8f7f5] flex items-center justify-center gap-2 text-[#1a1a1a] transition-all active:scale-[0.98]"
+            >
+              <span className="text-base">😊</span>
+              Job Done? Leave Feedback
+            </button>
+          )}
         </div>
 
-        {/* Work grid — real posts from DB, mock fallback in dev */}
+        {/* Tabs — My Work | Saved (own only) */}
         <div className="px-1 pt-3">
-          <div className="flex items-center justify-between px-4 mb-3">
-            <h3 className="text-sm font-bold text-[#1a1a1a]">My Work</h3>
-            <span className="text-xs text-[#7a7570]">
-              {gridLoading ? "…" : `${posts.length > 0 ? posts.length : (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)} posts`}
-            </span>
-          </div>
+          {isOwn && (
+            <div className="flex border-b border-[#e8e4df] mb-0 px-2">
+              <button
+                onClick={() => setActiveTab("work")}
+                className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+                  activeTab === "work"
+                    ? "text-[#6c47ff] border-b-2 border-[#6c47ff]"
+                    : "text-[#7a7570]"
+                }`}
+              >
+                My Work
+              </button>
+              <button
+                onClick={() => setActiveTab("saved")}
+                className={`flex-1 py-2.5 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
+                  activeTab === "saved"
+                    ? "text-[#6c47ff] border-b-2 border-[#6c47ff]"
+                    : "text-[#7a7570]"
+                }`}
+              >
+                Saved
+                {savedPostsList.length > 0 && (
+                  <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">
+                    {savedPostsList.length}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
 
-          <div className="grid grid-cols-3 gap-0.5 px-0.5">
-            {gridLoading ? (
-              // Skeleton tiles while loading
-              Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="aspect-square bg-gray-200 animate-pulse" />
-              ))
-            ) : posts.length > 0 ? (
-              // Real posts from Supabase
-              posts.map((post) => (
-                <div
-                  key={post.id}
-                  className="aspect-square relative overflow-hidden cursor-pointer"
-                  onClick={() => setViewingPost(post)}
-                >
-                  {post.thumbnailUrl ? (
-                    <img src={post.thumbnailUrl} alt={post.caption} className="absolute inset-0 w-full h-full object-cover" />
-                  ) : post.mediaUrl && post.type === "photo" ? (
-                    <img src={post.mediaUrl} alt={post.caption} className="absolute inset-0 w-full h-full object-cover" />
-                  ) : (
-                    <div className="absolute inset-0" style={{ background: post.thumbnailGradient }} />
-                  )}
-                  {post.type === "video" && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-8 h-8 rounded-full bg-white/25 flex items-center justify-center">
-                        <Play size={12} fill="white" color="white" />
-                      </div>
-                    </div>
-                  )}
+          {/* My Work grid */}
+          {activeTab === "work" && (
+            <>
+              {!isOwn && (
+                <div className="flex items-center justify-between px-4 mb-3 pt-1">
+                  <h3 className="text-sm font-bold text-[#1a1a1a]">Work</h3>
+                  <span className="text-xs text-[#7a7570]">
+                    {gridLoading ? "…" : `${posts.length > 0 ? posts.length : (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)} posts`}
+                  </span>
                 </div>
-              ))
-            ) : !SUPABASE_CONFIGURED ? (
-              // Dev mode only — show mock grid so the UI isn't bare during development
-              MOCK_WORK_GRID.map((item, i) => (
-                <div key={i} className="aspect-square relative overflow-hidden">
-                  <div className="absolute inset-0" style={{ background: item.gradient }} />
-                  {item.hasVideo && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-8 h-8 rounded-full bg-white/25 flex items-center justify-center">
-                        <Play size={12} fill="white" color="white" />
-                      </div>
+              )}
+              <div className="grid grid-cols-3 gap-0.5 px-0.5 pt-0.5">
+                {gridLoading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="aspect-square bg-gray-200 animate-pulse" />
+                  ))
+                ) : posts.length > 0 ? (
+                  posts.map((post) => (
+                    <GridTile key={post.id} post={post} onClick={() => setViewingPost(post)} />
+                  ))
+                ) : !SUPABASE_CONFIGURED ? (
+                  MOCK_WORK_GRID.map((item, i) => (
+                    <div key={i} className="aspect-square relative overflow-hidden">
+                      <div className="absolute inset-0" style={{ background: item.gradient }} />
+                      {item.hasVideo && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full bg-white/25 flex items-center justify-center">
+                            <Play size={12} fill="white" color="white" />
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))
-            ) : (
-              // Real empty state — user hasn't posted yet
-              <div className="col-span-3 py-10 flex flex-col items-center gap-2 text-center">
-                <p className="text-sm font-semibold text-[#7a7570]">No posts yet</p>
-                <p className="text-xs text-[#b0aaa5]">Upload your first job to showcase your skill</p>
+                  ))
+                ) : (
+                  <div className="col-span-3 py-10 flex flex-col items-center gap-2 text-center">
+                    <p className="text-sm font-semibold text-[#7a7570]">No posts yet</p>
+                    <p className="text-xs text-[#b0aaa5]">Upload your first job to showcase your skill</p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          )}
+
+          {/* Saved grid */}
+          {activeTab === "saved" && isOwn && (
+            <div className="grid grid-cols-3 gap-0.5 px-0.5 pt-0.5">
+              {savedPostsList.length > 0 ? (
+                savedPostsList.map((post) => (
+                  <GridTile key={post.id} post={post} onClick={() => setViewingPost(post)} />
+                ))
+              ) : (
+                <div className="col-span-3 py-12 flex flex-col items-center gap-2 text-center">
+                  <div className="w-12 h-12 rounded-full bg-[#f0eeea] flex items-center justify-center mb-1">
+                    <Bookmark size={20} className="text-[#b0aaa5]" />
+                  </div>
+                  <p className="text-sm font-semibold text-[#7a7570]">Nothing saved yet</p>
+                  <p className="text-xs text-[#b0aaa5]">Tap the bookmark on any post to save it here</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -244,6 +296,40 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             setViewingPost(updated);
           }}
         />
+      )}
+
+      {/* Feedback modal */}
+      {showFeedback && (
+        <FeedbackModal
+          skiller={{ displayName: user.displayName, avatarInitial: user.avatarInitial, avatarGradient: user.avatarGradient }}
+          onClose={() => setShowFeedback(false)}
+          onSubmit={async (fb) => {
+            // In production: call jobService.submitFeedback(user.id, fb)
+            await new Promise((r) => setTimeout(r, 700));
+            console.log("Feedback submitted:", fb);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function GridTile({ post, onClick }: { post: Post; onClick: () => void }) {
+  return (
+    <div className="aspect-square relative overflow-hidden cursor-pointer" onClick={onClick}>
+      {post.thumbnailUrl ? (
+        <img src={post.thumbnailUrl} alt={post.caption} className="absolute inset-0 w-full h-full object-cover" />
+      ) : post.mediaUrl && post.type === "photo" ? (
+        <img src={post.mediaUrl} alt={post.caption} className="absolute inset-0 w-full h-full object-cover" />
+      ) : (
+        <div className="absolute inset-0" style={{ background: post.thumbnailGradient }} />
+      )}
+      {post.type === "video" && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-white/25 flex items-center justify-center">
+            <Play size={12} fill="white" color="white" />
+          </div>
+        </div>
       )}
     </div>
   );
@@ -538,11 +624,12 @@ function MediaViewer({
   );
 }
 
-function Stat({ value, label, highlight }: { value: string; label: string; highlight?: boolean }) {
+function Stat({ value, label, highlight, emoji }: { value: string; label: string; highlight?: boolean; emoji?: string }) {
   return (
     <div className="flex flex-col items-center gap-0.5">
-      <span className={`font-bold text-base ${highlight ? "text-[#6c47ff]" : "text-[#1a1a1a]"}`}>{value}</span>
-      <span className="text-[11px] text-[#7a7570]">{label}</span>
+      {emoji && <span className="text-sm leading-none">{emoji}</span>}
+      <span className={`font-bold text-sm leading-tight ${highlight ? "text-[#6c47ff]" : "text-[#1a1a1a]"}`}>{value}</span>
+      <span className="text-[10px] text-[#7a7570] leading-tight">{label}</span>
     </div>
   );
 }

@@ -30,10 +30,23 @@ export interface User {
   skill: SkillCategory | null; // null = client/viewer
   isVerified: boolean;
   jobsDone: number;
+  happyPercent: number;        // % of happy feedback from completed jobs
   followers: number;
   following: number;
   postCount: number;
   isClient: boolean;
+  distanceKm?: number;         // distance from viewer (populated at query time)
+}
+
+// ── Feedback / Happy % ───────────────────────
+export interface JobFeedback {
+  id: string;
+  jobId: string;
+  fromUserId: string;
+  toUserId: string;
+  happy: boolean;
+  comment: string;
+  createdAt: string;
 }
 
 // ── Post / Feed ──────────────────────────────
