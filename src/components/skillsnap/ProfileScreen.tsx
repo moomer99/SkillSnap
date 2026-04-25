@@ -5,8 +5,8 @@
 // variant="client" → Client Profile (public view)
 // Data: userService.getUser(id) via useProfile hook
 // ─────────────────────────────────────────────
-import { MapPin, ArrowLeft, Play, Share2, Edit3 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { MapPin, ArrowLeft, Play, Share2, Edit3, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import type { Screen, ProfileVariant, Post } from "@/types";
 import { MOCK_WORK_GRID } from "@/mock-data/posts";
 import { useProfile } from "@/hooks/useProfile";
@@ -33,6 +33,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
   const { state, navigate } = useAppState();
   const [posts, setPosts] = useState<Post[]>([]);
   const [gridLoading, setGridLoading] = useState(true);
+  const [viewingPost, setViewingPost] = useState<Post | null>(null);
 
   // Load the user's posts for the work grid
   useEffect(() => {
@@ -181,7 +182,11 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             ) : posts.length > 0 ? (
               // Real posts from Supabase
               posts.map((post) => (
-                <div key={post.id} className="aspect-square relative overflow-hidden">
+                <div
+                  key={post.id}
+                  className="aspect-square relative overflow-hidden cursor-pointer"
+                  onClick={() => setViewingPost(post)}
+                >
                   {post.thumbnailUrl ? (
                     <img src={post.thumbnailUrl} alt={post.caption} className="absolute inset-0 w-full h-full object-cover" />
                   ) : post.mediaUrl && post.type === "photo" ? (
@@ -222,6 +227,101 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           </div>
         </div>
       </div>
+
+      {/* Full-screen media viewer */}
+      {viewingPost && (
+        <MediaViewer post={viewingPost} onClose={() => setViewingPost(null)} />
+      )}
+    </div>
+  );
+}
+
+function MediaViewer({ post, onClose }: { post: Post; onClose: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+
+  function handlePlayToggle() {
+    if (!videoRef.current) return;
+    if (playing) {
+      videoRef.current.pause();
+      setPlaying(false);
+    } else {
+      videoRef.current.play().catch(() => {});
+      setPlaying(true);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black flex flex-col"
+      onClick={onClose}
+    >
+      {/* Close button */}
+      <button
+        className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-black/50 flex items-center justify-center text-white"
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+      >
+        <X size={18} />
+      </button>
+
+      {/* Media */}
+      <div
+        className="flex-1 flex items-center justify-center"
+        onClick={(e) => { e.stopPropagation(); if (post.type === "video") handlePlayToggle(); }}
+      >
+        {post.type === "video" && post.mediaUrl ? (
+          <>
+            <video
+              ref={videoRef}
+              src={post.mediaUrl}
+              className="w-full h-full object-contain"
+              loop
+              playsInline
+              preload="metadata"
+              poster={post.thumbnailUrl}
+              onEnded={() => setPlaying(false)}
+            />
+            {!playing && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center"
+                  style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.3)" }}
+                >
+                  <svg width="20" height="24" viewBox="0 0 20 24" fill="white">
+                    <path d="M1 1l18 11-18 11V1z" />
+                  </svg>
+                </div>
+              </div>
+            )}
+          </>
+        ) : post.type === "video" ? (
+          // Video post but no real URL — show gradient placeholder
+          <div className="w-full h-full flex items-center justify-center" style={{ background: post.thumbnailGradient }}>
+            <div className="w-16 h-16 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.3)" }}>
+              <svg width="20" height="24" viewBox="0 0 20 24" fill="white">
+                <path d="M1 1l18 11-18 11V1z" />
+              </svg>
+            </div>
+          </div>
+        ) : post.mediaUrl ? (
+          <img src={post.mediaUrl} alt={post.caption} className="w-full h-full object-contain" />
+        ) : post.thumbnailUrl ? (
+          <img src={post.thumbnailUrl} alt={post.caption} className="w-full h-full object-contain" />
+        ) : (
+          <div className="w-full h-full" style={{ background: post.thumbnailGradient }} />
+        )}
+      </div>
+
+      {/* Caption */}
+      {post.caption && (
+        <div
+          className="px-4 py-3 bg-black/70"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <p className="text-white text-sm leading-snug">{post.caption}</p>
+        </div>
+      )}
     </div>
   );
 }

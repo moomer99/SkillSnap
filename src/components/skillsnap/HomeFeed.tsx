@@ -5,6 +5,7 @@
 // State: likedPosts, savedPosts via AppState
 // ─────────────────────────────────────────────
 import { Heart, Share2, MapPin, Bookmark } from "lucide-react";
+import { useState, useRef, useCallback } from "react";
 import type { Post } from "@/types";
 import type { Screen } from "@/types";
 import { formatLikes } from "@/mock-data/posts";
@@ -99,28 +100,63 @@ function FeedCard({
 }) {
   const { author } = post;
   const displayLikes = formatLikes(post.likes + (isLiked ? 1 : 0));
-  // Post-level fields take precedence; fall back to author profile values
   const displaySkill = post.skill ?? author.skill;
   const displayLocation = post.location ?? author.location;
 
+  const [playing, setPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handlePlayToggle = useCallback(() => {
+    if (!post.mediaUrl || post.type !== "video") return;
+    if (playing) {
+      videoRef.current?.pause();
+      setPlaying(false);
+    } else {
+      videoRef.current?.play().catch(() => {});
+      setPlaying(true);
+    }
+  }, [playing, post.mediaUrl, post.type]);
+
   return (
     <div className="relative w-full aspect-[9/16] max-h-[85vh] overflow-hidden bg-gray-900 mb-2">
-      {/* Video thumbnail — real image or gradient placeholder */}
-      {post.thumbnailUrl ? (
+      {/* Actual video element (only when mediaUrl exists) */}
+      {post.mediaUrl && post.type === "video" ? (
+        <video
+          ref={videoRef}
+          src={post.mediaUrl}
+          className="absolute inset-0 w-full h-full object-cover"
+          loop
+          playsInline
+          preload="metadata"
+          poster={post.thumbnailUrl}
+          onEnded={() => setPlaying(false)}
+        />
+      ) : post.mediaUrl && post.type === "photo" ? (
+        <img src={post.mediaUrl} alt={post.caption} className="absolute inset-0 w-full h-full object-cover" />
+      ) : post.thumbnailUrl ? (
         <img src={post.thumbnailUrl} alt={post.caption} className="absolute inset-0 w-full h-full object-cover" />
       ) : (
         <div className="absolute inset-0" style={{ background: post.thumbnailGradient }} />
       )}
 
-      {/* Play button */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-16 h-16 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.3)" }}>
-          <svg width="20" height="24" viewBox="0 0 20 24" fill="white">
-            <path d="M1 1l18 11-18 11V1z" />
-          </svg>
+      {/* Play / Pause button — only for video posts */}
+      {post.type === "video" && (
+        <div
+          className="absolute inset-0 flex items-center justify-center cursor-pointer"
+          onClick={handlePlayToggle}
+        >
+          {!playing && (
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.3)" }}
+            >
+              <svg width="20" height="24" viewBox="0 0 20 24" fill="white">
+                <path d="M1 1l18 11-18 11V1z" />
+              </svg>
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Right side actions — Like + Share */}
       <div className="absolute right-3 bottom-36 flex flex-col items-center gap-5">
