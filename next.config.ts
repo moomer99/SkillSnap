@@ -32,6 +32,16 @@ const nextConfig: NextConfig = {
     }
   },
   allowedDevOrigins: ['*.orchids.page', '*.orchids.cloud'],
+  async rewrites() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+    if (!supabaseUrl) return [];
+    return [
+      {
+        source: "/supabase/:path*",
+        destination: `${supabaseUrl}/:path*`,
+      },
+    ];
+  },
 } as NextConfig;
 
 export default nextConfig;
