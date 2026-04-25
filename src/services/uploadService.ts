@@ -1,6 +1,12 @@
 import { getSupabase } from "@/lib/supabase";
 import type { Post, SkillCategory } from "@/types";
 
+const REAL_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+
+function getRealPublicUrl(bucket: string, path: string): string {
+  return `${REAL_SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
+}
+
 export interface UploadPayload {
   file?: File;
   caption: string;
@@ -30,8 +36,7 @@ export const uploadService = {
     });
     if (error) throw error;
 
-    const { data: urlData } = sb.storage.from("post-media").getPublicUrl(path);
-    return urlData.publicUrl;
+    return getRealPublicUrl("post-media", path);
   },
 
   async uploadAvatar(file: File): Promise<string> {
@@ -47,8 +52,7 @@ export const uploadService = {
     });
     if (error) throw error;
 
-    const { data: urlData } = sb.storage.from("avatars").getPublicUrl(path);
-    return urlData.publicUrl;
+    return getRealPublicUrl("avatars", path);
   },
 
   async createPost(payload: UploadPayload): Promise<Post | null> {
@@ -98,7 +102,7 @@ export const uploadService = {
 
     const { data: fullPost } = await sb
       .from("posts")
-      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles(*)")
+      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*)")
       .eq("id", inserted.id)
       .single();
 

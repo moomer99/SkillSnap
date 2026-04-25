@@ -62,7 +62,7 @@ export const postService = {
   async getFeed(limit = 20, offset = 0): Promise<{ posts: Post[]; likedIds: Set<string>; savedIds: Set<string> }> {
     const { data, error } = await getSupabase()
       .from("posts")
-      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles(*)")
+      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*)")
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -78,7 +78,7 @@ export const postService = {
   async getUserPosts(userId: string): Promise<Post[]> {
     const { data } = await getSupabase()
       .from("posts")
-      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles(*)")
+      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*)")
       .eq("author_id", userId)
       .order("created_at", { ascending: false });
 
@@ -130,7 +130,7 @@ export const postService = {
   async getSavedPosts(userId: string): Promise<Post[]> {
     const { data } = await getSupabase()
       .from("saved_posts")
-      .select("posts(*, profiles(*))")
+      .select("posts(*, profiles!posts_author_id_fkey(*))")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
