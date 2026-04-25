@@ -35,8 +35,8 @@ export function useProfile(variant: ProfileVariant) {
     }
 
     if (variant === "own") {
-      // Always fetch fresh from DB so counts (jobs_done, post_count, followers) are current.
-      // feedVersion changes after uploads/verifications, keeping the stat row up-to-date.
+      // Show cached user instantly, then refresh from DB for up-to-date counts
+      if (state.currentUser) setUser(state.currentUser);
       userService.getCurrentUser().then((u) => {
         if (!u) return;
         setUser(u);
