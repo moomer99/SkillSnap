@@ -12,6 +12,7 @@ function getRealPublicUrl(bucket: string, path: string): string {
 
 export interface UploadPayload {
   file?: File;
+  dataUrl?: string;   // pre-converted data URL for sandbox-safe demo mode
   caption: string;
   skill: SkillCategory | "";
   location: string;
@@ -68,10 +69,10 @@ export const uploadService = {
 
     if (!userId) {
       // Demo / unauthenticated — create a local mock post
-      await new Promise((r) => setTimeout(r, 800));
-
+      // Use pre-converted data URL (sandbox-safe) or fall back to object URL
       const isVideo = payload.file ? payload.file.type.startsWith("video/") : false;
-      const mediaUrl = payload.file ? URL.createObjectURL(payload.file) : undefined;
+      const mediaUrl = payload.dataUrl ?? (payload.file ? URL.createObjectURL(payload.file) : undefined);
+      await new Promise((r) => setTimeout(r, 600));
 
       const { MOCK_CURRENT_USER } = await import("@/mock-data/users");
       const { randomGradient } = await import("@/mock-data/posts");
@@ -82,7 +83,7 @@ export const uploadService = {
         author: MOCK_CURRENT_USER,
         type: isVideo ? "video" : "photo",
         mediaUrl,
-        thumbnailUrl: isVideo ? undefined : mediaUrl,
+        thumbnailUrl: !isVideo ? mediaUrl : undefined,
         thumbnailGradient: randomGradient(`mock_${Date.now()}`),
         caption: payload.caption,
         skill: (payload.skill as SkillCategory) || undefined,

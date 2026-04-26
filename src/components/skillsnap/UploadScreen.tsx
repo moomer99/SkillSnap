@@ -30,6 +30,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   const [posted, setPosted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoPreviewRef = useRef<HTMLVideoElement>(null);
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -71,6 +72,33 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     setTimeout(() => fileInputRef.current?.click(), 0);
   }
 
+  // Convert file to a data URL so it works in any sandbox/iframe context
+  function fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target!.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Capture a JPEG thumbnail from the already-rendered preview video element
+  function capturePreviewThumbnail(): string | null {
+    const vid = videoPreviewRef.current;
+    if (!vid || vid.readyState < 2) return null;
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = vid.videoWidth || 390;
+      canvas.height = vid.videoHeight || 520;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return null;
+      ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL("image/jpeg", 0.85);
+    } catch {
+      return null;
+    }
+  }
+
   async function handlePublish() {
     if (!caption.trim() && !selectedFile) {
       setError("Add a caption or select a file before publishing.");
@@ -79,19 +107,25 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     setError(null);
     setLoading(true);
     try {
+      // Convert file to data URL before passing to service so it's sandbox-safe
+      let dataUrl: string | undefined;
+      if (selectedFile) {
+        dataUrl = await fileToDataUrl(selectedFile);
+      }
+
       const newPost = await uploadService.createPost({
         file: selectedFile ?? undefined,
+        dataUrl,
         caption: caption.trim(),
         skill: skill,
         location,
       });
+
       if (newPost) {
-        // Generate thumbnail for video from first frame
-        if (selectedFile?.type.startsWith("video/") && newPost.mediaUrl) {
-          try {
-            const thumb = await grabVideoThumbnail(newPost.mediaUrl);
-            if (thumb) newPost.thumbnailUrl = thumb;
-          } catch { /* non-fatal */ }
+        // Capture thumbnail from the already-loaded preview video (no re-loading needed)
+        if (selectedFile?.type.startsWith("video/")) {
+          const thumb = capturePreviewThumbnail();
+          if (thumb) newPost.thumbnailUrl = thumb;
         }
         dispatch({ type: "PREPEND_POST", post: newPost });
       }
@@ -104,31 +138,6 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     } finally {
       setLoading(false);
     }
-  }
-
-  function grabVideoThumbnail(src: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement("video");
-      video.src = src;
-      video.crossOrigin = "anonymous";
-      video.muted = true;
-      video.playsInline = true;
-      video.currentTime = 0.5;
-      video.onloadeddata = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          canvas.width = video.videoWidth || 390;
-          canvas.height = video.videoHeight || 520;
-          const ctx = canvas.getContext("2d");
-          if (!ctx) { reject(new Error("no ctx")); return; }
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          resolve(canvas.toDataURL("image/jpeg", 0.8));
-          video.remove();
-        } catch (e) { reject(e); }
-      };
-      video.onerror = reject;
-      video.load();
-    });
   }
 
   if (posted) {
@@ -209,10 +218,12 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
           <div className="rounded-2xl overflow-hidden border border-[#e8e4df] bg-white relative">
             {contentType === "video" ? (
               <video
+                ref={videoPreviewRef}
                 src={previewUrl}
                 className="w-full max-h-[280px] object-cover"
                 controls
                 playsInline
+                muted
               />
             ) : (
               <img src={previewUrl} alt="Preview" className="w-full max-h-[280px] object-cover" />
