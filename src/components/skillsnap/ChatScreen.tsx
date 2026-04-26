@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Phone, MoreVertical, Send, Paperclip, CheckCircle, Loader2, X } from "lucide-react";
-import type { Screen, User } from "@/types";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { ArrowLeft, Phone, MoreVertical, Send, Paperclip, CheckCircle, Loader2, X, Clock } from "lucide-react";
+import type { Screen, User, JobDoneStatus, JobRating } from "@/types";
 import { MOCK_USERS } from "@/mock-data/users";
 import { useAppState } from "@/state/AppState";
 import { useChat } from "@/hooks/useChat";
@@ -16,31 +16,53 @@ const SUPABASE_CONFIGURED =
   !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref");
 
-// ── Job-done flow states ──────────────────────
-type JobStatus = "idle" | "requested" | "confirmed" | "feedback_done";
-type Rating = "very_happy" | "okay" | "not_satisfied";
-
-const RATINGS: { key: Rating; emoji: string; label: string }[] = [
-  { key: "very_happy",    emoji: "😊", label: "Yes, Very\nHappy" },
-  { key: "okay",          emoji: "😐", label: "It was okay" },
-  { key: "not_satisfied", emoji: "😔", label: "Not satisfied" },
+const RATINGS: { key: JobRating; emoji: string; label: string; happy: boolean }[] = [
+  { key: "very_happy",    emoji: "😊", label: "Yes, Very\nHappy",    happy: true  },
+  { key: "okay",          emoji: "😐", label: "It was okay",         happy: true  },
+  { key: "not_satisfied", emoji: "😔", label: "Not satisfied",       happy: false },
 ];
 
+function hoursElapsed(iso: string): number {
+  return (Date.now() - new Date(iso).getTime()) / 3_600_000;
+}
+
+function recalcHappy(prev: number, prevJobs: number, isHappy: boolean): number {
+  if (prevJobs <= 0) return isHappy ? 100 : 0;
+  const prevHappyCount = Math.round((prev / 100) * prevJobs);
+  const newHappy = prevHappyCount + (isHappy ? 1 : 0);
+  return Math.round((newHappy / (prevJobs + 1)) * 100);
+}
+
 export default function ChatScreen({ onNavigate }: ChatScreenProps) {
-  const { state } = useAppState();
+  const { state, dispatch } = useAppState();
   const { messages, inputText, setInputText, sending, loading, sendMessage, bottomRef } = useChat();
   const [participant, setParticipant] = useState<User | null>(null);
 
   // Job-done flow
-  const [jobStatus, setJobStatus] = useState<JobStatus>("idle");
+  const [jobStatus, setJobStatus] = useState<JobDoneStatus>("idle");
   const [showFeedback, setShowFeedback] = useState(false);
-  const [rating, setRating] = useState<Rating | null>(null);
+  const [rating, setRating] = useState<JobRating | null>(null);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [feedbackDone, setFeedbackDone] = useState(false);
 
   const participantId = state.activeThreadParticipantId ?? state.viewingUserId;
-  const isSkiller = !!(participant?.skill); // skiller = has a skill set
+  const currentUser = state.currentUser;
+
+  // Current user is the skiller if they have a skill set
+  // In mock/demo mode (no auth), MOCK_CURRENT_USER has skill="Barber" so they're the skiller
+  const isSkiller = !!(currentUser?.skill);
+
+  const activeThread = useMemo(
+    () => state.threads.find((t) => t.id === state.activeThreadId),
+    [state.threads, state.activeThreadId]
+  );
+
+  const hasMessages = messages.length > 0;
+  const threadStartedAt = activeThread?.startedAt;
+  const hoursIn = threadStartedAt ? hoursElapsed(threadStartedAt) : 0;
+  const canRequestJobDone = hasMessages && hoursIn >= 24;
+  const hoursRemaining = Math.max(0, Math.ceil(24 - hoursIn));
 
   useEffect(() => {
     const threadParticipant = state.threads.find((t) => t.id === state.activeThreadId)?.participant;
@@ -53,6 +75,18 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
     });
   }, [participantId, state.threads, state.activeThreadId]);
 
+  // Track when first message is sent so the 24h clock starts
+  function sendMessageWithTracking() {
+    if (activeThread && !activeThread.startedAt) {
+      dispatch({
+        type: "SET_THREAD_STARTED_AT",
+        threadId: activeThread.id,
+        startedAt: new Date().toISOString(),
+      });
+    }
+    sendMessage();
+  }
+
   const displayParticipant = participant ?? MOCK_USERS[0];
   const inputRef = useRef<HTMLInputElement>(null);
   const attachRef = useRef<HTMLInputElement>(null);
@@ -61,6 +95,19 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
     if (!rating) return;
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 700));
+
+    const ratingData = RATINGS.find((r) => r.key === rating)!;
+    const newHappy = recalcHappy(
+      displayParticipant.happyPercent,
+      displayParticipant.jobsDone,
+      ratingData.happy
+    );
+    dispatch({
+      type: "UPDATE_PARTICIPANT_HAPPY",
+      userId: displayParticipant.id,
+      happyPercent: newHappy,
+    });
+
     setSubmitting(false);
     setFeedbackDone(true);
     setTimeout(() => {
@@ -135,8 +182,19 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           ))
         )}
 
-        {/* ── Job-done request card (visible to client after skiller sends request) ── */}
-        {jobStatus === "requested" && (
+        {/* ── SKILLER: request sent — waiting for client confirmation ── */}
+        {isSkiller && jobStatus === "requested" && (
+          <div className="mx-2 mt-2 bg-[#f5f0ff] rounded-2xl border border-[#6c47ff]/20 px-4 py-3 flex items-center gap-3">
+            <Loader2 size={18} className="text-[#6c47ff] flex-shrink-0 animate-spin" />
+            <div>
+              <p className="text-sm font-bold text-[#1a1a1a]">Job done request sent</p>
+              <p className="text-xs text-[#7a7570]">Waiting for {displayParticipant.displayName} to confirm…</p>
+            </div>
+          </div>
+        )}
+
+        {/* ── CLIENT: skiller marked job done — confirm or decline ── */}
+        {!isSkiller && jobStatus === "requested" && (
           <div className="mx-2 mt-2 bg-white rounded-2xl border border-[#e8e4df] shadow-sm overflow-hidden">
             <div className="px-4 pt-4 pb-3">
               <div className="flex items-center gap-2 mb-1">
@@ -144,13 +202,13 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                 <p className="font-bold text-[#1a1a1a] text-sm">{displayParticipant.displayName} marked the job as done</p>
               </div>
               <p className="text-xs text-[#7a7570] leading-snug">
-                Did they complete the work to your satisfaction? Confirm to unlock the feedback form.
+                Did they complete the work to your satisfaction? Confirm to leave feedback.
               </p>
             </div>
             <div className="flex border-t border-[#e8e4df]">
               <button
                 className="flex-1 py-3 text-sm font-semibold text-[#7a7570] active:bg-gray-50 transition-colors"
-                onClick={() => setJobStatus("idle")}
+                onClick={() => setJobStatus("declined")}
               >
                 Decline
               </button>
@@ -165,8 +223,27 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           </div>
         )}
 
-        {/* ── Confirmed + Leave Feedback button ── */}
-        {jobStatus === "confirmed" && !showFeedback && (
+        {/* ── CLIENT declined ── */}
+        {!isSkiller && jobStatus === "declined" && (
+          <div className="mx-2 mt-2 bg-[#fff7ed] rounded-2xl border border-orange-200 px-4 py-3 flex items-center gap-2">
+            <X size={16} className="text-orange-400 flex-shrink-0" />
+            <p className="text-sm font-semibold text-[#1a1a1a]">Job completion declined.</p>
+          </div>
+        )}
+
+        {/* ── SKILLER: client confirmed ── */}
+        {isSkiller && jobStatus === "confirmed" && (
+          <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
+            <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-[#1a1a1a]">Job confirmed by client!</p>
+              <p className="text-xs text-[#7a7570]">Your happy % will update once they rate.</p>
+            </div>
+          </div>
+        )}
+
+        {/* ── CLIENT: confirmed — leave feedback (if not yet submitted) ── */}
+        {!isSkiller && jobStatus === "confirmed" && !showFeedback && !feedbackDone && (
           <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
             <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
             <div className="flex-1 min-w-0">
@@ -183,7 +260,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           </div>
         )}
 
-        {/* ── Feedback done confirmation ── */}
+        {/* ── Feedback submitted ── */}
         {jobStatus === "feedback_done" && (
           <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
             <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
@@ -194,16 +271,30 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Send Job Completion Request (skiller side) / spacer (client side) ── */}
-      {jobStatus === "idle" && (
+      {/* ── SKILLER: Mark Job as Done button ── */}
+      {isSkiller && jobStatus === "idle" && (
         <div className="px-4 pb-2">
-          <button
-            onClick={() => setJobStatus("requested")}
-            className="w-full h-10 rounded-2xl font-semibold text-xs border-2 border-[#6c47ff]/30 text-[#6c47ff] flex items-center justify-center gap-2 bg-[#f5f0ff] transition-all active:scale-[0.98]"
-          >
-            <CheckCircle size={14} />
-            Mark Job as Done
-          </button>
+          {canRequestJobDone ? (
+            <button
+              onClick={() => setJobStatus("requested")}
+              className="w-full h-10 rounded-2xl font-semibold text-xs border-2 border-[#6c47ff]/30 text-[#6c47ff] flex items-center justify-center gap-2 bg-[#f5f0ff] transition-all active:scale-[0.98]"
+            >
+              <CheckCircle size={14} />
+              Mark Job as Done
+            </button>
+          ) : hasMessages ? (
+            <div className="w-full h-10 rounded-2xl flex items-center justify-center gap-2 bg-[#f0eeea] border border-[#e8e4df]">
+              <Clock size={13} className="text-[#b0aaa5]" />
+              <span className="text-xs text-[#b0aaa5] font-medium">
+                Available in ~{hoursRemaining}h · conversation must be 24h old
+              </span>
+            </div>
+          ) : (
+            <div className="w-full h-10 rounded-2xl flex items-center justify-center gap-2 bg-[#f0eeea] border border-[#e8e4df]">
+              <Clock size={13} className="text-[#b0aaa5]" />
+              <span className="text-xs text-[#b0aaa5] font-medium">Start a conversation to unlock job requests</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -228,12 +319,12 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessageWithTracking(); } }}
           placeholder="Message..."
           autoComplete="off"
           className="flex-1 bg-[#f0eeea] rounded-2xl px-4 py-2.5 min-h-[40px] text-sm text-[#1a1a1a] placeholder-[#b0aaa5] focus:outline-none focus:ring-2 focus:ring-[#6c47ff]/30"
         />
-        <button type="button" onClick={sendMessage}
+        <button type="button" onClick={sendMessageWithTracking}
           disabled={!inputText.trim() || sending}
           className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0 transition-opacity disabled:opacity-40"
           style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}>
@@ -241,10 +332,9 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         </button>
       </div>
 
-      {/* ── Feedback modal ── */}
+      {/* ── Feedback modal (client only) ── */}
       {showFeedback && (
         <div className="fixed inset-0 z-[200] flex flex-col bg-[#f5f5f5]">
-          {/* Header */}
           <div className="bg-white border-b border-[#ebebeb] px-4 py-3 flex items-center gap-3">
             <button onClick={() => setShowFeedback(false)}
               className="w-8 h-8 flex items-center justify-center text-[#7a7570]">
@@ -267,7 +357,6 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             </div>
           </div>
 
-          {/* Body */}
           <div className="flex-1 overflow-y-auto bg-white">
             {feedbackDone ? (
               <div className="flex flex-col items-center justify-center h-full gap-4 px-6">
@@ -279,7 +368,6 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
               </div>
             ) : (
               <>
-                {/* Dismiss handle */}
                 <div className="flex justify-start px-4 pt-4 pb-2">
                   <button onClick={() => setShowFeedback(false)}
                     className="w-8 h-8 rounded-full bg-[#e8e4df] flex items-center justify-center text-[#7a7570]">
@@ -287,15 +375,13 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                   </button>
                 </div>
 
-                {/* Title */}
                 <div className="px-5 pb-5 text-center">
                   <h2 className="font-bold text-[#1a1a1a] text-[18px] leading-tight mb-1">
                     Were You Happy With the Work?
                   </h2>
-                  <p className="text-sm text-[#7a7570]">Your feedback helps us improve the community!</p>
+                  <p className="text-sm text-[#7a7570]">Your feedback helps {displayParticipant.displayName} improve!</p>
                 </div>
 
-                {/* Rating cards */}
                 <div className="flex gap-3 px-5 mb-5">
                   {RATINGS.map(({ key, emoji, label }) => (
                     <button
@@ -321,7 +407,6 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                   ))}
                 </div>
 
-                {/* Note field */}
                 <div className="mx-5 mb-5 border border-[#e8e4df] rounded-2xl overflow-hidden bg-[#fafafa]">
                   <div className="px-4 pt-4 pb-1">
                     <span className="text-sm font-semibold text-[#1a1a1a]">Leave a note: </span>
@@ -335,7 +420,6 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                   />
                 </div>
 
-                {/* Submit */}
                 <div className="px-5 pb-8">
                   <button
                     onClick={handleSubmitFeedback}
@@ -345,7 +429,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                   >
                     {submitting
                       ? <><Loader2 size={18} className="animate-spin" /> Submitting…</>
-                      : "Submit"}
+                      : "Submit Feedback"}
                   </button>
                   {rating === null && (
                     <p className="text-center text-xs text-[#b0aaa5] mt-2">Select an option above to continue</p>

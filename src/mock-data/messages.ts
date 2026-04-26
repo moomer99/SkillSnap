@@ -7,6 +7,10 @@ import { MOCK_USERS } from "./users";
 
 const [marcus, priya, jake, sam, ana] = MOCK_USERS;
 
+// thread_1 started 25+ hours ago so "Mark Job as Done" is unlocked in demo
+const NOW = Date.now();
+const hoursAgo = (h: number) => new Date(NOW - h * 60 * 60 * 1000).toISOString();
+
 export const MOCK_THREADS: MessageThread[] = [
   {
     id: "thread_1",
@@ -14,6 +18,7 @@ export const MOCK_THREADS: MessageThread[] = [
     lastMessage: "Sure! I have a slot this Saturday at 2pm, does that work?",
     lastMessageTime: "2m",
     unreadCount: 2,
+    startedAt: hoursAgo(26), // 26h ago — unlocked
   },
   {
     id: "thread_2",
@@ -21,6 +26,7 @@ export const MOCK_THREADS: MessageThread[] = [
     lastMessage: "Here are some looks from my recent bridal session ✨",
     lastMessageTime: "14m",
     unreadCount: 0,
+    startedAt: hoursAgo(30),
   },
   {
     id: "thread_3",
@@ -28,6 +34,7 @@ export const MOCK_THREADS: MessageThread[] = [
     lastMessage: "I can come do a free quote on Thursday if you're around",
     lastMessageTime: "1h",
     unreadCount: 1,
+    startedAt: hoursAgo(2), // 2h ago — locked (< 24h)
   },
   {
     id: "thread_4",
@@ -35,6 +42,7 @@ export const MOCK_THREADS: MessageThread[] = [
     lastMessage: "Just posted my new 6-week transformation! Check it out",
     lastMessageTime: "3h",
     unreadCount: 0,
+    startedAt: hoursAgo(48),
   },
   {
     id: "thread_5",
@@ -42,6 +50,7 @@ export const MOCK_THREADS: MessageThread[] = [
     lastMessage: "Thank you! Glad you were happy with the service 😊",
     lastMessageTime: "1d",
     unreadCount: 0,
+    startedAt: hoursAgo(72),
   },
 ];
 

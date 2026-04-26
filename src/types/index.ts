@@ -86,7 +86,12 @@ export interface MessageThread {
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;
+  startedAt?: string; // ISO — when the first message was sent
 }
+
+// ── Job Done Flow ────────────────────────────
+export type JobDoneStatus = "idle" | "requested" | "confirmed" | "feedback_done" | "declined";
+export type JobRating = "very_happy" | "okay" | "not_satisfied";
 
 // ── Discovery / Map ──────────────────────────
 export interface DiscoveryPin {

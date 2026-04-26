@@ -57,7 +57,9 @@ type Action =
   | { type: "SET_FOLLOWED_USERS"; userIds: Set<string> }
   | { type: "UPDATE_CURRENT_USER"; patch: Partial<User> }
   | { type: "OPEN_JOBS_DONE_MODAL" }
-  | { type: "CLOSE_JOBS_DONE_MODAL" };
+  | { type: "CLOSE_JOBS_DONE_MODAL" }
+  | { type: "UPDATE_PARTICIPANT_HAPPY"; userId: string; happyPercent: number }
+  | { type: "SET_THREAD_STARTED_AT"; threadId: string; startedAt: string };
 
 // ── Initial State ────────────────────────────
 const initialState: AppStateShape = {
@@ -143,6 +145,27 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       return { ...state, modals: { ...state.modals, jobsDoneInfo: true } };
     case "CLOSE_JOBS_DONE_MODAL":
       return { ...state, modals: { ...state.modals, jobsDoneInfo: false } };
+    case "UPDATE_PARTICIPANT_HAPPY":
+      return {
+        ...state,
+        threads: state.threads.map((t) =>
+          t.participant.id === action.userId
+            ? { ...t, participant: { ...t.participant, happyPercent: action.happyPercent } }
+            : t
+        ),
+        // Also update currentUser if they are the target (shouldn't happen but guard)
+        currentUser:
+          state.currentUser?.id === action.userId
+            ? { ...state.currentUser, happyPercent: action.happyPercent }
+            : state.currentUser,
+      };
+    case "SET_THREAD_STARTED_AT":
+      return {
+        ...state,
+        threads: state.threads.map((t) =>
+          t.id === action.threadId ? { ...t, startedAt: action.startedAt } : t
+        ),
+      };
     default:
       return state;
   }
