@@ -20,6 +20,7 @@ interface AppStateShape {
   previousScreen: Screen | null;
 
   posts: Post[];
+  localPosts: Post[]; // posts created locally (demo/offline) — persisted in memory
   feedLoading: boolean;
   feedVersion: number; // increment to trigger a feed reload
 
@@ -59,7 +60,8 @@ type Action =
   | { type: "OPEN_JOBS_DONE_MODAL" }
   | { type: "CLOSE_JOBS_DONE_MODAL" }
   | { type: "UPDATE_PARTICIPANT_HAPPY"; userId: string; happyPercent: number }
-  | { type: "SET_THREAD_STARTED_AT"; threadId: string; startedAt: string };
+  | { type: "SET_THREAD_STARTED_AT"; threadId: string; startedAt: string }
+  | { type: "PREPEND_POST"; post: Post };
 
 // ── Initial State ────────────────────────────
 const initialState: AppStateShape = {
@@ -69,6 +71,7 @@ const initialState: AppStateShape = {
   screen: "auth",
   previousScreen: null,
   posts: [],
+  localPosts: [],
   feedLoading: false,
   feedVersion: 0,
   viewingUserId: null,
@@ -99,8 +102,12 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       return { ...state, authLoading: action.loading };
     case "NAVIGATE":
       return { ...state, previousScreen: state.screen, screen: action.screen };
-    case "SET_POSTS":
-      return { ...state, posts: action.posts };
+    case "SET_POSTS": {
+      // Always keep locally-created posts at the top so they survive feed reloads
+      const remoteIds = new Set(action.posts.map((p) => p.id));
+      const uniqueLocal = state.localPosts.filter((p) => !remoteIds.has(p.id));
+      return { ...state, posts: [...uniqueLocal, ...action.posts] };
+    }
     case "SET_FEED_LOADING":
       return { ...state, feedLoading: action.loading };
     case "REFRESH_FEED":
@@ -165,6 +172,12 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         threads: state.threads.map((t) =>
           t.id === action.threadId ? { ...t, startedAt: action.startedAt } : t
         ),
+      };
+    case "PREPEND_POST":
+      return {
+        ...state,
+        localPosts: [action.post, ...state.localPosts],
+        posts: [action.post, ...state.posts],
       };
     default:
       return state;

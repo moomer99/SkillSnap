@@ -37,8 +37,17 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
   const [viewingPost, setViewingPost] = useState<Post | null>(null);
   const [activeTab, setActiveTab] = useState<"work" | "saved">("work");
 
+  // Merge locally-created posts (demo mode) so they always appear on own profile
+  const localOwn = isOwn
+    ? state.localPosts.filter((p) => p.authorId === user?.id)
+    : [];
+  const mergedPosts = [
+    ...localOwn.filter((lp) => !posts.some((p) => p.id === lp.id)),
+    ...posts,
+  ];
+
   // Saved posts — resolved from global savedPosts set + all known posts
-  const allKnownPosts = [...state.posts, ...posts];
+  const allKnownPosts = [...state.posts, ...mergedPosts];
   const savedPostsList = allKnownPosts.filter(
     (p, i, arr) => state.savedPosts.has(p.id) && arr.findIndex((x) => x.id === p.id) === i
   );
@@ -210,9 +219,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
               >
                 My Works
                 {(() => {
-                  const count = SUPABASE_CONFIGURED
-                    ? (gridLoading ? null : posts.length)
-                    : MOCK_WORK_GRID.length;
+                  const count = gridLoading ? null : (mergedPosts.length || (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0));
                   if (!count) return null;
                   return (
                     <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">
@@ -242,9 +249,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             <div className="flex items-center gap-2 px-4 py-3 border-b border-[#e8e4df] bg-white">
               <h3 className="text-sm font-bold text-[#1a1a1a]">Works</h3>
               {(() => {
-                const count = SUPABASE_CONFIGURED
-                  ? (gridLoading ? null : posts.length)
-                  : MOCK_WORK_GRID.length;
+                const count = gridLoading ? null : (mergedPosts.length || (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0));
                 if (!count) return null;
                 return (
                   <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">
@@ -262,8 +267,8 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                   Array.from({ length: 6 }).map((_, i) => (
                     <div key={i} className="aspect-square bg-gray-200 animate-pulse" />
                   ))
-                ) : posts.length > 0 ? (
-                  posts.map((post) => (
+                ) : mergedPosts.length > 0 ? (
+                  mergedPosts.map((post) => (
                     <GridTile key={post.id} post={post} onClick={() => setViewingPost(post)} />
                   ))
                 ) : !SUPABASE_CONFIGURED ? (

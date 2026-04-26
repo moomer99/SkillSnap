@@ -85,6 +85,16 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         skill: skill,
         location,
       });
+      if (newPost) {
+        // Generate thumbnail for video from first frame
+        if (selectedFile?.type.startsWith("video/") && newPost.mediaUrl) {
+          try {
+            const thumb = await grabVideoThumbnail(newPost.mediaUrl);
+            if (thumb) newPost.thumbnailUrl = thumb;
+          } catch { /* non-fatal */ }
+        }
+        dispatch({ type: "PREPEND_POST", post: newPost });
+      }
       dispatch({ type: "REFRESH_FEED" });
       setPosted(true);
       setTimeout(() => onNavigate("own-profile"), 1400);
@@ -94,6 +104,31 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function grabVideoThumbnail(src: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement("video");
+      video.src = src;
+      video.crossOrigin = "anonymous";
+      video.muted = true;
+      video.playsInline = true;
+      video.currentTime = 0.5;
+      video.onloadeddata = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth || 390;
+          canvas.height = video.videoHeight || 520;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) { reject(new Error("no ctx")); return; }
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", 0.8));
+          video.remove();
+        } catch (e) { reject(e); }
+      };
+      video.onerror = reject;
+      video.load();
+    });
   }
 
   if (posted) {
