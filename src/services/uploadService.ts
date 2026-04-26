@@ -59,9 +59,16 @@ export const uploadService = {
   },
 
   async createPost(payload: UploadPayload): Promise<Post | null> {
-    // ── Mock path (no Supabase) ──────────────────────────────────────
-    if (!SUPABASE_CONFIGURED) {
-      await new Promise((r) => setTimeout(r, 800)); // simulate upload delay
+    // ── Check auth first; fall back to mock if not logged in ─────────
+    const sb = getSupabase();
+    let userId: string | null = null;
+    if (SUPABASE_CONFIGURED) {
+      try { userId = await getCurrentUserId(); } catch { userId = null; }
+    }
+
+    if (!userId) {
+      // Demo / unauthenticated — create a local mock post
+      await new Promise((r) => setTimeout(r, 800));
 
       const isVideo = payload.file ? payload.file.type.startsWith("video/") : false;
       const mediaUrl = payload.file ? URL.createObjectURL(payload.file) : undefined;
@@ -89,9 +96,7 @@ export const uploadService = {
       return mockPost;
     }
 
-    // ── Real Supabase path ───────────────────────────────────────────
-    const sb = getSupabase();
-    const userId = await getCurrentUserId();
+    // ── Authenticated Supabase path ───────────────────────────────────
 
     let mediaUrl: string | undefined;
     let thumbnailUrl: string | undefined;
