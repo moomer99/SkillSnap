@@ -76,9 +76,15 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
     );
   }
 
-  const followers = user.followers >= 1000
+  const connections = user.followers >= 1_000_000
+    ? `${(user.followers / 1_000_000).toFixed(1)}M`
+    : user.followers >= 1000
     ? `${(user.followers / 1000).toFixed(1)}k`
     : String(user.followers);
+
+  const happyDisplay = user.happyPercent !== undefined && user.happyPercent !== null
+    ? `${user.happyPercent}%`
+    : "—";
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
@@ -110,12 +116,19 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             {/* Avatar */}
             <UserAvatar user={user} size="lg" showVerified={isOwn} />
 
-            {/* Stats: Posts · Jobs Done · Happy · Followers */}
-            <div className="flex-1 grid grid-cols-4 gap-0.5 pt-2">
-              <Stat value={gridLoading ? String(user.postCount) : String(SUPABASE_CONFIGURED ? posts.length : user.postCount)} label="Posts" />
-              <Stat value={user.jobsDone >= 1000 ? `${(user.jobsDone/1000).toFixed(0)}k` : String(user.jobsDone)} label="Jobs" highlight />
-              <Stat value={`${user.happyPercent}%`} label="Happy" emoji="😊" />
-              <Stat value={followers} label="Followers" />
+            {/* Stats: Posts · Jobs Done · Happy · Connections */}
+            <div className="flex-1 grid grid-cols-4 gap-1 pt-1">
+              <Stat
+                value={gridLoading ? String(user.postCount) : String(SUPABASE_CONFIGURED ? posts.length : user.postCount)}
+                label="Posts"
+              />
+              <Stat
+                value={user.jobsDone >= 1000 ? `${(user.jobsDone / 1000).toFixed(0)}k` : String(user.jobsDone)}
+                label="Jobs Done"
+                highlight
+              />
+              <Stat value={happyDisplay} label="Happy" emoji="😊" />
+              <Stat value={connections} label="Connections" />
             </div>
           </div>
 
@@ -632,10 +645,12 @@ function MediaViewer({
 
 function Stat({ value, label, highlight, emoji }: { value: string; label: string; highlight?: boolean; emoji?: string }) {
   return (
-    <div className="flex flex-col items-center gap-0.5">
-      {emoji && <span className="text-sm leading-none">{emoji}</span>}
-      <span className={`font-bold text-sm leading-tight ${highlight ? "text-[#6c47ff]" : "text-[#1a1a1a]"}`}>{value}</span>
-      <span className="text-[10px] text-[#7a7570] leading-tight">{label}</span>
+    <div className="flex flex-col items-center gap-0.5 py-1">
+      {emoji && <span className="text-[15px] leading-none">{emoji}</span>}
+      <span className={`font-extrabold text-[15px] leading-tight tracking-tight ${highlight ? "text-[#6c47ff]" : "text-[#1a1a1a]"}`}>
+        {value}
+      </span>
+      <span className="text-[10px] text-[#7a7570] font-medium leading-tight text-center">{label}</span>
     </div>
   );
 }

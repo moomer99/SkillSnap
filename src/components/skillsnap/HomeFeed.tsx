@@ -16,6 +16,9 @@ interface HomeFeedProps {
   onNavigate: (s: Screen) => void;
 }
 
+// Header height in px — card fills exactly the remaining viewport
+const HEADER_H = 88;
+
 function timeAgo(iso: string): string {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
   if (diff < 60) return `${Math.floor(diff)}s ago`;
@@ -24,7 +27,8 @@ function timeAgo(iso: string): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-function formatNum(n: number): string {
+function fmtNum(n: number | undefined): string {
+  if (n === undefined || n === null) return "—";
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1000) return `${(n / 1000).toFixed(0)}k`;
   return String(n);
@@ -42,7 +46,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
-      {/* Sticky header */}
+      {/* Sticky header — height tracked by HEADER_H */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-3">
         <div className="flex items-center justify-between mb-2.5">
           <SkillSnapLogo />
@@ -57,10 +61,13 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
         <SearchBar />
       </header>
 
-      {/* Feed */}
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-24 snap-y snap-mandatory">
+      {/* Feed — cards snap, each fills exactly the space below the header */}
+      <div
+        className="overflow-y-auto no-scrollbar snap-y snap-mandatory"
+        style={{ height: `calc(100dvh - ${HEADER_H}px)` }}
+      >
         {loading && posts.length === 0 ? (
-          <div className="w-full h-screen bg-gray-200 animate-pulse" />
+          <div className="w-full bg-gray-200 animate-pulse" style={{ height: `calc(100dvh - ${HEADER_H}px)` }} />
         ) : (
           posts.map((post) => (
             <FeedCard
@@ -74,11 +81,8 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
               onConnectClick={() => connectTo(post.authorId)}
               onShare={() => {
                 const text = post.caption || "Check out this skill on SkillSnap!";
-                if (navigator.share) {
-                  navigator.share({ title: "SkillSnap", text }).catch(() => {});
-                } else {
-                  navigator.clipboard?.writeText(text).catch(() => {});
-                }
+                if (navigator.share) navigator.share({ title: "SkillSnap", text }).catch(() => {});
+                else navigator.clipboard?.writeText(text).catch(() => {});
               }}
               connecting={connecting}
             />
@@ -109,21 +113,19 @@ function FeedCard({
 
   const handleMediaTap = useCallback(() => {
     if (!post.mediaUrl || post.type !== "video") return;
-    if (playing) {
-      videoRef.current?.pause();
-      setPlaying(false);
-    } else {
-      videoRef.current?.play().catch(() => {});
-      setPlaying(true);
-    }
+    if (playing) { videoRef.current?.pause(); setPlaying(false); }
+    else { videoRef.current?.play().catch(() => {}); setPlaying(true); }
   }, [playing, post.mediaUrl, post.type]);
 
   const displayLocation = post.location ?? author.location;
+  // Safe happy percent — guard against undefined from real DB
+  const happyPct = author.happyPercent !== undefined && author.happyPercent !== null
+    ? `${author.happyPercent}%` : "—";
 
   return (
     <div
-      className="relative w-full snap-start overflow-hidden bg-gray-900"
-      style={{ height: "100dvh" }}
+      className="relative w-full snap-start overflow-hidden bg-gray-900 flex-shrink-0"
+      style={{ height: `calc(100dvh - ${HEADER_H}px)` }}
     >
       {/* ── Media ── */}
       <div className="absolute inset-0 cursor-pointer" onClick={handleMediaTap}>
@@ -142,41 +144,30 @@ function FeedCard({
         ) : (
           <div className="w-full h-full" style={{ background: post.thumbnailGradient }} />
         )}
-
-        {/* Gradient scrim: stronger at top and bottom */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 28%, transparent 50%, rgba(0,0,0,0.7) 78%, rgba(0,0,0,0.88) 100%)",
-          }}
-        />
+        {/* Scrim */}
+        <div className="absolute inset-0" style={{
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 25%, transparent 52%, rgba(0,0,0,0.65) 76%, rgba(0,0,0,0.85) 100%)",
+        }} />
       </div>
 
-      {/* ── Top bar: timestamp left, mute right ── */}
-      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-5 z-10">
-        <span className="text-white/75 text-xs font-medium drop-shadow">{timeAgo(post.createdAt)}</span>
+      {/* ── Top bar ── */}
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-4 z-10">
+        <span className="text-white/70 text-[12px] font-medium">{timeAgo(post.createdAt)}</span>
         {post.type === "video" && post.mediaUrl && (
           <button
-            className="w-8 h-8 rounded-full bg-black/35 flex items-center justify-center text-white"
-            onClick={(e) => { e.stopPropagation(); setMuted((m) => !m); }}
+            className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center text-white"
+            onClick={(e) => { e.stopPropagation(); setMuted(m => !m); }}
           >
             {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
           </button>
         )}
       </div>
 
-      {/* ── Play button (video not yet playing) ── */}
+      {/* ── Play button ── */}
       {post.type === "video" && !playing && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center"
-            style={{
-              background: "rgba(255,255,255,0.15)",
-              backdropFilter: "blur(6px)",
-              border: "2px solid rgba(255,255,255,0.3)",
-            }}
-          >
+          <div className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(6px)", border: "2px solid rgba(255,255,255,0.28)" }}>
             <svg width="20" height="24" viewBox="0 0 20 24" fill="white">
               <path d="M1 1l18 11-18 11V1z" />
             </svg>
@@ -184,11 +175,8 @@ function FeedCard({
         </div>
       )}
 
-      {/* ── Right side action stack ── */}
-      <div
-        className="absolute right-3 z-10 flex flex-col items-center gap-5"
-        style={{ bottom: "clamp(220px, 35%, 280px)" }}
-      >
+      {/* ── Right actions ── */}
+      <div className="absolute right-3 z-10 flex flex-col items-center gap-5" style={{ bottom: 220 }}>
         <RightAction
           icon={<Heart size={26} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "white"} strokeWidth={1.8} />}
           label={formatLikes(post.likes + (isLiked ? 1 : 0))}
@@ -208,130 +196,101 @@ function FeedCard({
       </div>
 
       {/* ── Bottom panel ── */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 px-4 pb-6">
-        {/* User info row */}
-        <div className="flex items-center gap-3 mb-2">
+      <div className="absolute bottom-0 left-0 right-0 z-10 px-4 pb-5">
+        {/* User row */}
+        <div className="flex items-center gap-3 mb-2.5">
           <div className="cursor-pointer flex-shrink-0" onClick={(e) => { e.stopPropagation(); onProfileClick(); }}>
             <UserAvatar user={author} size="sm" showVerified ring />
           </div>
-          <div className="flex-1 min-w-0" onClick={(e) => { e.stopPropagation(); onProfileClick(); }}>
-            <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex-1 min-w-0 cursor-pointer" onClick={(e) => { e.stopPropagation(); onProfileClick(); }}>
+            <div className="flex items-center gap-1.5">
               <span className="text-white font-bold text-[15px] leading-tight">{author.displayName}</span>
               {author.isVerified && (
-                <span className="w-[18px] h-[18px] rounded-full bg-[#6c47ff] flex items-center justify-center flex-shrink-0">
+                <span className="w-[17px] h-[17px] rounded-full bg-[#6c47ff] flex items-center justify-center flex-shrink-0">
                   <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
                     <path d="M1 3.5l2.5 2.5L8 1" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
               )}
             </div>
-            <p className="text-white/65 text-[12px] mt-0.5 leading-none">{author.skill}</p>
+            <p className="text-white/60 text-[12px] mt-0.5">{author.skill}</p>
           </div>
         </div>
 
         {/* Caption */}
         {post.caption && (
-          <p className="text-white/90 text-[13px] leading-snug mb-3 line-clamp-2">{post.caption}</p>
+          <p className="text-white/88 text-[13px] leading-snug mb-3 line-clamp-2">{post.caption}</p>
         )}
 
-        {/* Stats pill bar — Jobs Done | Followers | 😊 Happy% | 📍 Distance */}
+        {/* ── Stats bar ── */}
         <div
-          className="flex items-center mb-3 rounded-2xl px-3 py-2.5 gap-0"
-          style={{ background: "rgba(0,0,0,0.38)", backdropFilter: "blur(8px)" }}
+          className="flex items-stretch mb-3 rounded-2xl overflow-hidden"
+          style={{ background: "rgba(0,0,0,0.42)", backdropFilter: "blur(10px)" }}
         >
-          <StatCell icon="⭐" value={formatNum(author.jobsDone)} label="Jobs Done" />
-          <Divider />
-          <StatCell
-            icon={
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="5" r="3" stroke="white" strokeWidth="1.4"/>
-                <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="white" strokeWidth="1.4" strokeLinecap="round"/>
-              </svg>
-            }
-            value={formatNum(author.followers)}
-            label="Followers"
-          />
-          <Divider />
-          <StatCell icon="😊" value={`${author.happyPercent}%`} label="Happy" green />
+          <StatCell value={fmtNum(author.jobsDone)} label="Jobs Done" icon="⭐" />
+          <VSep />
+          <StatCell value={fmtNum(author.followers)} label="Connections" icon={
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="5" r="2.8" stroke="white" strokeWidth="1.4"/>
+              <path d="M2.5 13.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="white" strokeWidth="1.4" strokeLinecap="round"/>
+            </svg>
+          } />
+          <VSep />
+          <StatCell value={happyPct} label="Happy" icon="😊" green />
           {displayLocation && (
             <>
-              <Divider />
+              <VSep />
               <StatCell
+                value={author.distanceKm !== undefined ? `${author.distanceKm}km` : displayLocation}
+                label={author.distanceKm !== undefined ? displayLocation : ""}
                 icon={<MapPin size={12} stroke="white" fill="none" />}
-                value={author.distanceKm !== undefined ? `${author.distanceKm}km` : ""}
-                label={author.distanceKm !== undefined ? "" : displayLocation}
-                location={author.distanceKm === undefined ? displayLocation : undefined}
-                distanceLabel={author.distanceKm !== undefined ? displayLocation : undefined}
               />
             </>
           )}
         </div>
 
-        {/* Connect button — same style as current */}
         <ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />
       </div>
     </div>
   );
 }
 
-function RightAction({
-  icon, label, onClick, active,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onClick?: () => void;
-  active?: boolean;
+function StatCell({ value, label, icon, green }: {
+  value: string; label: string; icon: React.ReactNode; green?: boolean;
+}) {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 px-1">
+      <span className="text-[13px] leading-none mb-0.5">{icon}</span>
+      <span className={`text-[14px] font-extrabold leading-tight tracking-tight ${green ? "text-[#4ade80]" : "text-white"}`}>
+        {value}
+      </span>
+      {label && (
+        <span className="text-[10px] text-white/55 font-medium leading-tight text-center">{label}</span>
+      )}
+    </div>
+  );
+}
+
+function VSep() {
+  return <div className="w-px bg-white/15 self-stretch my-2" />;
+}
+
+function RightAction({ icon, label, onClick, active }: {
+  icon: React.ReactNode; label: string; onClick?: () => void; active?: boolean;
 }) {
   return (
     <button className="flex flex-col items-center gap-1 active:scale-90 transition-transform" onClick={onClick}>
       <div
         className="w-11 h-11 rounded-full flex items-center justify-center"
         style={{
-          background: active ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.32)",
+          background: active ? "rgba(255,255,255,0.22)" : "rgba(0,0,0,0.30)",
           backdropFilter: "blur(6px)",
-          border: "1.5px solid rgba(255,255,255,0.18)",
+          border: "1.5px solid rgba(255,255,255,0.16)",
         }}
       >
         {icon}
       </div>
-      <span className="text-white text-[11px] font-semibold drop-shadow">{label}</span>
+      <span className="text-white text-[11px] font-semibold">{label}</span>
     </button>
   );
-}
-
-function StatCell({
-  icon, value, label, green, location, distanceLabel,
-}: {
-  icon: React.ReactNode;
-  value: string;
-  label: string;
-  green?: boolean;
-  location?: string;
-  distanceLabel?: string;
-}) {
-  return (
-    <div className="flex items-center gap-1 px-1 min-w-0">
-      <span className="flex-shrink-0 text-[13px] leading-none">{icon}</span>
-      <div className="flex flex-col leading-none min-w-0">
-        {value && (
-          <span className={`text-[11px] font-bold leading-tight ${green ? "text-[#86efac]" : "text-white"}`}>
-            {value}
-          </span>
-        )}
-        {distanceLabel && (
-          <span className="text-[9px] text-white/55 font-medium leading-tight truncate">{distanceLabel}</span>
-        )}
-        {label && !distanceLabel && (
-          <span className="text-[9px] text-white/55 font-medium leading-tight">{label}</span>
-        )}
-        {location && !value && (
-          <span className="text-[11px] font-semibold text-white leading-tight truncate">{location}</span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Divider() {
-  return <div className="w-px self-stretch bg-white/20 mx-1.5" />;
 }

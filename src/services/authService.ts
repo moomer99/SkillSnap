@@ -24,6 +24,7 @@ function mapProfile(profile: Record<string, unknown>): User {
     skill: (profile.skill as User["skill"]) ?? null,
     isVerified: Boolean(profile.is_verified),
     jobsDone: Number(profile.jobs_done ?? 0),
+    happyPercent: Number(profile.happy_percent ?? 0),
     followers: Number(profile.followers_count ?? 0),
     following: Number(profile.following_count ?? 0),
     postCount: Number(profile.post_count ?? 0),
