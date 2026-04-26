@@ -204,13 +204,24 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             <div className="flex flex-1">
               <button
                 onClick={() => setActiveTab("work")}
-                className={`flex-1 py-3 text-sm font-semibold transition-colors ${
+                className={`flex-1 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
                   activeTab === "work"
                     ? "text-[#6c47ff] border-b-2 border-[#6c47ff]"
                     : "text-[#7a7570]"
                 }`}
               >
                 My Works
+                {(() => {
+                  const count = SUPABASE_CONFIGURED
+                    ? (gridLoading ? null : posts.length)
+                    : MOCK_WORK_GRID.length;
+                  if (!count) return null;
+                  return (
+                    <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">
+                      {count}
+                    </span>
+                  );
+                })()}
               </button>
               <button
                 onClick={() => setActiveTab("saved")}
