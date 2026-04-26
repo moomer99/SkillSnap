@@ -61,9 +61,9 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
         <SearchBar />
       </header>
 
-      {/* Feed — cards snap, each fills exactly the space below the header */}
+      {/* Feed — free scroll */}
       <div
-        className="overflow-y-auto no-scrollbar snap-y snap-mandatory"
+        className="overflow-y-auto no-scrollbar"
         style={{ height: `calc(100dvh - ${HEADER_H}px)` }}
       >
         {loading && posts.length === 0 ? (
@@ -124,7 +124,7 @@ function FeedCard({
 
   return (
     <div
-      className="relative w-full snap-start overflow-hidden bg-gray-900 flex-shrink-0 mb-2 rounded-xl"
+      className="relative w-full overflow-hidden bg-gray-900 flex-shrink-0 mb-2 rounded-xl"
       style={{ height: `calc(100dvh - ${HEADER_H}px - 8px)` }}
     >
       {/* ── Media ── */}
@@ -227,12 +227,15 @@ function FeedCard({
           className="flex items-stretch mb-3 rounded-2xl overflow-hidden"
           style={{ background: "rgba(0,0,0,0.42)", backdropFilter: "blur(10px)" }}
         >
-          <StatCell value={fmtNum(author.jobsDone)} label="Jobs Done" icon="⭐" />
+          <StatCell value={fmtNum(author.jobsDone)} label="Jobs Done" icon={
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="#facc15">
+              <path d="M8 1l1.8 3.6 4 .6-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4L2.2 5.2l4-.6L8 1z"/>
+            </svg>
+          } />
           <VSep />
           <StatCell value={fmtNum(author.followers)} label="Connections" icon={
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-              <circle cx="8" cy="5" r="2.8" stroke="white" strokeWidth="1.4"/>
-              <path d="M2.5 13.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="white" strokeWidth="1.4" strokeLinecap="round"/>
+            <svg width="14" height="13" viewBox="0 0 16 14" fill="white">
+              <path d="M6 7a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H1zm10-6a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm1.5 1.5c1.8.4 3 1.8 3 3.5h-3"/>
             </svg>
           } />
           <VSep />
@@ -243,7 +246,11 @@ function FeedCard({
               <StatCell
                 value={author.distanceKm !== undefined ? `${author.distanceKm}km` : displayLocation}
                 label={author.distanceKm !== undefined ? displayLocation : ""}
-                icon={<MapPin size={12} stroke="white" fill="none" />}
+                icon={
+                  <svg width="11" height="14" viewBox="0 0 11 14" fill="white">
+                    <path d="M5.5 0A5.5 5.5 0 000 5.5C0 9.625 5.5 14 5.5 14S11 9.625 11 5.5A5.5 5.5 0 005.5 0zm0 7.5a2 2 0 110-4 2 2 0 010 4z"/>
+                  </svg>
+                }
               />
             </>
           )}
@@ -260,13 +267,11 @@ function StatCell({ value, label, icon, green }: {
 }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 px-1">
-      <span className="text-[13px] leading-none mb-0.5">{icon}</span>
+      <span className="leading-none mb-0.5">{icon}</span>
       <span className={`text-[14px] font-extrabold leading-tight tracking-tight ${green ? "text-[#4ade80]" : "text-white"}`}>
         {value}
       </span>
-      {label && (
-        <span className="text-[10px] text-white/55 font-medium leading-tight text-center">{label}</span>
-      )}
+      <span className="text-[10px] text-white/55 font-medium leading-tight text-center">{label}</span>
     </div>
   );
 }
