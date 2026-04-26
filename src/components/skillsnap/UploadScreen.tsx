@@ -9,6 +9,7 @@ import type { Screen, SkillCategory } from "@/types";
 import { SKILL_CATEGORIES, MAP_CONFIG } from "@/constants/config";
 import { uploadService } from "@/services/uploadService";
 import { useAppState } from "@/state/AppState";
+import { useToast } from "./shared/Toast";
 
 interface UploadScreenProps {
   onNavigate: (s: Screen) => void;
@@ -18,6 +19,7 @@ type ContentType = "video" | "photo" | "social";
 
 export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   const { dispatch } = useAppState();
+  const { comingSoon } = useToast();
   const [contentType, setContentType] = useState<ContentType>("video");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -155,8 +157,8 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
               }
               title="Import from Social Media"
               subtitle="Instagram, TikTok, Facebook"
-              active={contentType === "social"}
-              onClick={() => handleTypeSelect("social")}
+              active={false}
+              onClick={() => comingSoon("Social media import")}
             />
           </div>
           {/* Hidden file input — accept attribute set dynamically in openPicker() */}

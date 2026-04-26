@@ -149,11 +149,21 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           <div className="flex gap-2.5 mt-4">
             {isOwn ? (
               <>
-                <button className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
+                <button
+                  onClick={() => onNavigate("edit-profile")}
+                  className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+                >
                   <Edit3 size={14} />
                   Edit Profile
                 </button>
-                <button className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
+                <button
+                  onClick={() => {
+                    const text = `Check out ${user.displayName} on SkillSnap!`;
+                    if (navigator.share) navigator.share({ title: "SkillSnap", text }).catch(() => {});
+                    else navigator.clipboard?.writeText(text).catch(() => {});
+                  }}
+                  className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+                >
                   <Share2 size={14} />
                   Share
                 </button>

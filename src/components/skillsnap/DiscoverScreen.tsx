@@ -1,14 +1,10 @@
 "use client";
-// ─────────────────────────────────────────────
-// SkillSnap — Discover / Map Screen
-// Data: discoveryService.getNearbyUsers() via useDiscovery hook
-// Integration: replace SVG map with Mapbox/Google
-// ─────────────────────────────────────────────
-import { MapPin, ChevronUp } from "lucide-react";
+import { MapPin, ChevronUp, Compass } from "lucide-react";
 import type { Screen } from "@/types";
 import { DISCOVERY_FILTER_CHIPS } from "@/mock-data/discovery";
 import { useDiscovery } from "@/hooks/useDiscovery";
 import { useAppState } from "@/state/AppState";
+import { useMessages } from "@/hooks/useMessages";
 import SearchBar from "./shared/SearchBar";
 import FilterChips from "./shared/FilterChips";
 import UserPreviewCard from "./shared/UserPreviewCard";
@@ -21,6 +17,7 @@ interface DiscoverScreenProps {
 export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
   const { pins, activeFilter, setFilter } = useDiscovery();
   const { dispatch } = useAppState();
+  const { connectTo, connecting } = useMessages();
 
   function handleProfileClick(userId: string) {
     dispatch({ type: "SET_VIEWING_USER", userId });
@@ -39,11 +36,14 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
         />
       </div>
 
-      {/* Map area — replace with real map SDK */}
+      {/* Map area with Coming Soon overlay */}
       <div className="relative flex-1 overflow-hidden" style={{ minHeight: "60vh" }}>
-        <div className="absolute inset-0"
-          style={{ background: "linear-gradient(135deg, #e8f4f8 0%, #d4e9f0 40%, #e8f0d4 100%)" }}>
-          <svg className="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 390 500" preserveAspectRatio="xMidYMid slice">
+        {/* Blurred map background */}
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(135deg, #e8f4f8 0%, #d4e9f0 40%, #e8f0d4 100%)", filter: "blur(2px)" }}
+        >
+          <svg className="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 390 500" preserveAspectRatio="xMidYMid slice">
             {[60, 120, 180, 240, 300, 360, 420].map(y => <line key={`h${y}`} x1="0" y1={y} x2="390" y2={y} stroke="#90aab8" strokeWidth="4" />)}
             {[55, 130, 200, 270, 335].map(x => <line key={`v${x}`} x1={x} y1="0" x2={x} y2="500" stroke="#90aab8" strokeWidth="4" />)}
             <line x1="0" y1="400" x2="390" y2="80" stroke="#90aab8" strokeWidth="5" />
@@ -64,44 +64,46 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
           </svg>
         </div>
 
-        {/* Map pins */}
+        {/* Faint pins (decorative) */}
         {pins.map((pin) => (
-          <button
+          <div
             key={pin.id}
-            className="absolute flex flex-col items-center"
+            className="absolute flex flex-col items-center opacity-20 pointer-events-none"
             style={{ left: pin.x, top: pin.y, transform: "translate(-50%,-100%)" }}
-            onClick={() => handleProfileClick(pin.userId)}
           >
             <div className="px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 text-white text-xs font-bold mb-0.5"
               style={{ background: pin.color }}>
               {pin.skill}
             </div>
             <div className="w-2 h-2 rotate-45 -mt-1" style={{ background: pin.color }} />
-          </button>
+          </div>
         ))}
 
-        {/* Current location dot */}
-        <div className="absolute" style={{ left: "46%", top: "48%" }}>
-          <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-md">
-            <div className="w-3 h-3 rounded-full bg-[#6c47ff]" />
+        {/* Coming Soon overlay */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-10 px-8">
+          <div
+            className="w-full rounded-3xl px-6 py-8 flex flex-col items-center text-center shadow-xl"
+            style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(16px)" }}
+          >
+            <div
+              className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4"
+              style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
+            >
+              <Compass size={32} className="text-white" />
+            </div>
+            <h2 className="font-bold text-[#1a1a1a] text-xl mb-2">Map Discovery</h2>
+            <p className="text-sm text-[#7a7570] leading-relaxed mb-4">
+              Find skilled pros near you on a live map. Real-time location-based discovery is coming soon!
+            </p>
+            <div className="flex items-center gap-2 bg-[#ede9fe] rounded-full px-4 py-2">
+              <span className="w-2 h-2 rounded-full bg-[#6c47ff] animate-pulse" />
+              <span className="text-xs font-bold text-[#6c47ff]">Coming Soon</span>
+            </div>
           </div>
-          <div className="absolute inset-0 rounded-full bg-[#6c47ff]/20 scale-[2.5] animate-pulse" />
-        </div>
-
-        {/* Location label */}
-        <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1 shadow-sm">
-          <MapPin size={12} className="text-[#6c47ff]" />
-          <span className="text-xs font-medium text-[#7a7570]">Liverpool, NSW</span>
-        </div>
-
-        {/* Zoom controls */}
-        <div className="absolute right-3 top-14 flex flex-col bg-white rounded-xl shadow-sm overflow-hidden">
-          <button className="w-9 h-9 flex items-center justify-center text-[#1a1a1a] border-b border-[#e8e4df] text-lg font-light">+</button>
-          <button className="w-9 h-9 flex items-center justify-center text-[#1a1a1a] text-lg font-light">−</button>
         </div>
       </div>
 
-      {/* Bottom preview tray */}
+      {/* Bottom preview tray — still shows real user cards */}
       <div className="bg-white rounded-t-3xl shadow-xl border-t border-[#e8e4df] px-4 pt-3 pb-24">
         <div className="w-10 h-1 bg-[#e8e4df] rounded-full mx-auto mb-4" />
         <div className="flex items-center justify-between mb-3">
@@ -113,7 +115,11 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
           {pins.map((pin) => (
             <div key={pin.id} className="flex flex-col gap-1.5 flex-shrink-0">
               <UserPreviewCard pin={pin} onClick={() => handleProfileClick(pin.userId)} />
-              <ConnectButton onClick={() => onNavigate("chat")} size="sm" />
+              <ConnectButton
+                onClick={() => connectTo(pin.userId)}
+                size="sm"
+                loading={connecting}
+              />
             </div>
           ))}
         </div>

@@ -11,6 +11,7 @@ import SearchBar from "./shared/SearchBar";
 import UserAvatar from "./shared/UserAvatar";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
 import ConnectButton from "./shared/ConnectButton";
+import { useToast } from "./shared/Toast";
 
 interface HomeFeedProps {
   onNavigate: (s: Screen) => void;
@@ -38,6 +39,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
   const { posts, loading, likedPosts, savedPosts, toggleLike, toggleSave } = useFeed();
   const { connectTo, connecting } = useMessages();
   const { dispatch } = useAppState();
+  const { comingSoon } = useToast();
 
   function handleProfileClick(userId: string) {
     dispatch({ type: "SET_VIEWING_USER", userId });
@@ -50,7 +52,10 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-3">
         <div className="flex items-center justify-between mb-2.5">
           <SkillSnapLogo />
-          <button className="flex items-center gap-1.5 text-[13px] font-semibold text-[#4a4a4a] border border-[#e8e4df] rounded-full px-3 py-1.5 bg-white">
+          <button
+            onClick={() => comingSoon("Location-based filtering")}
+            className="flex items-center gap-1.5 text-[13px] font-semibold text-[#4a4a4a] border border-[#e8e4df] rounded-full px-3 py-1.5 bg-white active:bg-[#f0eeea] transition-colors"
+          >
             <MapPin size={13} className="text-[#6c47ff]" />
             Nearby
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="ml-0.5 opacity-50">

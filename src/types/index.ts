@@ -77,6 +77,7 @@ export interface Message {
   threadId: string;
   from: MessageSender;
   text: string;
+  imageUrl?: string;   // local object URL or remote URL for image attachments
   time: string; // display string; replace with ISO when real-time
 }
 

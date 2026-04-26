@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useRef, useState, useMemo } from "react";
-import { ArrowLeft, Phone, MoreVertical, Send, Paperclip, CheckCircle, Loader2, X, Clock } from "lucide-react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { ArrowLeft, Phone, MoreVertical, Send, Paperclip, CheckCircle, Loader2, X, Clock, Flag, Bell, Trash2 } from "lucide-react";
 import type { Screen, User, JobDoneStatus, JobRating } from "@/types";
 import { MOCK_USERS } from "@/mock-data/users";
 import { useAppState } from "@/state/AppState";
@@ -35,8 +35,10 @@ function recalcHappy(prev: number, prevJobs: number, isHappy: boolean): number {
 
 export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const { state, dispatch } = useAppState();
-  const { messages, inputText, setInputText, sending, loading, sendMessage, bottomRef } = useChat();
+  const { messages, inputText, setInputText, sending, loading, sendMessage, sendImageMessage, bottomRef } = useChat();
   const [participant, setParticipant] = useState<User | null>(null);
+
+  const [showChatMenu, setShowChatMenu] = useState(false);
 
   // Job-done flow
   const [jobStatus, setJobStatus] = useState<JobDoneStatus>("idle");
@@ -74,6 +76,17 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       userService.getUser(participantId).then((u) => setParticipant(u ?? MOCK_USERS[0]));
     });
   }, [participantId, state.threads, state.activeThreadId]);
+
+  // Escape key closes any open overlay
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      if (showFeedback) { setShowFeedback(false); return; }
+      if (showChatMenu) { setShowChatMenu(false); return; }
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [showFeedback, showChatMenu]);
 
   // Track when first message is sent so the 24h clock starts
   function sendMessageWithTracking() {
@@ -133,8 +146,24 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           </div>
         </button>
         <div className="flex items-center gap-1">
-          <button className="w-9 h-9 flex items-center justify-center text-[#7a7570]"><Phone size={18} /></button>
-          <button className="w-9 h-9 flex items-center justify-center text-[#7a7570]"><MoreVertical size={18} /></button>
+          <button
+            onClick={() => {
+              if (navigator.userAgent.match(/iPhone|iPad|Android/i)) {
+                window.location.href = "tel:";
+              } else {
+                alert("Phone calling will be available in the mobile app.");
+              }
+            }}
+            className="w-9 h-9 flex items-center justify-center text-[#7a7570] active:text-[#6c47ff] transition-colors"
+          >
+            <Phone size={18} />
+          </button>
+          <button
+            onClick={() => setShowChatMenu(true)}
+            className="w-9 h-9 flex items-center justify-center text-[#7a7570] active:text-[#6c47ff] transition-colors"
+          >
+            <MoreVertical size={18} />
+          </button>
         </div>
       </header>
 
@@ -164,16 +193,29 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"}`}>
               <div className="max-w-[78%] flex flex-col gap-0.5">
-                <div
-                  className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                    msg.from === "me"
-                      ? "text-white rounded-br-sm"
-                      : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
-                  }`}
-                  style={msg.from === "me" ? { background: "linear-gradient(135deg, #6c47ff, #8b6af5)" } : {}}
-                >
-                  {msg.text}
-                </div>
+                {msg.imageUrl ? (
+                  /* Image bubble */
+                  <div className={`rounded-2xl overflow-hidden shadow-sm ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
+                    <img
+                      src={msg.imageUrl}
+                      alt={msg.text}
+                      className="w-full max-w-[220px] object-cover rounded-2xl"
+                      style={{ maxHeight: 260 }}
+                    />
+                  </div>
+                ) : (
+                  /* Text bubble */
+                  <div
+                    className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                      msg.from === "me"
+                        ? "text-white rounded-br-sm"
+                        : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
+                    }`}
+                    style={msg.from === "me" ? { background: "linear-gradient(135deg, #6c47ff, #8b6af5)" } : {}}
+                  >
+                    {msg.text}
+                  </div>
+                )}
                 <span className={`text-[10px] text-[#b0aaa5] ${msg.from === "me" ? "text-right" : "text-left"} px-1`}>
                   {msg.time}
                 </span>
@@ -303,10 +345,12 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         className="flex-shrink-0 bg-white border-t border-[#e8e4df] px-4 py-3 flex items-center gap-3"
         style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
       >
-        <input ref={attachRef} type="file" accept="image/*,video/*" className="hidden"
+        <input ref={attachRef} type="file" accept="image/*" className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) { setInputText(file.name); inputRef.current?.focus(); }
+            if (!file) return;
+            const objectUrl = URL.createObjectURL(file);
+            sendImageMessage(objectUrl, file.name);
             e.target.value = "";
           }}
         />
@@ -331,6 +375,66 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           <Send size={16} />
         </button>
       </div>
+
+      {/* ── Chat options menu ── */}
+      {showChatMenu && (
+        <div className="fixed inset-0 z-[200] flex items-end" onClick={() => setShowChatMenu(false)}>
+          <div
+            className="w-full bg-white rounded-t-3xl pb-8 pt-2 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 rounded-full bg-[#e8e4df] mx-auto mb-4" />
+            <div className="px-4 pb-2">
+              <p className="text-xs font-bold text-[#b0aaa5] uppercase tracking-wider mb-1">
+                {displayParticipant.displayName}
+              </p>
+            </div>
+            <button
+              className="w-full flex items-center gap-4 px-5 py-4 text-[#1a1a1a] text-sm font-medium active:bg-[#f8f7f5]"
+              onClick={() => { setShowChatMenu(false); onNavigate("client-profile"); }}
+            >
+              <div className="w-9 h-9 rounded-full bg-[#ede9fe] flex items-center justify-center flex-shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" />
+                </svg>
+              </div>
+              View Profile
+            </button>
+            <div className="h-px bg-[#f0eeea] mx-5" />
+            <button
+              className="w-full flex items-center gap-4 px-5 py-4 text-[#1a1a1a] text-sm font-medium active:bg-[#f8f7f5]"
+              onClick={() => setShowChatMenu(false)}
+            >
+              <div className="w-9 h-9 rounded-full bg-[#f0eeea] flex items-center justify-center flex-shrink-0">
+                <Bell size={16} className="text-[#7a7570]" />
+              </div>
+              Mute Notifications
+              <span className="ml-auto text-[10px] font-bold text-white bg-[#6c47ff] px-2 py-0.5 rounded-full">Soon</span>
+            </button>
+            <div className="h-px bg-[#f0eeea] mx-5" />
+            <button
+              className="w-full flex items-center gap-4 px-5 py-4 text-red-500 text-sm font-medium active:bg-red-50"
+              onClick={() => setShowChatMenu(false)}
+            >
+              <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
+                <Flag size={16} className="text-red-400" />
+              </div>
+              Report Conversation
+              <span className="ml-auto text-[10px] font-bold text-white bg-[#6c47ff] px-2 py-0.5 rounded-full">Soon</span>
+            </button>
+            <div className="h-px bg-[#f0eeea] mx-5" />
+            <button
+              className="w-full flex items-center gap-4 px-5 py-4 text-[#7a7570] text-sm font-medium active:bg-[#f8f7f5]"
+              onClick={() => setShowChatMenu(false)}
+            >
+              <div className="w-9 h-9 rounded-full bg-[#f0eeea] flex items-center justify-center flex-shrink-0">
+                <X size={16} className="text-[#7a7570]" />
+              </div>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Feedback modal (client only) ── */}
       {showFeedback && (

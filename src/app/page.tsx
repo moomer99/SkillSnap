@@ -14,7 +14,9 @@ import ProfileScreen from "@/components/skillsnap/ProfileScreen";
 import UploadScreen from "@/components/skillsnap/UploadScreen";
 import MessagesScreen from "@/components/skillsnap/MessagesScreen";
 import ChatScreen from "@/components/skillsnap/ChatScreen";
+import EditProfileScreen from "@/components/skillsnap/EditProfileScreen";
 import BottomNav from "@/components/skillsnap/BottomNav";
+import { ToastProvider } from "@/components/skillsnap/shared/Toast";
 
 // Screens that show the bottom nav
 const NAV_SCREENS: Screen[] = ["home", "discover", "upload", "messages", "own-profile"];
@@ -51,14 +53,15 @@ function SkillSnapRouter() {
           </div>
         )}
         {/* Screen renderer */}
-        {screen === "auth"           && <AuthScreen    onNavigate={navigate} />}
-        {screen === "home"           && <HomeFeed      onNavigate={navigate} />}
-        {screen === "discover"       && <DiscoverScreen onNavigate={navigate} />}
-        {screen === "own-profile"    && <ProfileScreen  variant="own"    onNavigate={navigate} />}
-        {screen === "client-profile" && <ProfileScreen  variant="client" onNavigate={navigate} />}
-        {screen === "upload"         && <UploadScreen   onNavigate={navigate} />}
-        {screen === "messages"       && <MessagesScreen onNavigate={navigate} />}
-        {screen === "chat"           && <ChatScreen     onNavigate={navigate} />}
+        {screen === "auth"           && <AuthScreen       onNavigate={navigate} />}
+        {screen === "home"           && <HomeFeed         onNavigate={navigate} />}
+        {screen === "discover"       && <DiscoverScreen   onNavigate={navigate} />}
+        {screen === "own-profile"    && <ProfileScreen    variant="own"    onNavigate={navigate} />}
+        {screen === "client-profile" && <ProfileScreen    variant="client" onNavigate={navigate} />}
+        {screen === "upload"         && <UploadScreen     onNavigate={navigate} />}
+        {screen === "messages"       && <MessagesScreen   onNavigate={navigate} />}
+        {screen === "chat"           && <ChatScreen       onNavigate={navigate} />}
+        {screen === "edit-profile"   && <EditProfileScreen onNavigate={navigate} />}
 
         {showBottomNav && <BottomNav active={screen} onNavigate={navigate} />}
       </div>
@@ -78,6 +81,7 @@ function SkillSnapRouter() {
             ["upload",         "Upload"],
             ["messages",       "Messages"],
             ["chat",           "Chat"],
+            ["edit-profile",   "Edit Profile"],
           ] as [Screen, string][]
         ).map(([s, label]) => (
           <button
@@ -98,7 +102,9 @@ function SkillSnapRouter() {
 export default function SkillSnapApp() {
   return (
     <AppProvider>
-      <SkillSnapRouter />
+      <ToastProvider>
+        <SkillSnapRouter />
+      </ToastProvider>
     </AppProvider>
   );
 }

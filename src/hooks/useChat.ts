@@ -93,18 +93,30 @@ export function useChat() {
 
     try {
       const confirmed = await messageService.sendMessage(threadId, text);
-      // Replace optimistic with confirmed DB row (has real id + timestamp)
       setMessages((prev) =>
         prev.map((m) => (m.id === optimisticId ? confirmed : m))
       );
     } catch {
-      // Roll back optimistic message on failure; restore the input text
       setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
       setInputText(text);
     } finally {
       setSending(false);
     }
   }, [inputText, threadId]);
+
+  // Send an image as a local-preview bubble (full upload wiring added when storage is ready)
+  const sendImageMessage = useCallback((imageUrl: string, fileName: string) => {
+    if (!threadId) return;
+    const msg: Message = {
+      id: `img_${Date.now()}`,
+      threadId,
+      from: "me",
+      text: fileName,
+      imageUrl,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+    setMessages((prev) => [...prev, msg]);
+  }, [threadId]);
 
   return {
     messages,
@@ -113,6 +125,7 @@ export function useChat() {
     sending,
     loading,
     sendMessage,
+    sendImageMessage,
     threadId,
     bottomRef,
   };
