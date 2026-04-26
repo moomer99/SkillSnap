@@ -196,12 +196,12 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           )}
         </div>
 
-        {/* Tabs — My Works | Saved */}
+        {/* Grid section */}
         <div className="pt-0">
-          {/* Tab bar + featured first post thumbnail */}
-          <div className="flex items-stretch border-b border-[#e8e4df] bg-white">
-            {/* Tabs */}
-            <div className="flex flex-1">
+
+          {isOwn ? (
+            /* ── Own profile: My Works | Saved tabs ── */
+            <div className="flex border-b border-[#e8e4df] bg-white">
               <button
                 onClick={() => setActiveTab("work")}
                 className={`flex-1 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
@@ -239,21 +239,27 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 )}
               </button>
             </div>
-
-          </div>
-
-          {/* My Works grid */}
-          {activeTab === "work" && (
-            <>
-              {!isOwn && (
-                <div className="flex items-center justify-between px-4 mb-3 pt-3">
-                  <h3 className="text-sm font-bold text-[#1a1a1a]">Works</h3>
-                  <span className="text-xs text-[#7a7570]">
-                    {gridLoading ? "…" : `${posts.length > 0 ? posts.length : (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)} posts`}
+          ) : (
+            /* ── Client profile: plain Works header with count ── */
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-[#e8e4df] bg-white">
+              <h3 className="text-sm font-bold text-[#1a1a1a]">Works</h3>
+              {(() => {
+                const count = SUPABASE_CONFIGURED
+                  ? (gridLoading ? null : posts.length)
+                  : MOCK_WORK_GRID.length;
+                if (!count) return null;
+                return (
+                  <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">
+                    {count}
                   </span>
-                </div>
-              )}
-              <div className="grid grid-cols-3 gap-0.5 pt-0.5">
+                );
+              })()}
+            </div>
+          )}
+
+          {/* Grid — shown for "work" tab on own, always on client */}
+          {(activeTab === "work" || !isOwn) && (
+            <div className="grid grid-cols-3 gap-0.5 pt-0.5">
                 {gridLoading ? (
                   Array.from({ length: 6 }).map((_, i) => (
                     <div key={i} className="aspect-square bg-gray-200 animate-pulse" />
@@ -282,10 +288,9 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                   </div>
                 )}
               </div>
-            </>
           )}
 
-          {/* Saved grid */}
+          {/* Saved grid — own profile only */}
           {activeTab === "saved" && isOwn && (
             <div className="grid grid-cols-3 gap-0.5 px-0.5 pt-0.5">
               {savedPostsList.length > 0 ? (
