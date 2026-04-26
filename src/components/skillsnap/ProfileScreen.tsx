@@ -240,12 +240,6 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
               </button>
             </div>
 
-            {/* Featured first-post thumbnail beside tabs */}
-            <FeaturedThumb
-              post={activeTab === "work" ? posts[0] : savedPostsList[0]}
-              mockItem={activeTab === "work" && !SUPABASE_CONFIGURED && posts.length === 0 ? MOCK_WORK_GRID[0] : undefined}
-              onClick={(p) => setViewingPost(p)}
-            />
           </div>
 
           {/* My Works grid */}
