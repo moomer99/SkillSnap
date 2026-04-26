@@ -127,7 +127,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 label="Jobs Done"
                 highlight
               />
-              <Stat value={happyDisplay} label="Happy" emoji="😊" />
+              <Stat value={happyDisplay} label="😊 Happy" />
               <Stat value={connections} label="Connections" />
             </div>
           </div>
@@ -643,10 +643,9 @@ function MediaViewer({
   );
 }
 
-function Stat({ value, label, highlight, emoji }: { value: string; label: string; highlight?: boolean; emoji?: string }) {
+function Stat({ value, label, highlight }: { value: string; label: string; highlight?: boolean }) {
   return (
     <div className="flex flex-col items-center gap-0.5 py-1">
-      {emoji && <span className="text-[15px] leading-none">{emoji}</span>}
       <span className={`font-extrabold text-[15px] leading-tight tracking-tight ${highlight ? "text-[#6c47ff]" : "text-[#1a1a1a]"}`}>
         {value}
       </span>
