@@ -20,12 +20,10 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   async rewrites() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-    if (!supabaseUrl) return [];
     return [
       {
         source: "/supabase/:path*",
-        destination: `${supabaseUrl}/:path*`,
+        destination: "https://dnraeyxjzdmpdvrkzyfd.supabase.co/:path*",
       },
     ];
   },
