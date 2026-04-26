@@ -15,7 +15,6 @@ import { useMessages } from "@/hooks/useMessages";
 import { useAppState } from "@/state/AppState";
 import UserAvatar from "./shared/UserAvatar";
 import ConnectButton from "./shared/ConnectButton";
-import FeedbackModal from "./FeedbackModal";
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -37,7 +36,6 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
   const [gridLoading, setGridLoading] = useState(true);
   const [viewingPost, setViewingPost] = useState<Post | null>(null);
   const [activeTab, setActiveTab] = useState<"work" | "saved">("work");
-  const [showFeedback, setShowFeedback] = useState(false);
 
   // Saved posts — resolved from global savedPosts set + all known posts
   const allKnownPosts = [...state.posts, ...posts];
@@ -184,16 +182,6 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             )}
           </div>
 
-          {/* Job Done feedback CTA — only on client viewing a skiller's profile */}
-          {!isOwn && user.skill && (
-            <button
-              onClick={() => setShowFeedback(true)}
-              className="mt-3 w-full h-11 rounded-2xl font-semibold text-sm border border-[#e8e4df] bg-[#f8f7f5] flex items-center justify-center gap-2 text-[#1a1a1a] transition-all active:scale-[0.98]"
-            >
-              <span className="text-base">😊</span>
-              Job Done? Leave Feedback
-            </button>
-          )}
         </div>
 
         {/* Grid section */}
@@ -328,24 +316,6 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
         />
       )}
 
-      {/* Feedback modal */}
-      {showFeedback && (
-        <FeedbackModal
-          skiller={{
-            displayName: user.displayName,
-            skill: user.skill,
-            avatarUrl: user.avatarUrl,
-            avatarInitial: user.avatarInitial,
-            avatarGradient: user.avatarGradient,
-          }}
-          onClose={() => setShowFeedback(false)}
-          onSubmit={async (fb) => {
-            // In production: call jobService.submitFeedback(user.id, fb)
-            await new Promise((r) => setTimeout(r, 700));
-            console.log("Feedback submitted:", fb);
-          }}
-        />
-      )}
     </div>
   );
 }
