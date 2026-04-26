@@ -228,8 +228,8 @@ function FeedCard({
           style={{ background: "rgba(0,0,0,0.42)", backdropFilter: "blur(10px)" }}
         >
           <StatCell value={fmtNum(author.jobsDone)} label="Jobs Done" icon={
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="#facc15">
-              <path d="M8 1l1.8 3.6 4 .6-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4L2.2 5.2l4-.6L8 1z"/>
+            <svg width="14" height="13" viewBox="0 0 16 14" fill="white">
+              <path d="M6 0h4a1 1 0 011 1v1h3a1 1 0 011 1v9a1 1 0 01-1 1H2a1 1 0 01-1-1V3a1 1 0 011-1h3V1a1 1 0 011-1zm0 2h4V1H6v1zM1 6v1h14V6H1zm0 2v4h14V8H1z"/>
             </svg>
           } />
           <VSep />
