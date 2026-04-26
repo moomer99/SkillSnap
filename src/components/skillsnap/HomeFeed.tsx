@@ -124,8 +124,8 @@ function FeedCard({
 
   return (
     <div
-      className="relative w-full snap-start overflow-hidden bg-gray-900 flex-shrink-0"
-      style={{ height: `calc(100dvh - ${HEADER_H}px)` }}
+      className="relative w-full snap-start overflow-hidden bg-gray-900 flex-shrink-0 mb-2 rounded-xl"
+      style={{ height: `calc(100dvh - ${HEADER_H}px - 8px)` }}
     >
       {/* ── Media ── */}
       <div className="absolute inset-0 cursor-pointer" onClick={handleMediaTap}>
