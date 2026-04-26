@@ -1,7 +1,10 @@
 import { getSupabase } from "@/lib/supabase";
 import type { Post, SkillCategory } from "@/types";
 
-const REAL_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const REAL_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+
+const SUPABASE_CONFIGURED =
+  !!REAL_SUPABASE_URL && !REAL_SUPABASE_URL.includes("your-project-ref");
 
 function getRealPublicUrl(bucket: string, path: string): string {
   return `${REAL_SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
@@ -56,6 +59,37 @@ export const uploadService = {
   },
 
   async createPost(payload: UploadPayload): Promise<Post | null> {
+    // ── Mock path (no Supabase) ──────────────────────────────────────
+    if (!SUPABASE_CONFIGURED) {
+      await new Promise((r) => setTimeout(r, 800)); // simulate upload delay
+
+      const isVideo = payload.file ? payload.file.type.startsWith("video/") : false;
+      const mediaUrl = payload.file ? URL.createObjectURL(payload.file) : undefined;
+
+      const { MOCK_CURRENT_USER } = await import("@/mock-data/users");
+      const { randomGradient } = await import("@/mock-data/posts");
+
+      const mockPost: Post = {
+        id: `mock_post_${Date.now()}`,
+        authorId: MOCK_CURRENT_USER.id,
+        author: MOCK_CURRENT_USER,
+        type: isVideo ? "video" : "photo",
+        mediaUrl,
+        thumbnailUrl: isVideo ? undefined : mediaUrl,
+        thumbnailGradient: randomGradient(`mock_${Date.now()}`),
+        caption: payload.caption,
+        skill: (payload.skill as SkillCategory) || undefined,
+        location: payload.location || undefined,
+        likes: 0,
+        likedByMe: false,
+        savedByMe: false,
+        createdAt: new Date().toISOString(),
+      };
+
+      return mockPost;
+    }
+
+    // ── Real Supabase path ───────────────────────────────────────────
     const sb = getSupabase();
     const userId = await getCurrentUserId();
 

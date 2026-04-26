@@ -71,27 +71,25 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     setTimeout(() => fileInputRef.current?.click(), 0);
   }
 
-  async function handlePost() {
+  async function handlePublish() {
     if (!caption.trim() && !selectedFile) {
-      setError("Add a caption or media before posting.");
+      setError("Add a caption or select a file before publishing.");
       return;
     }
     setError(null);
     setLoading(true);
     try {
-      await uploadService.createPost({
+      const newPost = await uploadService.createPost({
         file: selectedFile ?? undefined,
         caption: caption.trim(),
         skill: skill,
         location,
       });
-      // Signal feed and profile to reload with the new post
       dispatch({ type: "REFRESH_FEED" });
       setPosted(true);
-      // Navigate to own profile so the new post is visible in the grid
       setTimeout(() => onNavigate("own-profile"), 1400);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to post. Please try again.";
+      const msg = err instanceof Error ? err.message : "Failed to publish. Please try again.";
       setError(msg);
     } finally {
       setLoading(false);
@@ -104,8 +102,8 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         <div className="w-16 h-16 rounded-full bg-[#ede9fe] flex items-center justify-center">
           <CheckCircle size={32} className="text-[#6c47ff]" />
         </div>
-        <p className="text-base font-bold text-[#1a1a1a]">Posted!</p>
-        <p className="text-sm text-[#7a7570]">Your work is live on the feed</p>
+        <p className="text-base font-bold text-[#1a1a1a]">Published!</p>
+        <p className="text-sm text-[#7a7570]">Your work is now live on the feed</p>
       </div>
     );
   }
@@ -277,15 +275,15 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         )}
       </div>
 
-      {/* Post button */}
+      {/* Publish button */}
       <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[390px] px-4 pb-4 pt-3 bg-white/95 backdrop-blur-sm border-t border-[#e8e4df]">
         <button
-          onClick={handlePost}
-          disabled={loading}
-          className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+          onClick={handlePublish}
+          disabled={loading || (!caption.trim() && !selectedFile)}
+          className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
           style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
         >
-          {loading ? <><Loader2 size={20} className="animate-spin" /> Posting...</> : "Post"}
+          {loading ? <><Loader2 size={20} className="animate-spin" /> Publishing…</> : "Publish"}
         </button>
       </div>
     </div>
