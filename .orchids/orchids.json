@@ -1,6 +1,6 @@
 {
   "startupCommands": [
-    "npm install; npm run dev"
+    "npm install; npm run dev -- --port 3001"
   ],
   "projectId": "399257e2-309a-4a02-acf3-8a8123a981f3",
   "templateId": "nextjs"
