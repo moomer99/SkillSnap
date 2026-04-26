@@ -116,18 +116,16 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             {/* Avatar */}
             <UserAvatar user={user} size="lg" showVerified={isOwn} />
 
-            {/* Stats: Posts · Jobs Done · Happy · Connections */}
-            <div className="flex-1 grid grid-cols-4 gap-1 pt-1">
-              <Stat
-                value={gridLoading ? String(user.postCount) : String(SUPABASE_CONFIGURED ? posts.length : user.postCount)}
-                label="Posts"
-              />
+            {/* Stats: Jobs Done · Happy · Connections */}
+            <div className="flex-1 flex items-center justify-around pt-1 pb-1">
               <Stat
                 value={user.jobsDone >= 1000 ? `${(user.jobsDone / 1000).toFixed(0)}k` : String(user.jobsDone)}
                 label="Jobs Done"
                 highlight
               />
+              <div className="w-px h-8 bg-[#e8e4df]" />
               <Stat value={happyDisplay} label="😊 Happy" />
+              <div className="w-px h-8 bg-[#e8e4df]" />
               <Stat value={connections} label="Connections" />
             </div>
           </div>
@@ -198,23 +196,25 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           )}
         </div>
 
-        {/* Tabs — My Work | Saved (own only) */}
-        <div className="px-1 pt-3">
-          {isOwn && (
-            <div className="flex border-b border-[#e8e4df] mb-0 px-2">
+        {/* Tabs — My Works | Saved */}
+        <div className="pt-0">
+          {/* Tab bar + featured first post thumbnail */}
+          <div className="flex items-stretch border-b border-[#e8e4df] bg-white">
+            {/* Tabs */}
+            <div className="flex flex-1">
               <button
                 onClick={() => setActiveTab("work")}
-                className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+                className={`flex-1 py-3 text-sm font-semibold transition-colors ${
                   activeTab === "work"
                     ? "text-[#6c47ff] border-b-2 border-[#6c47ff]"
                     : "text-[#7a7570]"
                 }`}
               >
-                My Work
+                My Works
               </button>
               <button
                 onClick={() => setActiveTab("saved")}
-                className={`flex-1 py-2.5 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
+                className={`flex-1 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
                   activeTab === "saved"
                     ? "text-[#6c47ff] border-b-2 border-[#6c47ff]"
                     : "text-[#7a7570]"
@@ -228,20 +228,27 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 )}
               </button>
             </div>
-          )}
 
-          {/* My Work grid */}
+            {/* Featured first-post thumbnail beside tabs */}
+            <FeaturedThumb
+              post={activeTab === "work" ? posts[0] : savedPostsList[0]}
+              mockItem={activeTab === "work" && !SUPABASE_CONFIGURED && posts.length === 0 ? MOCK_WORK_GRID[0] : undefined}
+              onClick={(p) => setViewingPost(p)}
+            />
+          </div>
+
+          {/* My Works grid */}
           {activeTab === "work" && (
             <>
               {!isOwn && (
-                <div className="flex items-center justify-between px-4 mb-3 pt-1">
-                  <h3 className="text-sm font-bold text-[#1a1a1a]">Work</h3>
+                <div className="flex items-center justify-between px-4 mb-3 pt-3">
+                  <h3 className="text-sm font-bold text-[#1a1a1a]">Works</h3>
                   <span className="text-xs text-[#7a7570]">
                     {gridLoading ? "…" : `${posts.length > 0 ? posts.length : (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)} posts`}
                   </span>
                 </div>
               )}
-              <div className="grid grid-cols-3 gap-0.5 px-0.5 pt-0.5">
+              <div className="grid grid-cols-3 gap-0.5 pt-0.5">
                 {gridLoading ? (
                   Array.from({ length: 6 }).map((_, i) => (
                     <div key={i} className="aspect-square bg-gray-200 animate-pulse" />
@@ -328,6 +335,38 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             console.log("Feedback submitted:", fb);
           }}
         />
+      )}
+    </div>
+  );
+}
+
+function FeaturedThumb({
+  post, mockItem, onClick,
+}: {
+  post?: Post;
+  mockItem?: { gradient: string; hasVideo: boolean };
+  onClick: (p: Post) => void;
+}) {
+  if (!post && !mockItem) return null;
+  return (
+    <div
+      className="w-14 h-14 relative overflow-hidden flex-shrink-0 self-center mr-3 rounded-xl border-2 border-[#6c47ff]/30 cursor-pointer"
+      onClick={() => post && onClick(post)}
+    >
+      {post?.thumbnailUrl ? (
+        <img src={post.thumbnailUrl} className="w-full h-full object-cover" alt="" />
+      ) : (
+        <div
+          className="w-full h-full"
+          style={{ background: post?.thumbnailGradient ?? mockItem?.gradient ?? "#ccc" }}
+        />
+      )}
+      {(post?.type === "video" || mockItem?.hasVideo) && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-white/35 flex items-center justify-center">
+            <Play size={8} fill="white" color="white" />
+          </div>
+        </div>
       )}
     </div>
   );
