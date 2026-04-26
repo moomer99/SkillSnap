@@ -3,7 +3,9 @@
 // SkillSnap — Auth / Onboarding Screen
 // Supports: Google OAuth + email/password (Supabase Auth)
 // ─────────────────────────────────────────────
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const SAVED_EMAIL_KEY = "skillsnap_saved_email";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import type { Screen } from "@/types";
 import { APP_CONFIG } from "@/constants/config";
@@ -60,10 +62,20 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { dispatch } = useAppState();
+
+  // Auto-fill saved email on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(SAVED_EMAIL_KEY);
+    if (saved) {
+      setEmail(saved);
+      setRememberMe(true);
+    }
+  }, []);
 
   async function handleGoogleSignIn() {
     setError(null);
@@ -94,6 +106,12 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
       if (!result.success) {
         setError(result.error ?? "Something went wrong. Please try again.");
       } else {
+        // Persist or clear saved email based on "Remember me"
+        if (rememberMe) {
+          localStorage.setItem(SAVED_EMAIL_KEY, email);
+        } else {
+          localStorage.removeItem(SAVED_EMAIL_KEY);
+        }
         if (result.user) dispatch({ type: "SET_AUTH", user: result.user });
         onNavigate("home");
       }
@@ -182,6 +200,25 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                 </button>
               </div>
             </div>
+
+            {/* Remember me — login only */}
+            {mode === "login" && (
+              <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                <div
+                  onClick={() => setRememberMe(r => !r)}
+                  className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                    rememberMe ? "bg-[#6c47ff] border-[#6c47ff]" : "bg-white border-[#d0ccc8]"
+                  }`}
+                >
+                  {rememberMe && (
+                    <svg width="11" height="8" viewBox="0 0 11 8" fill="none">
+                      <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </div>
+                <span className="text-sm text-[#4a4a4a] font-medium">Remember my email</span>
+              </label>
+            )}
 
             {/* Error */}
             {error && (
