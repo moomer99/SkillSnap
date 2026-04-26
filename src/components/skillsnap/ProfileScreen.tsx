@@ -301,7 +301,13 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
       {/* Feedback modal */}
       {showFeedback && (
         <FeedbackModal
-          skiller={{ displayName: user.displayName, avatarInitial: user.avatarInitial, avatarGradient: user.avatarGradient }}
+          skiller={{
+            displayName: user.displayName,
+            skill: user.skill,
+            avatarUrl: user.avatarUrl,
+            avatarInitial: user.avatarInitial,
+            avatarGradient: user.avatarGradient,
+          }}
           onClose={() => setShowFeedback(false)}
           onSubmit={async (fb) => {
             // In production: call jobService.submitFeedback(user.id, fb)
