@@ -280,52 +280,20 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
   const isFirst = current === 0;
   const isLast = current === slides.length - 1;
 
-  // Translate: each slide is 100% of the track width; we shift by current index + live drag
-  const trackWidth = typeof window !== "undefined" ? (trackRef.current?.offsetWidth ?? 390) : 390;
-  const baseTranslate = -(current * trackWidth);
-  const totalTranslate = baseTranslate + dragOffset;
+  // Percentage-based base translate (no dependency on measured width) + raw px drag offset
+  // Track is N*100% wide; shifting by -(current * 100/N)% moves exactly one slide width
+  const pctBase = -((current * 100) / slides.length);
+  const translateValue = `calc(${pctBase}% + ${dragOffset}px)`;
 
   return (
     <div
-      className="flex flex-col select-none overflow-hidden"
+      className="relative flex flex-col select-none overflow-hidden"
       style={{
         minHeight: "100dvh",
         background: "linear-gradient(150deg, #edeaff 0%, #f4f2ff 50%, #eef1ff 100%)",
       }}
     >
-      {/* Skip — shown on slides 2 & 3 only */}
-      <div className="flex justify-end px-5 pt-5" style={{ height: 44 }}>
-        {!isFirst && !isLast && (
-          <button
-            onClick={finish}
-            className="text-sm font-semibold text-[#6c47ff] px-3 py-1 rounded-full active:opacity-60 transition-opacity"
-          >
-            Skip
-          </button>
-        )}
-      </div>
-
-      {/* Dot indicators */}
-      <div className="flex justify-center items-center gap-2 pt-1 pb-2">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            style={{
-              width: i === current ? 28 : 8,
-              height: 8,
-              borderRadius: 4,
-              background: i === current ? "#6c47ff" : "#c4b5fd",
-              transition: "width 0.3s ease, background 0.3s ease",
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Slides track */}
+      {/* Slides track — fills all available space */}
       <div
         ref={trackRef}
         className="flex-1 overflow-hidden"
@@ -339,7 +307,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
             display: "flex",
             height: "100%",
             width: `${slides.length * 100}%`,
-            transform: `translateX(${totalTranslate}px)`,
+            transform: `translateX(${translateValue})`,
             transition: isDragging ? "none" : "transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)",
             willChange: "transform",
           }}
@@ -347,7 +315,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
           {slides.map((s, i) => (
             <div
               key={i}
-              style={{ width: `${100 / slides.length}%` }}
+              style={{ width: `${100 / slides.length}%`, height: "100%" }}
               className="flex flex-col items-center justify-center px-8 gap-6"
             >
               {/* Illustration */}
@@ -376,6 +344,46 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
             </div>
           ))}
         </div>
+
+        {/* Dots overlaid at bottom of the slide area */}
+        <div
+          className="absolute bottom-5 left-0 right-0 flex justify-center items-center gap-2"
+          style={{ pointerEvents: "none" }}
+        >
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              style={{
+                width: i === current ? 28 : 8,
+                height: 8,
+                borderRadius: 4,
+                background: i === current ? "#6c47ff" : "rgba(108,71,255,0.35)",
+                transition: "width 0.3s ease, background 0.3s ease",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                pointerEvents: "auto",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Skip — shown on slides 2 & 3 only */}
+      <div
+        className="absolute top-5 right-5"
+        style={{ zIndex: 10 }}
+      >
+        {!isFirst && !isLast && (
+          <button
+            onClick={finish}
+            className="text-sm font-semibold text-[#6c47ff] px-3 py-1 rounded-full active:opacity-60 transition-opacity"
+            style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(4px)" }}
+          >
+            Skip
+          </button>
+        )}
       </div>
 
       {/* Bottom controls */}
