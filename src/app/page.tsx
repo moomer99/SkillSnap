@@ -31,13 +31,64 @@ function SkillSnapRouter() {
 
   return (
     <div
-      className="relative w-full min-h-screen flex justify-center bg-[#f0eeea]"
-      style={{ fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif" }}
+      className="relative w-full min-h-screen flex justify-center"
+      style={{
+        fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif",
+        background: "linear-gradient(135deg, #1a0a3c 0%, #2d1264 30%, #1e1050 60%, #0f0a2e 100%)",
+      }}
     >
+      {/* Desktop background decoration — only visible on larger screens */}
+      <div className="hidden sm:block absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Large soft orbs */}
+        <div style={{
+          position: "absolute", top: "-10%", left: "5%",
+          width: 520, height: 520, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(108,71,255,0.22) 0%, transparent 70%)",
+        }}/>
+        <div style={{
+          position: "absolute", bottom: "-5%", right: "6%",
+          width: 440, height: 440, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(139,106,245,0.18) 0%, transparent 70%)",
+        }}/>
+        <div style={{
+          position: "absolute", top: "40%", left: "2%",
+          width: 300, height: 300, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(167,139,250,0.12) 0%, transparent 70%)",
+        }}/>
+        <div style={{
+          position: "absolute", top: "20%", right: "4%",
+          width: 260, height: 260, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(196,181,253,0.10) 0%, transparent 70%)",
+        }}/>
+        {/* Subtle grid overlay */}
+        <svg
+          className="absolute inset-0 w-full h-full"
+          style={{ opacity: 0.04 }}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <pattern id="bg-grid" width="48" height="48" patternUnits="userSpaceOnUse">
+              <path d="M 48 0 L 0 0 0 48" fill="none" stroke="white" strokeWidth="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#bg-grid)"/>
+        </svg>
+        {/* SkillSnap wordmark watermark */}
+        <div style={{
+          position: "absolute", bottom: 32, left: "50%",
+          transform: "translateX(-50%)",
+          fontSize: 13, fontWeight: 700, letterSpacing: "0.08em",
+          color: "rgba(255,255,255,0.18)", whiteSpace: "nowrap",
+          userSelect: "none",
+        }}>
+          SKILLSNAP
+        </div>
+      </div>
+
       {/* App shell — full width on mobile, capped at 430px on larger screens */}
       <div
         className="relative w-full bg-[#f8f7f5] overflow-hidden"
-        style={{ maxWidth: "min(100vw, 430px)", minHeight: "100dvh", boxShadow: "0 0 80px rgba(0,0,0,0.12)" }}
+        style={{ maxWidth: "min(100vw, 430px)", minHeight: "100dvh", boxShadow: "0 0 120px rgba(108,71,255,0.35), 0 0 40px rgba(0,0,0,0.4)" }}
       >
         {/* Auth loading splash — shown while session resolves (not on onboarding) */}
         {authLoading && screen !== "auth" && (
