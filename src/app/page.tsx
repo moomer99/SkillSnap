@@ -17,6 +17,7 @@ import ChatScreen from "@/components/skillsnap/ChatScreen";
 import EditProfileScreen from "@/components/skillsnap/EditProfileScreen";
 import BottomNav from "@/components/skillsnap/BottomNav";
 import { ToastProvider } from "@/components/skillsnap/shared/Toast";
+import AuthPromptModal from "@/components/skillsnap/shared/AuthPromptModal";
 
 // Screens that show the bottom nav
 const NAV_SCREENS: Screen[] = ["home", "discover", "upload", "messages", "own-profile"];
@@ -64,6 +65,7 @@ function SkillSnapRouter() {
         {screen === "edit-profile"   && <EditProfileScreen onNavigate={navigate} />}
 
         {showBottomNav && <BottomNav active={screen} onNavigate={navigate} />}
+        <AuthPromptModal />
       </div>
 
       {/* Desktop screen switcher — dev preview only */}

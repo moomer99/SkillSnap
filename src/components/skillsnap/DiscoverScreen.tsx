@@ -16,8 +16,13 @@ interface DiscoverScreenProps {
 
 export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
   const { pins, activeFilter, setFilter } = useDiscovery();
-  const { dispatch } = useAppState();
+  const { state, dispatch } = useAppState();
   const { connectTo, connecting } = useMessages();
+
+  function requireAuth(action: () => void) {
+    if (state.isGuest) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
+    action();
+  }
 
   function handleProfileClick(userId: string) {
     dispatch({ type: "SET_VIEWING_USER", userId });
@@ -116,7 +121,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
             <div key={pin.id} className="flex flex-col gap-1.5 flex-shrink-0">
               <UserPreviewCard pin={pin} onClick={() => handleProfileClick(pin.userId)} />
               <ConnectButton
-                onClick={() => connectTo(pin.userId)}
+                onClick={() => requireAuth(() => connectTo(pin.userId))}
                 size="sm"
                 loading={connecting}
               />

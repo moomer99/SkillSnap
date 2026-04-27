@@ -14,7 +14,9 @@ import { mapProfile, ensureProfile } from "@/services/authService";
 interface AppStateShape {
   currentUser: User | null;
   isAuthenticated: boolean;
+  isGuest: boolean;
   authLoading: boolean; // true while session is being resolved on mount
+  showAuthPrompt: boolean;
 
   screen: Screen;
   previousScreen: Screen | null;
@@ -61,13 +63,18 @@ type Action =
   | { type: "CLOSE_JOBS_DONE_MODAL" }
   | { type: "UPDATE_PARTICIPANT_HAPPY"; userId: string; happyPercent: number }
   | { type: "SET_THREAD_STARTED_AT"; threadId: string; startedAt: string }
-  | { type: "PREPEND_POST"; post: Post };
+  | { type: "PREPEND_POST"; post: Post }
+  | { type: "SKIP_AUTH" }
+  | { type: "SHOW_AUTH_PROMPT" }
+  | { type: "HIDE_AUTH_PROMPT" };
 
 // ── Initial State ────────────────────────────
 const initialState: AppStateShape = {
   currentUser: null,
   isAuthenticated: false,
+  isGuest: false,
   authLoading: true, // start true — resolve on mount
+  showAuthPrompt: false,
   screen: "auth",
   previousScreen: null,
   posts: [],
@@ -93,6 +100,8 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         ...state,
         currentUser: action.user,
         isAuthenticated: true,
+        isGuest: false,
+        showAuthPrompt: false,
         authLoading: false,
         screen: state.screen === "auth" ? "home" : state.screen,
       };
@@ -179,6 +188,17 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         localPosts: [action.post, ...state.localPosts],
         posts: [action.post, ...state.posts],
       };
+    case "SKIP_AUTH":
+      return {
+        ...state,
+        isGuest: true,
+        authLoading: false,
+        screen: "home",
+      };
+    case "SHOW_AUTH_PROMPT":
+      return { ...state, showAuthPrompt: true };
+    case "HIDE_AUTH_PROMPT":
+      return { ...state, showAuthPrompt: false };
     default:
       return state;
   }

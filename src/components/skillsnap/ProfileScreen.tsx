@@ -31,7 +31,12 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
 
   const { user, isFollowing, toggleFollow } = useProfile(variant);
   const { connectTo, connecting } = useMessages();
-  const { state, navigate } = useAppState();
+  const { state, navigate, dispatch } = useAppState();
+
+  function requireAuth(action: () => void) {
+    if (state.isGuest) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
+    action();
+  }
   const [posts, setPosts] = useState<Post[]>([]);
   const [gridLoading, setGridLoading] = useState(true);
   const [viewingPost, setViewingPost] = useState<Post | null>(null);
@@ -182,13 +187,13 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 {/* Connect — opens/creates conversation then navigates to chat */}
                 <div className="flex-1">
                   <ConnectButton
-                    onClick={() => connectTo(user.id)}
+                    onClick={() => requireAuth(() => connectTo(user.id))}
                     fullWidth
                     loading={connecting}
                   />
                 </div>
                 <button
-                  onClick={() => toggleFollow(user.id)}
+                  onClick={() => requireAuth(() => toggleFollow(user.id))}
                   className={`flex-1 h-11 rounded-2xl font-semibold text-sm border-2 transition-all active:scale-[0.98] ${
                     isFollowing
                       ? "text-white bg-[#6c47ff] border-[#6c47ff]"

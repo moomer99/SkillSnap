@@ -38,8 +38,13 @@ function fmtNum(n: number | undefined): string {
 export default function HomeFeed({ onNavigate }: HomeFeedProps) {
   const { posts, loading, likedPosts, savedPosts, toggleLike, toggleSave } = useFeed();
   const { connectTo, connecting } = useMessages();
-  const { dispatch } = useAppState();
+  const { state, dispatch } = useAppState();
   const { comingSoon } = useToast();
+
+  function requireAuth(action: () => void) {
+    if (state.isGuest) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
+    action();
+  }
 
   function handleProfileClick(userId: string) {
     dispatch({ type: "SET_VIEWING_USER", userId });
@@ -80,10 +85,10 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
               post={post}
               isLiked={likedPosts.has(post.id)}
               isSaved={savedPosts.has(post.id)}
-              onLike={() => toggleLike(post.id)}
-              onSave={() => toggleSave(post.id)}
+              onLike={() => requireAuth(() => toggleLike(post.id))}
+              onSave={() => requireAuth(() => toggleSave(post.id))}
               onProfileClick={() => handleProfileClick(post.authorId)}
-              onConnectClick={() => connectTo(post.authorId)}
+              onConnectClick={() => requireAuth(() => connectTo(post.authorId))}
               onShare={() => {
                 const text = post.caption || "Check out this skill on SkillSnap!";
                 if (navigator.share) navigator.share({ title: "SkillSnap", text }).catch(() => {});

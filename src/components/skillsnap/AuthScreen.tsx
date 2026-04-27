@@ -332,6 +332,13 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
           </div>
         )}
 
+        <button
+          onClick={() => dispatch({ type: "SKIP_AUTH" })}
+          className="w-full text-center text-sm text-[#7a7570] font-medium py-2 transition-colors active:text-[#4a4a4a]"
+        >
+          Skip for now
+        </button>
+
         <p className="text-center text-xs text-[#b0aaa5] mt-1">
           By continuing, you agree to our Terms &amp; Privacy Policy
         </p>
