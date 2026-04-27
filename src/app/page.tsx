@@ -34,10 +34,10 @@ function SkillSnapRouter() {
       className="relative w-full min-h-screen flex justify-center bg-[#f0eeea]"
       style={{ fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif" }}
     >
-      {/* Phone shell */}
+      {/* App shell — full width on mobile, capped at 430px on larger screens */}
       <div
         className="relative w-full bg-[#f8f7f5] overflow-hidden"
-        style={{ maxWidth: 390, minHeight: "100dvh", boxShadow: "0 0 80px rgba(0,0,0,0.12)" }}
+        style={{ maxWidth: "min(100vw, 430px)", minHeight: "100dvh", boxShadow: "0 0 80px rgba(0,0,0,0.12)" }}
       >
         {/* Auth loading splash — shown while session resolves (not on onboarding) */}
         {authLoading && screen !== "onboarding" && (

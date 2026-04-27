@@ -134,7 +134,7 @@ function FeedCard({
 
   return (
     <div
-      className="relative w-full overflow-hidden bg-gray-900 flex-shrink-0 mb-2 rounded-xl"
+      className="relative w-full overflow-hidden bg-gray-900 flex-shrink-0 mb-2"
       style={{ height: `calc(100dvh - ${HEADER_H}px - 8px)` }}
     >
       {/* ── Media ── */}
