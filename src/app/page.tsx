@@ -116,8 +116,8 @@ function SkillSnapRouter() {
       {/* Dev screen switcher — Orchids preview only, never shown on real domain */}
       {isOrchidsPreview && (
         <div
-          className="hidden sm:flex fixed top-3 left-1/2 -translate-x-1/2 z-50 items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1.5 shadow-lg border border-[#e8e4df] flex-wrap justify-center"
-          style={{ maxWidth: "calc(100vw - 2rem)" }}
+          className="hidden sm:flex fixed right-0 top-1/2 z-50 flex-col items-stretch gap-1 bg-white/90 backdrop-blur-sm rounded-l-2xl px-2 py-3 shadow-lg border border-r-0 border-[#e8e4df]"
+          style={{ transform: "translateY(-50%)" }}
         >
           {(
             [
@@ -127,7 +127,7 @@ function SkillSnapRouter() {
               ["search",         "Search"],
               ["discover",       "Discover"],
               ["own-profile",    "My Profile"],
-              ["client-profile", "Client Profile"],
+              ["client-profile", "Client"],
               ["upload",         "Upload"],
               ["messages",       "Messages"],
               ["chat",           "Chat"],
@@ -137,8 +137,10 @@ function SkillSnapRouter() {
             <button
               key={s}
               onClick={() => navigate(s)}
-              className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
-                screen === s ? "bg-[#6c47ff] text-white" : "text-[#7a7570] hover:text-[#1a1a1a]"
+              className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all text-left whitespace-nowrap ${
+                screen === s
+                  ? "bg-[#6c47ff] text-white"
+                  : "text-[#7a7570] hover:bg-[#f0eeea] hover:text-[#1a1a1a]"
               }`}
             >
               {label}
