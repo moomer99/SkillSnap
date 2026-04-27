@@ -34,61 +34,64 @@ function SkillSnapRouter() {
       className="relative w-full min-h-screen flex justify-center"
       style={{
         fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif",
-        background: "linear-gradient(135deg, #1a0a3c 0%, #2d1264 30%, #1e1050 60%, #0f0a2e 100%)",
+        background: "#f0eff7",
       }}
     >
-      {/* Desktop background decoration — only visible on larger screens */}
+      {/* Desktop background — only visible on sm+ screens */}
       <div className="hidden sm:block absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Large soft orbs */}
+
+        {/* Base warm-white gradient */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, #fafafa 0%, #f3f1fb 55%, #ede9f9 100%)" }} />
+
+        {/* Large lavender glow — right side, matching reference */}
         <div style={{
-          position: "absolute", top: "-10%", left: "5%",
-          width: 520, height: 520, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(108,71,255,0.22) 0%, transparent 70%)",
+          position: "absolute", top: "50%", right: "-8%",
+          transform: "translateY(-50%)",
+          width: 680, height: 680, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(180,160,255,0.28) 0%, rgba(196,181,253,0.12) 45%, transparent 72%)",
         }}/>
+
+        {/* Softer secondary glow — upper right */}
         <div style={{
-          position: "absolute", bottom: "-5%", right: "6%",
-          width: 440, height: 440, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(139,106,245,0.18) 0%, transparent 70%)",
+          position: "absolute", top: "-5%", right: "8%",
+          width: 400, height: 400, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(216,207,255,0.22) 0%, transparent 65%)",
         }}/>
+
+        {/* Very faint glow — lower left */}
         <div style={{
-          position: "absolute", top: "40%", left: "2%",
-          width: 300, height: 300, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(167,139,250,0.12) 0%, transparent 70%)",
+          position: "absolute", bottom: "-8%", left: "-4%",
+          width: 360, height: 360, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(196,181,253,0.14) 0%, transparent 65%)",
         }}/>
-        <div style={{
-          position: "absolute", top: "20%", right: "4%",
-          width: 260, height: 260, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(196,181,253,0.10) 0%, transparent 70%)",
-        }}/>
-        {/* Subtle grid overlay */}
+
+        {/* Decorative arc rings — right side, like reference */}
         <svg
-          className="absolute inset-0 w-full h-full"
-          style={{ opacity: 0.04 }}
+          style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", opacity: 0.55 }}
+          width="340" height="700" viewBox="0 0 340 700" fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <defs>
-            <pattern id="bg-grid" width="48" height="48" patternUnits="userSpaceOnUse">
-              <path d="M 48 0 L 0 0 0 48" fill="none" stroke="white" strokeWidth="1"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#bg-grid)"/>
+          <circle cx="340" cy="350" r="180" stroke="#c4b5fd" strokeWidth="1" fill="none" opacity="0.5"/>
+          <circle cx="340" cy="350" r="240" stroke="#ddd6fe" strokeWidth="1" fill="none" opacity="0.4"/>
+          <circle cx="340" cy="350" r="300" stroke="#ede9fe" strokeWidth="1" fill="none" opacity="0.3"/>
         </svg>
-        {/* SkillSnap wordmark watermark */}
-        <div style={{
-          position: "absolute", bottom: 32, left: "50%",
-          transform: "translateX(-50%)",
-          fontSize: 13, fontWeight: 700, letterSpacing: "0.08em",
-          color: "rgba(255,255,255,0.18)", whiteSpace: "nowrap",
-          userSelect: "none",
-        }}>
-          SKILLSNAP
-        </div>
+
+        {/* Subtle left arc */}
+        <svg
+          style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", opacity: 0.3 }}
+          width="120" height="500" viewBox="0 0 120 500" fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="0" cy="250" r="160" stroke="#c4b5fd" strokeWidth="1" fill="none"/>
+          <circle cx="0" cy="250" r="210" stroke="#ddd6fe" strokeWidth="1" fill="none"/>
+        </svg>
+
       </div>
 
       {/* App shell — full width on mobile, capped at 430px on larger screens */}
       <div
         className="relative w-full bg-[#f8f7f5] overflow-hidden"
-        style={{ maxWidth: "min(100vw, 430px)", minHeight: "100dvh", boxShadow: "0 0 120px rgba(108,71,255,0.35), 0 0 40px rgba(0,0,0,0.4)" }}
+        style={{ maxWidth: "min(100vw, 430px)", minHeight: "100dvh", boxShadow: "0 8px 60px rgba(108,71,255,0.12), 0 2px 20px rgba(0,0,0,0.08)" }}
       >
         {/* Auth loading splash — shown while session resolves (not on onboarding) */}
         {authLoading && screen !== "auth" && (
