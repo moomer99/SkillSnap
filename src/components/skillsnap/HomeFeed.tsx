@@ -250,13 +250,13 @@ function FeedCard({
           } />
           <VSep />
           <StatCell value={happyPct} label="Happy" icon={
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
               <circle cx="12" cy="12" r="10"/>
-              <path d="M8 13s1.5 2 4 2 4-2 4-2"/>
-              <line x1="9" y1="9" x2="9.01" y2="9"/>
-              <line x1="15" y1="9" x2="15.01" y2="9"/>
+              <circle cx="9" cy="9.5" r="1.2" fill="#000" opacity="0.45"/>
+              <circle cx="15" cy="9.5" r="1.2" fill="#000" opacity="0.45"/>
+              <path d="M7.5 13.5c1 2 8 2 9 0" stroke="#000" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.45"/>
             </svg>
-          } green />
+          } green={happyPct !== "—" && happyPct !== "0%"} />
           {displayLocation && (
             <>
               <VSep />
