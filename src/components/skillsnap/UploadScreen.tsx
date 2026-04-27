@@ -4,12 +4,11 @@
 // Wired to uploadService.createPost() + Supabase Storage
 // ─────────────────────────────────────────────
 import { useState, useRef } from "react";
-import { Video, Image as ImageIcon, ChevronDown, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
+import { Video, Image as ImageIcon, ChevronDown, ArrowLeft, Loader2, CheckCircle, Download } from "lucide-react";
 import type { Screen, SkillCategory } from "@/types";
 import { SKILL_CATEGORIES, MAP_CONFIG } from "@/constants/config";
 import { uploadService } from "@/services/uploadService";
 import { useAppState } from "@/state/AppState";
-import { useToast } from "./shared/Toast";
 
 interface UploadScreenProps {
   onNavigate: (s: Screen) => void;
@@ -19,7 +18,6 @@ type ContentType = "video" | "photo" | "social";
 
 export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   const { dispatch } = useAppState();
-  const { comingSoon } = useToast();
   const [contentType, setContentType] = useState<ContentType>("video");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -190,26 +188,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
               active={contentType === "photo"}
               onClick={() => openPicker("photo")}
             />
-            <UploadButton
-              icon={
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <defs>
-                    <linearGradient id="igGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#f09433" />
-                      <stop offset="50%" stopColor="#dc2743" />
-                      <stop offset="100%" stopColor="#bc1888" />
-                    </linearGradient>
-                  </defs>
-                  <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#igGrad)" strokeWidth="2" fill="none" />
-                  <circle cx="12" cy="12" r="4" stroke="url(#igGrad)" strokeWidth="2" fill="none" />
-                  <circle cx="17.5" cy="6.5" r="1.5" fill="url(#igGrad)" />
-                </svg>
-              }
-              title="Import from Social Media"
-              subtitle="Instagram, TikTok, Facebook"
-              active={false}
-              onClick={() => comingSoon("Social media import")}
-            />
+            <SocialImportTip />
           </div>
           {/* Hidden file input — accept attribute set dynamically in openPicker() */}
           <input
@@ -340,6 +319,101 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
           {loading ? <><Loader2 size={20} className="animate-spin" /> Publishing…</> : "Publish"}
         </button>
       </div>
+    </div>
+  );
+}
+
+function SocialImportTip() {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="rounded-2xl border border-[#e8e4df] bg-white overflow-hidden">
+      {/* Header row */}
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full flex items-center gap-4 p-4 text-left active:bg-[#f8f7f5] transition-colors"
+      >
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-[#f0eeea]">
+          {/* Stacked platform mini-icons */}
+          <div className="flex items-center gap-[-4px]">
+            {/* TikTok */}
+            <span className="w-6 h-6 rounded-full bg-black flex items-center justify-center text-[10px] leading-none -mr-1 z-30 shadow-sm">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.75a8.2 8.2 0 004.79 1.54V6.83a4.85 4.85 0 01-1.02-.14z"/>
+              </svg>
+            </span>
+            {/* Instagram */}
+            <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] z-20 shadow-sm" style={{ background: "linear-gradient(135deg,#f09433,#dc2743,#bc1888)" }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2">
+                <rect x="2" y="2" width="20" height="20" rx="5"/>
+                <circle cx="12" cy="12" r="4.5"/>
+                <circle cx="17.5" cy="6.5" r="1.2" fill="white" stroke="none"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-[#1a1a1a]">Post from TikTok or Instagram?</p>
+          <p className="text-xs text-[#7a7570] mt-0.5">Quick 2-step guide to upload it here</p>
+        </div>
+
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#f0eeea] flex items-center justify-center transition-transform duration-200" style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}>
+          <ChevronDown size={14} className="text-[#7a7570]" />
+        </div>
+      </button>
+
+      {/* Expandable steps */}
+      {expanded && (
+        <div className="px-4 pb-4 border-t border-[#f0eeea]">
+          <p className="text-[11px] font-bold text-[#b0aaa5] uppercase tracking-wider mt-3 mb-3">How to import</p>
+
+          <div className="flex flex-col gap-3">
+            {/* Step 1 */}
+            <div className="flex gap-3 items-start">
+              <div className="w-7 h-7 rounded-full bg-[#ede9fe] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-[11px] font-extrabold text-[#6c47ff]">1</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-[#1a1a1a]">Open TikTok or Instagram</p>
+                <p className="text-xs text-[#7a7570] mt-0.5 leading-relaxed">Find the video or reel you want to share on SkillSnap.</p>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="flex gap-3 items-start">
+              <div className="w-7 h-7 rounded-full bg-[#ede9fe] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-[11px] font-extrabold text-[#6c47ff]">2</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-[#1a1a1a]">Save to your camera roll</p>
+                <p className="text-xs text-[#7a7570] mt-0.5 leading-relaxed">
+                  Tap <span className="font-semibold text-[#1a1a1a]">Share → Save video</span> (TikTok) or <span className="font-semibold text-[#1a1a1a]">⋯ → Download</span> (Instagram).
+                </p>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="flex gap-3 items-start">
+              <div className="w-7 h-7 rounded-full bg-[#6c47ff] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Download size={12} color="white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-[#6c47ff]">Upload Video above</p>
+                <p className="text-xs text-[#7a7570] mt-0.5 leading-relaxed">Tap <span className="font-semibold text-[#1a1a1a]">Upload Video</span> above and choose it from your gallery.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Tip pill */}
+          <div className="mt-4 flex items-center gap-2 bg-[#faf8ff] border border-[#e9e3ff] rounded-xl px-3 py-2.5">
+            <span className="text-base leading-none">💡</span>
+            <p className="text-xs text-[#6c47ff] font-medium leading-snug">
+              Tip: TikTok watermarks are fine — clients love seeing your real content.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
