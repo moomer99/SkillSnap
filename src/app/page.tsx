@@ -24,6 +24,11 @@ import AuthPromptModal from "@/components/skillsnap/shared/AuthPromptModal";
 // Screens that show the bottom nav
 const NAV_SCREENS: Screen[] = ["home", "discover", "upload", "messages", "own-profile"];
 
+// Only show dev tools on the Orchids sandbox preview, never on the real domain
+const isOrchidsPreview =
+  typeof window !== "undefined" &&
+  window.location.hostname.includes("orchids.cloud");
+
 function SkillSnapRouter() {
   const { state, navigate } = useAppState();
   const { screen, authLoading } = state;
@@ -107,6 +112,40 @@ function SkillSnapRouter() {
         {showBottomNav && <BottomNav active={screen} onNavigate={navigate} />}
         <AuthPromptModal />
       </div>
+
+      {/* Dev screen switcher — Orchids preview only, never shown on real domain */}
+      {isOrchidsPreview && (
+        <div
+          className="hidden sm:flex fixed top-3 left-1/2 -translate-x-1/2 z-50 items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1.5 shadow-lg border border-[#e8e4df] flex-wrap justify-center"
+          style={{ maxWidth: "calc(100vw - 2rem)" }}
+        >
+          {(
+            [
+              ["onboarding",     "Onboarding"],
+              ["auth",           "Auth"],
+              ["home",           "Feed"],
+              ["search",         "Search"],
+              ["discover",       "Discover"],
+              ["own-profile",    "My Profile"],
+              ["client-profile", "Client Profile"],
+              ["upload",         "Upload"],
+              ["messages",       "Messages"],
+              ["chat",           "Chat"],
+              ["edit-profile",   "Edit Profile"],
+            ] as [Screen, string][]
+          ).map(([s, label]) => (
+            <button
+              key={s}
+              onClick={() => navigate(s)}
+              className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                screen === s ? "bg-[#6c47ff] text-white" : "text-[#7a7570] hover:text-[#1a1a1a]"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
     </div>
   );
