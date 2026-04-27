@@ -390,19 +390,19 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
       {/* Bottom controls */}
       <div className="px-6 pb-10 pt-2 flex flex-col items-center gap-3">
         {isLast ? (
-          <div className="w-full flex flex-col gap-2.5">
+          <div className="w-full flex gap-3">
             <button
-              onClick={finish}
-              className="w-full h-14 rounded-2xl font-bold text-base text-white active:scale-[0.98] transition-transform"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+              onClick={back}
+              className="flex-1 h-14 rounded-2xl font-semibold text-base text-[#1a1a1a] bg-white border border-[#ddd6fe] active:scale-[0.98] transition-transform"
             >
-              Get Started
+              Back
             </button>
             <button
               onClick={finish}
-              className="w-full h-14 rounded-2xl font-semibold text-base text-[#6c47ff] border-2 border-[#6c47ff] bg-white active:scale-[0.98] transition-transform"
+              className="flex-[2] h-14 rounded-2xl font-bold text-base text-white active:scale-[0.98] transition-transform"
+              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
             >
-              Log In
+              Get Started
             </button>
           </div>
         ) : isFirst ? (
