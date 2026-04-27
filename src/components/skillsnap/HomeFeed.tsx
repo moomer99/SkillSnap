@@ -54,7 +54,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
       {/* Sticky header — height tracked by HEADER_H */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-3">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-3 w-full">
         <div className="flex items-center justify-between mb-2.5">
           <SkillSnapLogo />
           <button
