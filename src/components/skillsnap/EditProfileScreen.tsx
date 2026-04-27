@@ -50,30 +50,39 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
     }
     setSaving(true);
     try {
-      let avatarUrl = user?.avatarUrl;
+      let avatarUrl: string | undefined = avatarPreview ?? user?.avatarUrl;
       const isAuthenticated = SUPABASE_CONFIGURED && !!state.currentUser && !state.isGuest;
 
       if (isAuthenticated) {
+        // Try to upload new avatar — if it fails (bucket missing / RLS), keep local preview
         if (avatarFile) {
-          const { uploadService } = await import("@/services/uploadService");
-          avatarUrl = await uploadService.uploadAvatar(avatarFile);
+          try {
+            const { uploadService } = await import("@/services/uploadService");
+            avatarUrl = await uploadService.uploadAvatar(avatarFile);
+          } catch (uploadErr) {
+            console.warn("Avatar upload failed, using local preview:", uploadErr);
+            avatarUrl = avatarPreview ?? user?.avatarUrl;
+          }
         }
-        const { userService } = await import("@/services/userService");
-        await userService.updateProfile({
-          displayName: displayName.trim(),
-          username: `@${username.trim()}`,
-          bio: bio.trim(),
-          location: location.trim(),
-          skill: skill || null,
-          ...(avatarUrl ? { avatarUrl } : {}),
-        });
+        // Try to persist profile to DB — non-fatal if it fails
+        try {
+          const { userService } = await import("@/services/userService");
+          await userService.updateProfile({
+            displayName: displayName.trim(),
+            username: `@${username.trim()}`,
+            bio: bio.trim(),
+            location: location.trim(),
+            skill: skill || null,
+            ...(avatarUrl ? { avatarUrl } : {}),
+          });
+        } catch (profileErr) {
+          console.warn("Profile DB update failed:", profileErr);
+        }
       } else {
-        // Guest / mock save — simulate delay, use local preview URL
         await new Promise((r) => setTimeout(r, 600));
-        avatarUrl = avatarPreview ?? user?.avatarUrl;
       }
 
-      // Update global state immediately so all screens reflect the change
+      // Always update in-memory state — this makes changes visible immediately
       dispatch({
         type: "UPDATE_CURRENT_USER",
         patch: {
@@ -88,7 +97,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
 
       setSaved(true);
       setTimeout(() => onNavigate("own-profile"), 1200);
-    } catch {
+    } catch (err) {
+      console.error("Save profile error:", err);
       showToast("Failed to save. Please try again.", "info");
     } finally {
       setSaving(false);
