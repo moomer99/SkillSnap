@@ -51,8 +51,9 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
     setSaving(true);
     try {
       let avatarUrl = user?.avatarUrl;
+      const isAuthenticated = SUPABASE_CONFIGURED && !!state.currentUser && !state.isGuest;
 
-      if (SUPABASE_CONFIGURED) {
+      if (isAuthenticated) {
         if (avatarFile) {
           const { uploadService } = await import("@/services/uploadService");
           avatarUrl = await uploadService.uploadAvatar(avatarFile);
@@ -67,7 +68,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
           ...(avatarUrl ? { avatarUrl } : {}),
         });
       } else {
-        // Mock save — just simulate delay
+        // Guest / mock save — simulate delay, use local preview URL
         await new Promise((r) => setTimeout(r, 600));
         avatarUrl = avatarPreview ?? user?.avatarUrl;
       }
