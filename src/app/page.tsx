@@ -40,58 +40,40 @@ function SkillSnapRouter() {
       {/* Desktop background — only visible on sm+ screens */}
       <div className="hidden sm:block absolute inset-0 overflow-hidden pointer-events-none">
 
-        {/* Base warm-white gradient */}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, #fafafa 0%, #f3f1fb 55%, #ede9f9 100%)" }} />
+        {/* Clean white base */}
+        <div style={{ position: "absolute", inset: 0, background: "#fafafa" }} />
 
-        {/* Large lavender glow — right side, matching reference */}
+        {/* Single soft lavender glow — bottom-right corner only */}
         <div style={{
-          position: "absolute", top: "50%", right: "-8%",
-          transform: "translateY(-50%)",
-          width: 680, height: 680, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(180,160,255,0.28) 0%, rgba(196,181,253,0.12) 45%, transparent 72%)",
+          position: "absolute", bottom: "-10%", right: "-6%",
+          width: 500, height: 500, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(196,181,253,0.35) 0%, rgba(221,214,254,0.15) 50%, transparent 72%)",
         }}/>
 
-        {/* Softer secondary glow — upper right */}
-        <div style={{
-          position: "absolute", top: "-5%", right: "8%",
-          width: 400, height: 400, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(216,207,255,0.22) 0%, transparent 65%)",
-        }}/>
-
-        {/* Very faint glow — lower left */}
-        <div style={{
-          position: "absolute", bottom: "-8%", left: "-4%",
-          width: 360, height: 360, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(196,181,253,0.14) 0%, transparent 65%)",
-        }}/>
-
-        {/* Decorative arc rings — right side, like reference */}
+        {/* Faint arc rings — bottom-right corner, partially visible */}
         <svg
-          style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", opacity: 0.55 }}
-          width="340" height="700" viewBox="0 0 340 700" fill="none"
+          style={{ position: "absolute", bottom: -60, right: -60, opacity: 0.45 }}
+          width="380" height="380" viewBox="0 0 380 380" fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <circle cx="340" cy="350" r="180" stroke="#c4b5fd" strokeWidth="1" fill="none" opacity="0.5"/>
-          <circle cx="340" cy="350" r="240" stroke="#ddd6fe" strokeWidth="1" fill="none" opacity="0.4"/>
-          <circle cx="340" cy="350" r="300" stroke="#ede9fe" strokeWidth="1" fill="none" opacity="0.3"/>
+          <circle cx="380" cy="380" r="160" stroke="#c4b5fd" strokeWidth="1" fill="none"/>
+          <circle cx="380" cy="380" r="220" stroke="#ddd6fe" strokeWidth="1.5" fill="none"/>
+          <circle cx="380" cy="380" r="280" stroke="#ede9fe" strokeWidth="1" fill="none"/>
         </svg>
 
-        {/* Subtle left arc */}
-        <svg
-          style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", opacity: 0.3 }}
-          width="120" height="500" viewBox="0 0 120 500" fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle cx="0" cy="250" r="160" stroke="#c4b5fd" strokeWidth="1" fill="none"/>
-          <circle cx="0" cy="250" r="210" stroke="#ddd6fe" strokeWidth="1" fill="none"/>
-        </svg>
+        {/* Tiny dot accent — top-left */}
+        <div style={{
+          position: "absolute", top: "12%", left: "6%",
+          width: 120, height: 120, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(196,181,253,0.18) 0%, transparent 70%)",
+        }}/>
 
       </div>
 
       {/* App shell — full width on mobile, capped at 430px on larger screens */}
       <div
         className="relative w-full bg-[#f8f7f5] overflow-hidden"
-        style={{ maxWidth: "min(100vw, 430px)", minHeight: "100dvh", boxShadow: "0 8px 60px rgba(108,71,255,0.12), 0 2px 20px rgba(0,0,0,0.08)" }}
+        style={{ maxWidth: "min(100vw, 430px)", minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
       >
         {/* Auth loading splash — shown while session resolves (not on onboarding) */}
         {authLoading && screen !== "auth" && (
