@@ -40,7 +40,7 @@ function SkillSnapRouter() {
         style={{ maxWidth: "min(100vw, 430px)", minHeight: "100dvh", boxShadow: "0 0 80px rgba(0,0,0,0.12)" }}
       >
         {/* Auth loading splash — shown while session resolves (not on onboarding) */}
-        {authLoading && screen !== "onboarding" && screen !== "auth" && (
+        {authLoading && screen !== "auth" && (
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
             <div
               className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4"

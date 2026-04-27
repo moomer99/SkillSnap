@@ -69,20 +69,13 @@ type Action =
   | { type: "HIDE_AUTH_PROMPT" };
 
 // ── Initial State ────────────────────────────
-function getInitialScreen(): Screen {
-  if (typeof window !== "undefined" && localStorage.getItem("skillsnap_onboarded") === "1") {
-    return "auth";
-  }
-  return "onboarding";
-}
-
 const initialState: AppStateShape = {
   currentUser: null,
   isAuthenticated: false,
   isGuest: false,
   authLoading: true, // start true — resolve on mount
   showAuthPrompt: false,
-  screen: getInitialScreen(),
+  screen: "onboarding", // always start here; useEffect corrects immediately
   previousScreen: null,
   posts: [],
   localPosts: [],
@@ -226,9 +219,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Hydrate auth state from Supabase session on mount
   useEffect(() => {
+    // If user already completed onboarding, skip straight to auth before anything else
+    if (localStorage.getItem("skillsnap_onboarded") === "1") {
+      dispatch({ type: "NAVIGATE", screen: "auth" });
+    }
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
     if (!supabaseUrl || supabaseUrl.includes("your-project-ref")) {
-      // Supabase not configured — skip auth and stay on auth screen
       dispatch({ type: "SET_AUTH_LOADING", loading: false });
       return;
     }
