@@ -36,6 +36,14 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    const allowed = ["video/mp4", "video/quicktime", "image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      setError("Unsupported file type. Use MP4 or MOV for video, JPG/PNG/WebP for photos.");
+      e.target.value = "";
+      return;
+    }
+
     // Validate file size
     const maxMB = file.type.startsWith("video/") ? 60 : 10;
     if (file.size > maxMB * 1024 * 1024) {
@@ -64,7 +72,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     // before calling click(), because React state updates are async
     if (fileInputRef.current) {
       fileInputRef.current.accept =
-        type === "video" ? "video/mp4,video/quicktime,video/*" : "image/jpeg,image/png,image/webp,image/*";
+        type === "video" ? "video/mp4,video/quicktime" : "image/jpeg,image/png,image/webp";
       fileInputRef.current.value = "";
     }
     handleTypeSelect(type);
@@ -171,14 +179,14 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
             <UploadButton
               icon={<Video size={22} className="text-[#6c47ff]" />}
               title="Upload Video"
-              subtitle="MP4, MOV up to 60 seconds"
+              subtitle="MP4 or MOV, up to 60MB"
               active={contentType === "video"}
               onClick={() => openPicker("video")}
             />
             <UploadButton
               icon={<ImageIcon size={22} className="text-[#6c47ff]" />}
               title="Upload Photo"
-              subtitle="JPG, PNG up to 10MB"
+              subtitle="JPG, PNG or WebP, up to 10MB"
               active={contentType === "photo"}
               onClick={() => openPicker("photo")}
             />
@@ -207,7 +215,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
           <input
             ref={fileInputRef}
             type="file"
-            accept="video/*,image/*"
+            accept="video/mp4,video/quicktime,image/jpeg,image/png,image/webp"
             className="hidden"
             onChange={handleFileSelect}
           />
