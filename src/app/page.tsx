@@ -70,36 +70,6 @@ function SkillSnapRouter() {
         <AuthPromptModal />
       </div>
 
-      {/* Desktop screen switcher — dev preview only */}
-      <div
-        className="hidden sm:flex fixed top-4 left-1/2 -translate-x-1/2 z-50 items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg border border-[#e8e4df]"
-        style={{ maxWidth: "calc(100vw - 2rem)" }}
-      >
-        {(
-          [
-            ["onboarding",     "Onboarding"],
-            ["auth",           "Auth"],
-            ["home",           "Feed"],
-            ["discover",       "Discover"],
-            ["own-profile",    "My Profile"],
-            ["client-profile", "Client Profile"],
-            ["upload",         "Upload"],
-            ["messages",       "Messages"],
-            ["chat",           "Chat"],
-            ["edit-profile",   "Edit Profile"],
-          ] as [Screen, string][]
-        ).map(([s, label]) => (
-          <button
-            key={s}
-            onClick={() => navigate(s)}
-            className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
-              screen === s ? "bg-[#6c47ff] text-white" : "text-[#7a7570] hover:text-[#1a1a1a]"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
