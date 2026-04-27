@@ -218,7 +218,10 @@ const slides = [
 
 export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) {
   const [current, setCurrent] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const touchStartX = useRef<number | null>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   function finish() {
     if (typeof window !== "undefined") {
@@ -238,20 +241,49 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
 
   function handleTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;
+    setIsDragging(true);
+    setDragOffset(0);
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (touchStartX.current === null) return;
+    const delta = e.touches[0].clientX - touchStartX.current;
+    const trackWidth = trackRef.current?.offsetWidth ?? 390;
+    // Apply resistance at edges
+    let offset = delta;
+    if ((current === 0 && delta > 0) || (current === slides.length - 1 && delta < 0)) {
+      offset = delta * 0.2;
+    }
+    // Clamp to max one slide width
+    const max = trackWidth;
+    offset = Math.max(-max, Math.min(max, offset));
+    setDragOffset(offset);
   }
 
   function handleTouchEnd(e: React.TouchEvent) {
     if (touchStartX.current === null) return;
     const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0 && current < slides.length - 1) setCurrent(c => c + 1);
-      if (diff < 0 && current > 0) setCurrent(c => c - 1);
+    const trackWidth = trackRef.current?.offsetWidth ?? 390;
+    const threshold = trackWidth * 0.25;
+
+    if (diff > threshold && current < slides.length - 1) {
+      setCurrent(c => c + 1);
+    } else if (diff < -threshold && current > 0) {
+      setCurrent(c => c - 1);
     }
+
+    setDragOffset(0);
+    setIsDragging(false);
     touchStartX.current = null;
   }
 
   const isFirst = current === 0;
   const isLast = current === slides.length - 1;
+
+  // Translate: each slide is 100% of the track width; we shift by current index + live drag
+  const trackWidth = typeof window !== "undefined" ? (trackRef.current?.offsetWidth ?? 390) : 390;
+  const baseTranslate = -(current * trackWidth);
+  const totalTranslate = baseTranslate + dragOffset;
 
   return (
     <div
@@ -260,8 +292,6 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
         minHeight: "100dvh",
         background: "linear-gradient(150deg, #edeaff 0%, #f4f2ff 50%, #eef1ff 100%)",
       }}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
     >
       {/* Skip — shown on slides 2 & 3 only */}
       <div className="flex justify-end px-5 pt-5" style={{ height: 44 }}>
@@ -295,15 +325,23 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
         ))}
       </div>
 
-      {/* Slides track — all 4 rendered, CSS translateX shows the active one */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Slides track */}
+      <div
+        ref={trackRef}
+        className="flex-1 overflow-hidden"
+        style={{ position: "relative" }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div
           style={{
             display: "flex",
-            flex: 1,
+            height: "100%",
             width: `${slides.length * 100}%`,
-            transform: `translateX(-${(current * 100) / slides.length}%)`,
-            transition: "transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)",
+            transform: `translateX(${totalTranslate}px)`,
+            transition: isDragging ? "none" : "transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)",
+            willChange: "transform",
           }}
         >
           {slides.map((s, i) => (
