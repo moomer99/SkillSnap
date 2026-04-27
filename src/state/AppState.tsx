@@ -64,6 +64,7 @@ type Action =
   | { type: "UPDATE_PARTICIPANT_HAPPY"; userId: string; happyPercent: number }
   | { type: "SET_THREAD_STARTED_AT"; threadId: string; startedAt: string }
   | { type: "PREPEND_POST"; post: Post }
+  | { type: "DELETE_POST"; postId: string }
   | { type: "SKIP_AUTH" }
   | { type: "SHOW_AUTH_PROMPT" }
   | { type: "HIDE_AUTH_PROMPT" };
@@ -196,6 +197,12 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         ...state,
         localPosts: [action.post, ...state.localPosts],
         posts: [action.post, ...state.posts],
+      };
+    case "DELETE_POST":
+      return {
+        ...state,
+        localPosts: state.localPosts.filter((p) => p.id !== action.postId),
+        posts: state.posts.filter((p) => p.id !== action.postId),
       };
     case "SKIP_AUTH":
       return {

@@ -156,6 +156,13 @@ export const postService = {
   async sharePost(_postId: string): Promise<string> {
     return "";
   },
+
+  async deletePost(postId: string): Promise<void> {
+    const sb = getSupabase();
+    const { data: { user: authUser } } = await sb.auth.getUser();
+    if (!authUser) return;
+    await sb.from("posts").delete().eq("id", postId).eq("author_id", authUser.id);
+  },
 };
 
 export { mapPost };

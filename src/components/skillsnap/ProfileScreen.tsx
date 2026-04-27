@@ -325,9 +325,21 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           post={viewingPost}
           isOwn={isOwn}
           onClose={() => setViewingPost(null)}
-          onDelete={(postId) => {
+          onDelete={async (postId) => {
+            // Remove from global feed state immediately
+            dispatch({ type: "DELETE_POST", postId });
+            // Remove from local profile list
             setPosts((prev) => prev.filter((p) => p.id !== postId));
             setViewingPost(null);
+            // Persist to Supabase if authenticated
+            if (SUPABASE_CONFIGURED && state.currentUser && !state.isGuest) {
+              try {
+                const { postService } = await import("@/services/postService");
+                await postService.deletePost(postId);
+              } catch (e) {
+                console.warn("Delete post from DB failed:", e);
+              }
+            }
           }}
           onUpdate={(updated) => {
             setPosts((prev) => prev.map((p) => p.id === updated.id ? updated : p));
@@ -399,7 +411,7 @@ function MediaViewer({
   post: Post;
   isOwn: boolean;
   onClose: () => void;
-  onDelete: (postId: string) => void;
+  onDelete: (postId: string) => Promise<void>;
   onUpdate: (post: Post) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -436,9 +448,7 @@ function MediaViewer({
 
   async function handleDelete() {
     setSaving(true);
-    // In production: call postService.deletePost(post.id)
-    await new Promise((r) => setTimeout(r, 600));
-    onDelete(post.id);
+    await onDelete(post.id);
   }
 
   return (
