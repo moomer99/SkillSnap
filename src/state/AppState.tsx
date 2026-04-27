@@ -153,11 +153,19 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
     }
     case "SET_FOLLOWED_USERS":
       return { ...state, followedUsers: action.userIds };
-    case "UPDATE_CURRENT_USER":
+    case "UPDATE_CURRENT_USER": {
+      const patched = state.currentUser ? { ...state.currentUser, ...action.patch } : state.currentUser;
+      const patchPosts = (posts: Post[]) =>
+        posts.map(p =>
+          p.authorId === patched?.id ? { ...p, author: { ...p.author, ...action.patch } } : p
+        );
       return {
         ...state,
-        currentUser: state.currentUser ? { ...state.currentUser, ...action.patch } : state.currentUser,
+        currentUser: patched,
+        posts: patchPosts(state.posts),
+        localPosts: patchPosts(state.localPosts),
       };
+    }
     case "OPEN_JOBS_DONE_MODAL":
       return { ...state, modals: { ...state.modals, jobsDoneInfo: true } };
     case "CLOSE_JOBS_DONE_MODAL":
