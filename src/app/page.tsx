@@ -8,6 +8,7 @@ import { AppProvider, useAppState } from "@/state/AppState";
 import type { Screen } from "@/types";
 
 import OnboardingScreen from "@/components/skillsnap/OnboardingScreen";
+import SearchScreen from "@/components/skillsnap/SearchScreen";
 import AuthScreen from "@/components/skillsnap/AuthScreen";
 import HomeFeed from "@/components/skillsnap/HomeFeed";
 import DiscoverScreen from "@/components/skillsnap/DiscoverScreen";
@@ -92,6 +93,7 @@ function SkillSnapRouter() {
         )}
         {/* Screen renderer */}
         {screen === "onboarding"     && <OnboardingScreen onNavigate={navigate} />}
+        {screen === "search"          && <SearchScreen      onNavigate={navigate} />}
         {screen === "auth"           && <AuthScreen       onNavigate={navigate} />}
         {screen === "home"           && <HomeFeed         onNavigate={navigate} />}
         {screen === "discover"       && <DiscoverScreen   onNavigate={navigate} />}

@@ -68,7 +68,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
             </svg>
           </button>
         </div>
-        <SearchBar />
+        <SearchBar onFocus={() => onNavigate("search")} />
       </header>
 
       {/* Feed — free scroll */}
