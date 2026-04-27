@@ -249,18 +249,21 @@ function FeedCard({
             </svg>
           } />
           <VSep />
-          <StatCell value={happyPct} label="Happy" icon="😊" green />
+          <StatCell value={happyPct} label="Happy" icon={
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M8 13s1.5 2 4 2 4-2 4-2"/>
+              <line x1="9" y1="9" x2="9.01" y2="9"/>
+              <line x1="15" y1="9" x2="15.01" y2="9"/>
+            </svg>
+          } green />
           {displayLocation && (
             <>
               <VSep />
-              <StatCell
-                value={author.distanceKm !== undefined ? `${author.distanceKm}km` : displayLocation}
-                label={author.distanceKm !== undefined ? displayLocation : ""}
-                icon={
-                  <svg width="11" height="14" viewBox="0 0 11 14" fill="white">
-                    <path d="M5.5 0A5.5 5.5 0 000 5.5C0 9.625 5.5 14 5.5 14S11 9.625 11 5.5A5.5 5.5 0 005.5 0zm0 7.5a2 2 0 110-4 2 2 0 010 4z"/>
-                  </svg>
-                }
+              <LocationCell
+                distanceKm={author.distanceKm}
+                location={displayLocation}
+                onPress={onProfileClick}
               />
             </>
           )}
@@ -283,6 +286,33 @@ function StatCell({ value, label, icon, green }: {
       </span>
       <span className="text-[10px] text-white/55 font-medium leading-tight text-center">{label}</span>
     </div>
+  );
+}
+
+const MAX_SUBURB_CHARS = 12;
+
+function LocationCell({ distanceKm, location, onPress }: {
+  distanceKm?: number; location: string; onPress: () => void;
+}) {
+  const suburb = location.split(",")[0].trim();
+  const truncated = suburb.length > MAX_SUBURB_CHARS ? suburb.slice(0, MAX_SUBURB_CHARS) + "…" : suburb;
+  const distanceLabel = distanceKm !== undefined ? `${distanceKm}km` : "—";
+
+  return (
+    <button
+      className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 px-1 active:opacity-70 transition-opacity"
+      onClick={(e) => { e.stopPropagation(); onPress(); }}
+    >
+      <span className="leading-none mb-0.5">
+        <svg width="11" height="14" viewBox="0 0 11 14" fill="white">
+          <path d="M5.5 0A5.5 5.5 0 000 5.5C0 9.625 5.5 14 5.5 14S11 9.625 11 5.5A5.5 5.5 0 005.5 0zm0 7.5a2 2 0 110-4 2 2 0 010 4z"/>
+        </svg>
+      </span>
+      <span className="text-[14px] font-extrabold leading-tight tracking-tight text-white">
+        {distanceLabel}
+      </span>
+      <span className="text-[10px] text-white/55 font-medium leading-tight text-center">{truncated}</span>
+    </button>
   );
 }
 
