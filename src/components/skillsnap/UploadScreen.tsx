@@ -354,7 +354,7 @@ function SocialImportTip() {
         </div>
 
         <div className="flex-1">
-          <p className="text-sm font-semibold text-[#1a1a1a]">Post from TikTok or Instagram?</p>
+          <p className="text-sm font-semibold text-[#1a1a1a]">Import from TikTok or Instagram?</p>
           <p className="text-xs text-[#7a7570] mt-0.5">Quick 2-step guide to upload it here</p>
         </div>
 
