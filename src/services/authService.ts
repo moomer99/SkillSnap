@@ -99,13 +99,21 @@ export const authService = {
   // Starts the Google OAuth flow. Supabase redirects back to /auth/callback,
   // which exchanges the code for a session and redirects into the app.
   async signInWithGoogle(): Promise<{ error?: string }> {
-    const sb = getSupabase();
     const redirectTo =
       typeof window !== "undefined"
         ? `${window.location.origin}/auth/callback`
         : `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/auth/callback`;
 
-    const { error } = await sb.auth.signInWithOAuth({
+    // OAuth must bypass the /supabase proxy and hit the real Supabase URL
+    // directly — Google redirects the browser back to Supabase's own domain,
+    // so the proxy URL would cause a 403 from Google.
+    const { createBrowserClient } = await import("@supabase/ssr");
+    const directClient = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    const { error } = await directClient.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo,
