@@ -297,7 +297,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
       <div
         ref={trackRef}
         className="flex-1 overflow-hidden"
-        style={{ position: "relative" }}
+        style={{ position: "relative", display: "flex", flexDirection: "column" }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -305,7 +305,8 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
         <div
           style={{
             display: "flex",
-            height: "100%",
+            alignItems: "stretch",
+            flex: 1,
             width: `${slides.length * 100}%`,
             transform: `translateX(${translateValue})`,
             transition: isDragging ? "none" : "transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -315,7 +316,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
           {slides.map((s, i) => (
             <div
               key={i}
-              style={{ width: `${100 / slides.length}%`, height: "100%" }}
+              style={{ width: `${100 / slides.length}%` }}
               className="flex flex-col items-center justify-center px-8 gap-6"
             >
               {/* Illustration */}
