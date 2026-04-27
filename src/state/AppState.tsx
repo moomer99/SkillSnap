@@ -69,13 +69,20 @@ type Action =
   | { type: "HIDE_AUTH_PROMPT" };
 
 // ── Initial State ────────────────────────────
+function getInitialScreen(): Screen {
+  if (typeof window !== "undefined" && localStorage.getItem("skillsnap_onboarded") === "1") {
+    return "auth";
+  }
+  return "onboarding";
+}
+
 const initialState: AppStateShape = {
   currentUser: null,
   isAuthenticated: false,
   isGuest: false,
   authLoading: true, // start true — resolve on mount
   showAuthPrompt: false,
-  screen: "auth",
+  screen: getInitialScreen(),
   previousScreen: null,
   posts: [],
   localPosts: [],
@@ -103,11 +110,12 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         isGuest: false,
         showAuthPrompt: false,
         authLoading: false,
-        screen: state.screen === "auth" ? "home" : state.screen,
+        screen: (state.screen === "auth" || state.screen === "onboarding") ? "home" : state.screen,
       };
     case "CLEAR_AUTH":
       return { ...initialState, authLoading: false };
     case "SET_AUTH_LOADING":
+      // If no session found and we're on onboarding, stay there
       return { ...state, authLoading: action.loading };
     case "NAVIGATE":
       return { ...state, previousScreen: state.screen, screen: action.screen };

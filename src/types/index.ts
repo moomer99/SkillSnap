@@ -146,6 +146,7 @@ export interface Notification {
 
 // ── Navigation ───────────────────────────────
 export type Screen =
+  | "onboarding"
   | "auth"
   | "home"
   | "discover"

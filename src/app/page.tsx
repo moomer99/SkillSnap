@@ -7,6 +7,7 @@
 import { AppProvider, useAppState } from "@/state/AppState";
 import type { Screen } from "@/types";
 
+import OnboardingScreen from "@/components/skillsnap/OnboardingScreen";
 import AuthScreen from "@/components/skillsnap/AuthScreen";
 import HomeFeed from "@/components/skillsnap/HomeFeed";
 import DiscoverScreen from "@/components/skillsnap/DiscoverScreen";
@@ -38,8 +39,8 @@ function SkillSnapRouter() {
         className="relative w-full bg-[#f8f7f5] overflow-hidden"
         style={{ maxWidth: 390, minHeight: "100dvh", boxShadow: "0 0 80px rgba(0,0,0,0.12)" }}
       >
-        {/* Auth loading splash — shown while session resolves */}
-        {authLoading && (
+        {/* Auth loading splash — shown while session resolves (not on onboarding) */}
+        {authLoading && screen !== "onboarding" && (
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
             <div
               className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4"
@@ -54,6 +55,7 @@ function SkillSnapRouter() {
           </div>
         )}
         {/* Screen renderer */}
+        {screen === "onboarding"     && <OnboardingScreen onNavigate={navigate} />}
         {screen === "auth"           && <AuthScreen       onNavigate={navigate} />}
         {screen === "home"           && <HomeFeed         onNavigate={navigate} />}
         {screen === "discover"       && <DiscoverScreen   onNavigate={navigate} />}
@@ -75,6 +77,7 @@ function SkillSnapRouter() {
       >
         {(
           [
+            ["onboarding",     "Onboarding"],
             ["auth",           "Auth"],
             ["home",           "Feed"],
             ["discover",       "Discover"],
