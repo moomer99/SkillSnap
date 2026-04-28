@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Heart, Share2, Bookmark, MapPin, Volume2, VolumeX } from "lucide-react";
+import { Heart, Share2, Bookmark, MapPin, Volume2, VolumeX, Zap } from "lucide-react";
 import type { Post } from "@/types";
 import type { Screen } from "@/types";
 import { formatLikes } from "@/mock-data/posts";
@@ -58,14 +58,12 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
         <div className="flex items-center justify-between mb-2.5">
           <SkillSnapLogo />
           <button
-            onClick={() => comingSoon("Location-based filtering")}
-            className="flex items-center gap-1.5 text-[13px] font-semibold text-[#4a4a4a] border border-[#e8e4df] rounded-full px-3 py-1.5 bg-white active:bg-[#f0eeea] transition-colors"
+            onClick={() => onNavigate("pro")}
+            className="flex items-center gap-1.5 text-[12px] font-bold text-white rounded-full px-3 py-1.5 active:opacity-80 transition-opacity"
+            style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)", boxShadow: "0 2px 10px rgba(108,71,255,0.35)" }}
           >
-            <MapPin size={13} className="text-[#6c47ff]" />
-            Nearby
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="ml-0.5 opacity-50">
-              <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <Zap size={12} fill="white" color="white" />
+            Go Pro
           </button>
         </div>
         <SearchBar onFocus={() => onNavigate("search")} />
