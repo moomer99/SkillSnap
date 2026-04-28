@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { ArrowLeft, ChevronRight, User, Lock, Bell, Shield, HelpCircle, FileText, LogOut, Trash2, Loader2, CheckCircle } from "lucide-react";
+import { ArrowLeft, ChevronRight, User, Lock, Bell, Shield, HelpCircle, FileText, LogOut, Trash2, Loader2, CheckCircle, Zap } from "lucide-react";
 import type { Screen } from "@/types";
 import { useAppState } from "@/state/AppState";
 import { getNotifPermission, requestNotifPermission } from "@/hooks/useNotifications";
@@ -67,6 +67,27 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
           </div>
           <div className="flex items-center gap-1 text-xs font-semibold text-[#6c47ff]">
             Edit <ChevronRight size={14} />
+          </div>
+        </div>
+
+        {/* Pro upgrade banner */}
+        <div
+          className="mx-4 mt-5 rounded-2xl overflow-hidden cursor-pointer active:opacity-90 transition-opacity"
+          style={{ background: "linear-gradient(135deg, #1a0f3c 0%, #2d1b69 100%)", border: "1px solid rgba(167,139,250,0.3)" }}
+          onClick={() => onNavigate("pro")}
+        >
+          <div className="px-4 py-3.5 flex items-center gap-3">
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: "linear-gradient(135deg, #6c47ff, #a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Zap size={18} fill="white" color="white" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-white font-bold text-sm">SkillSnap Pro</span>
+                <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 6px", borderRadius: 99, background: "rgba(167,139,250,0.2)", color: "#a78bfa", border: "1px solid rgba(167,139,250,0.3)" }}>COMING SOON</span>
+              </div>
+              <p className="text-white/50 text-xs mt-0.5">Boost your profile — first 100 get 3 months free</p>
+            </div>
+            <ChevronRight size={16} color="rgba(255,255,255,0.4)" />
           </div>
         </div>
 

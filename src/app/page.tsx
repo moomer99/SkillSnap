@@ -18,6 +18,7 @@ import MessagesScreen from "@/components/skillsnap/MessagesScreen";
 import ChatScreen from "@/components/skillsnap/ChatScreen";
 import EditProfileScreen from "@/components/skillsnap/EditProfileScreen";
 import SettingsScreen from "@/components/skillsnap/SettingsScreen";
+import ProScreen from "@/components/skillsnap/ProScreen";
 import BottomNav from "@/components/skillsnap/BottomNav";
 import { ToastProvider } from "@/components/skillsnap/shared/Toast";
 import AuthPromptModal from "@/components/skillsnap/shared/AuthPromptModal";
@@ -110,6 +111,7 @@ function SkillSnapRouter() {
         {screen === "chat"           && <ChatScreen       onNavigate={navigate} />}
         {screen === "edit-profile"   && <EditProfileScreen onNavigate={navigate} />}
         {screen === "settings"       && <SettingsScreen    onNavigate={navigate} />}
+        {screen === "pro"            && <ProScreen         onNavigate={navigate} />}
 
         {showBottomNav && <BottomNav active={screen} onNavigate={navigate} />}
         <AuthPromptModal />
@@ -135,6 +137,7 @@ function SkillSnapRouter() {
               ["chat",           "Chat"],
               ["edit-profile",   "Edit Profile"],
               ["settings",       "Settings"],
+              ["pro",            "Pro"],
             ] as [Screen, string][]
           ).map(([s, label]) => (
             <button
