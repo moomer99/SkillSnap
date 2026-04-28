@@ -2,6 +2,7 @@
 // ─────────────────────────────────────────────
 // useChat — loads messages for the active thread via Supabase,
 // subscribes to Realtime for live updates.
+// Messages are cached in AppState so they survive navigation.
 // Falls back to MOCK_MESSAGES in dev mode (no Supabase).
 // ─────────────────────────────────────────────
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -17,15 +18,17 @@ const SUPABASE_CONFIGURED =
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref");
 
 export function useChat() {
-  const { state } = useAppState();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { state, dispatch } = useAppState();
   const [inputText, setInputText] = useState("");
   const [sending, setSending] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const unsubRef = useRef<(() => void) | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const threadId = state.activeThreadId ?? "";
+
+  // Messages come from AppState cache — survive navigation
+  const messages: Message[] = threadId ? (state.threadMessages[threadId] ?? []) : [];
 
   // Auto-scroll to bottom whenever messages change
   useEffect(() => {
@@ -39,29 +42,33 @@ export function useChat() {
     }
 
     if (!SUPABASE_CONFIGURED) {
-      // Dev mode: show mock messages for the active thread (or all if thread not in mock)
       const mock = MOCK_MESSAGES.filter((m) => m.threadId === threadId);
-      setMessages(mock.length ? mock : MOCK_MESSAGES);
+      const mockMsgs = mock.length ? mock : MOCK_MESSAGES;
+      dispatch({ type: "SET_THREAD_MESSAGES", threadId, messages: mockMsgs });
       setLoading(false);
       return;
     }
 
-    setLoading(true);
+    // Only show loading spinner if no cached messages yet
+    const hasCached = (state.threadMessages[threadId]?.length ?? 0) > 0;
+    if (!hasCached) setLoading(true);
+
     messageService.getMessages(threadId).then((msgs) => {
-      setMessages(msgs);
+      if (msgs.length > 0) {
+        dispatch({ type: "SET_THREAD_MESSAGES", threadId, messages: msgs });
+      }
       setLoading(false);
     }).catch(() => {
-      setMessages([]);
       setLoading(false);
     });
 
+    // Tear down any previous subscription before creating a new one
+    unsubRef.current?.();
+    unsubRef.current = null;
+
     // Subscribe to Realtime inserts
     unsubRef.current = messageService.subscribeToMessages(threadId, (msg) => {
-      setMessages((prev) => {
-        if (prev.some((m) => m.id === msg.id)) return prev;
-        return [...prev, msg];
-      });
-      // Show browser notification for incoming messages
+      dispatch({ type: "APPEND_THREAD_MESSAGE", threadId, message: msg });
       if (msg.from === "them") {
         showMessageNotification({
           senderName: msg.senderName ?? "New message",
@@ -75,17 +82,16 @@ export function useChat() {
       unsubRef.current?.();
       unsubRef.current = null;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [threadId]);
 
   const sendMessage = useCallback(async () => {
     const text = inputText.trim();
     if (!text) return;
-    // Use active threadId or fall back to a local mock thread
     const tid = threadId || "mock_thread_local";
     setSending(true);
     setInputText("");
 
-    // Optimistic append — always works, even in mock/no-thread mode
     const optimisticId = `optimistic_${Date.now()}`;
     const optimistic: Message = {
       id: optimisticId,
@@ -94,7 +100,7 @@ export function useChat() {
       text,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
-    setMessages((prev) => [...prev, optimistic]);
+    dispatch({ type: "APPEND_THREAD_MESSAGE", threadId: tid, message: optimistic });
 
     if (!SUPABASE_CONFIGURED || !threadId) {
       setSending(false);
@@ -103,24 +109,16 @@ export function useChat() {
 
     try {
       const confirmed = await messageService.sendMessage(tid, text);
-      // Replace optimistic with confirmed (has real DB id)
-      setMessages((prev) =>
-        prev.map((m) => (m.id === optimisticId ? confirmed : m))
-      );
+      dispatch({ type: "PATCH_THREAD_MESSAGE", threadId: tid, optimisticId, message: confirmed });
     } catch (err) {
       console.error("sendMessage failed:", err);
-      // Keep the message visible but mark it as failed
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === optimisticId ? { ...m, failed: true } : m
-        )
-      );
+      const failed: Message = { ...optimistic, failed: true };
+      dispatch({ type: "PATCH_THREAD_MESSAGE", threadId: tid, optimisticId, message: failed });
     } finally {
       setSending(false);
     }
-  }, [inputText, threadId]);
+  }, [inputText, threadId, dispatch]);
 
-  // Send an image as a local-preview bubble (full upload wiring added when storage is ready)
   const sendImageMessage = useCallback((imageUrl: string, fileName: string) => {
     if (!threadId) return;
     const msg: Message = {
@@ -131,8 +129,8 @@ export function useChat() {
       imageUrl,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
-    setMessages((prev) => [...prev, msg]);
-  }, [threadId]);
+    dispatch({ type: "APPEND_THREAD_MESSAGE", threadId, message: msg });
+  }, [threadId, dispatch]);
 
   return {
     messages,

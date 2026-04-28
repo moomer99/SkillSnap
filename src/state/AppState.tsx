@@ -5,7 +5,7 @@
 // onAuthStateChange keeps session in sync.
 // ─────────────────────────────────────────────
 import { createContext, useContext, useReducer, useEffect, type ReactNode } from "react";
-import type { User, Post, MessageThread, Screen } from "@/types";
+import type { User, Post, MessageThread, Message, Screen } from "@/types";
 import type { DiscoveryFilter } from "@/mock-data/discovery";
 import { getSupabase } from "@/lib/supabase";
 import { mapProfile, ensureProfile } from "@/services/authService";
@@ -31,6 +31,7 @@ interface AppStateShape {
   threads: MessageThread[];
   activeThreadId: string | null;
   activeThreadParticipantId: string | null;
+  threadMessages: Record<string, Message[]>; // cached messages keyed by threadId
 
   discoveryFilter: DiscoveryFilter;
 
@@ -63,6 +64,9 @@ type Action =
   | { type: "CLOSE_JOBS_DONE_MODAL" }
   | { type: "UPDATE_PARTICIPANT_HAPPY"; userId: string; happyPercent: number }
   | { type: "SET_THREAD_STARTED_AT"; threadId: string; startedAt: string }
+  | { type: "SET_THREAD_MESSAGES"; threadId: string; messages: Message[] }
+  | { type: "APPEND_THREAD_MESSAGE"; threadId: string; message: Message }
+  | { type: "PATCH_THREAD_MESSAGE"; threadId: string; optimisticId: string; message: Message }
   | { type: "PREPEND_POST"; post: Post }
   | { type: "DELETE_POST"; postId: string }
   | { type: "SKIP_AUTH" }
@@ -86,6 +90,7 @@ const initialState: AppStateShape = {
   threads: [],
   activeThreadId: null,
   activeThreadParticipantId: null,
+  threadMessages: {},
   discoveryFilter: "All",
   likedPosts: new Set(),
   savedPosts: new Set(),
@@ -192,6 +197,29 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
           t.id === action.threadId ? { ...t, startedAt: action.startedAt } : t
         ),
       };
+    case "SET_THREAD_MESSAGES":
+      return {
+        ...state,
+        threadMessages: { ...state.threadMessages, [action.threadId]: action.messages },
+      };
+    case "APPEND_THREAD_MESSAGE": {
+      const existing = state.threadMessages[action.threadId] ?? [];
+      if (existing.some((m) => m.id === action.message.id)) return state;
+      return {
+        ...state,
+        threadMessages: { ...state.threadMessages, [action.threadId]: [...existing, action.message] },
+      };
+    }
+    case "PATCH_THREAD_MESSAGE": {
+      const msgs = state.threadMessages[action.threadId] ?? [];
+      return {
+        ...state,
+        threadMessages: {
+          ...state.threadMessages,
+          [action.threadId]: msgs.map((m) => m.id === action.optimisticId ? action.message : m),
+        },
+      };
+    }
     case "PREPEND_POST":
       return {
         ...state,

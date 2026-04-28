@@ -53,15 +53,20 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
       let avatarUrl: string | undefined = avatarPreview ?? user?.avatarUrl;
       const isAuthenticated = SUPABASE_CONFIGURED && !!state.currentUser && !state.isGuest;
 
+      // persistedAvatarUrl is only a real remote URL (never a blob:) — safe to store in DB
+      let persistedAvatarUrl: string | undefined = user?.avatarUrl;
+
       if (isAuthenticated) {
-        // Try to upload new avatar — if it fails (bucket missing / RLS), keep local preview
+        // Try to upload new avatar to Supabase Storage
         if (avatarFile) {
           try {
             const { uploadService } = await import("@/services/uploadService");
-            avatarUrl = await uploadService.uploadAvatar(avatarFile);
+            persistedAvatarUrl = await uploadService.uploadAvatar(avatarFile);
+            avatarUrl = persistedAvatarUrl; // update local preview to remote URL too
           } catch (uploadErr) {
-            console.warn("Avatar upload failed, using local preview:", uploadErr);
-            avatarUrl = avatarPreview ?? user?.avatarUrl;
+            console.warn("Avatar upload failed, keeping existing remote URL:", uploadErr);
+            // avatarUrl stays as the local blob: preview for in-memory display,
+            // but we don't persist it to DB
           }
         }
         // Try to persist profile to DB — non-fatal if it fails
@@ -73,7 +78,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
             bio: bio.trim(),
             location: location.trim(),
             skill: skill || null,
-            ...(avatarUrl ? { avatarUrl } : {}),
+            // Only send avatarUrl to DB if it's a real remote URL
+            ...(persistedAvatarUrl ? { avatarUrl: persistedAvatarUrl } : {}),
           });
         } catch (profileErr) {
           console.warn("Profile DB update failed:", profileErr);
@@ -82,7 +88,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
         await new Promise((r) => setTimeout(r, 600));
       }
 
-      // Always update in-memory state — this makes changes visible immediately
+      // Always update in-memory state — use persisted URL if available, else local preview
+      const inMemoryAvatarUrl = persistedAvatarUrl ?? (avatarPreview?.startsWith("blob:") ? undefined : avatarPreview);
       dispatch({
         type: "UPDATE_CURRENT_USER",
         patch: {
@@ -91,7 +98,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
           bio: bio.trim(),
           location: location.trim(),
           skill: skill || null,
-          ...(avatarUrl !== undefined ? { avatarUrl } : {}),
+          ...(inMemoryAvatarUrl !== undefined ? { avatarUrl: inMemoryAvatarUrl } : {}),
         },
       });
 

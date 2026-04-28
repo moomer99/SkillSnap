@@ -56,7 +56,8 @@ export const uploadService = {
     });
     if (error) throw error;
 
-    return getRealPublicUrl("avatars", path);
+    // Append cache-buster so browsers/CDN don't serve a stale version of the previous avatar
+    return `${getRealPublicUrl("avatars", path)}?t=${Date.now()}`;
   },
 
   async createPost(payload: UploadPayload): Promise<Post | null> {
