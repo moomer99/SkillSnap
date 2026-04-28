@@ -89,7 +89,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
       }
 
       // Always update in-memory state — use persisted URL if available, else local preview
-      const inMemoryAvatarUrl = persistedAvatarUrl ?? (avatarPreview?.startsWith("blob:") ? undefined : avatarPreview);
+      const inMemoryAvatarUrl: string | undefined = persistedAvatarUrl ?? (avatarPreview?.startsWith("blob:") ? undefined : (avatarPreview ?? undefined));
       dispatch({
         type: "UPDATE_CURRENT_USER",
         patch: {

@@ -1,8 +1,4 @@
 "use client";
-// ─────────────────────────────────────────────
-// SkillSnap — Global Search Bar
-// Integration point: wire value to searchService
-// ─────────────────────────────────────────────
 import { Search } from "lucide-react";
 
 interface SearchBarProps {
@@ -12,17 +8,21 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({
-  placeholder = "Search skills, people, or location",
+  placeholder = "Search skills, people, or location…",
   onFocus,
   className = "",
 }: SearchBarProps) {
   return (
-    <div
-      className={`flex items-center gap-2.5 bg-[#f0eeea] rounded-2xl px-4 h-10 cursor-text ${className}`}
+    <button
+      type="button"
       onClick={onFocus}
+      className={`w-full flex items-center gap-2.5 bg-[#f0eeea] rounded-2xl px-4 h-10 cursor-text text-left active:bg-[#e8e4df] transition-colors ${className}`}
     >
-      <Search size={15} className="text-[#b0aaa5] flex-shrink-0" />
-      <span className="text-[#b0aaa5] text-sm truncate">{placeholder}</span>
-    </div>
+      <Search size={15} className="text-[#6c47ff] flex-shrink-0" />
+      <span className="text-[#b0aaa5] text-sm flex-1 truncate">{placeholder}</span>
+      <span className="text-[10px] font-semibold text-[#b0aaa5] bg-white border border-[#e8e4df] rounded-lg px-1.5 py-0.5 flex-shrink-0">
+        Search
+      </span>
+    </button>
   );
 }

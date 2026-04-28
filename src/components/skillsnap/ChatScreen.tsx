@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { ArrowLeft, Phone, MoreVertical, Send, Paperclip, CheckCircle, Loader2, X, Clock, Flag, Bell, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { ArrowLeft, Phone, MoreVertical, Send, Paperclip, CheckCircle, Loader2, X, Clock, Flag, Bell, ChevronDown } from "lucide-react";
 import type { Screen, User, JobDoneStatus, JobRating } from "@/types";
 import { MOCK_USERS } from "@/mock-data/users";
 import { useAppState } from "@/state/AppState";
@@ -74,6 +74,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const { state, dispatch } = useAppState();
   const { messages, inputText, setInputText, sending, loading, sendMessage, sendImageMessage, bottomRef, threadId } = useChat();
   const [participant, setParticipant] = useState<User | null>(null);
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const [showChatMenu, setShowChatMenu] = useState(false);
 
@@ -167,17 +169,20 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#f8f7f5]">
+    <div className="flex flex-col h-screen bg-[#f8f7f5] relative">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center gap-3 px-4 h-14 flex-shrink-0">
         <button onClick={() => onNavigate("messages")} className="text-[#7a7570]">
           <ArrowLeft size={20} />
         </button>
-        <button onClick={() => onNavigate("client-profile")} className="flex items-center gap-2.5 flex-1">
-          <UserAvatar user={displayParticipant} size="sm" />
-          <div>
-            <p className="text-sm font-bold text-[#1a1a1a] leading-tight">{displayParticipant.displayName}</p>
-            <p className="text-[11px] text-[#6c47ff] font-medium">
+        <button onClick={() => onNavigate("client-profile")} className="flex items-center gap-2.5 flex-1 min-w-0">
+          <div className="relative flex-shrink-0">
+            <UserAvatar user={displayParticipant} size="sm" />
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-white" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-[#1a1a1a] leading-tight truncate">{displayParticipant.displayName}</p>
+            <p className="text-[11px] text-[#6c47ff] font-medium truncate">
               {[displayParticipant.skill, displayParticipant.location].filter(Boolean).join(" · ")}
             </p>
           </div>
@@ -205,7 +210,15 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 pb-2 flex flex-col gap-2.5">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 pb-2 flex flex-col gap-2.5"
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+          setShowScrollBtn(distFromBottom > 120);
+        }}
+      >
         <div className="flex items-center gap-2 my-2">
           <div className="flex-1 h-px bg-[#e8e4df]" />
           <span className="text-[11px] text-[#b0aaa5] font-medium px-2">Today</span>
@@ -260,8 +273,14 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                     )}
                   </>
                 )}
-                <span className={`text-[10px] text-[#b0aaa5] ${msg.from === "me" ? "text-right" : "text-left"} px-1`}>
+                <span className={`text-[10px] text-[#b0aaa5] flex items-center gap-0.5 ${msg.from === "me" ? "justify-end" : "justify-start"} px-1`}>
                   {msg.time}
+                  {msg.from === "me" && !msg.failed && (
+                    <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="ml-0.5 flex-shrink-0">
+                      <path d="M1 4l2.5 2.5L8 1" stroke="#6c47ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M5.5 4l2.5 2.5L13 1" stroke="#6c47ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
                 </span>
               </div>
             </div>
@@ -356,6 +375,16 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
 
         <div ref={bottomRef} />
       </div>
+
+      {/* Scroll-to-bottom button */}
+      {showScrollBtn && (
+        <button
+          onClick={() => bottomRef.current?.scrollIntoView({ behavior: "smooth" })}
+          className="absolute bottom-[200px] right-4 z-30 w-9 h-9 rounded-full bg-white shadow-lg border border-[#e8e4df] flex items-center justify-center text-[#6c47ff] active:scale-95 transition-transform"
+        >
+          <ChevronDown size={18} />
+        </button>
+      )}
 
       {/* ── SKILLER: Mark Job as Done button ── */}
       {isSkiller && jobStatus === "idle" && (

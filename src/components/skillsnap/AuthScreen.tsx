@@ -97,16 +97,24 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
+    // Safety net — never leave spinner running forever
+    const loadingTimeout = setTimeout(() => {
+      setLoading(false);
+      setError("Request timed out. Please check your connection and try again.");
+    }, 15000);
+
     try {
       const result =
         mode === "signup"
           ? await authService.signUp(email, password, displayName)
           : await authService.logIn(email, password);
 
+      clearTimeout(loadingTimeout);
+
       if (!result.success) {
         setError(result.error ?? "Something went wrong. Please try again.");
       } else {
-        // Persist or clear saved email based on "Remember me"
         if (rememberMe) {
           localStorage.setItem(SAVED_EMAIL_KEY, email);
         } else {
@@ -116,6 +124,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         onNavigate("home");
       }
     } catch {
+      clearTimeout(loadingTimeout);
       setError("Connection error. Please try again.");
     } finally {
       setLoading(false);

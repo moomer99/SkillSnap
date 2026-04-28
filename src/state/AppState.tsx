@@ -275,8 +275,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const sb = getSupabase();
 
+    // Safety net — if auth resolution hangs for >8s, stop the spinner so the
+    // user isn't stuck on a blank loading screen
+    const authTimeout = setTimeout(() => {
+      dispatch({ type: "SET_AUTH_LOADING", loading: false });
+    }, 8000);
+
     // Resolve initial session — create profile if it doesn't exist yet
     sb.auth.getSession().then(async ({ data: { session } }) => {
+      clearTimeout(authTimeout);
       if (session?.user) {
         // Try fetching existing profile first
         const { data } = await sb
@@ -299,6 +306,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } else {
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }
+    }).catch(() => {
+      clearTimeout(authTimeout);
+      dispatch({ type: "SET_AUTH_LOADING", loading: false });
     });
 
     // Keep session in sync across tabs and token refresh

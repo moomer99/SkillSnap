@@ -53,14 +53,20 @@ export function useChat() {
     const hasCached = (state.threadMessages[threadId]?.length ?? 0) > 0;
     if (!hasCached) setLoading(true);
 
-    messageService.getMessages(threadId).then((msgs) => {
-      if (msgs.length > 0) {
-        dispatch({ type: "SET_THREAD_MESSAGES", threadId, messages: msgs });
-      }
-      setLoading(false);
-    }).catch(() => {
-      setLoading(false);
-    });
+    function fetchMessages() {
+      messageService.getMessages(threadId).then((msgs) => {
+        // Never replace a warm cache with an empty result — Supabase RLS
+        // can return [] if the policy momentarily blocks; keep what we have
+        if (msgs.length > 0) {
+          dispatch({ type: "SET_THREAD_MESSAGES", threadId, messages: msgs });
+        }
+        setLoading(false);
+      }).catch(() => {
+        setLoading(false);
+      });
+    }
+
+    fetchMessages();
 
     // Tear down any previous subscription before creating a new one
     unsubRef.current?.();
@@ -78,9 +84,17 @@ export function useChat() {
       }
     });
 
+    // Refetch when tab becomes visible again — catches messages sent while
+    // the Realtime subscription was suspended (background tab)
+    function handleVisibility() {
+      if (document.visibilityState === "visible") fetchMessages();
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
       unsubRef.current?.();
       unsubRef.current = null;
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [threadId]);
