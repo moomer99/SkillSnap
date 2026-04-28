@@ -20,9 +20,6 @@ export default function SearchBar({
     >
       <Search size={15} className="text-[#6c47ff] flex-shrink-0" />
       <span className="text-[#b0aaa5] text-sm flex-1 truncate">{placeholder}</span>
-      <span className="text-[10px] font-semibold text-[#b0aaa5] bg-white border border-[#e8e4df] rounded-lg px-1.5 py-0.5 flex-shrink-0">
-        Search
-      </span>
     </button>
   );
 }
