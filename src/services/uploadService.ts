@@ -12,7 +12,8 @@ function getRealPublicUrl(bucket: string, path: string): string {
 
 export interface UploadPayload {
   file?: File;
-  dataUrl?: string;   // pre-converted data URL for sandbox-safe demo mode
+  dataUrl?: string;        // pre-converted data URL for sandbox-safe demo mode
+  thumbnailDataUrl?: string; // JPEG thumbnail captured from video preview
   caption: string;
   skill: SkillCategory | "";
   location: string;
@@ -105,7 +106,18 @@ export const uploadService = {
 
     if (payload.file) {
       mediaUrl = await uploadService.uploadMedia(payload.file);
-      if (payload.file.type.startsWith("image/")) thumbnailUrl = mediaUrl;
+      if (payload.file.type.startsWith("image/")) {
+        thumbnailUrl = mediaUrl;
+      } else if (payload.thumbnailDataUrl) {
+        // Upload the captured video thumbnail to Storage
+        try {
+          const blob = await fetch(payload.thumbnailDataUrl).then((r) => r.blob());
+          const thumbFile = new File([blob], "thumbnail.jpg", { type: "image/jpeg" });
+          thumbnailUrl = await uploadService.uploadMedia(thumbFile);
+        } catch {
+          // non-fatal — post saves without thumbnail, grid shows gradient
+        }
+      }
     }
 
     const isVideo = payload.file ? payload.file.type.startsWith("video/") : false;

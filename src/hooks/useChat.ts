@@ -91,10 +91,14 @@ export function useChat() {
     }
     document.addEventListener("visibilitychange", handleVisibility);
 
+    // Polling fallback every 8s — catches messages if Realtime WebSocket drops
+    const pollInterval = setInterval(fetchMessages, 8000);
+
     return () => {
       unsubRef.current?.();
       unsubRef.current = null;
       document.removeEventListener("visibilitychange", handleVisibility);
+      clearInterval(pollInterval);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [threadId]);

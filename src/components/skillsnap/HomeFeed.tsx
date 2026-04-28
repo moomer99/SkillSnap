@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Heart, Share2, Bookmark, MapPin, Volume2, VolumeX } from "lucide-react";
 import type { Post } from "@/types";
 import type { Screen } from "@/types";
@@ -120,6 +120,28 @@ function FeedCard({
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Auto-play when card scrolls into view; pause when out of view
+  useEffect(() => {
+    if (post.type !== "video" || !post.mediaUrl) return;
+    const card = cardRef.current;
+    if (!card) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          videoRef.current?.play().catch(() => {});
+          setPlaying(true);
+        } else {
+          videoRef.current?.pause();
+          setPlaying(false);
+        }
+      },
+      { threshold: 0.6 }
+    );
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, [post.type, post.mediaUrl]);
 
   const handleMediaTap = useCallback(() => {
     if (!post.mediaUrl || post.type !== "video") return;
@@ -134,6 +156,7 @@ function FeedCard({
 
   return (
     <div
+      ref={cardRef}
       className="relative w-full overflow-hidden bg-gray-900 flex-shrink-0 mb-2"
       style={{ height: `calc(100dvh - ${HEADER_H}px - 8px)` }}
     >
@@ -165,16 +188,17 @@ function FeedCard({
         <span className="text-white/70 text-[12px] font-medium">{timeAgo(post.createdAt)}</span>
         {post.type === "video" && post.mediaUrl && (
           <button
-            className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center text-white"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-sm text-white active:bg-black/60 transition-colors"
             onClick={(e) => { e.stopPropagation(); setMuted(m => !m); }}
           >
-            {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+            <span className="text-[11px] font-semibold">{muted ? "Tap for sound" : "Mute"}</span>
           </button>
         )}
       </div>
 
-      {/* ── Play button ── */}
-      {post.type === "video" && !playing && (
+      {/* ── Play button — only show for photo posts or if video has no mediaUrl ── */}
+      {post.type === "video" && !playing && !post.mediaUrl && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
           <div className="w-16 h-16 rounded-full flex items-center justify-center"
             style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(6px)", border: "2px solid rgba(255,255,255,0.28)" }}>

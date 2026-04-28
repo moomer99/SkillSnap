@@ -389,18 +389,24 @@ function FeaturedThumb({
 }
 
 function GridTile({ post, onClick }: { post: Post; onClick: () => void }) {
+  const [imgErr, setImgErr] = useState(false);
+  const imgSrc = !imgErr ? (post.thumbnailUrl || (post.type === "photo" ? post.mediaUrl : undefined)) : undefined;
+
   return (
     <div className="aspect-square relative overflow-hidden cursor-pointer" onClick={onClick}>
-      {post.thumbnailUrl ? (
-        <img src={post.thumbnailUrl} alt={post.caption} className="absolute inset-0 w-full h-full object-cover" />
-      ) : post.mediaUrl && post.type === "photo" ? (
-        <img src={post.mediaUrl} alt={post.caption} className="absolute inset-0 w-full h-full object-cover" />
-      ) : (
-        <div className="absolute inset-0" style={{ background: post.thumbnailGradient }} />
+      {/* Always render gradient as base layer */}
+      <div className="absolute inset-0" style={{ background: post.thumbnailGradient }} />
+      {imgSrc && (
+        <img
+          src={imgSrc}
+          alt={post.caption}
+          className="absolute inset-0 w-full h-full object-cover"
+          onError={() => setImgErr(true)}
+        />
       )}
       {post.type === "video" && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-8 h-8 rounded-full bg-white/25 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-white/25 backdrop-blur-sm flex items-center justify-center">
             <Play size={12} fill="white" color="white" />
           </div>
         </div>

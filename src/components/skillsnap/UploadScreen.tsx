@@ -113,6 +113,12 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     setError(null);
     setLoading(true);
     try {
+      // Capture thumbnail from the preview video BEFORE createPost so it can be uploaded
+      let thumbnailDataUrl: string | undefined;
+      if (selectedFile?.type.startsWith("video/")) {
+        thumbnailDataUrl = capturePreviewThumbnail() ?? undefined;
+      }
+
       // Convert file to data URL before passing to service so it's sandbox-safe
       let dataUrl: string | undefined;
       if (selectedFile) {
@@ -122,16 +128,16 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
       const newPost = await uploadService.createPost({
         file: selectedFile ?? undefined,
         dataUrl,
+        thumbnailDataUrl,
         caption: caption.trim(),
         skill: skill,
         location,
       });
 
       if (newPost) {
-        // Capture thumbnail from the already-loaded preview video (no re-loading needed)
-        if (selectedFile?.type.startsWith("video/")) {
-          const thumb = capturePreviewThumbnail();
-          if (thumb) newPost.thumbnailUrl = thumb;
+        // If thumbnail wasn't uploaded to Storage, use the local data URL for immediate display
+        if (thumbnailDataUrl && !newPost.thumbnailUrl) {
+          newPost.thumbnailUrl = thumbnailDataUrl;
         }
         dispatch({ type: "PREPEND_POST", post: newPost });
       }
