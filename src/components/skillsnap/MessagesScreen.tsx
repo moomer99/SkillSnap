@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
-import { MessageSquare, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { MessageSquare, Search, Bell, BellOff } from "lucide-react";
 import type { Screen } from "@/types";
 import { useMessages } from "@/hooks/useMessages";
 import MessageThreadItem from "./shared/MessageThreadItem";
+import { getNotifPermission, requestNotifPermission, type NotifPermission } from "@/hooks/useNotifications";
 
 interface MessagesScreenProps {
   onNavigate: (s: Screen) => void;
@@ -12,6 +13,25 @@ interface MessagesScreenProps {
 export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScreenProps) {
   const { threads, threadsLoading, openThread } = useMessages();
   const [query, setQuery] = useState("");
+  const [notifPerm, setNotifPerm] = useState<NotifPermission>("default");
+  const [notifDismissed, setNotifDismissed] = useState(false);
+
+  useEffect(() => {
+    setNotifPerm(getNotifPermission());
+    try { setNotifDismissed(!!localStorage.getItem("skillsnap_notif_dismissed")); } catch {}
+  }, []);
+
+  async function handleEnableNotifs() {
+    const result = await requestNotifPermission();
+    setNotifPerm(result);
+  }
+
+  function handleDismissNotifs() {
+    setNotifDismissed(true);
+    try { localStorage.setItem("skillsnap_notif_dismissed", "1"); } catch {}
+  }
+
+  const showNotifBanner = notifPerm === "default" && !notifDismissed;
 
   const filtered = query.trim()
     ? threads.filter((t) => {
@@ -54,6 +74,42 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
           )}
         </div>
       </header>
+
+      {/* Notification permission banner */}
+      {showNotifBanner && (
+        <div className="mx-4 mt-3 mb-1 bg-[#f5f0ff] border border-[#c4b5fd] rounded-2xl px-4 py-3 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#6c47ff] flex items-center justify-center flex-shrink-0">
+            <Bell size={16} color="white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-[#1a1a1a] leading-tight">Get message alerts</p>
+            <p className="text-xs text-[#7a7570] mt-0.5">Know instantly when someone messages you</p>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={handleDismissNotifs}
+              className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#b0aaa5] active:bg-[#f0eeea]"
+            >
+              <BellOff size={13} />
+            </button>
+            <button
+              onClick={handleEnableNotifs}
+              className="text-xs font-bold text-white px-3 py-1.5 rounded-full"
+              style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)" }}
+            >
+              Enable
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Notification granted confirmation */}
+      {notifPerm === "granted" && (
+        <div className="mx-4 mt-3 mb-1 bg-[#f0fdf4] border border-green-200 rounded-2xl px-4 py-2.5 flex items-center gap-2.5">
+          <Bell size={14} className="text-green-500 flex-shrink-0" />
+          <p className="text-xs font-semibold text-green-700">Message notifications are on</p>
+        </div>
+      )}
 
       {/* Thread list */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24 divide-y divide-[#f0eeea]">

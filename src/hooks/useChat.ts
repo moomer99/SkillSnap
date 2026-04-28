@@ -8,6 +8,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useAppState } from "@/state/AppState";
 import { messageService } from "@/services/messageService";
 import { MOCK_MESSAGES } from "@/mock-data/messages";
+import { showMessageNotification } from "@/hooks/useNotifications";
 import type { Message } from "@/types";
 
 const SUPABASE_CONFIGURED =
@@ -57,10 +58,17 @@ export function useChat() {
     // Subscribe to Realtime inserts
     unsubRef.current = messageService.subscribeToMessages(threadId, (msg) => {
       setMessages((prev) => {
-        // Avoid duplicate if we already optimistically appended
         if (prev.some((m) => m.id === msg.id)) return prev;
         return [...prev, msg];
       });
+      // Show browser notification for incoming messages
+      if (msg.from === "them") {
+        showMessageNotification({
+          senderName: msg.senderName ?? "New message",
+          senderInitial: (msg.senderName ?? "?")[0].toUpperCase(),
+          text: msg.text ?? "Sent you a message",
+        });
+      }
     });
 
     return () => {

@@ -39,6 +39,11 @@ export default function RootLayout({
         />
         {children}
         <VisualEditsMessenger />
+        <Script id="sw-register" strategy="afterInteractive">{`
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+          }
+        `}</Script>
       </body>
     </html>
   );
