@@ -15,7 +15,8 @@ export type SkillCategory =
   | "Electrician"
   | "Landscaping"
   | "Nails"
-  | "Other";
+  | "Other"
+  | (string & {});
 
 // ── User / Profile ──────────────────────────
 export interface User {

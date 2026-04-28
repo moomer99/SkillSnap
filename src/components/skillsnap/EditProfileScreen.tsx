@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef } from "react";
-import { ArrowLeft, Camera, Loader2, CheckCircle, MapPin } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, CheckCircle, MapPin, Pencil, X } from "lucide-react";
 import type { Screen, SkillCategory } from "@/types";
 import { SKILL_CATEGORIES } from "@/constants/config";
 import { useAppState } from "@/state/AppState";
@@ -24,7 +24,15 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
   const [username, setUsername] = useState(user?.username?.replace("@", "") ?? "");
   const [bio, setBio] = useState(user?.bio ?? "");
   const [location, setLocation] = useState(user?.location ?? "");
-  const [skill, setSkill] = useState<SkillCategory | "">(user?.skill ?? "");
+  // If the stored skill is a known category, use it directly.
+  // If it's a custom string (not in the list), pre-select "Other" and populate customSkill.
+  const knownCategories = SKILL_CATEGORIES as readonly string[];
+  const storedSkill = user?.skill ?? "";
+  const isStoredCustom = storedSkill && !knownCategories.includes(storedSkill);
+  const [skill, setSkill] = useState<SkillCategory | "">(isStoredCustom ? "Other" : (storedSkill as SkillCategory | ""));
+  const [customSkill, setCustomSkill] = useState(isStoredCustom ? storedSkill : "");
+  const [showCustomInput, setShowCustomInput] = useState(!!isStoredCustom);
+  const customInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatarUrl ?? null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
@@ -77,7 +85,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
             username: `@${username.trim()}`,
             bio: bio.trim(),
             location: location.trim(),
-            skill: skill || null,
+            skill: (skill === "Other" ? (customSkill.trim() || null) : (skill || null)) as string | null,
             // Only send avatarUrl to DB if it's a real remote URL
             ...(persistedAvatarUrl ? { avatarUrl: persistedAvatarUrl } : {}),
           });
@@ -97,7 +105,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
           username: `@${username.trim()}`,
           bio: bio.trim(),
           location: location.trim(),
-          skill: skill || null,
+          skill: (skill === "Other" ? (customSkill.trim() || null) : (skill || null)) as string | null,
           ...(inMemoryAvatarUrl !== undefined ? { avatarUrl: inMemoryAvatarUrl } : {}),
         },
       });
@@ -233,41 +241,95 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
 
             {/* Skill */}
             <Field label="Skill Category">
-              <div className="bg-white rounded-2xl border border-[#e8e4df] px-4 h-12 flex items-center justify-between relative focus-within:border-[#6c47ff] transition-colors">
-                <select
-                  value={skill}
-                  onChange={(e) => setSkill(e.target.value as SkillCategory | "")}
-                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                >
-                  <option value="">No skill (Client)</option>
-                  {SKILL_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-                <span className={`text-sm ${skill ? "text-[#1a1a1a]" : "text-[#b0aaa5]"}`}>
-                  {skill || "No skill (Client)"}
-                </span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b0aaa5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </div>
-              {/* Quick chips */}
-              <div className="flex flex-wrap gap-2 mt-2.5">
-                {SKILL_CATEGORIES.slice(0, 6).map((cat) => (
+              {/* All chips — including Other */}
+              <div className="flex flex-wrap gap-2">
+                {(SKILL_CATEGORIES as readonly string[]).filter((c) => c !== "Other").map((cat) => (
                   <button
                     key={cat}
                     type="button"
-                    onClick={() => setSkill(skill === cat ? "" : cat)}
-                    className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
+                    onClick={() => {
+                      if (skill === cat) {
+                        setSkill("");
+                      } else {
+                        setSkill(cat as SkillCategory);
+                        setShowCustomInput(false);
+                        setCustomSkill("");
+                      }
+                    }}
+                    className={`text-xs font-semibold px-3.5 py-2 rounded-full border transition-all active:scale-[0.97] ${
                       skill === cat
-                        ? "bg-[#6c47ff] text-white border-[#6c47ff]"
-                        : "bg-white text-[#7a7570] border-[#e8e4df]"
+                        ? "bg-[#6c47ff] text-white border-[#6c47ff] shadow-sm"
+                        : "bg-white text-[#7a7570] border-[#e8e4df] hover:border-[#6c47ff]/40"
                     }`}
                   >
                     {cat}
                   </button>
                 ))}
+                {/* Other chip — always last */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (skill === "Other") {
+                      setSkill("");
+                      setShowCustomInput(false);
+                      setCustomSkill("");
+                    } else {
+                      setSkill("Other");
+                      setShowCustomInput(true);
+                      setTimeout(() => customInputRef.current?.focus(), 50);
+                    }
+                  }}
+                  className={`text-xs font-semibold px-3.5 py-2 rounded-full border transition-all active:scale-[0.97] flex items-center gap-1.5 ${
+                    skill === "Other"
+                      ? "bg-[#6c47ff] text-white border-[#6c47ff] shadow-sm"
+                      : "bg-white text-[#7a7570] border-[#e8e4df] hover:border-[#6c47ff]/40"
+                  }`}
+                >
+                  <Pencil size={10} />
+                  Other
+                </button>
               </div>
+
+              {/* Animated custom skill input — only when Other is selected */}
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-out ${
+                  showCustomInput ? "max-h-32 opacity-100 mt-3" : "max-h-0 opacity-0 mt-0"
+                }`}
+              >
+                <div className="bg-white rounded-2xl border-2 border-[#6c47ff] px-4 h-12 flex items-center gap-2.5 shadow-sm shadow-[#6c47ff]/10">
+                  <Pencil size={14} className="text-[#6c47ff] flex-shrink-0" />
+                  <input
+                    ref={customInputRef}
+                    type="text"
+                    value={customSkill}
+                    onChange={(e) => setCustomSkill(e.target.value.slice(0, 40))}
+                    placeholder="e.g. Carpenter, Hairdresser, Chef…"
+                    className="flex-1 bg-transparent text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none"
+                  />
+                  {customSkill && (
+                    <button
+                      type="button"
+                      onClick={() => setCustomSkill("")}
+                      className="text-[#b0aaa5] hover:text-[#7a7570] flex-shrink-0"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-[#b0aaa5] mt-1.5 px-1">
+                  Type your specific skill — this is what clients will see on your profile.
+                </p>
+              </div>
+
+              {/* Preview badge — shows the resolved skill label */}
+              {(skill && skill !== "Other") || (skill === "Other" && customSkill.trim()) ? (
+                <div className="flex items-center gap-2 mt-2 px-1">
+                  <span className="text-[10px] font-bold text-[#b0aaa5] uppercase tracking-wider">Preview:</span>
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#ede9fe] text-[#5b3dd8]">
+                    {skill === "Other" ? customSkill.trim() : skill}
+                  </span>
+                </div>
+              ) : null}
             </Field>
 
             {/* Save button */}
