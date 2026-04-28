@@ -272,26 +272,33 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
     <div className="flex flex-col min-h-screen bg-white">
       {/* Hero */}
       <div
-        className="relative flex-1 flex flex-col items-center justify-center overflow-hidden"
-        style={{ background: "linear-gradient(160deg, #ede9fe 0%, #f8f7f5 50%, #fff 100%)" }}
+        className="relative flex-1 flex flex-col overflow-hidden"
+        style={{ background: "linear-gradient(175deg, #0f0a1e 0%, #1a1040 40%, #2d1b69 100%)" }}
       >
-        {/* Floating skill bubbles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <Bubble text="Barber"        top="12%" left="8%"  rotate="-8deg" />
-          <Bubble text="Tiler"         top="20%" left="72%" rotate="6deg" />
-          <Bubble text="Makeup Artist" top="38%" left="4%"  rotate="-4deg" />
-          <Bubble text="Fitness"       top="55%" left="68%" rotate="10deg" />
-          <Bubble text="Cleaning"      top="68%" left="12%" rotate="-6deg" />
-          <Bubble text="Plumber"       top="75%" left="58%" rotate="3deg" />
+        {/* Subtle radial glow */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div style={{ position: "absolute", top: "15%", left: "50%", transform: "translateX(-50%)", width: 340, height: 340, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.35) 0%, transparent 70%)" }} />
         </div>
 
-        {/* Brand */}
-        <div className="relative z-10 flex flex-col items-center text-center px-8 mt-12">
+        {/* Floating skill pro bubbles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <ProBubble initial="M" gradient="linear-gradient(135deg,#667eea,#764ba2)" name="Marcus" skill="✂️ Barber"        top="8%"  left="5%"  rotate="-6deg" jobs={142} />
+          <ProBubble initial="P" gradient="linear-gradient(135deg,#f093fb,#f5576c)" name="Priya"  skill="💄 Makeup Artist" top="6%"  left="60%" rotate="5deg"  jobs={89}  />
+          <ProBubble initial="J" gradient="linear-gradient(135deg,#4facfe,#00c6ff)" name="Jake"   skill="🧱 Tiler"         top="26%" left="72%" rotate="7deg"  jobs={211} />
+          <ProBubble initial="S" gradient="linear-gradient(135deg,#43e97b,#38f9d7)" name="Sam"    skill="💪 Fitness / PT"  top="44%" left="2%"  rotate="-5deg" jobs={67}  />
+          <ProBubble initial="A" gradient="linear-gradient(135deg,#fa709a,#fee140)" name="Ana"    skill="🧹 Cleaning"      top="62%" left="62%" rotate="9deg"  jobs={178} />
+          <ProBubble initial="D" gradient="linear-gradient(135deg,#a18cd1,#fbc2eb)" name="Dan"    skill="🔧 Plumber"       top="72%" left="8%"  rotate="-4deg" jobs={95}  />
+          <ProBubble initial="L" gradient="linear-gradient(135deg,#ffecd2,#fcb69f)" name="Lisa"   skill="💅 Nails"         top="78%" left="52%" rotate="6deg"  jobs={134} />
+          <ProBubble initial="R" gradient="linear-gradient(135deg,#96fbc4,#f9f586)" name="Ryan"   skill="⚡ Electrician"   top="20%" left="18%" rotate="-8deg" jobs={57}  />
+        </div>
+
+        {/* Brand — centred */}
+        <div className="relative z-10 flex flex-col items-center text-center px-8 pt-16 pb-4">
           <div
-            className="flex items-center justify-center w-20 h-20 rounded-3xl mb-6"
-            style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
+            className="flex items-center justify-center w-[72px] h-[72px] rounded-2xl mb-5 shadow-lg"
+            style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)", boxShadow: "0 8px 32px rgba(108,71,255,0.45)" }}
           >
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
               <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="2.5" fill="none" />
               <circle cx="20" cy="20" r="5" fill="white" />
               <circle cx="20" cy="10" r="2" fill="white" opacity="0.8" />
@@ -299,42 +306,56 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
               <circle cx="11.3" cy="25" r="2" fill="white" opacity="0.8" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-[#1a1a1a] tracking-tight mb-2">{APP_CONFIG.name}</h1>
-          <p className="text-xl font-semibold text-[#6c47ff] mt-2 mb-1">{APP_CONFIG.tagline}</p>
-          <p className="text-sm text-[#7a7570] leading-relaxed max-w-[260px]">{APP_CONFIG.subtitle}</p>
+          <h1 className="text-[32px] font-extrabold text-white tracking-tight leading-tight mb-2">{APP_CONFIG.name}</h1>
+          <p className="text-base font-semibold mb-1" style={{ color: "#a78bfa" }}>{APP_CONFIG.tagline}</p>
+          <p className="text-sm leading-relaxed max-w-[240px]" style={{ color: "rgba(255,255,255,0.55)" }}>{APP_CONFIG.subtitle}</p>
         </div>
 
-        {/* Mini preview cards */}
-        <div className="relative z-10 mt-10 flex gap-3 px-6">
-          <MiniCard gradient="linear-gradient(135deg, #667eea, #764ba2)" skill="Barber"  name="Marcus T." />
-          <MiniCard gradient="linear-gradient(135deg, #f093fb, #f5576c)" skill="Makeup"  name="Priya K."  offset />
-          <MiniCard gradient="linear-gradient(135deg, #4facfe, #00f2fe)" skill="Tiler"   name="Jake R."  />
+        {/* Mini pro cards row */}
+        <div className="relative z-10 mt-6 flex gap-3 px-5 pb-8 overflow-x-auto no-scrollbar justify-center">
+          <MiniCard
+            gradient="linear-gradient(160deg,#667eea,#764ba2)"
+            skill="Barber" name="Marcus T." initial="M"
+            jobs={142} happy={96}
+          />
+          <MiniCard
+            gradient="linear-gradient(160deg,#f093fb,#f5576c)"
+            skill="Makeup Artist" name="Priya K." initial="P"
+            jobs={89} happy={100} offset
+          />
+          <MiniCard
+            gradient="linear-gradient(160deg,#4facfe,#00c6ff)"
+            skill="Fitness / PT" name="Sam L." initial="S"
+            jobs={67} happy={94}
+          />
         </div>
+
+        {/* Bottom fade into white CTA */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+          style={{ background: "linear-gradient(to bottom, transparent, white)" }} />
       </div>
 
       {/* CTA section */}
-      <div className="px-6 pt-6 pb-10 flex flex-col gap-3 bg-white">
-        {/* Google — primary OAuth option */}
+      <div className="px-5 pt-5 pb-10 flex flex-col gap-3 bg-white">
+        {/* Google — primary */}
         <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} />
 
         <OrDivider />
 
-        {/* Email options */}
         <button
           onClick={() => setMode("signup")}
-          className="w-full h-14 rounded-2xl font-semibold text-base text-white transition-all active:scale-[0.98]"
-          style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+          className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] shadow-sm"
+          style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 16px rgba(108,71,255,0.30)" }}
         >
           Sign up with email
         </button>
         <button
           onClick={() => setMode("login")}
-          className="w-full h-14 rounded-2xl font-semibold text-base text-[#6c47ff] border border-[#e8e4df] bg-white transition-all active:scale-[0.98]"
+          className="w-full h-14 rounded-2xl font-semibold text-base text-[#6c47ff] border-2 border-[#ede9fe] bg-white transition-all active:scale-[0.98]"
         >
           Log in with email
         </button>
 
-        {/* Error from failed OAuth redirect */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
             <p className="text-sm text-red-600 text-center">{error}</p>
@@ -343,12 +364,12 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
         <button
           onClick={() => dispatch({ type: "SKIP_AUTH" })}
-          className="w-full text-center text-sm text-[#7a7570] font-medium py-2 transition-colors active:text-[#4a4a4a]"
+          className="w-full text-center text-sm text-[#b0aaa5] font-medium py-1"
         >
-          Skip for now
+          Browse as guest
         </button>
 
-        <p className="text-center text-xs text-[#b0aaa5] mt-1">
+        <p className="text-center text-[11px] text-[#b0aaa5]">
           By continuing, you agree to our Terms &amp; Privacy Policy
         </p>
       </div>
@@ -356,33 +377,73 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   );
 }
 
-function Bubble({ text, top, left, rotate }: { text: string; top: string; left: string; rotate: string }) {
+// Floating pro bubble — avatar + name + skill chip
+function ProBubble({ initial, gradient, name, skill, top, left, rotate, jobs }: {
+  initial: string; gradient: string; name: string; skill: string;
+  top: string; left: string; rotate: string; jobs: number;
+}) {
   return (
     <div
-      className="absolute text-xs font-semibold px-3 py-1.5 rounded-full bg-white shadow-sm border border-[#e8e4df] text-[#6c47ff] whitespace-nowrap"
-      style={{ top, left, transform: `rotate(${rotate})`, opacity: 0.85 }}
+      className="absolute flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl px-2.5 py-1.5 shadow-lg"
+      style={{ top, left, transform: `rotate(${rotate})` }}
     >
-      {text}
+      <div
+        className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[11px] flex-shrink-0"
+        style={{ background: gradient }}
+      >
+        {initial}
+      </div>
+      <div>
+        <p className="text-white text-[11px] font-bold leading-tight">{name}</p>
+        <p className="text-white/60 text-[9px] leading-tight">{skill} · {jobs} jobs</p>
+      </div>
     </div>
   );
 }
 
-function MiniCard({ gradient, skill, name, offset }: { gradient: string; skill: string; name: string; offset?: boolean }) {
+// Mini video card with avatar + stats overlay
+function MiniCard({ gradient, skill, name, initial, jobs, happy, offset }: {
+  gradient: string; skill: string; name: string; initial: string;
+  jobs: number; happy: number; offset?: boolean;
+}) {
   return (
     <div
-      className={`relative w-[100px] h-[130px] rounded-2xl overflow-hidden shadow-lg flex-shrink-0 ${offset ? "-mt-4" : ""}`}
+      className={`relative w-[110px] h-[148px] rounded-2xl overflow-hidden shadow-xl flex-shrink-0 border border-white/10 ${offset ? "-mt-5" : ""}`}
       style={{ background: gradient }}
     >
+      {/* Scrim */}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.72) 100%)" }} />
+
+      {/* Play icon */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-9 h-9 rounded-full bg-white/30 flex items-center justify-center backdrop-blur-sm">
-          <svg width="14" height="16" viewBox="0 0 14 16" fill="white">
-            <path d="M1 1l12 7-12 7V1z" />
+        <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(4px)", border: "1.5px solid rgba(255,255,255,0.3)" }}>
+          <svg width="12" height="14" viewBox="0 0 12 14" fill="white">
+            <path d="M1 1l10 6-10 6V1z" />
           </svg>
         </div>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 p-2.5" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)" }}>
-        <p className="text-white text-[10px] font-bold leading-tight">{skill}</p>
-        <p className="text-white/80 text-[9px] leading-tight">{name}</p>
+
+      {/* Bottom info */}
+      <div className="absolute bottom-0 left-0 right-0 p-2.5">
+        {/* Avatar + name row */}
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <div
+            className="w-5 h-5 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+            style={{ fontSize: 8, background: "rgba(255,255,255,0.25)" }}
+          >
+            {initial}
+          </div>
+          <p className="text-white text-[10px] font-bold leading-none truncate">{name}</p>
+        </div>
+        {/* Skill chip */}
+        <div className="inline-flex items-center bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5 mb-1.5">
+          <p className="text-white text-[9px] font-semibold">{skill}</p>
+        </div>
+        {/* Stats row */}
+        <div className="flex items-center gap-2">
+          <span className="text-white/70 text-[9px]">{jobs} jobs</span>
+          <span className="text-[#4ade80] text-[9px] font-semibold">{happy}% 😊</span>
+        </div>
       </div>
     </div>
   );
