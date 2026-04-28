@@ -157,4 +157,5 @@ export type Screen =
   | "chat"
   | "own-profile"      // My Profile
   | "client-profile"   // Client Profile
-  | "edit-profile";
+  | "edit-profile"
+  | "settings";

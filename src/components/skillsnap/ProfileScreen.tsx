@@ -5,7 +5,7 @@
 // variant="client" → Client Profile (public view)
 // Data: userService.getUser(id) via useProfile hook
 // ─────────────────────────────────────────────
-import { MapPin, ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, Loader2, Bookmark } from "lucide-react";
+import { MapPin, ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, Loader2, Bookmark, Settings } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import type { Screen, ProfileVariant, Post, SkillCategory } from "@/types";
 import { MOCK_WORK_GRID } from "@/mock-data/posts";
@@ -109,16 +109,20 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           <ArrowLeft size={20} />
         </button>
         <span className="font-semibold text-[#1a1a1a] text-sm flex-1">{user.username}</span>
-        <span
-          className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
-          style={
-            isOwn
-              ? { background: "#ede9fe", color: "#5b3dd8" }
-              : { background: "#d1fae5", color: "#065f46" }
-          }
-        >
-          {isOwn ? "Your Profile" : "Client"}
-        </span>
+        {isOwn ? (
+          <button
+            onClick={() => onNavigate("settings")}
+            className="w-9 h-9 flex items-center justify-center text-[#7a7570] active:text-[#6c47ff] transition-colors"
+          >
+            <Settings size={20} />
+          </button>
+        ) : (
+          <span
+            className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-[#d1fae5] text-[#065f46]"
+          >
+            Client
+          </span>
+        )}
       </header>
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
