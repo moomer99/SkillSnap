@@ -103,12 +103,18 @@ export function useChat() {
 
     try {
       const confirmed = await messageService.sendMessage(tid, text);
+      // Replace optimistic with confirmed (has real DB id)
       setMessages((prev) =>
         prev.map((m) => (m.id === optimisticId ? confirmed : m))
       );
-    } catch {
-      setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
-      setInputText(text);
+    } catch (err) {
+      console.error("sendMessage failed:", err);
+      // Keep the message visible but mark it as failed
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === optimisticId ? { ...m, failed: true } : m
+        )
+      );
     } finally {
       setSending(false);
     }

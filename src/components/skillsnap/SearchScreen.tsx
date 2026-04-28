@@ -75,20 +75,29 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
   }, [query, filter, activeSkill]);
 
   async function runSearch(q: string) {
+    const ql = q.toLowerCase();
+    const mockResults = MOCK_USERS.filter(u =>
+      u.displayName.toLowerCase().includes(ql) ||
+      u.username.toLowerCase().includes(ql) ||
+      (u.skill?.toLowerCase().includes(ql) ?? false) ||
+      u.location.toLowerCase().includes(ql)
+    );
+
     try {
       let users: User[] = [];
       if (SUPABASE_CONFIGURED) {
-        const { searchService } = await import("@/services/searchService");
-        const res = await searchService.search(q);
-        users = res.users;
-      } else {
-        const ql = q.toLowerCase();
-        users = MOCK_USERS.filter(u =>
-          u.displayName.toLowerCase().includes(ql) ||
-          u.username.toLowerCase().includes(ql) ||
-          (u.skill?.toLowerCase().includes(ql) ?? false) ||
-          u.location.toLowerCase().includes(ql)
+        // Race Supabase against a 4s timeout — fall back to mock if slow/empty
+        const timeoutPromise = new Promise<User[]>((_, reject) =>
+          setTimeout(() => reject(new Error("timeout")), 4000)
         );
+        const supabasePromise = import("@/services/searchService").then(({ searchService }) =>
+          searchService.search(q).then((res) => res.users)
+        );
+        const sbUsers = await Promise.race([supabasePromise, timeoutPromise]).catch(() => [] as User[]);
+        // Use Supabase results if non-empty, otherwise show mock data
+        users = sbUsers.length > 0 ? sbUsers : mockResults;
+      } else {
+        users = mockResults;
       }
       if (filter === "pros")    users = users.filter(u => !u.isClient && u.skill);
       if (filter === "clients") users = users.filter(u => u.isClient);

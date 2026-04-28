@@ -241,17 +241,24 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                     />
                   </div>
                 ) : (
-                  /* Text bubble */
-                  <div
-                    className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                      msg.from === "me"
-                        ? "text-white rounded-br-sm"
-                        : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
-                    }`}
-                    style={msg.from === "me" ? { background: "linear-gradient(135deg, #6c47ff, #8b6af5)" } : {}}
-                  >
-                    {msg.text}
-                  </div>
+                  <>
+                    {/* Text bubble */}
+                    <div
+                      className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                        msg.from === "me"
+                          ? "text-white rounded-br-sm"
+                          : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
+                      } ${msg.failed ? "opacity-60" : ""}`}
+                      style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #6c47ff, #8b6af5)" } : {}}
+                    >
+                      {msg.text}
+                    </div>
+                    {msg.failed && (
+                      <span className="text-[10px] text-red-400 font-medium px-1">
+                        Not delivered · check connection
+                      </span>
+                    )}
+                  </>
                 )}
                 <span className={`text-[10px] text-[#b0aaa5] ${msg.from === "me" ? "text-right" : "text-left"} px-1`}>
                   {msg.time}

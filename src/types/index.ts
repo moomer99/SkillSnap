@@ -79,7 +79,8 @@ export interface Message {
   text: string;
   imageUrl?: string;
   time: string;
-  senderName?: string; // used for browser notifications
+  senderName?: string;
+  failed?: boolean; // true when DB insert failed — shown with retry indicator
 }
 
 export interface MessageThread {
