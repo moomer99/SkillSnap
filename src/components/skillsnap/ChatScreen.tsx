@@ -22,6 +22,43 @@ const RATINGS: { key: JobRating; emoji: string; label: string; happy: boolean }[
   { key: "not_satisfied", emoji: "😔", label: "Not satisfied",       happy: false },
 ];
 
+const QUICK_REPLIES_PRO = [
+  "Hi! I'm available 👋",
+  "What date works for you?",
+  "My rate is $X/hr",
+  "I can come to you",
+  "Done! Let me know 😊",
+];
+
+const QUICK_REPLIES_CLIENT = [
+  "Hi, are you available?",
+  "How much do you charge?",
+  "Can you come to me?",
+  "Sounds good!",
+  "Thanks! 🙌",
+];
+
+function QuickReplies({ onSelect, hasMessages, isSkiller }: {
+  onSelect: (text: string) => void;
+  hasMessages: boolean;
+  isSkiller: boolean;
+}) {
+  const replies = isSkiller ? QUICK_REPLIES_PRO : QUICK_REPLIES_CLIENT;
+  return (
+    <div className="bg-white border-t border-[#f0eeea] px-3 py-2 flex gap-2 overflow-x-auto no-scrollbar">
+      {replies.map((r) => (
+        <button
+          key={r}
+          onClick={() => onSelect(r)}
+          className="flex-shrink-0 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-[#e8e4df] bg-[#f8f7f5] text-[#4a4a4a] active:bg-[#ede9fe] active:border-[#c4b5fd] active:text-[#6c47ff] transition-all whitespace-nowrap"
+        >
+          {r}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function hoursElapsed(iso: string): number {
   return (Date.now() - new Date(iso).getTime()) / 3_600_000;
 }
@@ -35,7 +72,7 @@ function recalcHappy(prev: number, prevJobs: number, isHappy: boolean): number {
 
 export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const { state, dispatch } = useAppState();
-  const { messages, inputText, setInputText, sending, loading, sendMessage, sendImageMessage, bottomRef } = useChat();
+  const { messages, inputText, setInputText, sending, loading, sendMessage, sendImageMessage, bottomRef, threadId } = useChat();
   const [participant, setParticipant] = useState<User | null>(null);
 
   const [showChatMenu, setShowChatMenu] = useState(false);
@@ -339,6 +376,9 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           )}
         </div>
       )}
+
+      {/* Predictive text suggestions */}
+      <QuickReplies onSelect={(text) => { setInputText(text); inputRef.current?.focus(); }} hasMessages={hasMessages} isSkiller={isSkiller} />
 
       {/* Input bar */}
       <div

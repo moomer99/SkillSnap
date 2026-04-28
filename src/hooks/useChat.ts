@@ -71,28 +71,30 @@ export function useChat() {
 
   const sendMessage = useCallback(async () => {
     const text = inputText.trim();
-    if (!text || !threadId) return;
+    if (!text) return;
+    // Use active threadId or fall back to a local mock thread
+    const tid = threadId || "mock_thread_local";
     setSending(true);
     setInputText("");
 
-    // Optimistic append
+    // Optimistic append — always works, even in mock/no-thread mode
     const optimisticId = `optimistic_${Date.now()}`;
     const optimistic: Message = {
       id: optimisticId,
-      threadId,
+      threadId: tid,
       from: "me",
       text,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
     setMessages((prev) => [...prev, optimistic]);
 
-    if (!SUPABASE_CONFIGURED) {
+    if (!SUPABASE_CONFIGURED || !threadId) {
       setSending(false);
       return;
     }
 
     try {
-      const confirmed = await messageService.sendMessage(threadId, text);
+      const confirmed = await messageService.sendMessage(tid, text);
       setMessages((prev) =>
         prev.map((m) => (m.id === optimisticId ? confirmed : m))
       );
