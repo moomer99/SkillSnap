@@ -3,7 +3,7 @@
 // Connect flow: Connect button → getOrCreateConversation()
 // Realtime: subscribeToMessages() returns an unsubscribe fn.
 // ─────────────────────────────────────────────
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getRealtimeSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
 import type { MessageThread, Message } from "@/types";
 
@@ -173,14 +173,15 @@ export const messageService = {
   // Supabase Realtime subscription — returns unsubscribe function.
   // Resolves current user ID before subscribing to guarantee correct from/them mapping.
   subscribeToMessages(conversationId: string, onMessage: (msg: Message) => void): () => void {
-    let channel: ReturnType<ReturnType<typeof getSupabase>["channel"]> | null = null;
+    let channel: ReturnType<ReturnType<typeof getRealtimeSupabase>["channel"]> | null = null;
     let cancelled = false;
 
     getCurrentUserId().then((currentUserId) => {
       if (cancelled) return;
       const resolvedId = currentUserId ?? "";
+      const rt = getRealtimeSupabase();
 
-      channel = getSupabase()
+      channel = rt
         .channel(`messages:${conversationId}`)
         .on(
           "postgres_changes",
@@ -195,22 +196,25 @@ export const messageService = {
             onMessage(msg);
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          if (status === "CHANNEL_ERROR") {
+            console.warn("Realtime subscription error for conversation", conversationId);
+          }
+        });
     });
 
     return () => {
       cancelled = true;
-      if (channel) getSupabase().removeChannel(channel);
+      if (channel) getRealtimeSupabase().removeChannel(channel);
     };
   },
 
-  // Subscribe to conversation updates so the thread list stays fresh after messages are sent.
-  // Accepts a React ref to avoid re-subscribing when the conversation list grows.
   subscribeToConversationUpdates(
     idsRef: { current: string[] },
     onUpdate: () => void
   ): () => void {
-    const channel = getSupabase()
+    const rt = getRealtimeSupabase();
+    const channel = rt
       .channel("conversations:updates")
       .on(
         "postgres_changes",
@@ -225,7 +229,7 @@ export const messageService = {
       .subscribe();
 
     return () => {
-      getSupabase().removeChannel(channel);
+      getRealtimeSupabase().removeChannel(channel);
     };
   },
 
