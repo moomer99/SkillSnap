@@ -241,31 +241,25 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
 
             {/* Skill */}
             <Field label="Skill Category">
-              {/* All chips — including Other */}
               <div className="flex flex-wrap gap-2">
                 {(SKILL_CATEGORIES as readonly string[]).filter((c) => c !== "Other").map((cat) => (
                   <button
                     key={cat}
                     type="button"
                     onClick={() => {
-                      if (skill === cat) {
-                        setSkill("");
-                      } else {
-                        setSkill(cat as SkillCategory);
-                        setShowCustomInput(false);
-                        setCustomSkill("");
-                      }
+                      setSkill(skill === cat ? "" : cat as SkillCategory);
+                      setShowCustomInput(false);
+                      setCustomSkill("");
                     }}
-                    className={`text-xs font-semibold px-3.5 py-2 rounded-full border transition-all active:scale-[0.97] ${
+                    className={`text-xs font-semibold px-3.5 py-2 rounded-full border transition-all active:scale-95 ${
                       skill === cat
-                        ? "bg-[#6c47ff] text-white border-[#6c47ff] shadow-sm"
-                        : "bg-white text-[#7a7570] border-[#e8e4df] hover:border-[#6c47ff]/40"
+                        ? "bg-[#6c47ff] text-white border-[#6c47ff]"
+                        : "bg-white text-[#7a7570] border-[#e8e4df]"
                     }`}
                   >
                     {cat}
                   </button>
                 ))}
-                {/* Other chip — always last */}
                 <button
                   type="button"
                   onClick={() => {
@@ -276,13 +270,13 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                     } else {
                       setSkill("Other");
                       setShowCustomInput(true);
-                      setTimeout(() => customInputRef.current?.focus(), 50);
+                      setTimeout(() => customInputRef.current?.focus(), 80);
                     }
                   }}
-                  className={`text-xs font-semibold px-3.5 py-2 rounded-full border transition-all active:scale-[0.97] flex items-center gap-1.5 ${
+                  className={`text-xs font-semibold px-3.5 py-2 rounded-full border transition-all active:scale-95 flex items-center gap-1.5 ${
                     skill === "Other"
-                      ? "bg-[#6c47ff] text-white border-[#6c47ff] shadow-sm"
-                      : "bg-white text-[#7a7570] border-[#e8e4df] hover:border-[#6c47ff]/40"
+                      ? "bg-[#6c47ff] text-white border-[#6c47ff]"
+                      : "bg-white text-[#7a7570] border-[#e8e4df]"
                   }`}
                 >
                   <Pencil size={10} />
@@ -290,46 +284,43 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                 </button>
               </div>
 
-              {/* Animated custom skill input — only when Other is selected */}
-              <div
-                className={`overflow-hidden transition-all duration-300 ease-out ${
-                  showCustomInput ? "max-h-32 opacity-100 mt-3" : "max-h-0 opacity-0 mt-0"
-                }`}
-              >
-                <div className="bg-white rounded-2xl border-2 border-[#6c47ff] px-4 h-12 flex items-center gap-2.5 shadow-sm shadow-[#6c47ff]/10">
-                  <Pencil size={14} className="text-[#6c47ff] flex-shrink-0" />
-                  <input
-                    ref={customInputRef}
-                    type="text"
-                    value={customSkill}
-                    onChange={(e) => setCustomSkill(e.target.value.slice(0, 40))}
-                    placeholder="e.g. Carpenter, Hairdresser, Chef…"
-                    className="flex-1 bg-transparent text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none"
-                  />
-                  {customSkill && (
-                    <button
-                      type="button"
-                      onClick={() => setCustomSkill("")}
-                      className="text-[#b0aaa5] hover:text-[#7a7570] flex-shrink-0"
-                    >
-                      <X size={14} />
-                    </button>
-                  )}
+              {/* Custom skill input — visible when Other is selected */}
+              {showCustomInput && (
+                <div className="mt-3">
+                  <div
+                    style={{ border: "2px solid #6c47ff" }}
+                    className="bg-white rounded-2xl px-4 h-12 flex items-center gap-2.5"
+                  >
+                    <Pencil size={14} className="text-[#6c47ff] flex-shrink-0" />
+                    <input
+                      ref={customInputRef}
+                      type="text"
+                      value={customSkill}
+                      onChange={(e) => setCustomSkill(e.target.value.slice(0, 40))}
+                      placeholder="e.g. Carpenter, Hairdresser, Chef…"
+                      className="flex-1 bg-transparent text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none"
+                    />
+                    {customSkill ? (
+                      <button type="button" onClick={() => setCustomSkill("")} className="text-[#b0aaa5] flex-shrink-0">
+                        <X size={14} />
+                      </button>
+                    ) : null}
+                  </div>
+                  <p className="text-xs text-[#b0aaa5] mt-1.5 px-1">
+                    This will appear as your skill on your profile.
+                  </p>
                 </div>
-                <p className="text-xs text-[#b0aaa5] mt-1.5 px-1">
-                  Type your specific skill — this is what clients will see on your profile.
-                </p>
-              </div>
+              )}
 
-              {/* Preview badge — shows the resolved skill label */}
-              {(skill && skill !== "Other") || (skill === "Other" && customSkill.trim()) ? (
+              {/* Live preview badge */}
+              {((skill && skill !== "Other") || (skill === "Other" && customSkill.trim())) && (
                 <div className="flex items-center gap-2 mt-2 px-1">
                   <span className="text-[10px] font-bold text-[#b0aaa5] uppercase tracking-wider">Preview:</span>
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#ede9fe] text-[#5b3dd8]">
                     {skill === "Other" ? customSkill.trim() : skill}
                   </span>
                 </div>
-              ) : null}
+              )}
             </Field>
 
             {/* Save button */}
