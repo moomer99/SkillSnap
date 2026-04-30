@@ -108,26 +108,30 @@ export default function ErrorReporter({ error, reset }: ReporterProps) {
             </p>
           </div>
           <div className="space-y-2">
-            {process.env.NODE_ENV === "development" && (
-              <details className="mt-4 text-left">
-                <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-                  Error details
-                </summary>
-                <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
-                  {error.message}
-                  {error.stack && (
-                    <div className="mt-2 text-muted-foreground">
-                      {error.stack}
-                    </div>
-                  )}
-                  {error.digest && (
-                    <div className="mt-2 text-muted-foreground">
-                      Digest: {error.digest}
-                    </div>
-                  )}
-                </pre>
-              </details>
-            )}
+            <details className="mt-4 text-left" open>
+              <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                Error details
+              </summary>
+              <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto whitespace-pre-wrap break-all">
+                {error.message}
+                {error.stack && (
+                  <div className="mt-2 text-muted-foreground">
+                    {error.stack}
+                  </div>
+                )}
+                {error.digest && (
+                  <div className="mt-2 text-muted-foreground">
+                    Digest: {error.digest}
+                  </div>
+                )}
+              </pre>
+            </details>
+            <button
+              onClick={reset}
+              className="mt-4 px-4 py-2 bg-[#6c47ff] text-white rounded-xl text-sm font-semibold"
+            >
+              Try again
+            </button>
           </div>
         </div>
       </body>
