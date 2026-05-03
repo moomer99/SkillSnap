@@ -5,7 +5,7 @@
 // variant="client" → Client Profile (public view)
 // Data: userService.getUser(id) via useProfile hook
 // ─────────────────────────────────────────────
-import { MapPin, ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, Loader2, Bookmark, Settings } from "lucide-react";
+import { MapPin, ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, Loader2, Bookmark, Settings, Zap, Star, TrendingUp, Video, Shield, Gift, Sparkles, ChevronUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import type { Screen, ProfileVariant, Post, SkillCategory } from "@/types";
 import { MOCK_WORK_GRID } from "@/mock-data/posts";
@@ -40,7 +40,9 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
   const [posts, setPosts] = useState<Post[]>([]);
   const [gridLoading, setGridLoading] = useState(true);
   const [viewingPost, setViewingPost] = useState<Post | null>(null);
-  const [activeTab, setActiveTab] = useState<"work" | "saved">("work");
+  const [activeTab, setActiveTab] = useState<"work" | "saved" | "pro">("work");
+  const [proExpanded, setProExpanded] = useState(false);
+  const [proNotified, setProNotified] = useState(false);
 
   // Merge locally-created posts (demo mode) so they always appear on own profile
   const localOwn = isOwn
@@ -216,7 +218,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
         <div className="pt-0">
 
           {isOwn ? (
-            /* ── Own profile: My Works | Saved tabs ── */
+            /* ── Own profile: My Works | Saved | Pro tabs ── */
             <div className="flex border-b border-[#e8e4df] bg-white">
               <button
                 onClick={() => setActiveTab("work")}
@@ -252,6 +254,17 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                   </span>
                 )}
               </button>
+              <button
+                onClick={() => setActiveTab("pro")}
+                className={`flex-1 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
+                  activeTab === "pro"
+                    ? "text-[#6c47ff] border-b-2 border-[#6c47ff]"
+                    : "text-[#7a7570]"
+                }`}
+              >
+                <Zap size={13} className={activeTab === "pro" ? "text-[#6c47ff]" : "text-[#b0aaa5]"} />
+                Go Pro
+              </button>
             </div>
           ) : (
             /* ── Client profile: plain Works header with count ── */
@@ -267,6 +280,11 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 );
               })()}
             </div>
+          )}
+
+          {/* Pro tab — own profile only */}
+          {activeTab === "pro" && isOwn && (
+            <ProTab notified={proNotified} onNotify={() => setProNotified(true)} expanded={proExpanded} onToggleExpand={() => setProExpanded(v => !v)} />
           )}
 
           {/* Grid — shown for "work" tab on own, always on client */}
@@ -709,6 +727,186 @@ function Stat({ value, label, highlight }: { value: string; label: string; highl
         {value}
       </span>
       <span className="text-[10px] text-[#7a7570] font-medium leading-tight text-center">{label}</span>
+    </div>
+  );
+}
+
+const PRO_FEATURES = [
+  {
+    icon: <Video size={18} />,
+    color: "#a78bfa",
+    bg: "rgba(167,139,250,0.12)",
+    title: "In-App Video Editing",
+    desc: "Smart filters, branding overlays, and pro-grade edits directly in the app.",
+  },
+  {
+    icon: <TrendingUp size={18} />,
+    color: "#34d399",
+    bg: "rgba(52,211,153,0.12)",
+    title: "Local Discovery Boosts",
+    desc: "Get pinned to the top of local search results so more clients find you first.",
+  },
+  {
+    icon: <Shield size={18} />,
+    color: "#60a5fa",
+    bg: "rgba(96,165,250,0.12)",
+    title: "Verified Pro Badge",
+    desc: "Stand out with a blue verified checkmark that builds instant trust.",
+  },
+  {
+    icon: <Star size={18} />,
+    color: "#fbbf24",
+    bg: "rgba(251,191,36,0.12)",
+    title: "Brand Partnerships",
+    desc: "Connect with brands and earn from sponsored collaborations. (Later stage)",
+    later: true,
+  },
+];
+
+function ProTab({
+  notified, onNotify, expanded, onToggleExpand,
+}: {
+  notified: boolean;
+  onNotify: () => void;
+  expanded: boolean;
+  onToggleExpand: () => void;
+}) {
+  const visibleFeatures = expanded ? PRO_FEATURES : PRO_FEATURES.slice(0, 2);
+
+  return (
+    <div className="bg-[#f8f7f5] pb-6">
+      {/* Hero */}
+      <div
+        className="relative px-5 pt-8 pb-8 overflow-hidden flex flex-col items-center text-center"
+        style={{ background: "linear-gradient(160deg, #0d0a1a 0%, #1a0f3c 100%)" }}
+      >
+        <div style={{ position: "absolute", top: -40, left: -40, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.3) 0%, transparent 70%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: 10, right: -60, width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(circle, rgba(167,139,250,0.18) 0%, transparent 70%)", pointerEvents: "none" }} />
+
+        <div className="relative mb-4">
+          <div style={{ width: 64, height: 64, borderRadius: 20, background: "linear-gradient(135deg, #6c47ff, #a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 32px rgba(108,71,255,0.5)" }}>
+            <Zap size={30} fill="white" color="white" />
+          </div>
+          <div style={{ position: "absolute", top: -5, right: -5, width: 20, height: 20, borderRadius: "50%", background: "linear-gradient(135deg, #fbbf24, #f59e0b)", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #0d0a1a" }}>
+            <Star size={9} fill="white" color="white" />
+          </div>
+        </div>
+
+        <h2 className="text-white font-extrabold text-2xl mb-2 tracking-tight">
+          Go <span style={{ background: "linear-gradient(90deg, #a78bfa, #6c47ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Pro</span>
+        </h2>
+        <p className="text-white/50 text-xs leading-relaxed max-w-xs">
+          Supercharge your profile, land more clients, and grow your trade business with professional tools built for skilled workers.
+        </p>
+        <div className="flex items-center gap-2 mt-4">
+          <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#6c47ff", display: "inline-block" }} />
+          <span style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa", letterSpacing: 1.2 }}>LAUNCHING SOON</span>
+        </div>
+      </div>
+
+      {/* Early bird */}
+      <div className="mx-4 mt-4 rounded-2xl overflow-hidden" style={{ background: "linear-gradient(135deg, #1a0f3c, #2d1b69)", border: "1px solid rgba(167,139,250,0.2)" }}>
+        <div className="px-4 py-4 flex items-start gap-3">
+          <div style={{ width: 40, height: 40, borderRadius: 13, background: "linear-gradient(135deg, #f59e0b, #fbbf24)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Gift size={19} color="white" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span style={{ fontSize: 12, fontWeight: 800, color: "#fff" }}>Free 3-Month Pro Access</span>
+              <span style={{ fontSize: 8, fontWeight: 700, padding: "1px 5px", borderRadius: 99, background: "rgba(251,191,36,0.2)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}>EXCLUSIVE</span>
+            </div>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", lineHeight: 1.5 }}>
+              Be one of the <span style={{ color: "#fbbf24", fontWeight: 700 }}>first 100</span> to sign up and upload a video — get <span style={{ color: "#fbbf24", fontWeight: 700 }}>3 months free</span>.
+            </p>
+            <div className="mt-2.5">
+              <div className="flex justify-between mb-1">
+                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>Spots claimed</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#fbbf24" }}>47 / 100</span>
+              </div>
+              <div style={{ height: 5, borderRadius: 99, background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
+                <div style={{ height: "100%", width: "47%", background: "linear-gradient(90deg, #f59e0b, #fbbf24)", borderRadius: 99 }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Features */}
+      <div className="px-4 mt-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles size={12} color="#a78bfa" />
+          <span style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa", textTransform: "uppercase", letterSpacing: 1.2 }}>What's included</span>
+        </div>
+        <div className="flex flex-col gap-2.5">
+          {visibleFeatures.map((f, i) => (
+            <div key={i} className="flex items-start gap-3 rounded-2xl p-3.5"
+              style={{ background: "#fff", border: "1px solid #e8e4df" }}>
+              <div style={{ width: 38, height: 38, borderRadius: 12, background: f.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: f.color }}>
+                {f.icon}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm font-bold text-[#1a1a1a]">{f.title}</span>
+                  {f.later && (
+                    <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 6px", borderRadius: 99, background: "rgba(251,191,36,0.1)", color: "#d97706", border: "1px solid rgba(217,119,6,0.2)" }}>Later</span>
+                  )}
+                </div>
+                <p className="text-xs text-[#7a7570] leading-relaxed">{f.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={onToggleExpand}
+          className="flex items-center justify-center gap-1.5 w-full py-3 text-[#6c47ff] text-xs font-bold active:opacity-70 transition-opacity"
+        >
+          {expanded ? <><ChevronUp size={13} /> Show less</> : <><ChevronDown size={13} /> See all features</>}
+        </button>
+      </div>
+
+      {/* Pricing */}
+      <div className="mx-4 rounded-2xl overflow-hidden" style={{ background: "#fff", border: "1px solid #e8e4df" }}>
+        <div className="px-4 py-4">
+          <p className="text-[10px] font-bold text-[#b0aaa5] uppercase tracking-wider mb-3">Pricing</p>
+          <div className="flex gap-2.5">
+            <div className="flex-1 rounded-xl border border-[#e8e4df] p-3 text-center">
+              <p className="text-[10px] text-[#b0aaa5] mb-1.5">Monthly</p>
+              <p className="text-xl font-extrabold text-[#1a1a1a]">$9<span className="text-xs font-medium text-[#b0aaa5]">/mo</span></p>
+              <p className="text-[10px] text-[#b0aaa5] mt-1">Cancel anytime</p>
+            </div>
+            <div className="flex-1 rounded-xl p-3 text-center relative" style={{ background: "linear-gradient(135deg, rgba(108,71,255,0.08), rgba(167,139,250,0.05))", border: "1.5px solid #6c47ff" }}>
+              <div style={{ position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(90deg, #6c47ff, #a78bfa)", color: "#fff", fontSize: 8, fontWeight: 700, padding: "2px 8px", borderRadius: 99, whiteSpace: "nowrap" }}>
+                BEST VALUE
+              </div>
+              <p className="text-[10px] text-[#7a7570] mb-1.5">Yearly</p>
+              <p className="text-xl font-extrabold text-[#1a1a1a]">$7<span className="text-xs font-medium text-[#b0aaa5]">/mo</span></p>
+              <p className="text-[10px] text-[#6c47ff] font-semibold mt-1">Save $24/year</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div className="px-4 mt-4">
+        {notified ? (
+          <div className="flex flex-col items-center gap-2 py-4">
+            <div className="w-12 h-12 rounded-full bg-[#dcfce7] flex items-center justify-center">
+              <span className="text-xl">✓</span>
+            </div>
+            <p className="font-bold text-[#1a1a1a] text-sm">You're on the list!</p>
+            <p className="text-xs text-[#7a7570] text-center">We'll notify you when Pro launches. Early bird window secured.</p>
+          </div>
+        ) : (
+          <button
+            onClick={onNotify}
+            className="w-full h-13 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 active:scale-[0.98] transition-transform py-3.5"
+            style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 20px rgba(108,71,255,0.3)" }}
+          >
+            <Zap size={17} fill="white" color="white" />
+            Notify Me at Launch
+          </button>
+        )}
+      </div>
     </div>
   );
 }

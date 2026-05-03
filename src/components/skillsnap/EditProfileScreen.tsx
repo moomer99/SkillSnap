@@ -1,9 +1,10 @@
 "use client";
 import { useState, useRef } from "react";
-import { ArrowLeft, Camera, Loader2, CheckCircle, MapPin, X } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, CheckCircle, MapPin, X, Navigation, Eye, EyeOff, AlertCircle } from "lucide-react";
 import type { Screen, SkillCategory } from "@/types";
 import { SKILL_CATEGORIES } from "@/constants/config";
 import { useAppState } from "@/state/AppState";
+import { useLocation } from "@/hooks/useLocation";
 import { useToast } from "./shared/Toast";
 
 const SUPABASE_CONFIGURED =
@@ -23,7 +24,13 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
   const [username, setUsername] = useState(user?.username?.replace("@", "") ?? "");
   const [bio, setBio] = useState(user?.bio ?? "");
-  const [location, setLocation] = useState(user?.location ?? "");
+  const [locationText, setLocationText] = useState(user?.location ?? "");
+  const [locationPrivate, setLocationPrivate] = useState(user?.locationPrivate ?? false);
+  const [locGpsLoading, setLocGpsLoading] = useState(false);
+  const [locError, setLocError] = useState<string | null>(null);
+
+  // useLocation for GPS + geocoding in edit profile
+  const { requestGPS: hookRequestGPS, setManualLocation, status: locStatus, error: locHookError } = useLocation();
 
   const knownSkills = SKILL_CATEGORIES as readonly string[];
   const stored = user?.skill ?? "";
@@ -68,6 +75,41 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
     setAvatarPreview(URL.createObjectURL(file));
   }
 
+  async function handleGPSLocation() {
+    setLocGpsLoading(true);
+    setLocError(null);
+    if (!navigator.geolocation) {
+      setLocError("GPS not supported on this device");
+      setLocGpsLoading(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        try {
+          const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
+          const res = await fetch(url, { headers: { "Accept-Language": "en" } });
+          const data = await res.json();
+          const addr = data.address ?? {};
+          const suburb = addr.suburb ?? addr.town ?? addr.city ?? addr.county ?? "My Location";
+          const state_ = addr.state_code ?? addr.state ?? "";
+          setLocationText(state_ ? `${suburb}, ${state_}` : suburb);
+        } catch {
+          setLocationText("My Location");
+        }
+        setLocGpsLoading(false);
+      },
+      (err) => {
+        const msg = err.code === 1
+          ? "Permission denied. Please enter manually."
+          : "Couldn't get GPS. Please enter manually.";
+        setLocError(msg);
+        setLocGpsLoading(false);
+      },
+      { timeout: 10000 }
+    );
+  }
+
   async function handleSave() {
     if (!displayName.trim()) {
       showToast("Display name is required", "info");
@@ -93,7 +135,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
             displayName: displayName.trim(),
             username: `@${username.trim()}`,
             bio: bio.trim(),
-            location: location.trim(),
+            location: locationText.trim(),
+            locationPrivate,
             skill: resolvedSkill || null,
             ...(persistedAvatarUrl ? { avatarUrl: persistedAvatarUrl } : {}),
           });
@@ -113,7 +156,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
           displayName: displayName.trim(),
           username: `@${username.trim()}`,
           bio: bio.trim(),
-          location: location.trim(),
+          location: locationText.trim(),
+          locationPrivate,
           skill: (resolvedSkill || null) as SkillCategory | null,
           ...(inMemoryAvatarUrl !== undefined ? { avatarUrl: inMemoryAvatarUrl } : {}),
         },
@@ -212,17 +256,86 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
               <p className="text-right text-xs text-[#b0aaa5] mt-1">{bio.length} / 200</p>
             </Field>
 
+            {/* Location — enhanced with GPS + privacy toggle */}
             <Field label="Location">
+              {/* GPS button */}
+              <button
+                onClick={handleGPSLocation}
+                disabled={locGpsLoading}
+                className="w-full flex items-center gap-3 rounded-2xl border px-4 py-3 mb-2.5 transition-all active:bg-[#f5f3ff] disabled:opacity-60"
+                style={{ borderColor: "#6c47ff", background: "rgba(108,71,255,0.04)" }}
+              >
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}>
+                  {locGpsLoading ? (
+                    <Loader2 size={15} color="white" className="animate-spin" />
+                  ) : (
+                    <Navigation size={15} color="white" />
+                  )}
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-semibold text-[#1a1a1a]">
+                    {locGpsLoading ? "Detecting location…" : "Use GPS Location"}
+                  </p>
+                  <p className="text-xs text-[#7a7570]">Auto-detect your current suburb</p>
+                </div>
+              </button>
+
+              {/* Manual text input */}
               <div className="flex items-center bg-white rounded-2xl border border-[#e8e4df] px-4 h-12 gap-2.5 focus-within:border-[#6c47ff] transition-colors">
                 <MapPin size={15} className="text-[#6c47ff] flex-shrink-0" />
                 <input
                   type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  value={locationText}
+                  onChange={(e) => setLocationText(e.target.value)}
                   placeholder="e.g. Liverpool, NSW"
                   className="flex-1 bg-transparent text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none"
                 />
+                {locationText && (
+                  <button onClick={() => setLocationText("")} className="text-[#b0aaa5]">
+                    <X size={14} />
+                  </button>
+                )}
               </div>
+
+              {/* GPS error */}
+              {locError && (
+                <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-100 px-3 py-2 mt-2">
+                  <AlertCircle size={13} className="text-red-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-red-600">{locError}</p>
+                </div>
+              )}
+
+              {/* Privacy toggle */}
+              <div className="flex items-center justify-between bg-white rounded-2xl border border-[#e8e4df] px-4 py-3 mt-2.5">
+                <div className="flex items-center gap-2.5">
+                  {locationPrivate ? (
+                    <EyeOff size={16} className="text-[#7a7570]" />
+                  ) : (
+                    <Eye size={16} className="text-[#6c47ff]" />
+                  )}
+                  <div>
+                    <p className="text-sm font-semibold text-[#1a1a1a]">Show exact location</p>
+                    <p className="text-xs text-[#7a7570]">
+                      {locationPrivate ? "Only suburb is visible to others" : "Full address visible to others"}
+                    </p>
+                  </div>
+                </div>
+                {/* Toggle switch */}
+                <button
+                  onClick={() => setLocationPrivate(v => !v)}
+                  className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${locationPrivate ? "bg-[#e8e4df]" : "bg-[#6c47ff]"}`}
+                >
+                  <span
+                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${locationPrivate ? "translate-x-0.5" : "translate-x-6"}`}
+                  />
+                </button>
+              </div>
+              <p className="text-xs text-[#b0aaa5] px-1 mt-1.5">
+                {locationPrivate
+                  ? "Privacy on — only your suburb name is shown on your profile."
+                  : "Privacy off — your full location text is visible publicly."}
+              </p>
             </Field>
 
             {/* Skill Category */}
@@ -249,7 +362,6 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                 ))}
               </div>
 
-              {/* Custom input — shown when Other is selected */}
               <div style={{ display: skill === "Other" ? "block" : "none", marginTop: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#fff", border: "2px solid #6c47ff", borderRadius: 16, padding: "0 16px", height: 48 }}>
                   <input
@@ -271,7 +383,6 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                 </p>
               </div>
 
-              {/* Live preview */}
               {resolvedSkill ? (
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
                   <span style={{ fontSize: 10, fontWeight: 700, color: "#b0aaa5", textTransform: "uppercase", letterSpacing: 1 }}>Preview:</span>

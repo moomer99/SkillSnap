@@ -27,6 +27,9 @@ export interface User {
   avatarGradient: string;      // fallback gradient when no image
   avatarInitial: string;
   location: string;
+  lat?: number;                // GPS latitude (stored privately)
+  lng?: number;                // GPS longitude (stored privately)
+  locationPrivate?: boolean;   // if true, only show suburb publicly
   bio: string;
   skill: SkillCategory | null; // null = client/viewer
   isVerified: boolean;
