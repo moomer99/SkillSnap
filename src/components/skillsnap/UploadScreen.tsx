@@ -6,7 +6,7 @@
 import { useState, useRef } from "react";
 import { Video, Image as ImageIcon, ChevronDown, ArrowLeft, Loader2, CheckCircle, Download } from "lucide-react";
 import type { Screen, SkillCategory } from "@/types";
-import { SKILL_CATEGORIES, MAP_CONFIG } from "@/constants/config";
+import { SKILL_CATEGORIES } from "@/constants/config";
 import { uploadService } from "@/services/uploadService";
 import { useAppState } from "@/state/AppState";
 
@@ -17,13 +17,14 @@ interface UploadScreenProps {
 type ContentType = "video" | "photo" | "social";
 
 export default function UploadScreen({ onNavigate }: UploadScreenProps) {
-  const { dispatch } = useAppState();
+  const { state, dispatch } = useAppState();
   const [contentType, setContentType] = useState<ContentType>("video");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
   const [skill, setSkill] = useState<SkillCategory | "">("");
-  const [location] = useState(MAP_CONFIG.DEFAULT_LOCATION_LABEL);
+  const profileLocation = state.currentUser?.location ?? "";
+  const [location] = useState(profileLocation);
   const [loading, setLoading] = useState(false);
   const [posted, setPosted] = useState(false);
   const [error, setError] = useState<string | null>(null);

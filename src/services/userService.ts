@@ -96,6 +96,9 @@ export const userService = {
     if (patch.username !== undefined) dbPatch.username = patch.username;
     if (patch.bio !== undefined) dbPatch.bio = patch.bio;
     if (patch.location !== undefined) dbPatch.location = patch.location;
+    if (patch.lat !== undefined) dbPatch.lat = patch.lat;
+    if (patch.lng !== undefined) dbPatch.lng = patch.lng;
+    if (patch.locationPrivate !== undefined) dbPatch.location_private = patch.locationPrivate;
     if (patch.skill !== undefined) dbPatch.skill = patch.skill;
     if (patch.avatarUrl !== undefined) dbPatch.avatar_url = patch.avatarUrl;
     if (patch.avatarGradient !== undefined) dbPatch.avatar_gradient = patch.avatarGradient;

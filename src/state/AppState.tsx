@@ -204,7 +204,22 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       };
     case "APPEND_THREAD_MESSAGE": {
       const existing = state.threadMessages[action.threadId] ?? [];
+      // Exact ID match — already have it
       if (existing.some((m) => m.id === action.message.id)) return state;
+      // Realtime echo of our own sent message — replace the optimistic entry instead of duplicating
+      if (action.message.from === "me") {
+        const optimisticIdx = existing.findIndex(
+          (m) => m.id.startsWith("optimistic_") && m.text === action.message.text
+        );
+        if (optimisticIdx !== -1) {
+          const updated = [...existing];
+          updated[optimisticIdx] = action.message;
+          return {
+            ...state,
+            threadMessages: { ...state.threadMessages, [action.threadId]: updated },
+          };
+        }
+      }
       return {
         ...state,
         threadMessages: { ...state.threadMessages, [action.threadId]: [...existing, action.message] },

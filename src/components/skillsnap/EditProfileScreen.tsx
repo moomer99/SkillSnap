@@ -25,6 +25,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
   const [username, setUsername] = useState(user?.username?.replace("@", "") ?? "");
   const [bio, setBio] = useState(user?.bio ?? "");
   const [locationText, setLocationText] = useState(user?.location ?? "");
+  const [locationLat, setLocationLat] = useState<number | undefined>(user?.lat);
+  const [locationLng, setLocationLng] = useState<number | undefined>(user?.lng);
   const [locationPrivate, setLocationPrivate] = useState(user?.locationPrivate ?? false);
   const [locGpsLoading, setLocGpsLoading] = useState(false);
   const [locError, setLocError] = useState<string | null>(null);
@@ -86,6 +88,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords;
+        setLocationLat(lat);
+        setLocationLng(lng);
         try {
           const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
           const res = await fetch(url, { headers: { "Accept-Language": "en" } });
@@ -136,6 +140,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
             username: `@${username.trim()}`,
             bio: bio.trim(),
             location: locationText.trim(),
+            ...(locationLat !== undefined ? { lat: locationLat } : {}),
+            ...(locationLng !== undefined ? { lng: locationLng } : {}),
             locationPrivate,
             skill: resolvedSkill || null,
             ...(persistedAvatarUrl ? { avatarUrl: persistedAvatarUrl } : {}),
@@ -157,6 +163,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
           username: `@${username.trim()}`,
           bio: bio.trim(),
           location: locationText.trim(),
+          ...(locationLat !== undefined ? { lat: locationLat } : {}),
+          ...(locationLng !== undefined ? { lng: locationLng } : {}),
           locationPrivate,
           skill: (resolvedSkill || null) as SkillCategory | null,
           ...(inMemoryAvatarUrl !== undefined ? { avatarUrl: inMemoryAvatarUrl } : {}),

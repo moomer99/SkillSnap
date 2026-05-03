@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { Heart, Share2, Bookmark, MapPin, Volume2, VolumeX, Navigation, ChevronDown } from "lucide-react";
+import { Heart, Share2, Bookmark, MapPin, Volume2, VolumeX, Navigation, X, Play } from "lucide-react";
 import type { Post } from "@/types";
 import type { Screen } from "@/types";
 import { formatLikes } from "@/mock-data/posts";
@@ -19,7 +19,8 @@ interface HomeFeedProps {
   onNavigate: (s: Screen) => void;
 }
 
-const HEADER_H = 116; // header + radius bar
+const HEADER_H_NO_LOC = 88;
+const HEADER_H_WITH_LOC = 120;
 const RADIUS_OPTIONS = [5, 10, 15, 25];
 
 function timeAgo(iso: string): string {
@@ -37,19 +38,12 @@ function fmtNum(n: number | undefined): string {
   return String(n);
 }
 
-// Attach computed distanceKm to posts based on viewer location
-function attachDistances(
-  posts: Post[],
-  viewerLat: number,
-  viewerLng: number
-): Post[] {
-  return posts.map((p) => {
-    const aLat = p.author.lat;
-    const aLng = p.author.lng;
-    if (aLat == null || aLng == null) return p;
-    const d = distanceKm(viewerLat, viewerLng, aLat, aLng);
-    return { ...p, author: { ...p.author, distanceKm: Math.round(d * 10) / 10 } };
-  });
+function computeDistance(
+  viewerLat: number, viewerLng: number,
+  authorLat?: number, authorLng?: number
+): number | undefined {
+  if (authorLat == null || authorLng == null) return undefined;
+  return Math.round(distanceKm(viewerLat, viewerLng, authorLat, authorLng) * 10) / 10;
 }
 
 export default function HomeFeed({ onNavigate }: HomeFeedProps) {
@@ -58,7 +52,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
   const { state, dispatch } = useAppState();
   const { location, status, error, radiusKm, requestGPS, setManualLocation, setRadiusKm } = useLocation();
   const [showLocationPicker, setShowLocationPicker] = useState(false);
-  const [showRadiusMenu, setShowRadiusMenu] = useState(false);
+  const [fullscreenPost, setFullscreenPost] = useState<Post | null>(null);
   const [locationPromptDismissed, setLocationPromptDismissed] = useState(() => {
     try { return localStorage.getItem("skillsnap_loc_prompt") === "1"; } catch { return false; }
   });
@@ -78,25 +72,22 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
     try { localStorage.setItem("skillsnap_loc_prompt", "1"); } catch {}
   }
 
-  // Filter + sort posts by location when viewer has a location set
+  // Attach computed distance + filter by radius
   const filteredPosts = useMemo(() => {
     if (!location) return posts;
-    const withDist = attachDistances(posts, location.lat, location.lng);
+    const withDist = posts.map((p) => {
+      const d = computeDistance(location.lat, location.lng, p.author.lat, p.author.lng);
+      return { ...p, author: { ...p.author, distanceKm: d } };
+    });
     const inRadius = withDist.filter((p) => {
       const d = p.author.distanceKm;
-      // Include posts where author has no coords (server-side location unavailable)
-      if (d === undefined) return true;
-      return d <= radiusKm;
+      return d === undefined || d <= radiusKm;
     });
-    // Sort by distance ascending (closest first)
-    return inRadius.sort((a, b) => {
-      const da = a.author.distanceKm ?? Infinity;
-      const db = b.author.distanceKm ?? Infinity;
-      return da - db;
-    });
+    return inRadius.sort((a, b) => (a.author.distanceKm ?? Infinity) - (b.author.distanceKm ?? Infinity));
   }, [posts, location, radiusKm]);
 
   const showLocationBanner = !location && !locationPromptDismissed;
+  const headerH = location ? HEADER_H_WITH_LOC : HEADER_H_NO_LOC;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
@@ -104,32 +95,29 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-0 w-full">
         <div className="flex items-center justify-between mb-2.5">
           <SkillSnapLogo />
-          {/* Location + radius control */}
-          <div className="flex items-center gap-2">
-            {location ? (
-              <button
-                onClick={() => setShowLocationPicker(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#e8e4df] bg-[#f8f7f5] active:bg-[#f0eeea] transition-colors"
-              >
-                <MapPin size={11} className="text-[#6c47ff]" />
-                <span className="text-[11px] font-semibold text-[#1a1a1a] max-w-[80px] truncate">{location.label}</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => setShowLocationPicker(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-dashed border-[#6c47ff]/40 bg-[#ede9fe]/30 active:bg-[#ede9fe]/60 transition-colors"
-              >
-                <Navigation size={11} className="text-[#6c47ff]" />
-                <span className="text-[11px] font-bold text-[#6c47ff]">Set location</span>
-              </button>
-            )}
-          </div>
+          {location ? (
+            <button
+              onClick={() => setShowLocationPicker(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#e8e4df] bg-[#f8f7f5] active:bg-[#f0eeea] transition-colors"
+            >
+              <MapPin size={11} className="text-[#6c47ff]" />
+              <span className="text-[11px] font-semibold text-[#1a1a1a] max-w-[80px] truncate">{location.label}</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowLocationPicker(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-dashed border-[#6c47ff]/40 bg-[#ede9fe]/30 active:bg-[#ede9fe]/60 transition-colors"
+            >
+              <Navigation size={11} className="text-[#6c47ff]" />
+              <span className="text-[11px] font-bold text-[#6c47ff]">Set location</span>
+            </button>
+          )}
         </div>
         <SearchBar onFocus={() => onNavigate("search")} />
 
-        {/* Radius selector bar — only shown when location is set */}
+        {/* Radius bar */}
         {location && (
-          <div className="flex items-center gap-2 pb-2.5 pt-2.5 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 pb-2.5 pt-2 overflow-x-auto no-scrollbar">
             <span className="text-[10px] font-bold text-[#b0aaa5] uppercase tracking-wider flex-shrink-0">Radius</span>
             <div className="flex items-center gap-1.5">
               {RADIUS_OPTIONS.map((r) => (
@@ -146,32 +134,23 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
                 </button>
               ))}
             </div>
-            <div className="flex-1 text-right flex-shrink-0">
-              <span className="text-[10px] text-[#b0aaa5] font-medium">
-                {filteredPosts.filter(p => p.author.distanceKm !== undefined).length > 0
-                  ? `${filteredPosts.filter(p => p.author.distanceKm !== undefined).length} nearby`
-                  : ""}
-              </span>
-            </div>
+            <span className="ml-auto text-[10px] text-[#b0aaa5] font-medium flex-shrink-0">
+              {filteredPosts.length} result{filteredPosts.length !== 1 ? "s" : ""}
+            </span>
           </div>
         )}
       </header>
 
-      {/* Feed */}
-      <div
-        className="overflow-y-auto no-scrollbar"
-        style={{ height: `calc(100dvh - ${location ? HEADER_H + 8 : 88}px)` }}
-      >
+      {/* Feed scroll container */}
+      <div className="overflow-y-auto no-scrollbar" style={{ height: `calc(100dvh - ${headerH}px)` }}>
         {/* Location prompt banner */}
         {showLocationBanner && (
           <div
             className="mx-3 mt-3 mb-1 rounded-2xl overflow-hidden flex items-center gap-3 px-4 py-3"
             style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)", border: "1.5px solid rgba(108,71,255,0.18)" }}
           >
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
-            >
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}>
               <Navigation size={16} color="white" />
             </div>
             <div className="flex-1 min-w-0">
@@ -179,42 +158,32 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
               <p className="text-[11px] text-[#7a7570] leading-snug">Set your location to see skilled workers in your area</p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <button
-                onClick={() => setShowLocationPicker(true)}
+              <button onClick={() => setShowLocationPicker(true)}
                 className="text-[11px] font-bold text-white px-3 py-1.5 rounded-full"
-                style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
-              >
+                style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}>
                 Set
               </button>
-              <button
-                onClick={dismissPrompt}
-                className="text-[#b0aaa5] p-1"
-              >
-                ✕
-              </button>
+              <button onClick={dismissPrompt} className="text-[#b0aaa5] p-1">✕</button>
             </div>
           </div>
         )}
 
         {loading && filteredPosts.length === 0 ? (
-          <div className="w-full bg-gray-200 animate-pulse" style={{ height: `calc(100dvh - ${HEADER_H}px)` }} />
+          <div className="w-full bg-gray-200 animate-pulse" style={{ height: `calc(100dvh - ${headerH}px)` }} />
         ) : filteredPosts.length === 0 && location ? (
-          /* Empty state when no posts match the radius */
           <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
-            <div className="w-16 h-16 rounded-3xl mb-4 flex items-center justify-center" style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)" }}>
+            <div className="w-16 h-16 rounded-3xl mb-4 flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)" }}>
               <MapPin size={28} className="text-[#6c47ff]" />
             </div>
             <p className="font-bold text-[#1a1a1a] text-base mb-2">No pros within {radiusKm} km</p>
             <p className="text-[#7a7570] text-sm leading-relaxed mb-5">
-              Try expanding your radius or check back later as more skilled workers join your area.
+              Try expanding your radius or check back later as more skilled workers join.
             </p>
             <div className="flex gap-2">
               {RADIUS_OPTIONS.filter(r => r > radiusKm).slice(0, 2).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRadiusKm(r)}
-                  className="px-4 py-2 rounded-xl text-sm font-bold border-2 border-[#6c47ff] text-[#6c47ff] active:bg-[#ede9fe] transition-colors"
-                >
+                <button key={r} onClick={() => setRadiusKm(r)}
+                  className="px-4 py-2 rounded-xl text-sm font-bold border-2 border-[#6c47ff] text-[#6c47ff] active:bg-[#ede9fe]">
                   Try {r} km
                 </button>
               ))}
@@ -236,14 +205,15 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
                 if (navigator.share) navigator.share({ title: "SkillSnap", text }).catch(() => {});
                 else navigator.clipboard?.writeText(text).catch(() => {});
               }}
+              onFullscreen={() => setFullscreenPost(post)}
               connecting={connecting}
-              hasViewerLocation={!!location}
+              headerH={headerH}
             />
           ))
         )}
       </div>
 
-      {/* Location picker sheet */}
+      {/* Location picker */}
       {showLocationPicker && (
         <LocationPickerSheet
           onClose={() => setShowLocationPicker(false)}
@@ -254,12 +224,166 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
           currentLabel={location?.label}
         />
       )}
+
+      {/* Fullscreen video viewer */}
+      {fullscreenPost && (
+        <FullscreenViewer
+          post={fullscreenPost}
+          onClose={() => setFullscreenPost(null)}
+          onProfileClick={() => { setFullscreenPost(null); handleProfileClick(fullscreenPost.authorId); }}
+          onLike={() => requireAuth(() => toggleLike(fullscreenPost.id))}
+          isLiked={likedPosts.has(fullscreenPost.id)}
+        />
+      )}
     </div>
   );
 }
 
+// ── Full-screen viewer overlay ─────────────────────────────────────
+function FullscreenViewer({
+  post, onClose, onProfileClick, onLike, isLiked,
+}: {
+  post: Post;
+  onClose: () => void;
+  onProfileClick: () => void;
+  onLike: () => void;
+  isLiked: boolean;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    // Autoplay when viewer opens
+    videoRef.current?.play().then(() => setPlaying(true)).catch(() => {});
+    // Prevent body scroll while open
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  function togglePlay() {
+    if (!videoRef.current) return;
+    if (playing) { videoRef.current.pause(); setPlaying(false); }
+    else { videoRef.current.play().catch(() => {}); setPlaying(true); }
+  }
+
+  const { author } = post;
+  const displayLocation = post.location ?? author.location;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] bg-black flex flex-col"
+      style={{ touchAction: "none" }}
+    >
+      {/* Media */}
+      <div className="absolute inset-0" onClick={togglePlay}>
+        {post.type === "video" && post.mediaUrl ? (
+          <video
+            ref={videoRef}
+            src={post.mediaUrl}
+            className="w-full h-full object-contain"
+            loop playsInline
+            muted={muted}
+            poster={post.thumbnailUrl}
+          />
+        ) : post.thumbnailUrl ? (
+          <img src={post.thumbnailUrl} alt={post.caption} className="w-full h-full object-contain" />
+        ) : (
+          <div className="w-full h-full" style={{ background: post.thumbnailGradient }} />
+        )}
+
+        {/* Gradient scrim */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 20%, transparent 55%, rgba(0,0,0,0.8) 100%)",
+        }} />
+
+        {/* Pause indicator */}
+        {post.type === "video" && !playing && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-18 h-18 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "2px solid rgba(255,255,255,0.3)", width: 72, height: 72 }}>
+              <Play size={28} fill="white" color="white" />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Top controls */}
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-12 z-10">
+        <button
+          onClick={onClose}
+          className="w-10 h-10 rounded-full flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
+        >
+          <X size={20} color="white" />
+        </button>
+        {post.type === "video" && post.mediaUrl && (
+          <button
+            onClick={(e) => { e.stopPropagation(); setMuted(m => !m); }}
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
+          >
+            {muted ? <VolumeX size={18} color="white" /> : <Volume2 size={18} color="white" />}
+          </button>
+        )}
+      </div>
+
+      {/* Bottom info */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 px-5 pb-10">
+        {/* Author row */}
+        <button
+          className="flex items-center gap-3 mb-3"
+          onClick={(e) => { e.stopPropagation(); onProfileClick(); }}
+        >
+          <UserAvatar user={author} size="sm" showVerified ring />
+          <div className="text-left">
+            <div className="flex items-center gap-1.5">
+              <span className="text-white font-bold text-[16px]">{author.displayName}</span>
+              {author.isVerified && (
+                <span className="w-[17px] h-[17px] rounded-full bg-[#6c47ff] flex items-center justify-center">
+                  <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                    <path d="M1 3.5l2.5 2.5L8 1" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              )}
+            </div>
+            <p className="text-white/60 text-[12px]">{author.skill}</p>
+          </div>
+        </button>
+
+        {/* Caption — always shown in fullscreen */}
+        {post.caption ? (
+          <p className="text-white text-[14px] leading-relaxed mb-3 line-clamp-4">{post.caption}</p>
+        ) : null}
+
+        {/* Location + distance pill */}
+        {displayLocation && (
+          <div className="flex items-center gap-1.5 mb-4">
+            <MapPin size={13} className="text-white/70 flex-shrink-0" />
+            <span className="text-white/70 text-[12px] font-medium">
+              {author.distanceKm !== undefined ? `${author.distanceKm} km · ` : ""}
+              {displayLocation.split(",")[0]}
+            </span>
+          </div>
+        )}
+
+        {/* Like button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onLike(); }}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-full"
+          style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.2)" }}
+        >
+          <Heart size={18} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "white"} strokeWidth={1.8} />
+          <span className="text-white text-sm font-semibold">{isLiked ? "Liked" : "Like"}</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Feed card ──────────────────────────────────────────────────────
 function FeedCard({
-  post, isLiked, isSaved, onLike, onSave, onProfileClick, onConnectClick, onShare, connecting, hasViewerLocation,
+  post, isLiked, isSaved, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, connecting, headerH,
 }: {
   post: Post;
   isLiked: boolean;
@@ -269,8 +393,9 @@ function FeedCard({
   onProfileClick: () => void;
   onConnectClick: () => void;
   onShare: () => void;
+  onFullscreen: () => void;
   connecting: boolean;
-  hasViewerLocation: boolean;
+  headerH: number;
 }) {
   const { author } = post;
   const [playing, setPlaying] = useState(false);
@@ -278,6 +403,7 @@ function FeedCard({
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // Auto-play on scroll into view
   useEffect(() => {
     if (post.type !== "video" || !post.mediaUrl) return;
     const card = cardRef.current;
@@ -299,22 +425,19 @@ function FeedCard({
   }, [post.type, post.mediaUrl]);
 
   const handleMediaTap = useCallback(() => {
-    if (!post.mediaUrl || post.type !== "video") return;
-    if (playing) { videoRef.current?.pause(); setPlaying(false); }
-    else { videoRef.current?.play().catch(() => {}); setPlaying(true); }
-  }, [playing, post.mediaUrl, post.type]);
+    // Open fullscreen viewer on tap
+    onFullscreen();
+  }, [onFullscreen]);
 
   const displayLocation = post.location ?? author.location;
   const happyPct = author.happyPercent !== undefined && author.happyPercent !== null
     ? `${author.happyPercent}%` : "—";
 
-  const CARD_H = 88;
-
   return (
     <div
       ref={cardRef}
       className="relative w-full overflow-hidden bg-gray-900 flex-shrink-0 mb-2"
-      style={{ height: `calc(100dvh - ${CARD_H}px - 8px)` }}
+      style={{ height: `calc(100dvh - ${headerH}px - 8px)` }}
     >
       {/* Media */}
       <div className="absolute inset-0 cursor-pointer" onClick={handleMediaTap}>
@@ -334,7 +457,7 @@ function FeedCard({
           <div className="w-full h-full" style={{ background: post.thumbnailGradient }} />
         )}
         <div className="absolute inset-0" style={{
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 25%, transparent 52%, rgba(0,0,0,0.65) 76%, rgba(0,0,0,0.85) 100%)",
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 22%, transparent 50%, rgba(0,0,0,0.6) 75%, rgba(0,0,0,0.88) 100%)",
         }} />
       </div>
 
@@ -352,7 +475,7 @@ function FeedCard({
         )}
       </div>
 
-      {/* Play button for non-playing video stubs */}
+      {/* Play button for videos without stream */}
       {post.type === "video" && !playing && !post.mediaUrl && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
           <div className="w-16 h-16 rounded-full flex items-center justify-center"
@@ -364,7 +487,7 @@ function FeedCard({
         </div>
       )}
 
-      {/* Right actions */}
+      {/* Right action buttons */}
       <div className="absolute right-3 z-10 flex flex-col items-center gap-5" style={{ bottom: 220 }}>
         <RightAction
           icon={<Heart size={26} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "white"} strokeWidth={1.8} />}
@@ -406,10 +529,10 @@ function FeedCard({
           </div>
         </div>
 
-        {/* Caption */}
-        {post.caption && (
-          <p className="text-white/88 text-[13px] leading-snug mb-3 line-clamp-2">{post.caption}</p>
-        )}
+        {/* Caption — pulled from post.caption */}
+        {post.caption ? (
+          <p className="text-white/90 text-[13px] leading-snug mb-3 line-clamp-2">{post.caption}</p>
+        ) : null}
 
         {/* Stats bar */}
         <div
@@ -428,15 +551,16 @@ function FeedCard({
             </svg>
           } />
           <VSep />
-          <StatCell value={happyPct} label="Happy" icon={
+          <StatCell value={happyPct} label="Happy" green={happyPct !== "—" && happyPct !== "0%"} icon={
             <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
               <circle cx="12" cy="12" r="10"/>
               <circle cx="9" cy="9.5" r="1.2" fill="#000" opacity="0.45"/>
               <circle cx="15" cy="9.5" r="1.2" fill="#000" opacity="0.45"/>
               <path d="M7.5 13.5c1 2 8 2 9 0" stroke="#000" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.45"/>
             </svg>
-          } green={happyPct !== "—" && happyPct !== "0%"} />
-          {(displayLocation || hasViewerLocation) && (
+          } />
+          {/* Location + distance cell — always shown if location text exists */}
+          {displayLocation && (
             <>
               <VSep />
               <LocationCell
@@ -468,15 +592,11 @@ function StatCell({ value, label, icon, green }: {
   );
 }
 
-const MAX_SUBURB_CHARS = 12;
-
 function LocationCell({ distanceKm: d, location, onPress }: {
   distanceKm?: number; location?: string; onPress: () => void;
 }) {
   const suburb = location ? location.split(",")[0].trim() : "";
-  const truncated = suburb.length > MAX_SUBURB_CHARS ? suburb.slice(0, MAX_SUBURB_CHARS) + "…" : suburb;
-  const distanceLabel = d !== undefined ? `${d < 1 ? "<1" : d}km` : suburb ? "—" : "?";
-
+  const truncated = suburb.length > 12 ? suburb.slice(0, 12) + "…" : suburb;
   return (
     <button
       className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 px-1 active:opacity-70 transition-opacity"
@@ -488,10 +608,10 @@ function LocationCell({ distanceKm: d, location, onPress }: {
         </svg>
       </span>
       <span className="text-[14px] font-extrabold leading-tight tracking-tight text-white">
-        {d !== undefined ? `${d < 1 ? "<1" : d}km` : "—"}
+        {d !== undefined ? `${d < 1 ? "<1" : d}km` : truncated || "—"}
       </span>
       <span className="text-[10px] text-white/55 font-medium leading-tight text-center">
-        {truncated || "Nearby"}
+        {d !== undefined ? truncated || "Nearby" : "Location"}
       </span>
     </button>
   );
