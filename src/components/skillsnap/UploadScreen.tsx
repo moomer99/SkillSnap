@@ -175,7 +175,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         <h1 className="font-bold text-base text-[#1a1a1a] flex-1">Showcase Your Work</h1>
       </header>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-28 px-4 pt-5 flex flex-col gap-5">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-5 pb-8 flex flex-col gap-5">
         {/* Upload type */}
         <div>
           <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider mb-3 block">
@@ -347,22 +347,35 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-start gap-2.5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             <p className="text-sm text-red-600">{error}</p>
           </div>
         )}
-      </div>
 
-      {/* Publish button */}
-      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[390px] px-4 pb-4 pt-3 bg-white/95 backdrop-blur-sm border-t border-[#e8e4df]">
-        <button
-          onClick={handlePublish}
-          disabled={loading || (!caption.trim() && !selectedFile)}
-          className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
-        >
-          {loading ? <><Loader2 size={20} className="animate-spin" /> Publishing…</> : "Publish"}
-        </button>
+        {/* Publish button — inside scroll so it's never hidden */}
+        <div className="mt-2">
+          <button
+            onClick={handlePublish}
+            disabled={loading || (!caption.trim() && !selectedFile)}
+            className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2.5"
+            style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 20px rgba(108,71,255,0.35)" }}
+          >
+            {loading ? (
+              <><Loader2 size={20} className="animate-spin" /> Publishing…</>
+            ) : (
+              <>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+                Publish to Feed
+              </>
+            )}
+          </button>
+          <p className="text-center text-xs text-[#b0aaa5] mt-2">
+            Your work will appear on the public feed
+          </p>
+        </div>
       </div>
     </div>
   );
