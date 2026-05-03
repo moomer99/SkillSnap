@@ -27,8 +27,11 @@ export function useChat() {
 
   const threadId = state.activeThreadId ?? "";
 
-  // Messages come from AppState cache — survive navigation
-  const messages: Message[] = threadId ? (state.threadMessages[threadId] ?? []) : [];
+  // Messages come from AppState cache — survive navigation.
+  // Fall back to "mock_thread_local" bucket so optimistic messages sent before
+  // a real threadId is assigned (e.g. guest/demo mode) still appear.
+  const messagesKey = threadId || "mock_thread_local";
+  const messages: Message[] = state.threadMessages[messagesKey] ?? [];
 
   // Auto-scroll to bottom whenever messages change
   useEffect(() => {
@@ -36,15 +39,12 @@ export function useChat() {
   }, [messages]);
 
   useEffect(() => {
-    if (!threadId) {
-      setLoading(false);
-      return;
-    }
-
-    if (!SUPABASE_CONFIGURED) {
-      const mock = MOCK_MESSAGES.filter((m) => m.threadId === threadId);
+    if (!SUPABASE_CONFIGURED || !threadId) {
+      // Demo / guest mode — show mock messages keyed to whatever thread bucket we use
+      const key = threadId || "mock_thread_local";
+      const mock = MOCK_MESSAGES.filter((m) => m.threadId === key);
       const mockMsgs = mock.length ? mock : MOCK_MESSAGES;
-      dispatch({ type: "SET_THREAD_MESSAGES", threadId, messages: mockMsgs });
+      dispatch({ type: "SET_THREAD_MESSAGES", threadId: key, messages: mockMsgs });
       setLoading(false);
       return;
     }
