@@ -24,7 +24,8 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   const [caption, setCaption] = useState("");
   const [skill, setSkill] = useState<SkillCategory | "">("");
   const profileLocation = state.currentUser?.location ?? "";
-  const [location] = useState(profileLocation);
+  const [location, setLocation] = useState(profileLocation);
+  const [locationEditing, setLocationEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [posted, setPosted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -298,13 +299,50 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         {/* Location */}
         <div>
           <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider mb-2 block">Location</label>
-          <div className="bg-white rounded-2xl border border-[#e8e4df] px-4 h-12 flex items-center gap-2.5">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
-            </svg>
-            <span className="text-[#1a1a1a] text-sm font-medium">{location}</span>
-            <span className="ml-auto text-[10px] text-[#6c47ff] font-semibold bg-[#ede9fe] px-2 py-0.5 rounded-full">Auto</span>
-          </div>
+          {locationEditing ? (
+            <div className="flex items-center bg-white rounded-2xl border-2 border-[#6c47ff] px-4 h-12 gap-2.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
+              </svg>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                onBlur={() => setLocationEditing(false)}
+                autoFocus
+                placeholder="e.g. Liverpool, NSW"
+                className="flex-1 bg-transparent text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none"
+              />
+              {location && (
+                <button onClick={() => { setLocation(""); }} className="text-[#b0aaa5] flex-shrink-0">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => setLocationEditing(true)}
+              className="w-full bg-white rounded-2xl border border-[#e8e4df] px-4 h-12 flex items-center gap-2.5 active:bg-[#f8f7f5] transition-colors text-left"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
+              </svg>
+              <span className={`flex-1 text-sm font-medium ${location ? "text-[#1a1a1a]" : "text-[#b0aaa5]"}`}>
+                {location || "Enter location…"}
+              </span>
+              {location && location === profileLocation ? (
+                <span className="flex-shrink-0 text-[10px] text-[#6c47ff] font-semibold bg-[#ede9fe] px-2 py-0.5 rounded-full">Auto</span>
+              ) : location ? (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setLocation(profileLocation); }}
+                  className="flex-shrink-0 text-[10px] text-[#b0aaa5] font-semibold bg-[#f0eeea] px-2 py-0.5 rounded-full active:bg-[#e8e4df]"
+                >
+                  Reset
+                </button>
+              ) : null}
+            </button>
+          )}
+          <p className="text-xs text-[#b0aaa5] mt-1.5 px-1">Auto-filled from your profile · tap to edit</p>
         </div>
 
         {/* Error */}
