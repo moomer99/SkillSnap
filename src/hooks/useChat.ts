@@ -39,12 +39,16 @@ export function useChat() {
   }, [messages]);
 
   useEffect(() => {
-    if (!SUPABASE_CONFIGURED || !threadId) {
-      // Demo / guest mode — show mock messages keyed to whatever thread bucket we use
+    if (!SUPABASE_CONFIGURED) {
+      // Demo mode only — load mock messages
       const key = threadId || "mock_thread_local";
       const mock = MOCK_MESSAGES.filter((m) => m.threadId === key);
-      const mockMsgs = mock.length ? mock : MOCK_MESSAGES;
-      dispatch({ type: "SET_THREAD_MESSAGES", threadId: key, messages: mockMsgs });
+      dispatch({ type: "SET_THREAD_MESSAGES", threadId: key, messages: mock.length ? mock : MOCK_MESSAGES });
+      setLoading(false);
+      return;
+    }
+
+    if (!threadId) {
       setLoading(false);
       return;
     }
