@@ -51,8 +51,8 @@ function SkillSnapRouter() {
         background: "#f0eff7",
       }}
     >
-      {/* Desktop background — only visible on sm+ screens */}
-      <div className="hidden sm:block absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Desktop background — only visible on sm+ screens, fixed so it doesn't scroll */}
+      <div className="hidden sm:block fixed inset-0 overflow-hidden pointer-events-none">
 
         {/* Floating icon keyframes */}
         <style>{`
@@ -144,67 +144,54 @@ function SkillSnapRouter() {
           <rect x="52" y="36" width="16" height="12" rx="2" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
         </svg>
 
-        {/* 4. Wrench — top-right */}
+        {/* 4. Wrench — top-right (Lucide-style, viewBox 24x24 scaled to 72px) */}
         <svg style={{ position:"absolute", top:"9%", right:"5%", animation:"floatD 7s ease-in-out infinite", opacity:0.5 }}
-          width="68" height="68" viewBox="0 0 68 68" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Wrench handle shaft */}
-          <line x1="50" y1="18" x2="18" y2="50" stroke="#1a1a2e" strokeWidth="2.8"/>
-          {/* Wrench head opening */}
-          <path d="M44 8 C52 6, 62 12, 60 22 C58 28, 52 30, 46 28 L42 32 L36 26 L40 22 C38 16, 40 10, 44 8 Z"
-            stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
-          {/* Wrench tail */}
-          <path d="M18 50 C14 54, 12 60, 16 64 C20 68, 26 66, 28 62 C30 58, 26 56, 22 54 Z"
-            stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
+          width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
         </svg>
 
-        {/* 5. Paintbrush — right side upper-middle */}
+        {/* 5. Paintbrush — right side upper-middle (Lucide-style) */}
         <svg style={{ position:"absolute", top:"32%", right:"4%", animation:"floatA 6.5s ease-in-out infinite 0.8s", opacity:0.5 }}
-          width="60" height="80" viewBox="0 0 60 80" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Handle */}
-          <rect x="26" y="4" width="8" height="44" rx="4" stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
-          {/* Ferrule (metal band) */}
-          <rect x="24" y="44" width="12" height="8" rx="1" stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
-          {/* Bristle head */}
-          <path d="M24 52 C20 56, 18 64, 24 70 C28 74, 32 74, 36 70 C42 64, 40 56, 36 52 Z"
-            stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
-          {/* Bristle tip */}
-          <line x1="30" y1="70" x2="30" y2="76" stroke="#1a1a2e" strokeWidth="2"/>
+          width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/>
+          <path d="M9 8c-2 3-4 3.5-7 4l8 8c1-.5 3.5-2 4-7"/>
+          <path d="M14.5 17.5 4.5 15"/>
         </svg>
 
-        {/* 6. Hammer — bottom-right upper */}
+        {/* 6. Hammer — bottom-right upper (Lucide-style) */}
         <svg style={{ position:"absolute", bottom:"28%", right:"3.5%", animation:"floatE 8s ease-in-out infinite", opacity:0.5 }}
-          width="72" height="72" viewBox="0 0 72 72" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Handle */}
-          <rect x="32" y="32" width="10" height="36" rx="5" stroke="#1a1a2e" strokeWidth="2.5" fill="none" transform="rotate(-45 37 50)"/>
-          {/* Hammer head */}
-          <rect x="8" y="6" width="38" height="20" rx="4" stroke="#1a1a2e" strokeWidth="2.5" fill="none" transform="rotate(-45 27 16)"/>
-          {/* Claw cut */}
-          <path d="M40 4 L46 10 L40 16" stroke="#1a1a2e" strokeWidth="2.2" fill="none" transform="rotate(-45 43 10)"/>
+          width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9"/>
+          <path d="M17.64 15 22 10.64"/>
+          <path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 4.6a5.56 5.56 0 0 0-3.94-1.64H9l.92.82A6.18 6.18 0 0 1 12 8.4v1.56l2 2h2.47l2.26 1.91"/>
         </svg>
 
-        {/* 7. Guitar — bottom-right lower */}
+        {/* 7. Guitar — bottom-right lower (clean guitar silhouette) */}
         <svg style={{ position:"absolute", bottom:"6%", right:"5%", animation:"floatB 7s ease-in-out infinite 1.4s", opacity:0.5 }}
-          width="56" height="84" viewBox="0 0 56 84" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Neck */}
-          <rect x="24" y="4" width="8" height="32" rx="3" stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
-          {/* Headstock */}
-          <rect x="20" y="2" width="16" height="8" rx="3" stroke="#1a1a2e" strokeWidth="2" fill="none"/>
+          width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          {/* Neck + headstock */}
+          <line x1="12" y1="2" x2="12" y2="10"/>
+          <rect x="10" y="2" width="4" height="3" rx="1"/>
           {/* Tuning pegs */}
-          <circle cx="20" cy="5" r="2.5" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
-          <circle cx="36" cy="5" r="2.5" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
-          {/* Fret lines */}
-          <line x1="24" y1="14" x2="32" y2="14" stroke="#1a1a2e" strokeWidth="1.6"/>
-          <line x1="24" y1="22" x2="32" y2="22" stroke="#1a1a2e" strokeWidth="1.6"/>
-          <line x1="24" y1="30" x2="32" y2="30" stroke="#1a1a2e" strokeWidth="1.6"/>
-          {/* Body — figure-8 */}
-          <path d="M28 36 C16 36, 6 44, 6 54 C6 62, 12 68, 20 68 C22 68, 24 67, 26 66 C28 70, 28 74, 28 76 C28 80, 30 82, 28 82 C26 82, 26 80, 28 78"
-            stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
-          <path d="M28 36 C40 36, 50 44, 50 54 C50 62, 44 68, 36 68 C34 68, 32 67, 30 66 C28 70, 28 74, 28 76"
-            stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
+          <circle cx="10" cy="3" r="0.8" fill="#1a1a2e"/>
+          <circle cx="14" cy="3" r="0.8" fill="#1a1a2e"/>
+          {/* Frets */}
+          <line x1="11" y1="5.5" x2="13" y2="5.5"/>
+          <line x1="11" y1="7.5" x2="13" y2="7.5"/>
+          {/* Body — upper bout */}
+          <path d="M12 10 C8 10 5 12 5 14.5 C5 16.5 6.5 17.5 8 17.5 C9 17.5 9.5 17 10 16.5"/>
+          <path d="M12 10 C16 10 19 12 19 14.5 C19 16.5 17.5 17.5 16 17.5 C15 17.5 14.5 17 14 16.5"/>
+          {/* Waist */}
+          <path d="M10 16.5 C9.5 17.5 9.5 18.5 10 19.5"/>
+          <path d="M14 16.5 C14.5 17.5 14.5 18.5 14 19.5"/>
+          {/* Body — lower bout */}
+          <path d="M10 19.5 C8.5 19.5 5 20.5 5 22 C5 23 6.5 24 9 24"/>
+          <path d="M14 19.5 C15.5 19.5 19 20.5 19 22 C19 23 17.5 24 15 24"/>
+          <path d="M9 24 Q12 25 15 24"/>
           {/* Sound hole */}
-          <circle cx="28" cy="56" r="7" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+          <circle cx="12" cy="21" r="1.5"/>
           {/* String */}
-          <line x1="28" y1="36" x2="28" y2="66" stroke="#1a1a2e" strokeWidth="1.2"/>
+          <line x1="12" y1="10" x2="12" y2="22.5" strokeWidth="0.8"/>
         </svg>
 
       </div>
