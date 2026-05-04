@@ -115,7 +115,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
             style={{ background: "rgba(108,71,255,0.15)", border: "1px solid rgba(108,71,255,0.35)" }}>
             <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse" />
-            <span className="text-[11px] font-bold text-[#a78bfa] tracking-wider uppercase">Western Sydney's #1 Skills Platform</span>
+            <span className="text-[11px] font-bold text-[#a78bfa] tracking-wider uppercase">Western Sydney's Skills Platform</span>
           </div>
         </FadeIn>
 
@@ -179,7 +179,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
               ))}
             </div>
             <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.45)" }}>
-              <span className="text-white font-bold">500+</span> pros already on SkillSnap
+              <span className="text-white font-bold">Be one of the first</span> pros on SkillSnap
             </p>
           </div>
         </FadeIn>
