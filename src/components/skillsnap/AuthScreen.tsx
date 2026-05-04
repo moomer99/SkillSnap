@@ -290,16 +290,13 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
           <ProBubble initial="A" gradient="linear-gradient(135deg,#fa709a,#fee140)" name="Ana"    skill="🧹 Cleaning"      top="62%" left="62%" rotate="9deg"  jobs={178} />
           <ProBubble initial="D" gradient="linear-gradient(135deg,#a18cd1,#fbc2eb)" name="Dan"    skill="🔧 Plumber"       top="72%" left="8%"  rotate="-4deg" jobs={95}  />
           <ProBubble initial="L" gradient="linear-gradient(135deg,#ffecd2,#fcb69f)" name="Lisa"   skill="💅 Nails"         top="78%" left="52%" rotate="6deg"  jobs={134} />
-          <ProBubble initial="R" gradient="linear-gradient(135deg,#96fbc4,#f9f586)" name="Ryan"   skill="⚡ Electrician"   top="20%" left="18%" rotate="-8deg" jobs={57}  />
+          <ProBubble initial="R" gradient="linear-gradient(135deg,#96fbc4,#f9f586)" name="Ryan"   skill="⚡ Electrician"   top="55%" left="60%" rotate="4deg"  jobs={57}  />
         </div>
 
         {/* Brand — centred */}
-        <div className="relative z-10 flex flex-col items-center text-center px-8 pt-16 pb-4">
-          <div className="mb-5">
-            <SkillSnapLogo variant="icon" size="lg" dark />
-          </div>
-          <div className="mb-2">
-            <SkillSnapLogo variant="full" size="md" dark />
+        <div className="relative z-10 flex flex-col items-center text-center px-8 pt-20 pb-4">
+          <div className="mb-3">
+            <SkillSnapLogo variant="full" size="xl" dark />
           </div>
           <p className="text-base font-semibold mb-1" style={{ color: "#a78bfa" }}>{APP_CONFIG.tagline}</p>
           <p className="text-sm leading-relaxed max-w-[240px]" style={{ color: "rgba(255,255,255,0.55)" }}>{APP_CONFIG.subtitle}</p>

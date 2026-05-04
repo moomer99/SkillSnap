@@ -9,7 +9,7 @@ interface LogoProps {
 // App design-system colours
 const BRAND   = "#6c47ff"; // app purple (replaces original #5b72fe blue)
 const SLASH   = "#1a1a2e"; // dark diagonal slash (was #302929)
-const SLASH_DARK = "rgba(255,255,255,0.25)"; // slash on dark bg
+const SLASH_DARK = "#6c47ff"; // slash on dark bg — brand purple
 
 // Full wordmark heights → width derived from 160:47 aspect ratio ≈ 3.4:1
 const FULL_HEIGHTS = { xs: 16, sm: 20, md: 26, lg: 36, xl: 50 };
