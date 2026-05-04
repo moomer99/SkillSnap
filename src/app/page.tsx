@@ -4,23 +4,28 @@
 // Navigation is driven by AppState.screen
 // All screens receive onNavigate from here
 // ─────────────────────────────────────────────
+import { lazy, Suspense } from "react";
 import { AppProvider, useAppState } from "@/state/AppState";
 import type { Screen } from "@/types";
 
+// Landing + Auth load eagerly — they're the first thing every visitor sees
 import LandingPage from "@/components/skillsnap/LandingPage";
-import OnboardingScreen from "@/components/skillsnap/OnboardingScreen";
-import SearchScreen from "@/components/skillsnap/SearchScreen";
 import AuthScreen from "@/components/skillsnap/AuthScreen";
-import HomeFeed from "@/components/skillsnap/HomeFeed";
-import DiscoverScreen from "@/components/skillsnap/DiscoverScreen";
-import ProfileScreen from "@/components/skillsnap/ProfileScreen";
-import UploadScreen from "@/components/skillsnap/UploadScreen";
-import MessagesScreen from "@/components/skillsnap/MessagesScreen";
-import ChatScreen from "@/components/skillsnap/ChatScreen";
-import EditProfileScreen from "@/components/skillsnap/EditProfileScreen";
-import SettingsScreen from "@/components/skillsnap/SettingsScreen";
-import ProScreen from "@/components/skillsnap/ProScreen";
-import BottomNav from "@/components/skillsnap/BottomNav";
+
+// Everything else is lazy — only downloaded when the user actually navigates there
+const OnboardingScreen  = lazy(() => import("@/components/skillsnap/OnboardingScreen"));
+const SearchScreen      = lazy(() => import("@/components/skillsnap/SearchScreen"));
+const HomeFeed          = lazy(() => import("@/components/skillsnap/HomeFeed"));
+const DiscoverScreen    = lazy(() => import("@/components/skillsnap/DiscoverScreen"));
+const ProfileScreen     = lazy(() => import("@/components/skillsnap/ProfileScreen"));
+const UploadScreen      = lazy(() => import("@/components/skillsnap/UploadScreen"));
+const MessagesScreen    = lazy(() => import("@/components/skillsnap/MessagesScreen"));
+const ChatScreen        = lazy(() => import("@/components/skillsnap/ChatScreen"));
+const EditProfileScreen = lazy(() => import("@/components/skillsnap/EditProfileScreen"));
+const SettingsScreen    = lazy(() => import("@/components/skillsnap/SettingsScreen"));
+const ProScreen         = lazy(() => import("@/components/skillsnap/ProScreen"));
+const BottomNav         = lazy(() => import("@/components/skillsnap/BottomNav"));
+
 import { ToastProvider } from "@/components/skillsnap/shared/Toast";
 import AuthPromptModal from "@/components/skillsnap/shared/AuthPromptModal";
 
@@ -84,8 +89,10 @@ function SkillSnapRouter() {
         className="relative w-full bg-[#f8f7f5] overflow-hidden"
         style={{ maxWidth: "min(100vw, 430px)", minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
       >
-        {/* Auth loading splash — shown while session resolves, but NOT on home/feed (feed shows its own skeleton) */}
-        {authLoading && screen !== "auth" && screen !== "home" && (
+        {/* Auth loading splash — shown while session resolves.
+            Excluded: landing (public, no auth needed — show immediately),
+            auth (has its own UI), home (has its own skeleton) */}
+        {authLoading && screen !== "landing" && screen !== "auth" && screen !== "home" && (
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
             <div
               className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4"
@@ -99,23 +106,25 @@ function SkillSnapRouter() {
             <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
           </div>
         )}
-        {/* Screen renderer */}
-        {screen === "landing"        && <LandingPage      onNavigate={navigate} />}
-        {screen === "onboarding"     && <OnboardingScreen onNavigate={navigate} />}
-        {screen === "search"          && <SearchScreen      onNavigate={navigate} />}
-        {screen === "auth"           && <AuthScreen       onNavigate={navigate} />}
-        {screen === "home"           && <HomeFeed         onNavigate={navigate} />}
-        {screen === "discover"       && <DiscoverScreen   onNavigate={navigate} />}
-        {screen === "own-profile"    && <ProfileScreen    variant="own"    onNavigate={navigate} />}
-        {screen === "client-profile" && <ProfileScreen    variant="client" onNavigate={navigate} />}
-        {screen === "upload"         && <UploadScreen     onNavigate={navigate} />}
-        {screen === "messages"       && <MessagesScreen   onNavigate={navigate} />}
-        {screen === "chat"           && <ChatScreen       onNavigate={navigate} />}
-        {screen === "edit-profile"   && <EditProfileScreen onNavigate={navigate} />}
-        {screen === "settings"       && <SettingsScreen    onNavigate={navigate} />}
-        {screen === "pro"            && <ProScreen         onNavigate={navigate} />}
+        {/* Screen renderer — eager screens first, rest wrapped in Suspense */}
+        {screen === "landing" && <LandingPage onNavigate={navigate} />}
+        {screen === "auth"    && <AuthScreen  onNavigate={navigate} />}
 
-        {showBottomNav && <BottomNav active={screen} onNavigate={navigate} />}
+        <Suspense fallback={<div className="flex-1 bg-[#f8f7f5]" />}>
+          {screen === "onboarding"     && <OnboardingScreen onNavigate={navigate} />}
+          {screen === "search"         && <SearchScreen      onNavigate={navigate} />}
+          {screen === "home"           && <HomeFeed          onNavigate={navigate} />}
+          {screen === "discover"       && <DiscoverScreen    onNavigate={navigate} />}
+          {screen === "own-profile"    && <ProfileScreen     variant="own"    onNavigate={navigate} />}
+          {screen === "client-profile" && <ProfileScreen     variant="client" onNavigate={navigate} />}
+          {screen === "upload"         && <UploadScreen      onNavigate={navigate} />}
+          {screen === "messages"       && <MessagesScreen    onNavigate={navigate} />}
+          {screen === "chat"           && <ChatScreen        onNavigate={navigate} />}
+          {screen === "edit-profile"   && <EditProfileScreen onNavigate={navigate} />}
+          {screen === "settings"       && <SettingsScreen    onNavigate={navigate} />}
+          {screen === "pro"            && <ProScreen         onNavigate={navigate} />}
+          {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
+        </Suspense>
         <AuthPromptModal />
       </div>
 
