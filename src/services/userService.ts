@@ -1,9 +1,16 @@
 // ─────────────────────────────────────────────
 // SkillSnap — User Service (Supabase)
 // ─────────────────────────────────────────────
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getAuthSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
 import type { User } from "@/types";
+
+// Shared helper — always uses the auth client (real URL) so the session
+// token is found regardless of sandbox proxy URL mismatch
+async function getAuthUserId(): Promise<string | null> {
+  const { data: { user } } = await getAuthSupabase().auth.getUser();
+  return user?.id ?? null;
+}
 
 export const userService = {
   async getUser(id: string): Promise<User | null> {
@@ -17,13 +24,12 @@ export const userService = {
   },
 
   async getCurrentUser(): Promise<User | null> {
-    const sb = getSupabase();
-    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
-    if (!session?.user) return null;
-    const { data, error } = await sb
+    const userId = await getAuthUserId();
+    if (!userId) return null;
+    const { data, error } = await getSupabase()
       .from("profiles")
       .select("*")
-      .eq("id", session.user.id)
+      .eq("id", userId)
       .single();
     if (error || !data) return null;
     return mapProfile(data as Record<string, unknown>);
@@ -39,57 +45,50 @@ export const userService = {
     return (data ?? []).map((row) => mapProfile(row as Record<string, unknown>));
   },
 
-  // Returns all user IDs the current user is following — used to seed AppState on login
   async getFollowedUserIds(): Promise<Set<string>> {
-    const sb = getSupabase();
-    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
-    if (!session) return new Set();
-    const { data } = await sb
+    const userId = await getAuthUserId();
+    if (!userId) return new Set();
+    const { data } = await getSupabase()
       .from("follows")
       .select("following_id")
-      .eq("follower_id", session.user.id);
+      .eq("follower_id", userId);
     return new Set((data ?? []).map((r) => r.following_id as string));
   },
 
   async followUser(targetId: string): Promise<void> {
-    const sb = getSupabase();
-    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
-    if (!session) return;
-    // upsert prevents duplicate-key errors if the user double-taps
-    await sb.from("follows").upsert(
-      { follower_id: session.user.id, following_id: targetId },
+    const userId = await getAuthUserId();
+    if (!userId) return;
+    await getSupabase().from("follows").upsert(
+      { follower_id: userId, following_id: targetId },
       { onConflict: "follower_id,following_id", ignoreDuplicates: true }
     );
   },
 
   async unfollowUser(targetId: string): Promise<void> {
-    const sb = getSupabase();
-    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
-    if (!session) return;
-    // Ignore "row not found" errors — idempotent unfollow
-    await sb.from("follows")
+    const userId = await getAuthUserId();
+    if (!userId) return;
+    await getSupabase()
+      .from("follows")
       .delete()
-      .eq("follower_id", session.user.id)
+      .eq("follower_id", userId)
       .eq("following_id", targetId);
   },
 
   async isFollowing(targetId: string): Promise<boolean> {
-    const sb = getSupabase();
-    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
-    if (!session) return false;
-    const { data } = await sb
+    const userId = await getAuthUserId();
+    if (!userId) return false;
+    const { data } = await getSupabase()
       .from("follows")
       .select("follower_id")
-      .eq("follower_id", session.user.id)
+      .eq("follower_id", userId)
       .eq("following_id", targetId)
       .maybeSingle();
     return !!data;
   },
 
   async updateProfile(patch: Partial<User>): Promise<User | null> {
-    const sb = getSupabase();
-    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
-    if (!session) return null;
+    const userId = await getAuthUserId();
+    if (!userId) return null;
 
     const dbPatch: Record<string, unknown> = {};
     if (patch.displayName !== undefined) dbPatch.display_name = patch.displayName;
@@ -103,10 +102,10 @@ export const userService = {
     if (patch.avatarUrl !== undefined) dbPatch.avatar_url = patch.avatarUrl;
     if (patch.avatarGradient !== undefined) dbPatch.avatar_gradient = patch.avatarGradient;
 
-    const { data, error } = await sb
+    const { data, error } = await getSupabase()
       .from("profiles")
       .update(dbPatch)
-      .eq("id", session.user.id)
+      .eq("id", userId)
       .select()
       .single();
     if (error || !data) return null;

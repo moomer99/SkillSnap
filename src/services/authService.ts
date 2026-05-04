@@ -158,15 +158,14 @@ export const authService = {
   },
 
   async getCurrentUser(): Promise<User | null> {
-    const sb = getSupabase();
-    const { data: { user: _authUser } } = await sb.auth.getUser(); const session = _authUser ? { user: _authUser } : null;
-    if (!session?.user) return null;
-    return fetchProfile(session.user.id);
+    const { data: { user } } = await getAuthSupabase().auth.getUser();
+    if (!user) return null;
+    return fetchProfile(user.id);
   },
 
   async getSession() {
-    const { data: { user: _authUser } } = await getSupabase().auth.getUser(); const session = _authUser ? { user: _authUser } : null;
-    return session;
+    const { data: { user } } = await getAuthSupabase().auth.getUser();
+    return user ? { user } : null;
   },
 
   isAuthenticated(): boolean {

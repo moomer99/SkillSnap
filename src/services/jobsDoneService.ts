@@ -3,7 +3,7 @@
 // Flow: skiller requests → client confirms → jobs_done increments
 // via DB trigger (handle_job_confirmed)
 // ─────────────────────────────────────────────
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getAuthSupabase } from "@/lib/supabase";
 import type { JobRecord } from "@/types";
 
 function mapJob(row: Record<string, unknown>): JobRecord {
@@ -17,8 +17,8 @@ function mapJob(row: Record<string, unknown>): JobRecord {
 }
 
 async function getCurrentUserId(): Promise<string | null> {
-  const { data: { user: _authUser } } = await getSupabase().auth.getUser(); const session = _authUser ? { user: _authUser } : null;
-  return session?.user.id ?? null;
+  const { data: { user } } = await getAuthSupabase().auth.getUser();
+  return user?.id ?? null;
 }
 
 export const jobsDoneService = {

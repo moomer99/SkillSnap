@@ -1,4 +1,4 @@
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getAuthSupabase } from "@/lib/supabase";
 import type { Post, SkillCategory } from "@/types";
 
 const REAL_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
@@ -20,16 +20,15 @@ export interface UploadPayload {
 }
 
 async function getCurrentUserId(): Promise<string> {
-  const sb = getSupabase();
-  // getUser() makes a live API call — works regardless of localStorage session key
-  const { data: { user }, error } = await sb.auth.getUser();
+  // Always use the auth client (real URL) — proxy client has different storage key
+  const { data: { user }, error } = await getAuthSupabase().auth.getUser();
   if (error || !user) throw new Error("Not authenticated");
   return user.id;
 }
 
 export const uploadService = {
   async uploadMedia(file: File): Promise<string> {
-    const sb = getSupabase();
+    const sb = getAuthSupabase();
     const userId = await getCurrentUserId();
 
     const ext = file.name.split(".").pop() ?? "mp4";
@@ -45,7 +44,9 @@ export const uploadService = {
   },
 
   async uploadAvatar(file: File): Promise<string> {
-    const sb = getSupabase();
+    // Use the auth/real-URL client for storage — proxy rewrites can drop
+    // multipart bodies or auth headers on file uploads
+    const sb = getAuthSupabase();
     const userId = await getCurrentUserId();
 
     const ext = file.name.split(".").pop() ?? "jpg";
@@ -57,7 +58,7 @@ export const uploadService = {
     });
     if (error) throw error;
 
-    // Append cache-buster so browsers/CDN don't serve a stale version of the previous avatar
+    // Append cache-buster so browsers/CDN don't serve a stale version
     return `${getRealPublicUrl("avatars", path)}?t=${Date.now()}`;
   },
 

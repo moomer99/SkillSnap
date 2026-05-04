@@ -3,7 +3,7 @@
 // Connect flow: Connect button → getOrCreateConversation()
 // Realtime: subscribeToMessages() returns an unsubscribe fn.
 // ─────────────────────────────────────────────
-import { getSupabase, getRealtimeSupabase } from "@/lib/supabase";
+import { getSupabase, getAuthSupabase, getRealtimeSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
 import type { MessageThread, Message } from "@/types";
 
@@ -44,7 +44,7 @@ function mapMessage(row: Record<string, unknown>, currentUserId: string): Messag
 }
 
 async function getCurrentUserId(): Promise<string | null> {
-  const { data: { user } } = await getSupabase().auth.getUser();
+  const { data: { user } } = await getAuthSupabase().auth.getUser();
   return user?.id ?? null;
 }
 
