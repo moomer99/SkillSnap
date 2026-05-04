@@ -71,7 +71,7 @@ async function getUserInteractionSets(postIds: string[]): Promise<{ likedIds: Se
 }
 
 export const postService = {
-  async getFeed(limit = 20, offset = 0): Promise<{ posts: Post[]; likedIds: Set<string>; savedIds: Set<string> }> {
+  async getFeed(limit = 10, offset = 0): Promise<{ posts: Post[]; likedIds: Set<string>; savedIds: Set<string> }> {
     const { data, error } = await getSupabase()
       .from("posts")
       .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*)")

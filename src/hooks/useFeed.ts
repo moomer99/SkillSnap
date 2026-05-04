@@ -1,13 +1,15 @@
 "use client";
 // ─────────────────────────────────────────────
-// useFeed — loads the home feed via postService (Supabase).
+// useFeed — paginated feed with infinite scroll.
+// Loads 10 posts at a time from Supabase.
 // Falls back to MOCK_POSTS only when Supabase is not configured.
-// Seeds likedPosts/savedPosts in AppState from the DB response.
 // ─────────────────────────────────────────────
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { useAppState } from "@/state/AppState";
 import { postService } from "@/services/postService";
 import { MOCK_POSTS } from "@/mock-data/posts";
+
+const PAGE_SIZE = 10;
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -16,20 +18,34 @@ const SUPABASE_CONFIGURED =
 
 export function useFeed() {
   const { state, dispatch } = useAppState();
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const offsetRef = useRef(0);
+  // Track feedVersion so we reset when a new post is created
+  const feedVersionRef = useRef(state.feedVersion);
 
+  // Initial load / reset when feedVersion changes
   useEffect(() => {
+    const isReset = feedVersionRef.current !== state.feedVersion;
+    feedVersionRef.current = state.feedVersion;
+
     dispatch({ type: "SET_FEED_LOADING", loading: true });
 
     if (!SUPABASE_CONFIGURED) {
       dispatch({ type: "SET_POSTS", posts: MOCK_POSTS });
       dispatch({ type: "SET_FEED_LOADING", loading: false });
+      setHasMore(false);
       return;
     }
 
+    // Reset pagination on version bump
+    if (isReset) offsetRef.current = 0;
+
     postService
-      .getFeed()
+      .getFeed(PAGE_SIZE, 0)
       .then(({ posts, likedIds, savedIds }) => {
-        // Merge locally-created posts (demo) back at the top so they aren't lost on reload
+        offsetRef.current = posts.length;
+        setHasMore(posts.length === PAGE_SIZE);
         dispatch({ type: "SET_POSTS", posts });
         dispatch({ type: "SET_INTERACTIONS", likedIds, savedIds });
         dispatch({ type: "SET_FEED_LOADING", loading: false });
@@ -37,20 +53,37 @@ export function useFeed() {
       .catch(() => {
         dispatch({ type: "SET_FEED_LOADING", loading: false });
       });
-  // feedVersion increments after a new post is created, triggering a reload
   }, [dispatch, state.feedVersion]);
+
+  // Load next page
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loadingMore || !SUPABASE_CONFIGURED) return;
+    setLoadingMore(true);
+    try {
+      const { posts: newPosts, likedIds, savedIds } = await postService.getFeed(PAGE_SIZE, offsetRef.current);
+      if (newPosts.length === 0) {
+        setHasMore(false);
+        return;
+      }
+      offsetRef.current += newPosts.length;
+      setHasMore(newPosts.length === PAGE_SIZE);
+      // Append to existing posts (SET_POSTS replaces — use APPEND_POSTS pattern via SET_POSTS with combined list)
+      const combined = [...state.posts, ...newPosts.filter(p => !state.posts.some(e => e.id === p.id))];
+      dispatch({ type: "SET_POSTS", posts: combined });
+      dispatch({ type: "SET_INTERACTIONS", likedIds, savedIds });
+    } catch {
+      // silently fail — user can scroll again to retry
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loadingMore, state.posts, dispatch]);
 
   const toggleLike = useCallback(
     (postId: string) => {
       const isLiked = state.likedPosts.has(postId);
-      // Optimistic update first
       dispatch({ type: "TOGGLE_LIKE", postId });
-      // Fire-and-forget DB sync
-      if (isLiked) {
-        postService.unlikePost(postId).catch(() => {});
-      } else {
-        postService.likePost(postId).catch(() => {});
-      }
+      if (isLiked) postService.unlikePost(postId).catch(() => {});
+      else postService.likePost(postId).catch(() => {});
     },
     [state.likedPosts, dispatch]
   );
@@ -59,11 +92,8 @@ export function useFeed() {
     (postId: string) => {
       const isSaved = state.savedPosts.has(postId);
       dispatch({ type: "TOGGLE_SAVE", postId });
-      if (isSaved) {
-        postService.unsavePost(postId).catch(() => {});
-      } else {
-        postService.savePost(postId).catch(() => {});
-      }
+      if (isSaved) postService.unsavePost(postId).catch(() => {});
+      else postService.savePost(postId).catch(() => {});
     },
     [state.savedPosts, dispatch]
   );
@@ -71,6 +101,9 @@ export function useFeed() {
   return {
     posts: state.posts,
     loading: state.feedLoading,
+    loadingMore,
+    hasMore,
+    loadMore,
     likedPosts: state.likedPosts,
     savedPosts: state.savedPosts,
     toggleLike,
