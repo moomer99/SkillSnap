@@ -175,7 +175,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         <h1 className="font-bold text-base text-[#1a1a1a] flex-1">Showcase Your Work</h1>
       </header>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-5 pb-8 flex flex-col gap-5">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-5 pb-28 flex flex-col gap-5">
         {/* Upload type */}
         <div>
           <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider mb-3 block">

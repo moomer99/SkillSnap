@@ -94,7 +94,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
       {/* Sticky header */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-0 w-full">
         <div className="flex items-center justify-between mb-2.5">
-          <SkillSnapLogo />
+          <SkillSnapLogo size="lg" />
           {location ? (
             <button
               onClick={() => setShowLocationPicker(true)}
