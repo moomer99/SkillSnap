@@ -9,36 +9,9 @@ interface OnboardingScreenProps {
 
 function SlideWelcome() {
   return (
-    <div className="relative flex items-center justify-center" style={{ width: 200, height: 200 }}>
-      {/* Background circle */}
-      <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute inset-0">
-        <defs>
-          <radialGradient id="w-bg" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#ede9fe"/>
-            <stop offset="100%" stopColor="#ddd6fe"/>
-          </radialGradient>
-          <filter id="w-shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="8" stdDeviation="14" floodColor="#6c47ff" floodOpacity="0.2"/>
-          </filter>
-        </defs>
-        <circle cx="100" cy="96" r="82" fill="url(#w-bg)"/>
-        {/* Three small icon pills */}
-        <rect x="30" y="152" width="44" height="22" rx="11" fill="white" filter="url(#w-shadow)"/>
-        <circle cx="43" cy="163" r="7" fill="#6c47ff"/>
-        <polygon points="41,160 41,166 47,163" fill="white"/>
-        <text x="58" y="167" fontFamily="-apple-system,sans-serif" fontSize="8" fontWeight="700" fill="#1a1a1a">Video</text>
-        <rect x="80" y="152" width="40" height="22" rx="11" fill="white" filter="url(#w-shadow)"/>
-        <text x="92" y="167" fontFamily="-apple-system,sans-serif" fontSize="11" fill="#f59e0b">★</text>
-        <text x="103" y="167" fontFamily="-apple-system,sans-serif" fontSize="8" fontWeight="700" fill="#1a1a1a">Rated</text>
-        <rect x="126" y="152" width="44" height="22" rx="11" fill="white" filter="url(#w-shadow)"/>
-        <text x="138" y="167" fontFamily="-apple-system,sans-serif" fontSize="11" fill="#6c47ff">📍</text>
-        <text x="151" y="167" fontFamily="-apple-system,sans-serif" fontSize="8" fontWeight="700" fill="#1a1a1a">Local</text>
-      </svg>
-      {/* Real logo centred in the circle */}
-      <div className="relative z-10 flex flex-col items-center gap-2" style={{ marginTop: -20 }}>
-        <SkillSnapLogo variant="icon" size="md" />
-        <SkillSnapLogo variant="full" size="sm" />
-      </div>
+    <div className="flex flex-col items-center justify-center gap-5" style={{ width: 200, height: 200 }}>
+      <SkillSnapLogo variant="icon" size="xl" />
+      <SkillSnapLogo variant="full" size="md" />
     </div>
   );
 }
