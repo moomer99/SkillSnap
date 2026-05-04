@@ -449,7 +449,7 @@ function FeedCard({
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Video lazy-load + auto-play: only load src when card is near viewport
+  // Step 1: Watch intersection — set videoVisible when card enters viewport
   useEffect(() => {
     if (post.type !== "video" || !post.mediaUrl) return;
     const card = cardRef.current;
@@ -458,7 +458,6 @@ function FeedCard({
       ([entry]) => {
         if (entry.isIntersecting) {
           setVideoVisible(true);
-          videoRef.current?.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
         } else {
           videoRef.current?.pause();
           setPlaying(false);
@@ -469,6 +468,12 @@ function FeedCard({
     observer.observe(card);
     return () => observer.disconnect();
   }, [post.type, post.mediaUrl]);
+
+  // Step 2: Play after src is in the DOM (runs after re-render that sets src)
+  useEffect(() => {
+    if (!videoVisible || !videoRef.current) return;
+    videoRef.current.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+  }, [videoVisible]);
 
   const handleMediaTap = useCallback(() => { onFullscreen(); }, [onFullscreen]);
   const displayLocation = post.location ?? author.location;
