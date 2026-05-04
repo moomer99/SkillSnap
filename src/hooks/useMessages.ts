@@ -8,6 +8,7 @@ import { useEffect, useCallback, useState, useRef } from "react";
 import { useAppState } from "@/state/AppState";
 import { messageService } from "@/services/messageService";
 import { MOCK_THREADS } from "@/mock-data/messages";
+import { showMessageNotification } from "@/hooks/useNotifications";
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -50,14 +51,36 @@ export function useMessages() {
   useEffect(() => {
     if (!SUPABASE_CONFIGURED) return;
 
-    const unsub = messageService.subscribeToConversationUpdates(
-      // getter fn so Realtime callback always sees the latest IDs without re-subscribing
+    const unsubConv = messageService.subscribeToConversationUpdates(
       threadIdsRef,
       () => { loadThreads(); }
     );
 
-    return unsub;
-  // Only subscribe once — loadThreads is stable
+    // Fix 2 & 4: subscribe to new message INSERTs across ALL user conversations.
+    // This ensures recipients receive messages and triggers background notifications
+    // even when the chat screen is closed.
+    const unsubMsgs = messageService.subscribeToAllMessages(
+      threadIdsRef,
+      (msg) => {
+        // Dispatch into the correct thread cache (dedup-safe)
+        dispatch({ type: "APPEND_THREAD_MESSAGE_IF_NEW", threadId: msg.threadId, message: msg });
+        // Increment local unread badge for incoming messages
+        if (msg.from === "them") {
+          dispatch({ type: "INCREMENT_THREAD_UNREAD", threadId: msg.threadId });
+          showMessageNotification({
+            senderName: msg.senderName ?? "New message",
+            senderInitial: (msg.senderName ?? "?")[0].toUpperCase(),
+            text: msg.text ?? "Sent you a message",
+          });
+        }
+      }
+    );
+
+    return () => {
+      unsubConv();
+      unsubMsgs();
+    };
+  // Only subscribe once — loadThreads and dispatch are stable
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

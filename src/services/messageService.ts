@@ -32,12 +32,14 @@ function mapThread(
 }
 
 function mapMessage(row: Record<string, unknown>, currentUserId: string): Message {
+  const profile = row.profiles as Record<string, unknown> | undefined;
   return {
     id: row.id as string,
     threadId: row.conversation_id as string,
     from: row.sender_id === currentUserId ? "me" : "them",
     text: row.text as string,
     time: new Date(row.created_at as string).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    senderName: profile?.display_name as string | undefined,
   };
 }
 
@@ -115,7 +117,33 @@ export const messageService = {
 
     if (error) throw error;
     if (!data) throw new Error("No data returned from insert");
+
+    // Increment unread_count for the other participant
+    messageService.incrementUnreadForOthers(conversationId, userId).catch(() => {});
+
     return mapMessage(data as Record<string, unknown>, userId);
+  },
+
+  async incrementUnreadForOthers(conversationId: string, senderId: string): Promise<void> {
+    const sb = getSupabase();
+    // Get all members except the sender
+    const { data: members } = await sb
+      .from("conversation_members")
+      .select("user_id, unread_count")
+      .eq("conversation_id", conversationId)
+      .neq("user_id", senderId);
+
+    if (!members?.length) return;
+
+    await Promise.all(
+      members.map((m) =>
+        sb
+          .from("conversation_members")
+          .update({ unread_count: (m.unread_count ?? 0) + 1 })
+          .eq("conversation_id", conversationId)
+          .eq("user_id", m.user_id)
+      )
+    );
   },
 
   // Reset unread count when user opens a conversation
@@ -201,6 +229,42 @@ export const messageService = {
             console.warn("Realtime subscription error for conversation", conversationId);
           }
         });
+    });
+
+    return () => {
+      cancelled = true;
+      if (channel) getRealtimeSupabase().removeChannel(channel);
+    };
+  },
+
+  // Subscribes to INSERT events for ALL of the user's conversations.
+  // Used in useMessages so recipients get notified even when chat screen is closed.
+  subscribeToAllMessages(
+    idsRef: { current: string[] },
+    onMessage: (msg: Message) => void
+  ): () => void {
+    let channel: ReturnType<ReturnType<typeof getRealtimeSupabase>["channel"]> | null = null;
+    let cancelled = false;
+
+    getCurrentUserId().then((currentUserId) => {
+      if (cancelled) return;
+      const resolvedId = currentUserId ?? "";
+      const rt = getRealtimeSupabase();
+
+      channel = rt
+        .channel("messages:all")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages" },
+          (payload) => {
+            const row = payload.new as Record<string, unknown>;
+            const convId = row.conversation_id as string;
+            if (!idsRef.current.includes(convId)) return;
+            const msg = mapMessage(row, resolvedId);
+            onMessage(msg);
+          }
+        )
+        .subscribe();
     });
 
     return () => {

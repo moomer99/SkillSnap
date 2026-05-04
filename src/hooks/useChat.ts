@@ -9,7 +9,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useAppState } from "@/state/AppState";
 import { messageService } from "@/services/messageService";
 import { MOCK_MESSAGES } from "@/mock-data/messages";
-import { showMessageNotification } from "@/hooks/useNotifications";
 import type { Message } from "@/types";
 
 const SUPABASE_CONFIGURED =
@@ -76,16 +75,9 @@ export function useChat() {
     unsubRef.current?.();
     unsubRef.current = null;
 
-    // Subscribe to Realtime inserts
+    // Subscribe to Realtime inserts — skip if message already in state (echo dedup)
     unsubRef.current = messageService.subscribeToMessages(threadId, (msg) => {
-      dispatch({ type: "APPEND_THREAD_MESSAGE", threadId, message: msg });
-      if (msg.from === "them") {
-        showMessageNotification({
-          senderName: msg.senderName ?? "New message",
-          senderInitial: (msg.senderName ?? "?")[0].toUpperCase(),
-          text: msg.text ?? "Sent you a message",
-        });
-      }
+      dispatch({ type: "APPEND_THREAD_MESSAGE_IF_NEW", threadId, message: msg });
     });
 
     // Refetch when tab becomes visible again — catches messages sent while

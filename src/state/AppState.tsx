@@ -66,7 +66,9 @@ type Action =
   | { type: "SET_THREAD_STARTED_AT"; threadId: string; startedAt: string }
   | { type: "SET_THREAD_MESSAGES"; threadId: string; messages: Message[] }
   | { type: "APPEND_THREAD_MESSAGE"; threadId: string; message: Message }
+  | { type: "APPEND_THREAD_MESSAGE_IF_NEW"; threadId: string; message: Message }
   | { type: "PATCH_THREAD_MESSAGE"; threadId: string; optimisticId: string; message: Message }
+  | { type: "INCREMENT_THREAD_UNREAD"; threadId: string }
   | { type: "PREPEND_POST"; post: Post }
   | { type: "DELETE_POST"; postId: string }
   | { type: "SKIP_AUTH" }
@@ -225,6 +227,33 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         threadMessages: { ...state.threadMessages, [action.threadId]: [...existing, action.message] },
       };
     }
+    // Realtime path — only append if the message ID isn't already present
+    case "APPEND_THREAD_MESSAGE_IF_NEW": {
+      const existing = state.threadMessages[action.threadId] ?? [];
+      if (existing.some((m) => m.id === action.message.id)) return state;
+      // Replace matching optimistic entry for own echoed messages
+      if (action.message.from === "me") {
+        const idx = existing.findIndex(
+          (m) => m.id.startsWith("optimistic_") && m.text === action.message.text
+        );
+        if (idx !== -1) {
+          const updated = [...existing];
+          updated[idx] = action.message;
+          return { ...state, threadMessages: { ...state.threadMessages, [action.threadId]: updated } };
+        }
+      }
+      return {
+        ...state,
+        threadMessages: { ...state.threadMessages, [action.threadId]: [...existing, action.message] },
+      };
+    }
+    case "INCREMENT_THREAD_UNREAD":
+      return {
+        ...state,
+        threads: state.threads.map((t) =>
+          t.id === action.threadId ? { ...t, unreadCount: (t.unreadCount ?? 0) + 1 } : t
+        ),
+      };
     case "PATCH_THREAD_MESSAGE": {
       const msgs = state.threadMessages[action.threadId] ?? [];
       return {
