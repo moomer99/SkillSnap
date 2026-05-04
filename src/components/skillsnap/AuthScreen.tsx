@@ -273,56 +273,48 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
     <div className="flex flex-col min-h-screen bg-white">
       {/* Hero */}
       <div
-        className="relative flex-1 flex flex-col overflow-hidden"
-        style={{ background: "linear-gradient(175deg, #0f0a1e 0%, #1a1040 40%, #2d1b69 100%)" }}
+        className="relative flex flex-col items-center justify-center text-center overflow-hidden px-8 pt-16 pb-14"
+        style={{ background: "linear-gradient(175deg, #0f0a1e 0%, #1a1040 50%, #2d1b69 100%)" }}
       >
-        {/* Subtle radial glow */}
+        {/* Radial glow */}
         <div className="absolute inset-0 pointer-events-none">
-          <div style={{ position: "absolute", top: "15%", left: "50%", transform: "translateX(-50%)", width: 340, height: 340, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.35) 0%, transparent 70%)" }} />
+          <div style={{ position: "absolute", top: "10%", left: "50%", transform: "translateX(-50%)", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.30) 0%, transparent 70%)" }} />
         </div>
 
-        {/* Floating skill pro bubbles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <ProBubble initial="M" gradient="linear-gradient(135deg,#667eea,#764ba2)" name="Marcus" skill="✂️ Barber"        top="8%"  left="5%"  rotate="-6deg" jobs={142} />
-          <ProBubble initial="P" gradient="linear-gradient(135deg,#f093fb,#f5576c)" name="Priya"  skill="💄 Makeup Artist" top="6%"  left="60%" rotate="5deg"  jobs={89}  />
-          <ProBubble initial="J" gradient="linear-gradient(135deg,#4facfe,#00c6ff)" name="Jake"   skill="🧱 Tiler"         top="26%" left="72%" rotate="7deg"  jobs={211} />
-          <ProBubble initial="S" gradient="linear-gradient(135deg,#43e97b,#38f9d7)" name="Sam"    skill="💪 Fitness / PT"  top="44%" left="2%"  rotate="-5deg" jobs={67}  />
-          <ProBubble initial="A" gradient="linear-gradient(135deg,#fa709a,#fee140)" name="Ana"    skill="🧹 Cleaning"      top="62%" left="62%" rotate="9deg"  jobs={178} />
-          <ProBubble initial="D" gradient="linear-gradient(135deg,#a18cd1,#fbc2eb)" name="Dan"    skill="🔧 Plumber"       top="72%" left="8%"  rotate="-4deg" jobs={95}  />
-          <ProBubble initial="L" gradient="linear-gradient(135deg,#ffecd2,#fcb69f)" name="Lisa"   skill="💅 Nails"         top="78%" left="52%" rotate="6deg"  jobs={134} />
-          <ProBubble initial="R" gradient="linear-gradient(135deg,#96fbc4,#f9f586)" name="Ryan"   skill="⚡ Electrician"   top="55%" left="60%" rotate="4deg"  jobs={57}  />
+        {/* Brand */}
+        <div className="relative z-10 mb-4">
+          <SkillSnapLogo variant="full" size="xl" dark />
         </div>
 
-        {/* Brand — centred */}
-        <div className="relative z-10 flex flex-col items-center text-center px-8 pt-20 pb-4">
-          <div className="mb-3">
-            <SkillSnapLogo variant="full" size="xl" dark />
-          </div>
-          <p className="text-base font-semibold mb-1" style={{ color: "#a78bfa" }}>{APP_CONFIG.tagline}</p>
-          <p className="text-sm leading-relaxed max-w-[240px]" style={{ color: "rgba(255,255,255,0.55)" }}>{APP_CONFIG.subtitle}</p>
+        <p className="relative z-10 text-base font-semibold mb-2" style={{ color: "#a78bfa" }}>
+          {APP_CONFIG.tagline}
+        </p>
+        <p className="relative z-10 text-sm leading-relaxed max-w-[260px]" style={{ color: "rgba(255,255,255,0.50)" }}>
+          {APP_CONFIG.subtitle}
+        </p>
+
+        {/* Skill pills — consistent, clean social proof */}
+        <div className="relative z-10 mt-8 flex flex-wrap gap-2 justify-center max-w-[300px]">
+          {[
+            { label: "✂️ Barbers", color: "#667eea" },
+            { label: "🔧 Tradies", color: "#4facfe" },
+            { label: "💄 Makeup", color: "#f093fb" },
+            { label: "🧹 Cleaning", color: "#43e97b" },
+            { label: "💅 Nails", color: "#fa709a" },
+            { label: "💪 Fitness", color: "#a78bfa" },
+          ].map(({ label, color }) => (
+            <span
+              key={label}
+              className="px-3 py-1.5 rounded-full text-[12px] font-semibold text-white"
+              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
+            >
+              {label}
+            </span>
+          ))}
         </div>
 
-        {/* Mini pro cards row — no offset so middle card is fully visible */}
-        <div className="relative z-10 mt-8 flex gap-3 px-5 pb-10 overflow-x-auto no-scrollbar justify-center items-end">
-          <MiniCard
-            gradient="linear-gradient(160deg,#667eea,#764ba2)"
-            skill="Barber" name="Marcus T." initial="M"
-            jobs={142} happy={96}
-          />
-          <MiniCard
-            gradient="linear-gradient(160deg,#f093fb,#f5576c)"
-            skill="Makeup Artist" name="Priya K." initial="P"
-            jobs={89} happy={100} featured
-          />
-          <MiniCard
-            gradient="linear-gradient(160deg,#4facfe,#00c6ff)"
-            skill="Fitness / PT" name="Sam L." initial="S"
-            jobs={67} happy={94}
-          />
-        </div>
-
-        {/* Bottom fade into white CTA */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
           style={{ background: "linear-gradient(to bottom, transparent, white)" }} />
       </div>
 
@@ -368,79 +360,3 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   );
 }
 
-// Floating pro bubble — avatar + name + skill chip
-function ProBubble({ initial, gradient, name, skill, top, left, rotate, jobs }: {
-  initial: string; gradient: string; name: string; skill: string;
-  top: string; left: string; rotate: string; jobs: number;
-}) {
-  return (
-    <div
-      className="absolute flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl px-2.5 py-1.5 shadow-lg"
-      style={{ top, left, transform: `rotate(${rotate})` }}
-    >
-      <div
-        className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[11px] flex-shrink-0"
-        style={{ background: gradient }}
-      >
-        {initial}
-      </div>
-      <div>
-        <p className="text-white text-[11px] font-bold leading-tight">{name}</p>
-        <p className="text-white/60 text-[9px] leading-tight">{skill} · {jobs} jobs</p>
-      </div>
-    </div>
-  );
-}
-
-// Mini video card with avatar + stats overlay
-function MiniCard({ gradient, skill, name, initial, jobs, happy, featured }: {
-  gradient: string; skill: string; name: string; initial: string;
-  jobs: number; happy: number; featured?: boolean;
-}) {
-  return (
-    <div
-      className={`relative rounded-2xl overflow-hidden shadow-xl flex-shrink-0 ${featured ? "border-2 border-white/30" : "border border-white/10"}`}
-      style={{
-        width: featured ? 118 : 106,
-        height: featured ? 168 : 148,
-        background: gradient,
-        boxShadow: featured ? "0 8px 32px rgba(108,71,255,0.35)" : undefined,
-      }}
-    >
-      {/* Scrim */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.72) 100%)" }} />
-
-      {/* Play icon */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(4px)", border: "1.5px solid rgba(255,255,255,0.3)" }}>
-          <svg width="12" height="14" viewBox="0 0 12 14" fill="white">
-            <path d="M1 1l10 6-10 6V1z" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Bottom info */}
-      <div className="absolute bottom-0 left-0 right-0 p-2.5">
-        {/* Avatar + name row */}
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <div
-            className="w-5 h-5 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
-            style={{ fontSize: 8, background: "rgba(255,255,255,0.25)" }}
-          >
-            {initial}
-          </div>
-          <p className="text-white text-[10px] font-bold leading-none truncate">{name}</p>
-        </div>
-        {/* Skill chip */}
-        <div className="inline-flex items-center bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5 mb-1.5">
-          <p className="text-white text-[9px] font-semibold">{skill}</p>
-        </div>
-        {/* Stats row */}
-        <div className="flex items-center gap-2">
-          <span className="text-white/70 text-[9px]">{jobs} jobs</span>
-          <span className="text-[#4ade80] text-[9px] font-semibold">{happy}% 😊</span>
-        </div>
-      </div>
-    </div>
-  );
-}
