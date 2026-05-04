@@ -12,7 +12,21 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: "SkillSnap — Watch. Trust. Connect.",
-  description: "Discover real skills near you",
+  description: "Discover skilled professionals through real video proof. No more guessing — watch the work.",
+  openGraph: {
+    title: "SkillSnap — Watch. Trust. Connect.",
+    description: "Discover skilled professionals through real video proof. No more guessing — watch the work.",
+    url: "https://skillsnap.com.au",
+    siteName: "SkillSnap",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 627,
+      },
+    ],
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {
