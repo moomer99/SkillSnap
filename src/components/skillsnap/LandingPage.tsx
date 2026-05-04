@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import type { Screen } from "@/types";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
 
@@ -7,7 +8,6 @@ interface LandingPageProps {
   onNavigate: (s: Screen) => void;
 }
 
-// ── Fade-in on scroll ──────────────────────────
 function useFadeIn() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -16,7 +16,7 @@ function useFadeIn() {
     if (!el) return;
     const obs = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.12 }
+      { threshold: 0.08 }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -32,8 +32,8 @@ function FadeIn({ children, delay = 0, className = "" }: { children: React.React
       className={className}
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(28px)",
-        transition: `opacity 0.65s ease ${delay}ms, transform 0.65s ease ${delay}ms`,
+        transform: visible ? "translateY(0)" : "translateY(24px)",
+        transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
       }}
     >
       {children}
@@ -41,7 +41,7 @@ function FadeIn({ children, delay = 0, className = "" }: { children: React.React
   );
 }
 
-// ── Video mockup card ──────────────────────────
+// Lazy video mock card — uses CSS gradient as placeholder (no real image needed)
 function VideoCard({ gradient, name, skill, jobs, delay }: {
   gradient: string; name: string; skill: string; jobs: number; delay?: number;
 }) {
@@ -49,31 +49,29 @@ function VideoCard({ gradient, name, skill, jobs, delay }: {
   return (
     <div
       ref={ref}
-      className="relative flex-shrink-0 rounded-2xl overflow-hidden"
+      className="relative flex-shrink-0 rounded-2xl overflow-hidden shadow-2xl"
       style={{
-        width: 130, height: 190,
+        width: 136, height: 196,
         background: gradient,
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0) scale(1)" : "translateY(20px) scale(0.96)",
         transition: `opacity 0.6s ease ${delay ?? 0}ms, transform 0.6s ease ${delay ?? 0}ms`,
-      }}
+        contentVisibility: "auto",
+      } as React.CSSProperties}
     >
-      {/* Play button */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-10 h-10 rounded-full flex items-center justify-center"
+        <div className="w-11 h-11 rounded-full flex items-center justify-center"
           style={{ background: "rgba(255,255,255,0.22)", backdropFilter: "blur(6px)", border: "1.5px solid rgba(255,255,255,0.35)" }}>
           <svg width="14" height="16" viewBox="0 0 14 16" fill="white"><path d="M1 1l12 7-12 7V1z"/></svg>
         </div>
       </div>
-      {/* Gradient scrim */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%)" }} />
-      {/* Info */}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.78) 100%)" }} />
       <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
-        <p className="text-white font-bold text-[11px] leading-tight">{name}</p>
-        <p className="text-white/65 text-[10px]">{skill}</p>
-        <div className="flex items-center gap-1 mt-1">
+        <p className="text-white font-bold text-[12px] leading-tight">{name}</p>
+        <p className="text-white/65 text-[10px] mt-0.5">{skill}</p>
+        <div className="flex items-center gap-1.5 mt-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-          <span className="text-white/60 text-[9px] font-medium">{jobs} jobs</span>
+          <span className="text-white/60 text-[9px] font-semibold">{jobs} jobs</span>
         </div>
       </div>
     </div>
@@ -81,16 +79,14 @@ function VideoCard({ gradient, name, skill, jobs, delay }: {
 }
 
 export default function LandingPage({ onNavigate }: LandingPageProps) {
-  function goToAuth() {
-    onNavigate("auth");
-  }
+  function goToAuth() { onNavigate("auth"); }
 
   return (
     <div className="flex flex-col min-h-screen" style={{ background: "#0d0a1a", color: "white" }}>
 
-      {/* ── NAV ─────────────────────────────── */}
+      {/* ── NAV — same bg as page ───────────── */}
       <nav className="sticky top-0 z-50 px-5 h-14 flex items-center justify-between"
-        style={{ background: "rgba(13,10,26,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        style={{ background: "#0d0a1a", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <SkillSnapLogo variant="full" size="sm" dark />
         <button
           onClick={goToAuth}
@@ -103,14 +99,12 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
 
       {/* ── HERO ────────────────────────────── */}
       <section className="relative overflow-hidden px-5 pt-12 pb-16 flex flex-col items-center text-center">
-        {/* Background glows */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div style={{ position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.28) 0%, transparent 65%)" }} />
           <div style={{ position: "absolute", top: "30%", left: "-10%", width: 260, height: 260, borderRadius: "50%", background: "radial-gradient(circle, rgba(167,139,250,0.12) 0%, transparent 70%)" }} />
           <div style={{ position: "absolute", top: "20%", right: "-10%", width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.10) 0%, transparent 70%)" }} />
         </div>
 
-        {/* Badge */}
         <FadeIn delay={0}>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
             style={{ background: "rgba(108,71,255,0.15)", border: "1px solid rgba(108,71,255,0.35)" }}>
@@ -119,7 +113,6 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           </div>
         </FadeIn>
 
-        {/* Headline */}
         <FadeIn delay={80}>
           <h1 className="text-[38px] font-extrabold leading-[1.08] tracking-tight mb-5 max-w-[320px]">
             Don't read reviews.{" "}
@@ -135,16 +128,15 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           </p>
         </FadeIn>
 
-        {/* CTA */}
         <FadeIn delay={240}>
           <div className="flex flex-col gap-3 w-full max-w-[300px]">
             <button
               onClick={goToAuth}
-              className="w-full h-14 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2.5 transition-all active:scale-[0.97]"
+              className="w-full h-14 rounded-2xl font-extrabold text-base text-white flex items-center justify-center gap-2.5 transition-all active:scale-[0.97]"
               style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 32px rgba(108,71,255,0.5)" }}
             >
               Join Free
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
               </svg>
             </button>
@@ -158,7 +150,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           </div>
         </FadeIn>
 
-        {/* Floating video cards */}
+        {/* Video cards — lazy rendered via FadeIn + contentVisibility */}
         <FadeIn delay={320} className="w-full mt-10">
           <div className="flex gap-3 justify-center overflow-x-auto no-scrollbar pb-2 px-2">
             <VideoCard gradient="linear-gradient(160deg,#667eea,#764ba2)" name="Marcus T." skill="✂️ Barber" jobs={142} delay={0} />
@@ -167,7 +159,6 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           </div>
         </FadeIn>
 
-        {/* Social proof */}
         <FadeIn delay={400}>
           <div className="flex items-center gap-3 mt-6">
             <div className="flex -space-x-2">
@@ -179,7 +170,8 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
               ))}
             </div>
             <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.45)" }}>
-              <span className="text-white font-bold">Be one of the first</span> pros on SkillSnap
+              <span className="text-white font-bold">Be one of the first</span> pros on{" "}
+              <span className="font-bold text-white">SkillSnap</span>
             </p>
           </div>
         </FadeIn>
@@ -259,7 +251,6 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         </FadeIn>
 
         <div className="flex flex-col gap-4">
-          {/* Skilled Pro card */}
           <FadeIn delay={60}>
             <div className="rounded-3xl overflow-hidden p-5 relative"
               style={{ background: "linear-gradient(135deg, #1a0f3c, #2d1b69)", border: "1px solid rgba(108,71,255,0.3)" }}>
@@ -287,7 +278,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                 </ul>
                 <button
                   onClick={goToAuth}
-                  className="mt-5 w-full h-12 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 transition-all active:scale-[0.97]"
+                  className="mt-5 w-full h-12 rounded-2xl font-extrabold text-sm text-white flex items-center justify-center gap-2 transition-all active:scale-[0.97]"
                   style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 20px rgba(108,71,255,0.4)" }}
                 >
                   Join as a Pro →
@@ -296,7 +287,6 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
             </div>
           </FadeIn>
 
-          {/* Looking to hire card */}
           <FadeIn delay={120}>
             <div className="rounded-3xl overflow-hidden p-5 relative"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)" }}>
@@ -324,7 +314,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                 </ul>
                 <button
                   onClick={goToAuth}
-                  className="mt-5 w-full h-12 rounded-2xl font-bold text-sm transition-all active:scale-[0.97]"
+                  className="mt-5 w-full h-12 rounded-2xl font-extrabold text-sm transition-all active:scale-[0.97]"
                   style={{ color: "white", border: "1.5px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.07)" }}
                 >
                   Find Local Pros →
@@ -335,17 +325,14 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         </div>
       </section>
 
-      {/* ── FINAL CTA ───────────────────────── */}
+      {/* ── FINAL CTA — no SK icon ───────────── */}
       <section className="px-5 py-16 flex flex-col items-center text-center relative overflow-hidden"
         style={{ background: "linear-gradient(160deg, #0f0820, #1a0f3c)" }}>
         <div className="absolute inset-0 pointer-events-none">
           <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.22) 0%, transparent 65%)" }} />
         </div>
 
-        <FadeIn className="relative">
-          <div className="mb-5">
-            <SkillSnapLogo variant="icon" size="lg" dark />
-          </div>
+        <FadeIn className="relative w-full flex flex-col items-center">
           <h2 className="text-[30px] font-extrabold leading-tight mb-3 max-w-[280px]">
             Ready to join{" "}
             <span style={{ background: "linear-gradient(90deg, #a78bfa, #6c47ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
@@ -357,11 +344,11 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           </p>
           <button
             onClick={goToAuth}
-            className="w-full max-w-[300px] h-14 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2.5 transition-all active:scale-[0.97]"
+            className="w-full max-w-[300px] h-14 rounded-2xl font-extrabold text-base text-white flex items-center justify-center gap-2.5 transition-all active:scale-[0.97]"
             style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 6px 40px rgba(108,71,255,0.55)" }}
           >
-            Join SkillSnap Free
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            Join <span className="font-extrabold">SkillSnap</span> Free
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
             </svg>
           </button>
@@ -369,12 +356,12 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         </FadeIn>
       </section>
 
-      {/* ── FOOTER ──────────────────────────── */}
+      {/* ── FOOTER — 2026 ────────────────────── */}
       <footer className="px-5 py-6 flex flex-col items-center gap-2"
         style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <SkillSnapLogo variant="full" size="xs" dark />
         <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.25)" }}>
-          © 2025 SkillSnap · Sydney
+          © 2026 SkillSnap · Sydney
         </p>
       </footer>
     </div>

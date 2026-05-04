@@ -302,8 +302,8 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
           <p className="text-sm leading-relaxed max-w-[240px]" style={{ color: "rgba(255,255,255,0.55)" }}>{APP_CONFIG.subtitle}</p>
         </div>
 
-        {/* Mini pro cards row */}
-        <div className="relative z-10 mt-6 flex gap-3 px-5 pb-8 overflow-x-auto no-scrollbar justify-center">
+        {/* Mini pro cards row — no offset so middle card is fully visible */}
+        <div className="relative z-10 mt-8 flex gap-3 px-5 pb-10 overflow-x-auto no-scrollbar justify-center items-end">
           <MiniCard
             gradient="linear-gradient(160deg,#667eea,#764ba2)"
             skill="Barber" name="Marcus T." initial="M"
@@ -312,7 +312,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
           <MiniCard
             gradient="linear-gradient(160deg,#f093fb,#f5576c)"
             skill="Makeup Artist" name="Priya K." initial="P"
-            jobs={89} happy={100} offset
+            jobs={89} happy={100} featured
           />
           <MiniCard
             gradient="linear-gradient(160deg,#4facfe,#00c6ff)"
@@ -393,14 +393,19 @@ function ProBubble({ initial, gradient, name, skill, top, left, rotate, jobs }: 
 }
 
 // Mini video card with avatar + stats overlay
-function MiniCard({ gradient, skill, name, initial, jobs, happy, offset }: {
+function MiniCard({ gradient, skill, name, initial, jobs, happy, featured }: {
   gradient: string; skill: string; name: string; initial: string;
-  jobs: number; happy: number; offset?: boolean;
+  jobs: number; happy: number; featured?: boolean;
 }) {
   return (
     <div
-      className={`relative w-[110px] h-[148px] rounded-2xl overflow-hidden shadow-xl flex-shrink-0 border border-white/10 ${offset ? "-mt-5" : ""}`}
-      style={{ background: gradient }}
+      className={`relative rounded-2xl overflow-hidden shadow-xl flex-shrink-0 ${featured ? "border-2 border-white/30" : "border border-white/10"}`}
+      style={{
+        width: featured ? 118 : 106,
+        height: featured ? 168 : 148,
+        background: gradient,
+        boxShadow: featured ? "0 8px 32px rgba(108,71,255,0.35)" : undefined,
+      }}
     >
       {/* Scrim */}
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.72) 100%)" }} />
