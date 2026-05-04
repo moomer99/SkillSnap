@@ -115,7 +115,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
             style={{ background: "rgba(108,71,255,0.15)", border: "1px solid rgba(108,71,255,0.35)" }}>
             <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse" />
-            <span className="text-[11px] font-bold text-[#a78bfa] tracking-wider uppercase">Western Sydney's Skills Platform</span>
+            <span className="text-[11px] font-bold text-[#a78bfa] tracking-wider uppercase">Sydney's Skills Platform</span>
           </div>
         </FadeIn>
 
@@ -131,7 +131,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
 
         <FadeIn delay={160}>
           <p className="text-[15px] leading-relaxed max-w-[280px] mb-8" style={{ color: "rgba(255,255,255,0.55)" }}>
-            Discover skilled barbers, tradies &amp; cleaners in Western Sydney — through real video portfolios.
+            Discover skilled barbers, tradies &amp; cleaners in Sydney — through real video portfolios.
           </p>
         </FadeIn>
 
@@ -353,7 +353,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
             </span>
           </h2>
           <p className="text-[14px] mb-8 max-w-[240px]" style={{ color: "rgba(255,255,255,0.45)" }}>
-            Free to join. No subscription. Western Sydney's skills community.
+            Free to join. No subscription. Sydney's skills community.
           </p>
           <button
             onClick={goToAuth}
@@ -374,7 +374,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <SkillSnapLogo variant="full" size="xs" dark />
         <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.25)" }}>
-          © 2025 SkillSnap · Western Sydney
+          © 2025 SkillSnap · Sydney
         </p>
       </footer>
     </div>
