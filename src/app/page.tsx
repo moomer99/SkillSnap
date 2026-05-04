@@ -94,104 +94,58 @@ function SkillSnapRouter() {
         {/* ── Floating skill-pro tool icons — desktop only ───────────────────────────── */}
 
         {/* 1. Clapperboard — top-left */}
-        <svg style={{ position:"absolute", top:"7%", left:"5%", animation:"floatA 6s ease-in-out infinite", opacity:0.5 }}
-          width="80" height="80" viewBox="0 0 80 80" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Board body */}
+        <svg style={{ position:"absolute", top:"7%", left:"5%", animation:"floatA 6s ease-in-out infinite", opacity:0.2 }}
+          width="72" height="72" viewBox="0 0 80 80" fill="none" strokeLinecap="round" strokeLinejoin="round">
           <rect x="10" y="28" width="60" height="42" rx="4" stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
-          {/* Clapper bar */}
           <rect x="10" y="16" width="60" height="14" rx="3" stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
-          {/* Clapper diagonal stripes */}
           <line x1="22" y1="16" x2="18" y2="30" stroke="#1a1a2e" strokeWidth="2.2"/>
           <line x1="34" y1="16" x2="30" y2="30" stroke="#1a1a2e" strokeWidth="2.2"/>
           <line x1="46" y1="16" x2="42" y2="30" stroke="#1a1a2e" strokeWidth="2.2"/>
           <line x1="58" y1="16" x2="54" y2="30" stroke="#1a1a2e" strokeWidth="2.2"/>
-          {/* Play triangle on body */}
           <path d="M32 42 L32 60 L52 51 Z" stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
         </svg>
 
-        {/* 2. Mobile camera (phone) — left side middle-upper */}
-        <svg style={{ position:"absolute", top:"30%", left:"3.5%", animation:"floatB 7.5s ease-in-out infinite", opacity:0.5 }}
-          width="60" height="80" viewBox="0 0 60 80" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Phone outline */}
-          <rect x="8" y="4" width="44" height="72" rx="7" stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
-          {/* Screen area */}
-          <rect x="13" y="12" width="34" height="46" rx="3" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
-          {/* Camera lens circle */}
-          <circle cx="30" cy="35" r="9" stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
-          <circle cx="30" cy="35" r="4" stroke="#1a1a2e" strokeWidth="1.5" fill="none"/>
-          {/* Flash dot */}
-          <circle cx="42" cy="18" r="2.5" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
-          {/* Home button */}
-          <circle cx="30" cy="68" r="3" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+        {/* 2. Camera (uploaded icon 2) — left side upper */}
+        <svg style={{ position:"absolute", top:"22%", left:"4%", animation:"floatB 7.5s ease-in-out infinite", opacity:0.2 }}
+          width="72" height="72" viewBox="0 0 48 48" fill="none">
+          <path d="M8 8.44444H14L18 4H30L34 8.44444H40C41.0609 8.44444 42.0783 8.9127 42.8284 9.74619C43.5786 10.5797 44 11.7101 44 12.8889V39.5556C44 40.7343 43.5786 41.8648 42.8284 42.6983C42.0783 43.5317 41.0609 44 40 44H8C6.93913 44 5.92172 43.5317 5.17157 42.6983C4.42143 41.8648 4 40.7343 4 39.5556V12.8889C4 11.7101 4.42143 10.5797 5.17157 9.74619C5.92172 8.9127 6.93913 8.44444 8 8.44444ZM24 15.1111C21.3478 15.1111 18.8043 16.2817 16.9289 18.3655C15.0536 20.4492 14 23.2754 14 26.2222C14 29.1691 15.0536 31.9952 16.9289 34.079C18.8043 36.1627 21.3478 37.3333 24 37.3333C26.6522 37.3333 29.1957 36.1627 31.0711 34.079C32.9464 31.9952 34 29.1691 34 26.2222C34 23.2754 32.9464 20.4492 31.0711 18.3655C29.1957 16.2817 26.6522 15.1111 24 15.1111ZM24 19.5556C25.5913 19.5556 27.1174 20.2579 28.2426 21.5082C29.3679 22.7584 30 24.4541 30 26.2222C30 27.9903 29.3679 29.686 28.2426 30.9363C27.1174 32.1865 25.5913 32.8889 24 32.8889C22.4087 32.8889 20.8826 32.1865 19.7574 30.9363C18.6321 29.686 18 27.9903 18 26.2222C18 24.4541 18.6321 22.7584 19.7574 21.5082C20.8826 20.2579 22.4087 19.5556 24 19.5556Z" fill="#1a1a2e"/>
         </svg>
 
-        {/* 3. DSLR / Pro Camera — bottom-left */}
-        <svg style={{ position:"absolute", bottom:"12%", left:"4%", animation:"floatC 5.8s ease-in-out infinite", opacity:0.5 }}
-          width="84" height="68" viewBox="0 0 84 68" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Camera body */}
-          <rect x="8" y="20" width="68" height="42" rx="5" stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
-          {/* Top hump (viewfinder/pentaprism) */}
-          <path d="M26 20 L26 10 L42 6 L58 10 L58 20" stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
-          {/* Lens barrel */}
-          <circle cx="36" cy="41" r="14" stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
-          <circle cx="36" cy="41" r="8" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
-          <circle cx="36" cy="41" r="3" stroke="#1a1a2e" strokeWidth="1.5" fill="none"/>
-          {/* Shutter button */}
-          <circle cx="58" cy="12" r="4" stroke="#1a1a2e" strokeWidth="2" fill="none"/>
-          {/* Mode dial */}
-          <circle cx="62" cy="30" r="5" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
-          {/* LCD screen area */}
-          <rect x="52" y="36" width="16" height="12" rx="2" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+        {/* 3. Skates / Sport (uploaded icon 3) — bottom-left upper */}
+        <svg style={{ position:"absolute", top:"48%", left:"4%", animation:"floatC 5.8s ease-in-out infinite", opacity:0.2 }}
+          width="72" height="72" viewBox="0 0 48 48" fill="none">
+          <path d="M41.8527 18.2199L33.2024 11.0077L27.9877 15.3043L22.773 11.0077L29.7055 5.17647C30.1963 4.76726 30.7485 4.46922 31.362 4.28235C31.9754 4.09548 32.5889 4.00136 33.2024 4C33.8568 4 34.481 4.09412 35.0748 4.28235C35.6687 4.47059 36.1898 4.76863 36.638 5.17647L41.8527 9.5243C42.5889 10.104 43.1313 10.7778 43.4797 11.5458C43.8282 12.3137 44.0016 13.0892 44 13.8721C43.9983 14.6551 43.8249 15.4223 43.4797 16.1739C43.1345 16.9255 42.5922 17.6075 41.8527 18.2199ZM8.04908 27.6317C7.31288 27.0179 6.94478 26.2936 6.94478 25.4588C6.94478 24.624 7.31288 23.8991 8.04908 23.2839L14.0613 18.2199L19.2761 22.5678L13.2025 27.6317C12.5072 28.2455 11.6589 28.5524 10.6577 28.5524C9.65644 28.5524 8.78691 28.2455 8.04908 27.6317ZM5.41104 42.8235C4.96115 42.4143 4.6135 41.9628 4.3681 41.469C4.1227 40.9753 4 40.4549 4 39.9079C4 39.3609 4.11288 38.8412 4.33865 38.3488C4.56442 37.8564 4.92188 37.4043 5.41104 36.9923L22.773 22.5678L14.9816 16.0205C14.2454 15.4407 13.8773 14.7335 13.8773 13.8987C13.8773 13.0639 14.2454 12.339 14.9816 11.7238C15.6769 11.11 16.5358 10.8031 17.5583 10.8031C18.5808 10.8031 19.4601 11.11 20.1963 11.7238L27.9877 18.2199L31.4847 15.3043L38.3558 21.1355C38.8466 21.5448 39.092 22.0222 39.092 22.5678C39.092 23.1134 38.8466 23.5908 38.3558 24C37.865 24.4092 37.2924 24.6138 36.638 24.6138C35.9836 24.6138 35.411 24.4092 34.9202 24L12.3436 42.8235C11.8528 43.2327 11.3104 43.5314 10.7166 43.7197C10.1227 43.9079 9.51983 44.0013 8.90797 44C8.29611 43.9986 7.68262 43.8963 7.06748 43.6931C6.45235 43.4898 5.9002 43.2 5.41104 42.8235Z" fill="#1a1a2e"/>
         </svg>
 
-        {/* 4. Wrench — top-right (Lucide-style, viewBox 24x24 scaled to 72px) */}
-        <svg style={{ position:"absolute", top:"9%", right:"5%", animation:"floatD 7s ease-in-out infinite", opacity:0.5 }}
-          width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        {/* 4. Fitness / Dumbbell (uploaded icon 1) — bottom-left */}
+        <svg style={{ position:"absolute", bottom:"10%", left:"5%", animation:"floatD 7s ease-in-out infinite", opacity:0.2 }}
+          width="72" height="72" viewBox="0 0 48 48" fill="none">
+          <path d="M41.14 29.72L44 26.86L41.14 24L34 31.14L16.86 14L24 6.86L21.14 4L18.28 6.86L15.42 4L11.14 8.28L8.28 5.42L5.42 8.28L8.28 11.14L4 15.42L6.86 18.28L4 21.14L6.86 24L14 16.86L31.14 34L24 41.14L26.86 44L29.72 41.14L32.58 44L36.86 39.72L39.72 42.58L42.58 39.72L39.72 36.86L44 32.58L41.14 29.72Z" fill="#1a1a2e"/>
         </svg>
 
-        {/* 5. Paintbrush — right side upper-middle (Lucide-style) */}
-        <svg style={{ position:"absolute", top:"32%", right:"4%", animation:"floatA 6.5s ease-in-out infinite 0.8s", opacity:0.5 }}
-          width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/>
-          <path d="M9 8c-2 3-4 3.5-7 4l8 8c1-.5 3.5-2 4-7"/>
-          <path d="M14.5 17.5 4.5 15"/>
+        {/* 5. Music / Guitar (uploaded icon 7) — top-right */}
+        <svg style={{ position:"absolute", top:"8%", right:"5%", animation:"floatA 6.5s ease-in-out infinite 0.8s", opacity:0.2 }}
+          width="72" height="72" viewBox="0 0 35 35" fill="none">
+          <path d="M27.9078 23.0262H7.6262L7.58936 3.06606C7.58936 1.07378 9.4683 0.00292969 11.5867 0.00292969C19.4157 0.00292969 27.9078 7.53623 27.9078 11.7574V23.0262Z" fill="#1a1a2e"/>
+          <path d="M26.7159 13.7758C29.409 12.1073 27.6148 7.8214 22.7093 4.20043C17.8019 0.579462 11.6401 -1.0044 8.94877 0.664134C6.25377 2.33267 8.04798 6.61856 12.9554 10.2395C17.8627 13.8605 24.0227 15.4444 26.7159 13.7758Z" fill="#1a1a2e" fillOpacity="0.4"/>
+          <path d="M3.68433 27.7283V23.8931C3.68433 23.1585 4.56854 22.5483 5.6738 22.5483H29.3264C30.4133 22.5483 31.3159 23.146 31.3159 23.8931V27.7283H3.68433Z" fill="#1a1a2e"/>
+          <path d="M0 34.9999V29.3717C0 28.3631 1.23421 27.5288 2.72631 27.5288H32.2737C33.7658 27.5288 35 28.3631 35 29.3717V34.9999H0Z" fill="#1a1a2e"/>
         </svg>
 
-        {/* 6. Hammer — bottom-right upper (Lucide-style) */}
-        <svg style={{ position:"absolute", bottom:"28%", right:"3.5%", animation:"floatE 8s ease-in-out infinite", opacity:0.5 }}
-          width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9"/>
-          <path d="M17.64 15 22 10.64"/>
-          <path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 4.6a5.56 5.56 0 0 0-3.94-1.64H9l.92.82A6.18 6.18 0 0 1 12 8.4v1.56l2 2h2.47l2.26 1.91"/>
+        {/* 6. Paintbrush / Art (uploaded icon 4) — right side middle */}
+        <svg style={{ position:"absolute", top:"35%", right:"4%", animation:"floatE 8s ease-in-out infinite", opacity:0.2 }}
+          width="72" height="72" viewBox="0 0 48 48" fill="none">
+          <path d="M10.8636 19.7747C10.9725 19.6915 11.0982 19.6288 11.2335 19.5901C11.3688 19.5515 11.5111 19.5377 11.6523 19.5495C11.7934 19.5613 11.9307 19.5985 12.0561 19.659C12.1816 19.7194 12.2929 19.802 12.3836 19.9018C12.4743 20.0017 12.5426 20.117 12.5848 20.2412C12.6269 20.3653 12.6419 20.4958 12.6291 20.6253C12.6162 20.7547 12.5756 20.8806 12.5097 20.9957C12.4438 21.1108 12.3538 21.2128 12.2449 21.296L12.2438 21.297L12.2417 21.299L12.2384 21.301L12.2276 21.3089L12.1953 21.3337L12.0841 21.4118C11.9899 21.4778 11.8578 21.5636 11.6881 21.6692C11.3481 21.8771 10.8571 22.1483 10.2376 22.4195C8.62732 23.1281 6.86522 23.499 5.07918 23.5054C4.79296 23.5054 4.51847 23.4011 4.31608 23.2154C4.1137 23.0298 4 22.778 4 22.5155C4 22.253 4.1137 22.0012 4.31608 21.8156C4.51847 21.63 4.79296 21.5257 5.07918 21.5257C6.54413 21.5193 7.98917 21.2139 9.30955 20.6319C9.71811 20.4537 10.1126 20.2497 10.4902 20.0211C10.6143 19.9458 10.7356 19.8666 10.8538 19.7836L10.8646 19.7737L10.8636 19.7747ZM14.3115 26.3086C14.5497 26.1629 14.7149 25.9364 14.771 25.6789C14.8271 25.4215 14.7693 25.1541 14.6105 24.9357C14.4516 24.7173 14.2047 24.5657 13.924 24.5142C13.6433 24.4628 13.3518 24.5158 13.1136 24.6615L13.1115 24.6635L13.0899 24.6754L12.9971 24.7298C12.9115 24.7793 12.7859 24.8476 12.6205 24.9347C12.1757 25.1677 11.7182 25.3798 11.2499 25.5702C10.0973 26.0403 8.63938 26.4749 7.23753 26.4749C6.95131 26.4749 6.67682 26.5792 6.47444 26.7648C6.27205 26.9504 6.15835 27.2022 6.15835 27.4647C6.15835 27.7272 6.27205 27.979 6.47444 28.1646C6.67682 28.3503 6.95131 28.4546 7.23753 28.4546C9.07429 28.4546 10.8528 27.8993 12.1273 27.3796C12.8199 27.0974 13.4915 26.7737 14.1378 26.4105L14.2608 26.3393L14.2953 26.3185L14.3061 26.3125L14.3115 26.3086ZM26.5 25.4355L14.9183 5.45463C14.8518 5.33985 14.8105 5.21418 14.797 5.08478C14.7834 4.95538 14.7977 4.8248 14.8392 4.70048C14.9228 4.44942 15.1118 4.23913 15.3646 4.11587C15.6173 3.99262 15.913 3.9665 16.1868 4.04326C16.3223 4.08126 16.4484 4.14338 16.5577 4.22607C16.6671 4.30876 16.7576 4.41039 16.8241 4.52517L28.4069 24.5061L30.0495 23.7043C30.5501 23.4602 31.0982 23.3089 31.6626 23.2592C32.2269 23.2094 32.7964 23.262 33.3386 23.4142C33.8807 23.5663 34.3849 23.8149 34.8223 24.1458C35.2597 24.4766 35.6218 24.8833 35.8878 25.3425L36.5871 26.5481L44 36.501L28.6228 44L23.7719 32.797L23.0737 31.5914C22.8075 31.1323 22.6425 30.6295 22.5881 30.112C22.5338 29.5944 22.5911 29.072 22.7569 28.5747C22.9226 28.0775 23.1935 27.615 23.5542 27.2138C23.9148 26.8126 24.358 26.4804 24.8586 26.2363L26.5 25.4355ZM25.8709 27.9844L31.0617 25.4534C31.312 25.3313 31.586 25.2556 31.8682 25.2307C32.1503 25.2058 32.4351 25.2321 32.7062 25.3081C32.9772 25.3841 33.2293 25.5083 33.4481 25.6737C33.6668 25.8391 33.8478 26.0424 33.9809 26.272L34.6802 27.4766L25.6766 31.8675L24.9784 30.6619C24.8453 30.4323 24.7628 30.181 24.7356 29.9222C24.7085 29.6634 24.7371 29.4022 24.82 29.1536C24.9029 28.905 25.0383 28.6737 25.2187 28.4731C25.399 28.2725 25.6206 28.1064 25.8709 27.9844ZM26.7666 34.351L29.7376 41.2136L31.7168 40.2485L29.3804 36.0763L31.3013 35.1716L33.6237 39.319L40.8563 35.7913L36.3152 29.6938L26.7666 34.351Z" fill="#1a1a2e"/>
         </svg>
 
-        {/* 7. Guitar — bottom-right lower (clean guitar silhouette) */}
-        <svg style={{ position:"absolute", bottom:"6%", right:"5%", animation:"floatB 7s ease-in-out infinite 1.4s", opacity:0.5 }}
-          width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          {/* Neck + headstock */}
-          <line x1="12" y1="2" x2="12" y2="10"/>
-          <rect x="10" y="2" width="4" height="3" rx="1"/>
-          {/* Tuning pegs */}
-          <circle cx="10" cy="3" r="0.8" fill="#1a1a2e"/>
-          <circle cx="14" cy="3" r="0.8" fill="#1a1a2e"/>
-          {/* Frets */}
-          <line x1="11" y1="5.5" x2="13" y2="5.5"/>
-          <line x1="11" y1="7.5" x2="13" y2="7.5"/>
-          {/* Body — upper bout */}
-          <path d="M12 10 C8 10 5 12 5 14.5 C5 16.5 6.5 17.5 8 17.5 C9 17.5 9.5 17 10 16.5"/>
-          <path d="M12 10 C16 10 19 12 19 14.5 C19 16.5 17.5 17.5 16 17.5 C15 17.5 14.5 17 14 16.5"/>
-          {/* Waist */}
-          <path d="M10 16.5 C9.5 17.5 9.5 18.5 10 19.5"/>
-          <path d="M14 16.5 C14.5 17.5 14.5 18.5 14 19.5"/>
-          {/* Body — lower bout */}
-          <path d="M10 19.5 C8.5 19.5 5 20.5 5 22 C5 23 6.5 24 9 24"/>
-          <path d="M14 19.5 C15.5 19.5 19 20.5 19 22 C19 23 17.5 24 15 24"/>
-          <path d="M9 24 Q12 25 15 24"/>
-          {/* Sound hole */}
-          <circle cx="12" cy="21" r="1.5"/>
-          {/* String */}
-          <line x1="12" y1="10" x2="12" y2="22.5" strokeWidth="0.8"/>
+        {/* 7. Music instrument (uploaded icon 6) — bottom-right */}
+        <svg style={{ position:"absolute", bottom:"8%", right:"5%", animation:"floatB 7s ease-in-out infinite 1.4s", opacity:0.2 }}
+          width="72" height="72" viewBox="0 0 48 48" fill="none">
+          <path d="M32.1211 12.6674V15.2562L40.8748 13.3587V10.4712M32.1711 20.3462L32.1523 18.3812L40.8748 19.7287V22.5412" fill="#1a1a2e" stroke="#1a1a2e" strokeLinejoin="round"/>
+          <path d="M40.875 8.36865V10.8687L19.6625 15.8812V18.3812C19.6625 18.3812 40.6725 22.0937 40.8663 22.0937V24.5937L16.4988 20.2562C14.795 19.9537 13.3738 18.8624 13.3738 17.1312C13.3738 15.3999 14.8125 14.3974 16.4988 14.0062L40.875 8.36865Z" fill="#1a1a2e" stroke="#1a1a2e" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M17.45 37.1313H35.575C37.4787 37.1313 39.0125 35.5488 39.0125 33.5838C39.0125 31.6176 37.4787 30.0351 35.575 30.0351H12.1375C8.67495 30.0351 5.88745 27.1576 5.88745 23.5838C5.88745 20.0088 8.67495 17.1313 12.1375 17.1313H13.3075" stroke="#1a1a2e" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M13.3875 35.2563L17.1375 35.8813V38.3813L13.3875 39.0063V35.2563Z" fill="#1a1a2e" stroke="#1a1a2e" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M13.3675 34.0063V40.2563M12.7625 35.8813H10.2625M12.7625 38.3788H10.2625" stroke="#1a1a2e"/>
         </svg>
 
       </div>
