@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────
 // SkillSnap — Auth Service (Supabase Auth)
 // ─────────────────────────────────────────────
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getAuthSupabase } from "@/lib/supabase";
 import type { User } from "@/types";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -107,16 +107,9 @@ export const authService = {
         ? `${window.location.origin}/auth/callback`
         : `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/auth/callback`;
 
-    // OAuth must bypass the /supabase proxy and hit the real Supabase URL
-    // directly — Google redirects the browser back to Supabase's own domain,
-    // so the proxy URL would cause a 403 from Google.
-    const { createBrowserClient } = await import("@supabase/ssr");
-    const directClient = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-
-    const { error } = await directClient.auth.signInWithOAuth({
+    // Use the auth client (always real Supabase URL) so the PKCE code verifier
+    // and post-callback session cookies share the same storage key.
+    const { error } = await getAuthSupabase().auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo,

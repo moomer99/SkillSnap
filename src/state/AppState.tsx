@@ -7,7 +7,7 @@
 import { createContext, useContext, useReducer, useEffect, type ReactNode } from "react";
 import type { User, Post, MessageThread, Message, Screen } from "@/types";
 import type { DiscoveryFilter } from "@/mock-data/discovery";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getAuthSupabase } from "@/lib/supabase";
 import { mapProfile, ensureProfile } from "@/services/authService";
 
 // ── State Shape ──────────────────────────────
@@ -312,36 +312,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const sb = getSupabase();
+    // Use the auth client (always real URL) for session/auth operations.
+    // The proxy client used for DB queries has a different storage key, which
+    // causes getSession() to return null after an OAuth callback.
+    const authSb = getAuthSupabase();
+    const sb = getSupabase(); // used only for profile DB queries below
 
-    // Safety net — if auth resolution hangs for >8s, stop the spinner so the
-    // user isn't stuck on a blank loading screen
+    // Safety net — if auth resolution hangs for >8s, stop the spinner
     const authTimeout = setTimeout(() => {
       dispatch({ type: "SET_AUTH_LOADING", loading: false });
     }, 8000);
 
-    // Resolve initial session — create profile if it doesn't exist yet
-    sb.auth.getSession().then(async ({ data: { session } }) => {
+    async function hydrateProfile(userId: string, authUser: import("@supabase/supabase-js").User) {
+      const { data } = await sb
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+      if (data) {
+        dispatch({ type: "SET_AUTH", user: mapProfile(data as Record<string, unknown>) });
+      } else {
+        const user = await ensureProfile(authUser);
+        if (user) dispatch({ type: "SET_AUTH", user });
+        else dispatch({ type: "SET_AUTH_LOADING", loading: false });
+      }
+    }
+
+    // Resolve initial session
+    authSb.auth.getSession().then(async ({ data: { session } }) => {
       clearTimeout(authTimeout);
       if (session?.user) {
-        // Try fetching existing profile first
-        const { data } = await sb
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .single();
-
-        if (data) {
-          dispatch({ type: "SET_AUTH", user: mapProfile(data as Record<string, unknown>) });
-        } else {
-          // Profile missing — create it from auth user metadata
-          const user = await ensureProfile(session.user);
-          if (user) {
-            dispatch({ type: "SET_AUTH", user });
-          } else {
-            dispatch({ type: "SET_AUTH_LOADING", loading: false });
-          }
-        }
+        await hydrateProfile(session.user.id, session.user);
       } else {
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }
@@ -350,25 +351,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       dispatch({ type: "SET_AUTH_LOADING", loading: false });
     });
 
-    // Keep session in sync across tabs and token refresh
-    const { data: { subscription } } = sb.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_OUT" || !session) {
+    // Keep session in sync across tabs, token refresh, and post-OAuth redirects.
+    // INITIAL_SESSION fires when the page loads with an existing session (e.g. after
+    // an OAuth callback redirect) — handle it so the user lands on home, not landing.
+    const { data: { subscription } } = authSb.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
         dispatch({ type: "CLEAR_AUTH" });
-      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        // Fetch or create profile for this session
-        const { data } = await sb
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .single();
-
-        if (data) {
-          dispatch({ type: "SET_AUTH", user: mapProfile(data as Record<string, unknown>) });
-        } else {
-          // First sign-in or profile missing — upsert from provider metadata
-          const user = await ensureProfile(session.user);
-          if (user) dispatch({ type: "SET_AUTH", user });
-        }
+      } else if (
+        session &&
+        (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION")
+      ) {
+        await hydrateProfile(session.user.id, session.user);
       }
     });
 
