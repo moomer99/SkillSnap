@@ -277,11 +277,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Hydrate auth state from Supabase session on mount
   useEffect(() => {
-    // If user already completed onboarding, skip straight to auth before anything else
-    if (localStorage.getItem("skillsnap_onboarded") === "1") {
-      dispatch({ type: "NAVIGATE", screen: "auth" });
-    }
-
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
     if (!supabaseUrl || supabaseUrl.includes("your-project-ref")) {
       dispatch({ type: "SET_AUTH_LOADING", loading: false });

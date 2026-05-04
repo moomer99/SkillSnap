@@ -82,9 +82,6 @@ function VideoCard({ gradient, name, skill, jobs, delay }: {
 
 export default function LandingPage({ onNavigate }: LandingPageProps) {
   function goToAuth() {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("skillsnap_onboarded", "1");
-    }
     onNavigate("auth");
   }
 
