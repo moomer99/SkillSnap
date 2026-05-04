@@ -7,6 +7,7 @@
 import { AppProvider, useAppState } from "@/state/AppState";
 import type { Screen } from "@/types";
 
+import LandingPage from "@/components/skillsnap/LandingPage";
 import OnboardingScreen from "@/components/skillsnap/OnboardingScreen";
 import SearchScreen from "@/components/skillsnap/SearchScreen";
 import AuthScreen from "@/components/skillsnap/AuthScreen";
@@ -99,6 +100,7 @@ function SkillSnapRouter() {
           </div>
         )}
         {/* Screen renderer */}
+        {screen === "landing"        && <LandingPage      onNavigate={navigate} />}
         {screen === "onboarding"     && <OnboardingScreen onNavigate={navigate} />}
         {screen === "search"          && <SearchScreen      onNavigate={navigate} />}
         {screen === "auth"           && <AuthScreen       onNavigate={navigate} />}
@@ -125,6 +127,7 @@ function SkillSnapRouter() {
         >
           {(
             [
+              ["landing",        "Landing"],
               ["onboarding",     "Onboarding"],
               ["auth",           "Auth"],
               ["home",           "Feed"],

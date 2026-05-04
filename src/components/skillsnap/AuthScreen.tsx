@@ -10,6 +10,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import type { Screen } from "@/types";
 import { APP_CONFIG } from "@/constants/config";
 import { authService } from "@/services/authService";
+import SkillSnapLogo from "./shared/SkillSnapLogo";
 import { useAppState } from "@/state/AppState";
 
 interface AuthScreenProps {
@@ -294,19 +295,12 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
         {/* Brand — centred */}
         <div className="relative z-10 flex flex-col items-center text-center px-8 pt-16 pb-4">
-          <div
-            className="flex items-center justify-center w-[72px] h-[72px] rounded-2xl mb-5 shadow-lg"
-            style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)", boxShadow: "0 8px 32px rgba(108,71,255,0.45)" }}
-          >
-            <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
-              <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="2.5" fill="none" />
-              <circle cx="20" cy="20" r="5" fill="white" />
-              <circle cx="20" cy="10" r="2" fill="white" opacity="0.8" />
-              <circle cx="28.7" cy="25" r="2" fill="white" opacity="0.8" />
-              <circle cx="11.3" cy="25" r="2" fill="white" opacity="0.8" />
-            </svg>
+          <div className="mb-5">
+            <SkillSnapLogo variant="icon" size="lg" dark />
           </div>
-          <h1 className="text-[32px] font-extrabold text-white tracking-tight leading-tight mb-2">{APP_CONFIG.name}</h1>
+          <div className="mb-2">
+            <SkillSnapLogo variant="full" size="md" dark />
+          </div>
           <p className="text-base font-semibold mb-1" style={{ color: "#a78bfa" }}>{APP_CONFIG.tagline}</p>
           <p className="text-sm leading-relaxed max-w-[240px]" style={{ color: "rgba(255,255,255,0.55)" }}>{APP_CONFIG.subtitle}</p>
         </div>

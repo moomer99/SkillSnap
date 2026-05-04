@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef } from "react";
 import type { Screen } from "@/types";
+import SkillSnapLogo from "./shared/SkillSnapLogo";
 
 interface OnboardingScreenProps {
   onNavigate: (s: Screen) => void;
@@ -10,46 +11,37 @@ interface OnboardingScreenProps {
 
 function SlideWelcome() {
   return (
-    <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="w-bg" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#ede9fe"/>
-          <stop offset="100%" stopColor="#ddd6fe"/>
-        </radialGradient>
-        <filter id="w-shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="8" stdDeviation="14" floodColor="#6c47ff" floodOpacity="0.2"/>
-        </filter>
-      </defs>
+    <div className="relative flex items-center justify-center" style={{ width: 200, height: 200 }}>
       {/* Background circle */}
-      <circle cx="100" cy="96" r="82" fill="url(#w-bg)"/>
-
-      {/* SkillSnap "S" logo mark */}
-      <rect x="76" y="34" width="48" height="48" rx="14" fill="#6c47ff" filter="url(#w-shadow)"/>
-      <text x="100" y="67" textAnchor="middle" fontFamily="-apple-system,sans-serif" fontSize="28" fontWeight="900" fill="white">S</text>
-
-      {/* Wordmark below logo */}
-      <text x="100" y="102" textAnchor="middle" fontFamily="-apple-system,sans-serif" fontSize="15" fontWeight="800" fill="#6c47ff">Skill<tspan fill="#1a1a1a">Snap</tspan></text>
-
-      {/* Tagline */}
-      <text x="100" y="122" textAnchor="middle" fontFamily="-apple-system,sans-serif" fontSize="9.5" fill="#7a7570">Connect · Discover · Get Hired</text>
-
-      {/* Three small icon pills */}
-      {/* Video pill */}
-      <rect x="30" y="142" width="44" height="22" rx="11" fill="white" filter="url(#w-shadow)"/>
-      <circle cx="43" cy="153" r="7" fill="#6c47ff"/>
-      <polygon points="41,150 41,156 47,153" fill="white"/>
-      <text x="58" y="157" fontFamily="-apple-system,sans-serif" fontSize="8" fontWeight="700" fill="#1a1a1a">Video</text>
-
-      {/* Star pill */}
-      <rect x="80" y="142" width="40" height="22" rx="11" fill="white" filter="url(#w-shadow)"/>
-      <text x="92" y="157" fontFamily="-apple-system,sans-serif" fontSize="11" fill="#f59e0b">★</text>
-      <text x="103" y="157" fontFamily="-apple-system,sans-serif" fontSize="8" fontWeight="700" fill="#1a1a1a">Rated</text>
-
-      {/* Pin pill */}
-      <rect x="126" y="142" width="44" height="22" rx="11" fill="white" filter="url(#w-shadow)"/>
-      <text x="138" y="157" fontFamily="-apple-system,sans-serif" fontSize="11" fill="#6c47ff">📍</text>
-      <text x="151" y="157" fontFamily="-apple-system,sans-serif" fontSize="8" fontWeight="700" fill="#1a1a1a">Local</text>
-    </svg>
+      <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute inset-0">
+        <defs>
+          <radialGradient id="w-bg" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#ede9fe"/>
+            <stop offset="100%" stopColor="#ddd6fe"/>
+          </radialGradient>
+          <filter id="w-shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="8" stdDeviation="14" floodColor="#6c47ff" floodOpacity="0.2"/>
+          </filter>
+        </defs>
+        <circle cx="100" cy="96" r="82" fill="url(#w-bg)"/>
+        {/* Three small icon pills */}
+        <rect x="30" y="152" width="44" height="22" rx="11" fill="white" filter="url(#w-shadow)"/>
+        <circle cx="43" cy="163" r="7" fill="#6c47ff"/>
+        <polygon points="41,160 41,166 47,163" fill="white"/>
+        <text x="58" y="167" fontFamily="-apple-system,sans-serif" fontSize="8" fontWeight="700" fill="#1a1a1a">Video</text>
+        <rect x="80" y="152" width="40" height="22" rx="11" fill="white" filter="url(#w-shadow)"/>
+        <text x="92" y="167" fontFamily="-apple-system,sans-serif" fontSize="11" fill="#f59e0b">★</text>
+        <text x="103" y="167" fontFamily="-apple-system,sans-serif" fontSize="8" fontWeight="700" fill="#1a1a1a">Rated</text>
+        <rect x="126" y="152" width="44" height="22" rx="11" fill="white" filter="url(#w-shadow)"/>
+        <text x="138" y="167" fontFamily="-apple-system,sans-serif" fontSize="11" fill="#6c47ff">📍</text>
+        <text x="151" y="167" fontFamily="-apple-system,sans-serif" fontSize="8" fontWeight="700" fill="#1a1a1a">Local</text>
+      </svg>
+      {/* Real logo centred in the circle */}
+      <div className="relative z-10 flex flex-col items-center gap-2" style={{ marginTop: -20 }}>
+        <SkillSnapLogo variant="icon" size="md" />
+        <SkillSnapLogo variant="full" size="sm" />
+      </div>
+    </div>
   );
 }
 

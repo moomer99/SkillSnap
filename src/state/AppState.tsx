@@ -80,7 +80,7 @@ const initialState: AppStateShape = {
   isGuest: false,
   authLoading: true, // start true — resolve on mount
   showAuthPrompt: false,
-  screen: "onboarding", // always start here; useEffect corrects immediately
+  screen: "landing", // always start here; useEffect corrects immediately
   previousScreen: null,
   posts: [],
   localPosts: [],
@@ -109,7 +109,7 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         isGuest: false,
         showAuthPrompt: false,
         authLoading: false,
-        screen: (state.screen === "auth" || state.screen === "onboarding") ? "home" : state.screen,
+        screen: (state.screen === "auth" || state.screen === "onboarding" || state.screen === "landing") ? "home" : state.screen,
       };
     case "CLEAR_AUTH":
       return { ...initialState, authLoading: false };
