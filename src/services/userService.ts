@@ -58,7 +58,7 @@ export const userService = {
   async followUser(targetId: string): Promise<void> {
     const userId = await getAuthUserId();
     if (!userId) return;
-    await getSupabase().from("follows").upsert(
+    await getAuthSupabase().from("follows").upsert(
       { follower_id: userId, following_id: targetId },
       { onConflict: "follower_id,following_id", ignoreDuplicates: true }
     );
@@ -67,7 +67,7 @@ export const userService = {
   async unfollowUser(targetId: string): Promise<void> {
     const userId = await getAuthUserId();
     if (!userId) return;
-    await getSupabase()
+    await getAuthSupabase()
       .from("follows")
       .delete()
       .eq("follower_id", userId)
@@ -102,7 +102,7 @@ export const userService = {
     if (patch.avatarUrl !== undefined) dbPatch.avatar_url = patch.avatarUrl;
     if (patch.avatarGradient !== undefined) dbPatch.avatar_gradient = patch.avatarGradient;
 
-    const { data, error } = await getSupabase()
+    const { data, error } = await getAuthSupabase()
       .from("profiles")
       .update(dbPatch)
       .eq("id", userId)
