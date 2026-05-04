@@ -54,12 +54,13 @@ function SkillSnapRouter() {
       {/* Desktop background — only visible on sm+ screens */}
       <div className="hidden sm:block absolute inset-0 overflow-hidden pointer-events-none">
 
-        {/* Floating blob keyframes */}
+        {/* Floating icon keyframes */}
         <style>{`
           @keyframes floatA { 0%,100%{transform:translateY(0px) rotate(0deg)} 50%{transform:translateY(-18px) rotate(3deg)} }
           @keyframes floatB { 0%,100%{transform:translateY(0px) rotate(0deg)} 50%{transform:translateY(-24px) rotate(-4deg)} }
           @keyframes floatC { 0%,100%{transform:translateY(0px) rotate(0deg)} 50%{transform:translateY(-14px) rotate(5deg)} }
           @keyframes floatD { 0%,100%{transform:translateY(0px) rotate(0deg)} 50%{transform:translateY(-20px) rotate(-3deg)} }
+          @keyframes floatE { 0%,100%{transform:translateY(0px) rotate(0deg)} 50%{transform:translateY(-20px) rotate(2deg)} }
         `}</style>
 
         {/* Clean white base */}
@@ -90,40 +91,120 @@ function SkillSnapRouter() {
           background: "radial-gradient(circle, rgba(196,181,253,0.18) 0%, transparent 70%)",
         }}/>
 
-        {/* ── Floating blobs — desktop only ───────────────────────────── */}
+        {/* ── Floating skill-pro tool icons — desktop only ───────────────────────────── */}
 
-        {/* Top-left large blob */}
-        <svg style={{ position:"absolute", top:"6%", left:"4%", animation:"floatA 6s ease-in-out infinite", opacity:0.55 }}
-          width="90" height="90" viewBox="0 0 90 90" fill="none">
-          <path d="M45 8 C62 5, 82 18, 84 38 C86 58, 70 80, 50 83 C30 86, 10 72, 8 52 C6 32, 22 12, 45 8 Z"
+        {/* 1. Clapperboard — top-left */}
+        <svg style={{ position:"absolute", top:"7%", left:"5%", animation:"floatA 6s ease-in-out infinite", opacity:0.5 }}
+          width="80" height="80" viewBox="0 0 80 80" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          {/* Board body */}
+          <rect x="10" y="28" width="60" height="42" rx="4" stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
+          {/* Clapper bar */}
+          <rect x="10" y="16" width="60" height="14" rx="3" stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
+          {/* Clapper diagonal stripes */}
+          <line x1="22" y1="16" x2="18" y2="30" stroke="#1a1a2e" strokeWidth="2.2"/>
+          <line x1="34" y1="16" x2="30" y2="30" stroke="#1a1a2e" strokeWidth="2.2"/>
+          <line x1="46" y1="16" x2="42" y2="30" stroke="#1a1a2e" strokeWidth="2.2"/>
+          <line x1="58" y1="16" x2="54" y2="30" stroke="#1a1a2e" strokeWidth="2.2"/>
+          {/* Play triangle on body */}
+          <path d="M32 42 L32 60 L52 51 Z" stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
+        </svg>
+
+        {/* 2. Mobile camera (phone) — left side middle-upper */}
+        <svg style={{ position:"absolute", top:"30%", left:"3.5%", animation:"floatB 7.5s ease-in-out infinite", opacity:0.5 }}
+          width="60" height="80" viewBox="0 0 60 80" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          {/* Phone outline */}
+          <rect x="8" y="4" width="44" height="72" rx="7" stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
+          {/* Screen area */}
+          <rect x="13" y="12" width="34" height="46" rx="3" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+          {/* Camera lens circle */}
+          <circle cx="30" cy="35" r="9" stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
+          <circle cx="30" cy="35" r="4" stroke="#1a1a2e" strokeWidth="1.5" fill="none"/>
+          {/* Flash dot */}
+          <circle cx="42" cy="18" r="2.5" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+          {/* Home button */}
+          <circle cx="30" cy="68" r="3" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+        </svg>
+
+        {/* 3. DSLR / Pro Camera — bottom-left */}
+        <svg style={{ position:"absolute", bottom:"12%", left:"4%", animation:"floatC 5.8s ease-in-out infinite", opacity:0.5 }}
+          width="84" height="68" viewBox="0 0 84 68" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          {/* Camera body */}
+          <rect x="8" y="20" width="68" height="42" rx="5" stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
+          {/* Top hump (viewfinder/pentaprism) */}
+          <path d="M26 20 L26 10 L42 6 L58 10 L58 20" stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
+          {/* Lens barrel */}
+          <circle cx="36" cy="41" r="14" stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
+          <circle cx="36" cy="41" r="8" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+          <circle cx="36" cy="41" r="3" stroke="#1a1a2e" strokeWidth="1.5" fill="none"/>
+          {/* Shutter button */}
+          <circle cx="58" cy="12" r="4" stroke="#1a1a2e" strokeWidth="2" fill="none"/>
+          {/* Mode dial */}
+          <circle cx="62" cy="30" r="5" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+          {/* LCD screen area */}
+          <rect x="52" y="36" width="16" height="12" rx="2" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+        </svg>
+
+        {/* 4. Wrench — top-right */}
+        <svg style={{ position:"absolute", top:"9%", right:"5%", animation:"floatD 7s ease-in-out infinite", opacity:0.5 }}
+          width="68" height="68" viewBox="0 0 68 68" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          {/* Wrench handle shaft */}
+          <line x1="50" y1="18" x2="18" y2="50" stroke="#1a1a2e" strokeWidth="2.8"/>
+          {/* Wrench head opening */}
+          <path d="M44 8 C52 6, 62 12, 60 22 C58 28, 52 30, 46 28 L42 32 L36 26 L40 22 C38 16, 40 10, 44 8 Z"
+            stroke="#1a1a2e" strokeWidth="2.5" fill="none"/>
+          {/* Wrench tail */}
+          <path d="M18 50 C14 54, 12 60, 16 64 C20 68, 26 66, 28 62 C30 58, 26 56, 22 54 Z"
             stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
         </svg>
 
-        {/* Bottom-left medium blob */}
-        <svg style={{ position:"absolute", bottom:"10%", left:"3%", animation:"floatB 7.5s ease-in-out infinite", opacity:0.45 }}
-          width="68" height="72" viewBox="0 0 68 72" fill="none">
-          <path d="M34 6 C48 4, 64 16, 63 32 C62 48, 48 66, 32 66 C16 66, 4 52, 5 36 C6 20, 18 8, 34 6 Z"
-            stroke="#1a1a2e" strokeWidth="2" fill="none"/>
+        {/* 5. Paintbrush — right side upper-middle */}
+        <svg style={{ position:"absolute", top:"32%", right:"4%", animation:"floatA 6.5s ease-in-out infinite 0.8s", opacity:0.5 }}
+          width="60" height="80" viewBox="0 0 60 80" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          {/* Handle */}
+          <rect x="26" y="4" width="8" height="44" rx="4" stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
+          {/* Ferrule (metal band) */}
+          <rect x="24" y="44" width="12" height="8" rx="1" stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
+          {/* Bristle head */}
+          <path d="M24 52 C20 56, 18 64, 24 70 C28 74, 32 74, 36 70 C42 64, 40 56, 36 52 Z"
+            stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
+          {/* Bristle tip */}
+          <line x1="30" y1="70" x2="30" y2="76" stroke="#1a1a2e" strokeWidth="2"/>
         </svg>
 
-        {/* Top-right small blob */}
-        <svg style={{ position:"absolute", top:"8%", right:"5%", animation:"floatC 5.5s ease-in-out infinite", opacity:0.40 }}
-          width="48" height="50" viewBox="0 0 48 50" fill="none">
-          <path d="M24 4 C34 3, 45 12, 44 24 C43 36, 33 46, 22 46 C11 46, 3 36, 4 24 C5 12, 14 5, 24 4 Z"
-            stroke="#1a1a2e" strokeWidth="2" fill="none"/>
+        {/* 6. Hammer — bottom-right upper */}
+        <svg style={{ position:"absolute", bottom:"28%", right:"3.5%", animation:"floatE 8s ease-in-out infinite", opacity:0.5 }}
+          width="72" height="72" viewBox="0 0 72 72" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          {/* Handle */}
+          <rect x="32" y="32" width="10" height="36" rx="5" stroke="#1a1a2e" strokeWidth="2.5" fill="none" transform="rotate(-45 37 50)"/>
+          {/* Hammer head */}
+          <rect x="8" y="6" width="38" height="20" rx="4" stroke="#1a1a2e" strokeWidth="2.5" fill="none" transform="rotate(-45 27 16)"/>
+          {/* Claw cut */}
+          <path d="M40 4 L46 10 L40 16" stroke="#1a1a2e" strokeWidth="2.2" fill="none" transform="rotate(-45 43 10)"/>
         </svg>
 
-        {/* Bottom-right two small blobs */}
-        <svg style={{ position:"absolute", bottom:"18%", right:"3.5%", animation:"floatD 8s ease-in-out infinite", opacity:0.45 }}
-          width="52" height="56" viewBox="0 0 52 56" fill="none">
-          <path d="M26 4 C38 3, 50 14, 49 28 C48 42, 36 54, 22 53 C8 52, 2 40, 3 26 C4 12, 14 5, 26 4 Z"
-            stroke="#1a1a2e" strokeWidth="2" fill="none"/>
-        </svg>
-
-        <svg style={{ position:"absolute", bottom:"8%", right:"6%", animation:"floatA 6.8s ease-in-out infinite 1.2s", opacity:0.35 }}
-          width="36" height="38" viewBox="0 0 36 38" fill="none">
-          <path d="M18 3 C27 2, 34 10, 34 20 C34 30, 26 36, 16 36 C6 36, 2 28, 3 18 C4 8, 10 4, 18 3 Z"
-            stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+        {/* 7. Guitar — bottom-right lower */}
+        <svg style={{ position:"absolute", bottom:"6%", right:"5%", animation:"floatB 7s ease-in-out infinite 1.4s", opacity:0.5 }}
+          width="56" height="84" viewBox="0 0 56 84" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          {/* Neck */}
+          <rect x="24" y="4" width="8" height="32" rx="3" stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
+          {/* Headstock */}
+          <rect x="20" y="2" width="16" height="8" rx="3" stroke="#1a1a2e" strokeWidth="2" fill="none"/>
+          {/* Tuning pegs */}
+          <circle cx="20" cy="5" r="2.5" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+          <circle cx="36" cy="5" r="2.5" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+          {/* Fret lines */}
+          <line x1="24" y1="14" x2="32" y2="14" stroke="#1a1a2e" strokeWidth="1.6"/>
+          <line x1="24" y1="22" x2="32" y2="22" stroke="#1a1a2e" strokeWidth="1.6"/>
+          <line x1="24" y1="30" x2="32" y2="30" stroke="#1a1a2e" strokeWidth="1.6"/>
+          {/* Body — figure-8 */}
+          <path d="M28 36 C16 36, 6 44, 6 54 C6 62, 12 68, 20 68 C22 68, 24 67, 26 66 C28 70, 28 74, 28 76 C28 80, 30 82, 28 82 C26 82, 26 80, 28 78"
+            stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
+          <path d="M28 36 C40 36, 50 44, 50 54 C50 62, 44 68, 36 68 C34 68, 32 67, 30 66 C28 70, 28 74, 28 76"
+            stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
+          {/* Sound hole */}
+          <circle cx="28" cy="56" r="7" stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+          {/* String */}
+          <line x1="28" y1="36" x2="28" y2="66" stroke="#1a1a2e" strokeWidth="1.2"/>
         </svg>
 
       </div>
