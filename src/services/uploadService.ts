@@ -6,8 +6,11 @@ const REAL_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const SUPABASE_CONFIGURED =
   !!REAL_SUPABASE_URL && !REAL_SUPABASE_URL.includes("your-project-ref");
 
-function getRealPublicUrl(bucket: string, path: string): string {
-  return `${REAL_SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
+function getPublicUrl(bucket: string, path: string): string {
+  // Use the SDK — works for both public and signed URL buckets,
+  // and avoids hand-rolled strings that silently 403 on private buckets.
+  const { data } = getAuthSupabase().storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
 }
 
 export interface UploadPayload {
@@ -40,7 +43,7 @@ export const uploadService = {
     });
     if (error) throw error;
 
-    return getRealPublicUrl("post-media", path);
+    return getPublicUrl("post-media", path);
   },
 
   async uploadAvatar(file: File): Promise<string> {
@@ -59,7 +62,7 @@ export const uploadService = {
     if (error) throw error;
 
     // Append cache-buster so browsers/CDN don't serve a stale version
-    return `${getRealPublicUrl("avatars", path)}?t=${Date.now()}`;
+    return `${getPublicUrl("avatars", path)}?t=${Date.now()}`;
   },
 
   async createPost(payload: UploadPayload): Promise<Post | null> {

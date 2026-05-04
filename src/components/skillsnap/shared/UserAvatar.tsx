@@ -5,6 +5,7 @@
 // falls back to gradient + initial.
 // ─────────────────────────────────────────────
 import Image from "next/image";
+import { useState } from "react";
 import type { User } from "@/types";
 
 interface UserAvatarProps {
@@ -39,21 +40,25 @@ export default function UserAvatar({
   ring = false,
 }: UserAvatarProps) {
   const Tag = onClick ? "button" : "div";
+  // Track image load failure so we can fall back to gradient + initial
+  const [imgError, setImgError] = useState(false);
+  const showImage = !!user.avatarUrl && !imgError;
 
   return (
     <Tag
       onClick={onClick}
       className={`relative flex-shrink-0 ${SIZE_MAP[size]} rounded-full flex items-center justify-center text-white font-bold overflow-hidden ${ring ? "ring-2 ring-white/40" : ""}`}
-      style={user.avatarUrl ? {} : { background: user.avatarGradient }}
+      style={showImage ? {} : { background: user.avatarGradient }}
     >
-      {user.avatarUrl ? (
+      {showImage ? (
         <Image
-          src={user.avatarUrl}
+          src={user.avatarUrl!}
           alt={user.displayName}
           width={PX_MAP[size]}
           height={PX_MAP[size]}
           className="w-full h-full object-cover"
           unoptimized
+          onError={() => setImgError(true)}
         />
       ) : (
         user.avatarInitial

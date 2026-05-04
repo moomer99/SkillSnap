@@ -95,7 +95,7 @@ export const messageService = {
     const userId = await getCurrentUserId();
     if (!userId) return [];
 
-    const { data } = await getSupabase()
+    const { data } = await getAuthSupabase()
       .from("messages")
       .select("*")
       .eq("conversation_id", conversationId)
@@ -107,7 +107,9 @@ export const messageService = {
   async sendMessage(conversationId: string, text: string): Promise<Message> {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error("Not authenticated");
-    const sb = getSupabase();
+    // Use the auth client (direct URL, no proxy) for writes so the JWT is
+    // always sent correctly and RLS auth.uid() resolves without any proxy gap.
+    const sb = getAuthSupabase();
 
     const { data, error } = await sb
       .from("messages")
@@ -117,6 +119,14 @@ export const messageService = {
 
     if (error) throw error;
     if (!data) throw new Error("No data returned from insert");
+
+    // Keep the conversations row fresh — required if no DB trigger exists.
+    // Fire-and-forget; non-fatal if it fails.
+    sb.from("conversations")
+      .update({ last_message_text: text, last_message_at: new Date().toISOString() })
+      .eq("id", conversationId)
+      .then(() => {})
+      .catch(() => {});
 
     // Increment unread_count for the other participant
     messageService.incrementUnreadForOthers(conversationId, userId).catch(() => {});
@@ -161,7 +171,7 @@ export const messageService = {
   async getOrCreateConversation(participantId: string): Promise<string> {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error("Not authenticated");
-    const sb = getSupabase();
+    const sb = getAuthSupabase();
 
     // Check if conversation already exists between these two users
     const { data: existingMemberships } = await sb

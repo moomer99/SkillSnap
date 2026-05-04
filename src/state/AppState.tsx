@@ -338,11 +338,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Resolve initial session
-    authSb.auth.getSession().then(async ({ data: { session } }) => {
+    // Resolve initial session — use getUser() (live network call) instead of
+    // getSession() (localStorage only). This catches the case where a brand-new
+    // OAuth user has their session in cookies (set server-side by the callback
+    // route) but localStorage hasn't been populated yet.
+    authSb.auth.getUser().then(async ({ data: { user } }) => {
       clearTimeout(authTimeout);
-      if (session?.user) {
-        await hydrateProfile(session.user.id, session.user);
+      if (user) {
+        await hydrateProfile(user.id, user);
       } else {
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }
