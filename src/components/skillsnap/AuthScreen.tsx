@@ -342,7 +342,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         </button>
         <button
           onClick={() => setMode("login")}
-          className="w-full h-14 rounded-2xl font-semibold text-base text-[#6c47ff] border-2 border-[#ede9fe] bg-white transition-all active:scale-[0.98]"
+          className="w-full h-14 rounded-2xl font-semibold text-base text-[#6c47ff] border-2 border-[#6c47ff]/30 bg-white transition-all active:scale-[0.98]"
         >
           Log in with email
         </button>
@@ -355,7 +355,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
         <button
           onClick={() => dispatch({ type: "SKIP_AUTH" })}
-          className="w-full text-center text-sm text-[#b0aaa5] font-medium py-1"
+          className="w-full text-center text-sm text-[#7a7570] font-semibold py-1"
         >
           Browse as guest
         </button>
