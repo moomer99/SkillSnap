@@ -168,8 +168,11 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
           </div>
         )}
 
+        {/* ── Loading skeleton ── */}
         {loading && filteredPosts.length === 0 ? (
           <div className="w-full bg-gray-200 animate-pulse" style={{ height: `calc(100dvh - ${headerH}px)` }} />
+
+        /* ── No results within radius ── */
         ) : filteredPosts.length === 0 && location ? (
           <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
             <div className="w-16 h-16 rounded-3xl mb-4 flex items-center justify-center"
@@ -189,6 +192,47 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
               ))}
             </div>
           </div>
+
+        /* ── FIX 4: New user empty state — no location, no posts ── */
+        ) : filteredPosts.length === 0 && !loading ? (
+          <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
+            <div
+              className="w-20 h-20 rounded-3xl mb-5 flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
+            >
+              <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+                <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="2.5" fill="none" />
+                <circle cx="20" cy="20" r="5" fill="white" />
+                <circle cx="20" cy="10" r="2" fill="white" opacity="0.8" />
+                <circle cx="28.7" cy="25" r="2" fill="white" opacity="0.8" />
+                <circle cx="11.3" cy="25" r="2" fill="white" opacity="0.8" />
+              </svg>
+            </div>
+            <h2 className="font-bold text-[#1a1a1a] text-lg mb-2 leading-tight">
+              Welcome to SkillSnap
+            </h2>
+            <p className="text-[#7a7570] text-sm leading-relaxed mb-6 max-w-[260px]">
+              Set your location to discover skilled pros near you — or browse everyone on the platform.
+            </p>
+            <div className="flex flex-col gap-3 w-full max-w-[280px]">
+              <button
+                onClick={() => setShowLocationPicker(true)}
+                className="w-full h-12 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2"
+                style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 16px rgba(108,71,255,0.30)" }}
+              >
+                <Navigation size={15} />
+                Set My Location
+              </button>
+              <button
+                onClick={dismissPrompt}
+                className="w-full h-12 rounded-2xl font-semibold text-sm text-[#6c47ff] border-2 border-[#ede9fe] bg-white"
+              >
+                Browse Everyone
+              </button>
+            </div>
+          </div>
+
+        /* ── Feed cards ── */
         ) : (
           filteredPosts.map((post) => (
             <FeedCard
@@ -239,7 +283,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
   );
 }
 
-// ── Full-screen viewer overlay ─────────────────────────────────────
+// ── Full-screen viewer overlay ─────────────────────────────────────────────
 function FullscreenViewer({
   post, onClose, onProfileClick, onLike, isLiked,
 }: {
@@ -254,9 +298,7 @@ function FullscreenViewer({
   const [muted, setMuted] = useState(false);
 
   useEffect(() => {
-    // Autoplay when viewer opens
     videoRef.current?.play().then(() => setPlaying(true)).catch(() => {});
-    // Prevent body scroll while open
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
@@ -330,7 +372,6 @@ function FullscreenViewer({
 
       {/* Bottom info */}
       <div className="absolute bottom-0 left-0 right-0 z-10 px-5 pb-10">
-        {/* Author row */}
         <button
           className="flex items-center gap-3 mb-3"
           onClick={(e) => { e.stopPropagation(); onProfileClick(); }}
@@ -351,12 +392,10 @@ function FullscreenViewer({
           </div>
         </button>
 
-        {/* Caption — always shown in fullscreen */}
         {post.caption ? (
           <p className="text-white text-[14px] leading-relaxed mb-3 line-clamp-4">{post.caption}</p>
         ) : null}
 
-        {/* Location + distance pill */}
         {displayLocation && (
           <div className="flex items-center gap-1.5 mb-4">
             <MapPin size={13} className="text-white/70 flex-shrink-0" />
@@ -367,7 +406,6 @@ function FullscreenViewer({
           </div>
         )}
 
-        {/* Like button */}
         <button
           onClick={(e) => { e.stopPropagation(); onLike(); }}
           className="flex items-center gap-2 px-4 py-2.5 rounded-full"
@@ -411,8 +449,7 @@ function FeedCard({
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          videoRef.current?.play().catch(() => {});
-          setPlaying(true);
+          videoRef.current?.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
         } else {
           videoRef.current?.pause();
           setPlaying(false);
@@ -425,13 +462,16 @@ function FeedCard({
   }, [post.type, post.mediaUrl]);
 
   const handleMediaTap = useCallback(() => {
-    // Open fullscreen viewer on tap
     onFullscreen();
   }, [onFullscreen]);
 
   const displayLocation = post.location ?? author.location;
   const happyPct = author.happyPercent !== undefined && author.happyPercent !== null
     ? `${author.happyPercent}%` : "—";
+
+  // FIX 1: show play button overlay whenever video is not playing
+  // (covers both no-mediaUrl AND autoplay-blocked cases)
+  const showPlayOverlay = post.type === "video" && !playing;
 
   return (
     <div
@@ -475,11 +515,20 @@ function FeedCard({
         )}
       </div>
 
-      {/* Play button for videos without stream */}
-      {post.type === "video" && !playing && !post.mediaUrl && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(6px)", border: "2px solid rgba(255,255,255,0.28)" }}>
+      {/* FIX 1 — Play button overlay: shown whenever video is not playing */}
+      {showPlayOverlay && (
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+          onClick={handleMediaTap}
+        >
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{
+              background: "rgba(255,255,255,0.18)",
+              backdropFilter: "blur(6px)",
+              border: "2px solid rgba(255,255,255,0.28)",
+            }}
+          >
             <svg width="20" height="24" viewBox="0 0 20 24" fill="white">
               <path d="M1 1l18 11-18 11V1z" />
             </svg>
@@ -491,7 +540,7 @@ function FeedCard({
       <div className="absolute right-3 z-10 flex flex-col items-center gap-5" style={{ bottom: 220 }}>
         <RightAction
           icon={<Heart size={26} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "white"} strokeWidth={1.8} />}
-          label={formatLikes(post.likes + (isLiked ? 1 : 0))}
+          label={formatLikes(post.likes)}
           onClick={onLike}
         />
         <RightAction
@@ -529,7 +578,7 @@ function FeedCard({
           </div>
         </div>
 
-        {/* Caption — pulled from post.caption */}
+        {/* Caption */}
         {post.caption ? (
           <p className="text-white/90 text-[13px] leading-snug mb-3 line-clamp-2">{post.caption}</p>
         ) : null}
@@ -559,7 +608,6 @@ function FeedCard({
               <path d="M7.5 13.5c1 2 8 2 9 0" stroke="#000" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.45"/>
             </svg>
           } />
-          {/* Location + distance cell — always shown if location text exists */}
           {displayLocation && (
             <>
               <VSep />
