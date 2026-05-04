@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     siteName: "SkillSnap",
     images: [
       {
-        url: "/og-image.png",
+        url: "https://skillsnap.com.au/og-image.png",
         width: 1200,
         height: 627,
       },
