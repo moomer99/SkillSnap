@@ -7,8 +7,6 @@ interface OnboardingScreenProps {
   onNavigate: (s: Screen) => void;
 }
 
-// Each illustration uses unique ID prefixes to avoid SVG defs collision (all 4 are in the DOM at once).
-
 function SlideWelcome() {
   return (
     <div className="relative flex items-center justify-center" style={{ width: 200, height: 200 }}>
@@ -66,20 +64,13 @@ function SlideDiscover() {
           <feDropShadow dx="3" dy="10" stdDeviation="16" floodColor="#6c47ff" floodOpacity="0.25"/>
         </filter>
       </defs>
-      {/* Ground shadow */}
       <ellipse cx="90" cy="186" rx="50" ry="8" fill="#6c47ff" opacity="0.08"/>
-      {/* Handle */}
-      <rect x="118" y="126" width="52" height="22" rx="11" fill="url(#d-handle)" filter="url(#d-drop)"
-        transform="rotate(45 118 126)"/>
-      {/* Outer ring */}
+      <rect x="118" y="126" width="52" height="22" rx="11" fill="url(#d-handle)" filter="url(#d-drop)" transform="rotate(45 118 126)"/>
       <circle cx="80" cy="88" r="62" fill="#7c3aed" filter="url(#d-drop)"/>
       <circle cx="80" cy="88" r="56" fill="#6d28d9"/>
-      {/* Lens */}
       <circle cx="80" cy="88" r="50" fill="url(#d-lens)"/>
       <circle cx="80" cy="88" r="50" fill="url(#d-shine)"/>
-      {/* Highlight arc */}
       <path d="M56 66 Q80 48 104 66" stroke="white" strokeWidth="3.5" strokeLinecap="round" opacity="0.55" fill="none"/>
-      {/* Shine dot */}
       <circle cx="60" cy="68" r="7" fill="white" opacity="0.3"/>
     </svg>
   );
@@ -107,16 +98,12 @@ function SlideSkills() {
         </filter>
       </defs>
       <ellipse cx="100" cy="186" rx="50" ry="8" fill="#f97316" opacity="0.08"/>
-      {/* Small top-left sparkle */}
       <path d="M42 58 L46 76 L42 94 L38 76 Z" fill="url(#sk-s1)" filter="url(#sk-drop)"/>
       <path d="M24 76 L42 72 L60 76 L42 80 Z" fill="url(#sk-s1)"/>
-      {/* Small bottom-right sparkle */}
       <path d="M138 110 L141 122 L138 134 L135 122 Z" fill="url(#sk-s2)" filter="url(#sk-drop)"/>
       <path d="M126 122 L138 119 L150 122 L138 125 Z" fill="url(#sk-s2)"/>
-      {/* Main centre sparkle */}
       <path d="M100 18 L112 82 L100 146 L88 82 Z" fill="url(#sk-main)" filter="url(#sk-drop)"/>
       <path d="M36 82 L100 70 L164 82 L100 94 Z" fill="url(#sk-main)"/>
-      {/* Glow centre */}
       <circle cx="100" cy="82" r="11" fill="white" opacity="0.45"/>
       <circle cx="100" cy="82" r="5" fill="white" opacity="0.65"/>
     </svg>
@@ -140,51 +127,42 @@ function SlideLocal() {
         </filter>
       </defs>
       <ellipse cx="100" cy="186" rx="52" ry="8" fill="#6c47ff" opacity="0.08"/>
-      {/* Map circle */}
       <circle cx="100" cy="94" r="76" fill="url(#lc-map)"/>
-      {/* Grid lines */}
       <line x1="26" y1="70" x2="174" y2="70" stroke="#c4b5fd" strokeWidth="1" strokeDasharray="5 4" opacity="0.5"/>
       <line x1="26" y1="94" x2="174" y2="94" stroke="#c4b5fd" strokeWidth="1" strokeDasharray="5 4" opacity="0.5"/>
       <line x1="26" y1="118" x2="174" y2="118" stroke="#c4b5fd" strokeWidth="1" strokeDasharray="5 4" opacity="0.5"/>
       <line x1="60" y1="20" x2="60" y2="168" stroke="#c4b5fd" strokeWidth="1" strokeDasharray="5 4" opacity="0.5"/>
       <line x1="100" y1="20" x2="100" y2="168" stroke="#c4b5fd" strokeWidth="1" strokeDasharray="5 4" opacity="0.5"/>
       <line x1="140" y1="20" x2="140" y2="168" stroke="#c4b5fd" strokeWidth="1" strokeDasharray="5 4" opacity="0.5"/>
-
-      {/* Small pin left */}
       <g filter="url(#lc-drop)">
         <circle cx="58" cy="112" r="11" fill="#a78bfa"/>
         <path d="M58 123 L58 136" stroke="#a78bfa" strokeWidth="3" strokeLinecap="round"/>
         <circle cx="58" cy="137" r="2.5" fill="#a78bfa" opacity="0.3"/>
         <text x="58" y="117" textAnchor="middle" fill="white" fontSize="11">★</text>
       </g>
-      {/* Small pin right */}
       <g filter="url(#lc-drop)">
         <circle cx="144" cy="82" r="11" fill="#a78bfa"/>
         <path d="M144 93 L144 106" stroke="#a78bfa" strokeWidth="3" strokeLinecap="round"/>
         <circle cx="144" cy="107" r="2.5" fill="#a78bfa" opacity="0.3"/>
         <text x="144" y="87" textAnchor="middle" fill="white" fontSize="11">★</text>
       </g>
-      {/* Tiny pin top */}
       <g filter="url(#lc-drop)">
         <circle cx="76" cy="62" r="8" fill="#c4b5fd"/>
         <path d="M76 70 L76 80" stroke="#c4b5fd" strokeWidth="2.5" strokeLinecap="round"/>
         <text x="76" y="67" textAnchor="middle" fill="white" fontSize="8">★</text>
       </g>
-      {/* Main centre pin */}
       <g filter="url(#lc-drop)">
         <circle cx="100" cy="84" r="24" fill="url(#lc-pin)"/>
         <path d="M100 108 L100 140" stroke="#6c47ff" strokeWidth="6" strokeLinecap="round"/>
         <circle cx="100" cy="142" r="4" fill="#6c47ff" opacity="0.3"/>
         <text x="100" y="91" textAnchor="middle" fill="white" fontSize="20" fontWeight="bold">★</text>
       </g>
-      {/* Pulse rings */}
       <circle cx="100" cy="84" r="34" stroke="#6c47ff" strokeWidth="2" opacity="0.15" strokeDasharray="6 4"/>
       <circle cx="100" cy="84" r="46" stroke="#6c47ff" strokeWidth="1.5" opacity="0.08" strokeDasharray="5 5"/>
     </svg>
   );
 }
 
-// ── Slide data ────────────────────────────────
 const slides = [
   {
     illustration: <SlideWelcome />,
@@ -241,12 +219,10 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
     if (touchStartX.current === null) return;
     const delta = e.touches[0].clientX - touchStartX.current;
     const trackWidth = trackRef.current?.offsetWidth ?? 390;
-    // Apply resistance at edges
     let offset = delta;
     if ((current === 0 && delta > 0) || (current === slides.length - 1 && delta < 0)) {
       offset = delta * 0.2;
     }
-    // Clamp to max one slide width
     const max = trackWidth;
     offset = Math.max(-max, Math.min(max, offset));
     setDragOffset(offset);
@@ -257,13 +233,11 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
     const diff = touchStartX.current - e.changedTouches[0].clientX;
     const trackWidth = trackRef.current?.offsetWidth ?? 390;
     const threshold = trackWidth * 0.25;
-
     if (diff > threshold && current < slides.length - 1) {
       setCurrent(c => c + 1);
     } else if (diff < -threshold && current > 0) {
       setCurrent(c => c - 1);
     }
-
     setDragOffset(0);
     setIsDragging(false);
     touchStartX.current = null;
@@ -271,9 +245,6 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
 
   const isFirst = current === 0;
   const isLast = current === slides.length - 1;
-
-  // Percentage-based base translate (no dependency on measured width) + raw px drag offset
-  // Track is N*100% wide; shifting by -(current * 100/N)% moves exactly one slide width
   const pctBase = -((current * 100) / slides.length);
   const translateValue = `calc(${pctBase}% + ${dragOffset}px)`;
 
@@ -285,7 +256,6 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
         background: "linear-gradient(150deg, #edeaff 0%, #f4f2ff 50%, #eef1ff 100%)",
       }}
     >
-      {/* Slides track — fills all available space */}
       <div
         ref={trackRef}
         className="flex-1 overflow-hidden"
@@ -311,7 +281,6 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
               style={{ width: `${100 / slides.length}%` }}
               className="flex flex-col items-center justify-center px-8 gap-6"
             >
-              {/* Illustration */}
               <div
                 className="flex items-center justify-center rounded-3xl"
                 style={{
@@ -324,8 +293,6 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
               >
                 {s.illustration}
               </div>
-
-              {/* Text */}
               <div className="text-center">
                 <h2 className="text-[26px] font-extrabold text-[#1a1a1a] leading-tight mb-3 tracking-tight">
                   {s.title}
@@ -338,7 +305,6 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
           ))}
         </div>
 
-        {/* Dots overlaid at bottom of the slide area */}
         <div
           className="absolute bottom-5 left-0 right-0 flex justify-center items-center gap-2"
           style={{ pointerEvents: "none" }}
@@ -363,12 +329,9 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
         </div>
       </div>
 
-      {/* Skip — shown on slides 2 & 3 only */}
-      <div
-        className="absolute top-5 right-5"
-        style={{ zIndex: 10 }}
-      >
-        {!isFirst && !isLast && (
+      {/* FIX UX2 — Skip shown on ALL slides except the last one (was slides 2 & 3 only) */}
+      <div className="absolute top-5 right-5" style={{ zIndex: 10 }}>
+        {!isLast && (
           <button
             onClick={finish}
             className="text-sm font-semibold text-[#6c47ff] px-3 py-1 rounded-full active:opacity-60 transition-opacity"
@@ -422,7 +385,6 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
             </button>
           </div>
         )}
-
         <p className="text-[13px] text-[#b0aaa5] font-medium tabular-nums">
           {current + 1} of {slides.length}
         </p>
