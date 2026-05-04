@@ -445,35 +445,43 @@ function FeedCard({
   const { author } = post;
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
-  const [videoVisible, setVideoVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Step 1: Watch intersection — set videoVisible when card enters viewport
   useEffect(() => {
     if (post.type !== "video" || !post.mediaUrl) return;
     const card = cardRef.current;
-    if (!card) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVideoVisible(true);
-        } else {
-          videoRef.current?.pause();
-          setPlaying(false);
-        }
-      },
-      { threshold: 0.5 }
-    );
-    observer.observe(card);
-    return () => observer.disconnect();
-  }, [post.type, post.mediaUrl]);
+    const video = videoRef.current;
+    if (!card || !video) return;
 
-  // Step 2: Play after src is in the DOM (runs after re-render that sets src)
-  useEffect(() => {
-    if (!videoVisible || !videoRef.current) return;
-    videoRef.current.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-  }, [videoVisible]);
+    function tryPlay() {
+      if (!video) return;
+      video.play().then(() => setPlaying(true)).catch(() => {});
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        // If media not loaded yet, trigger load then wait for canplay
+        if (video!.readyState === 0) video!.load();
+        if (video!.readyState >= 3) {
+          tryPlay();
+        } else {
+          video!.addEventListener("canplay", tryPlay, { once: true });
+        }
+      } else {
+        video!.removeEventListener("canplay", tryPlay);
+        video!.pause();
+        setPlaying(false);
+      }
+    }, { threshold: 0.6 });
+
+    observer.observe(card);
+    return () => {
+      observer.disconnect();
+      video.removeEventListener("canplay", tryPlay);
+      video.pause();
+    };
+  }, [post.type, post.mediaUrl]);
 
   const handleMediaTap = useCallback(() => { onFullscreen(); }, [onFullscreen]);
   const displayLocation = post.location ?? author.location;
@@ -492,14 +500,14 @@ function FeedCard({
         {post.type === "video" && post.mediaUrl ? (
           <video
             ref={videoRef}
-            // Only set src once the card enters the viewport — lazy load
-            src={videoVisible ? post.mediaUrl : undefined}
+            src={post.mediaUrl}
             className="w-full h-full object-cover"
             loop playsInline
             preload="none"
             muted={muted}
             poster={post.thumbnailUrl}
-            onEnded={() => setPlaying(false)}
+            onPlay={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
           />
         ) : post.thumbnailUrl ? (
           <div className="relative w-full h-full">
