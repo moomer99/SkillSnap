@@ -54,17 +54,25 @@ function SkillSnapRouter() {
       {/* Desktop background — only visible on sm+ screens */}
       <div className="hidden sm:block absolute inset-0 overflow-hidden pointer-events-none">
 
+        {/* Floating blob keyframes */}
+        <style>{`
+          @keyframes floatA { 0%,100%{transform:translateY(0px) rotate(0deg)} 50%{transform:translateY(-18px) rotate(3deg)} }
+          @keyframes floatB { 0%,100%{transform:translateY(0px) rotate(0deg)} 50%{transform:translateY(-24px) rotate(-4deg)} }
+          @keyframes floatC { 0%,100%{transform:translateY(0px) rotate(0deg)} 50%{transform:translateY(-14px) rotate(5deg)} }
+          @keyframes floatD { 0%,100%{transform:translateY(0px) rotate(0deg)} 50%{transform:translateY(-20px) rotate(-3deg)} }
+        `}</style>
+
         {/* Clean white base */}
         <div style={{ position: "absolute", inset: 0, background: "#fafafa" }} />
 
-        {/* Single soft lavender glow — bottom-right corner only */}
+        {/* Soft lavender glow — bottom-right */}
         <div style={{
           position: "absolute", bottom: "-10%", right: "-6%",
           width: 500, height: 500, borderRadius: "50%",
           background: "radial-gradient(circle, rgba(196,181,253,0.35) 0%, rgba(221,214,254,0.15) 50%, transparent 72%)",
         }}/>
 
-        {/* Faint arc rings — bottom-right corner, partially visible */}
+        {/* Faint arc rings — bottom-right corner */}
         <svg
           style={{ position: "absolute", bottom: -60, right: -60, opacity: 0.45 }}
           width="380" height="380" viewBox="0 0 380 380" fill="none"
@@ -81,6 +89,42 @@ function SkillSnapRouter() {
           width: 120, height: 120, borderRadius: "50%",
           background: "radial-gradient(circle, rgba(196,181,253,0.18) 0%, transparent 70%)",
         }}/>
+
+        {/* ── Floating blobs — desktop only ───────────────────────────── */}
+
+        {/* Top-left large blob */}
+        <svg style={{ position:"absolute", top:"6%", left:"4%", animation:"floatA 6s ease-in-out infinite", opacity:0.55 }}
+          width="90" height="90" viewBox="0 0 90 90" fill="none">
+          <path d="M45 8 C62 5, 82 18, 84 38 C86 58, 70 80, 50 83 C30 86, 10 72, 8 52 C6 32, 22 12, 45 8 Z"
+            stroke="#1a1a2e" strokeWidth="2.2" fill="none"/>
+        </svg>
+
+        {/* Bottom-left medium blob */}
+        <svg style={{ position:"absolute", bottom:"10%", left:"3%", animation:"floatB 7.5s ease-in-out infinite", opacity:0.45 }}
+          width="68" height="72" viewBox="0 0 68 72" fill="none">
+          <path d="M34 6 C48 4, 64 16, 63 32 C62 48, 48 66, 32 66 C16 66, 4 52, 5 36 C6 20, 18 8, 34 6 Z"
+            stroke="#1a1a2e" strokeWidth="2" fill="none"/>
+        </svg>
+
+        {/* Top-right small blob */}
+        <svg style={{ position:"absolute", top:"8%", right:"5%", animation:"floatC 5.5s ease-in-out infinite", opacity:0.40 }}
+          width="48" height="50" viewBox="0 0 48 50" fill="none">
+          <path d="M24 4 C34 3, 45 12, 44 24 C43 36, 33 46, 22 46 C11 46, 3 36, 4 24 C5 12, 14 5, 24 4 Z"
+            stroke="#1a1a2e" strokeWidth="2" fill="none"/>
+        </svg>
+
+        {/* Bottom-right two small blobs */}
+        <svg style={{ position:"absolute", bottom:"18%", right:"3.5%", animation:"floatD 8s ease-in-out infinite", opacity:0.45 }}
+          width="52" height="56" viewBox="0 0 52 56" fill="none">
+          <path d="M26 4 C38 3, 50 14, 49 28 C48 42, 36 54, 22 53 C8 52, 2 40, 3 26 C4 12, 14 5, 26 4 Z"
+            stroke="#1a1a2e" strokeWidth="2" fill="none"/>
+        </svg>
+
+        <svg style={{ position:"absolute", bottom:"8%", right:"6%", animation:"floatA 6.8s ease-in-out infinite 1.2s", opacity:0.35 }}
+          width="36" height="38" viewBox="0 0 36 38" fill="none">
+          <path d="M18 3 C27 2, 34 10, 34 20 C34 30, 26 36, 16 36 C6 36, 2 28, 3 18 C4 8, 10 4, 18 3 Z"
+            stroke="#1a1a2e" strokeWidth="1.8" fill="none"/>
+        </svg>
 
       </div>
 
