@@ -11,7 +11,7 @@ const BRAND      = "#6c47ff";
 const SLASH      = "#1a1a1a";
 const SLASH_DARK = "rgba(255,255,255,0.75)";
 
-// Full wordmark: height → width derived from viewBox aspect ratio ~5.79:1
+// Full wordmark: height → width derived from viewBox aspect ratio ~4.66:1
 const FULL_HEIGHTS = { xs: 16, sm: 20, md: 26, lg: 36, xl: 50 };
 // Icon sizes (square)
 const ICON_SIZES   = { xs: 28, sm: 36, md: 44, lg: 64, xl: 88 };
@@ -19,12 +19,12 @@ const ICON_SIZES   = { xs: 28, sm: 36, md: 44, lg: 64, xl: 88 };
 function Wordmark({ height, dark: onDark }: { height: number; dark: boolean }) {
   const fill  = onDark ? "#ffffff" : BRAND;
   const slash = onDark ? SLASH_DARK : SLASH;
-  const w = Math.round(height * (1315 / 227));
+  const w = Math.round(height * (1315 / 282));
   return (
     <svg
       width={w}
       height={height}
-      viewBox="240 488 1315 227"
+      viewBox="240 488 1315 282"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="SkillSnap"
