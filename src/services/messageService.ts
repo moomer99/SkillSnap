@@ -69,21 +69,8 @@ export const messageService = {
 
     const sb = getAuthSupabase();
 
-    // Query conversation_members with joined conversation and profile data
-    // Never query conversations table directly — RLS blocks it
     const { data: memberships, error } = await sb
-      .from("conversation_members")
-      .select(`
-        conversation_id,
-        unread_count,
-        conversations (
-          id,
-          last_message_text,
-          last_message_at
-        )
-      `)
-      .eq("user_id", userId)
-      .order("conversation_id", { ascending: false });
+      .rpc("get_my_threads");
 
     if (error) {
       console.error("[messageService] getThreads error:", error.message);
@@ -95,7 +82,7 @@ export const messageService = {
       return [];
     }
 
-    const conversationIds = memberships.map((m) => m.conversation_id);
+    const conversationIds = memberships.map((m: Record<string, unknown>) => m.conversation_id);
 
     // Get other members with their profiles
     const { data: otherMembers, error: membersErr } = await sb
@@ -108,11 +95,8 @@ export const messageService = {
       console.error("[messageService] getThreads otherMembers error:", membersErr.message);
     }
 
-    const result = memberships
+    const result = (memberships as Record<string, unknown>[])
       .map((membership) => {
-        const conv = membership.conversations as Record<string, unknown>;
-        if (!conv) return null;
-
         const otherMember = (otherMembers ?? []).find(
           (m) => m.conversation_id === membership.conversation_id
         );
@@ -121,16 +105,16 @@ export const messageService = {
         const participant = mapProfile(otherMember.profiles as Record<string, unknown>);
 
         return {
-          id: membership.conversation_id,
+          id: membership.conversation_id as string,
           participant,
-          lastMessage: (conv.last_message_text as string) ?? "",
-          lastMessageTime: conv.last_message_at
-            ? new Date(conv.last_message_at as string).toLocaleTimeString([], {
+          lastMessage: (membership.last_message_text as string) ?? "",
+          lastMessageTime: membership.last_message_at
+            ? new Date(membership.last_message_at as string).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               })
             : "",
-          unreadCount: membership.unread_count ?? 0,
+          unreadCount: (membership.unread_count as number) ?? 0,
         } as MessageThread;
       })
       .filter(Boolean) as MessageThread[];
