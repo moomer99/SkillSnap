@@ -3,16 +3,15 @@ import { createClient } from "@supabase/supabase-js";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SupabaseClient = ReturnType<typeof createClient<any>>;
 
-let _client: SupabaseClient | null = null;
-let _authClient: SupabaseClient | null = null;
-let _realtimeClient: SupabaseClient | null = null;
-
 const REAL_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-// Detect if we're running in the Orchids sandbox preview.
-// The sandbox blocks direct XHR to Supabase, so DB/REST queries must be
-// routed through the /api/proxy Next.js route instead.
+// ONE shared client instance for the entire app.
+// Multiple createClient instances sharing the same localStorage key fight over
+// the auth token lock (5000ms timeout → stale JWT → RLS blocks all queries).
+// A single instance has one token refresher, one lock, no contention.
+let _client: SupabaseClient | null = null;
+
 function isOrchidsSandbox(): boolean {
   return (
     typeof window !== "undefined" &&
@@ -20,34 +19,18 @@ function isOrchidsSandbox(): boolean {
   );
 }
 
-// DB/REST client.
-// On Orchids sandbox: routes through /api/proxy to bypass network restrictions.
-// On real domain (skillsnap.com.au, Vercel): uses the direct Supabase URL.
-// createClient from @supabase/supabase-js correctly stores the session in
-// localStorage and attaches the JWT as Bearer on every request — unlike
-// createBrowserClient (@supabase/ssr) which is designed for cookie-based SSR.
-export function getSupabase(): SupabaseClient {
+function getClient(): SupabaseClient {
   if (!_client) {
-    const url = isOrchidsSandbox()
-      ? `${window.location.origin}/api/proxy`
-      : REAL_URL;
-    _client = createClient(url, ANON_KEY, {
-      auth: {
-        storage: typeof window !== "undefined" ? window.localStorage : undefined,
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: false,
-      },
-    });
-  }
-  return _client;
-}
+    // On Orchids sandbox the browser can't reach Supabase directly — route
+    // everything through the /api/proxy Next.js handler which forwards to
+    // the real Supabase URL. Auth, DB, and Storage all work through the proxy.
+    // On production (Vercel/skillsnap.com.au) use the real URL directly.
+    const url =
+      typeof window !== "undefined" && isOrchidsSandbox()
+        ? `${window.location.origin}/api/proxy`
+        : REAL_URL;
 
-// Auth client — ALWAYS uses the real Supabase URL directly.
-// OAuth redirects, token refresh, and getUser() must bypass any proxy.
-export function getAuthSupabase(): SupabaseClient {
-  if (!_authClient) {
-    _authClient = createClient(REAL_URL, ANON_KEY, {
+    _client = createClient(url, ANON_KEY, {
       auth: {
         storage: typeof window !== "undefined" ? window.localStorage : undefined,
         persistSession: true,
@@ -56,26 +39,15 @@ export function getAuthSupabase(): SupabaseClient {
       },
     });
   }
-  return _authClient;
+  return _client;
 }
 
-// Realtime client — always direct Supabase URL (WebSocket cannot be proxied).
-export function getRealtimeSupabase(): SupabaseClient {
-  if (!_realtimeClient) {
-    _realtimeClient = createClient(REAL_URL, ANON_KEY, {
-      auth: {
-        storage: typeof window !== "undefined" ? window.localStorage : undefined,
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: false,
-      },
-    });
-  }
-  return _realtimeClient;
-}
+// All three exports return the same instance — kept for backwards compatibility
+// with all call sites that import getSupabase / getAuthSupabase / getRealtimeSupabase.
+export const getSupabase = getClient;
+export const getAuthSupabase = getClient;
+export const getRealtimeSupabase = getClient;
 
 export function resetSupabaseClient() {
   _client = null;
-  _authClient = null;
-  _realtimeClient = null;
 }
