@@ -58,10 +58,10 @@ export function useChat() {
 
     function fetchMessages() {
       messageService.getMessages(threadId).then((msgs) => {
-        // Never replace a warm cache with an empty result — Supabase RLS
-        // can return [] if the policy momentarily blocks; keep what we have
         if (msgs.length > 0) {
-          dispatch({ type: "SET_THREAD_MESSAGES", threadId, messages: msgs });
+          // Merge strategy: DB is authoritative but preserves in-flight optimistic messages.
+          // Prevents messages disappearing when fetchMessages runs mid-send.
+          dispatch({ type: "MERGE_THREAD_MESSAGES", threadId, messages: msgs });
         }
         setLoading(false);
       }).catch(() => {

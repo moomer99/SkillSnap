@@ -65,6 +65,7 @@ type Action =
   | { type: "UPDATE_PARTICIPANT_HAPPY"; userId: string; happyPercent: number }
   | { type: "SET_THREAD_STARTED_AT"; threadId: string; startedAt: string }
   | { type: "SET_THREAD_MESSAGES"; threadId: string; messages: Message[] }
+  | { type: "MERGE_THREAD_MESSAGES"; threadId: string; messages: Message[] }
   | { type: "APPEND_THREAD_MESSAGE"; threadId: string; message: Message }
   | { type: "APPEND_THREAD_MESSAGE_IF_NEW"; threadId: string; message: Message }
   | { type: "PATCH_THREAD_MESSAGE"; threadId: string; optimisticId: string; message: Message }
@@ -204,6 +205,27 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         ...state,
         threadMessages: { ...state.threadMessages, [action.threadId]: action.messages },
       };
+    // Merges DB messages into the cache without clobbering in-flight optimistic messages.
+    // DB is authoritative for confirmed messages; optimistic/failed msgs only kept if not in DB.
+    case "MERGE_THREAD_MESSAGES": {
+      const existing = state.threadMessages[action.threadId] ?? [];
+      const dbIds = new Set(action.messages.map((m) => m.id));
+      // Keep only local messages not yet confirmed in DB (optimistic or failed)
+      const localOnly = existing.filter(
+        (m) => !dbIds.has(m.id) && (m.id.startsWith("optimistic_") || m.failed)
+      );
+      // Replace any optimistic messages that match a DB message by text+from
+      const localDeduped = localOnly.filter((local) =>
+        !action.messages.some((db) => db.from === "me" && db.text === local.text)
+      );
+      return {
+        ...state,
+        threadMessages: {
+          ...state.threadMessages,
+          [action.threadId]: [...action.messages, ...localDeduped],
+        },
+      };
+    }
     case "APPEND_THREAD_MESSAGE": {
       const existing = state.threadMessages[action.threadId] ?? [];
       // Exact ID match — already have it

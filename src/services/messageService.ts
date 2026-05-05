@@ -268,8 +268,6 @@ export const messageService = {
           { event: "INSERT", schema: "public", table: "messages" },
           (payload) => {
             const row = payload.new as Record<string, unknown>;
-            const convId = row.conversation_id as string;
-            if (!idsRef.current.includes(convId)) return;
             const msg = mapMessage(row, resolvedId);
             onMessage(msg);
           }

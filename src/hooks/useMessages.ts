@@ -62,6 +62,11 @@ export function useMessages() {
     const unsubMsgs = messageService.subscribeToAllMessages(
       threadIdsRef,
       (msg) => {
+        // If this conversation isn't known yet (e.g. receiver's first message),
+        // reload the thread list so it appears in the inbox.
+        if (!threadIdsRef.current.includes(msg.threadId)) {
+          loadThreads();
+        }
         // Dispatch into the correct thread cache (dedup-safe)
         dispatch({ type: "APPEND_THREAD_MESSAGE_IF_NEW", threadId: msg.threadId, message: msg });
         // Increment local unread badge for incoming messages
