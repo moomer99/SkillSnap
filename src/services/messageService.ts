@@ -42,14 +42,18 @@ function mapMessage(row: Record<string, unknown>, currentUserId: string): Messag
   };
 }
 
+// Uses getSession() (localStorage — instant, no network) first, falls back to
+// getUser() (live network call). This prevents getThreads/getMessages from
+// returning empty just because the auth server is momentarily slow.
 async function getCurrentUserId(): Promise<string | null> {
-  const { data: { user } } = await getAuthSupabase().auth.getUser();
+  const sb = getAuthSupabase();
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user?.id) return session.user.id;
+  // Session not in localStorage yet (e.g. first load after OAuth) — try live call
+  const { data: { user } } = await sb.auth.getUser();
   return user?.id ?? null;
 }
 
-// Retrieves the current JWT access token for authenticating Realtime channels.
-// Supabase Realtime with RLS requires the token to be passed via setAuth()
-// so the server can verify the subscriber's identity before delivering rows.
 async function getAccessToken(): Promise<string | null> {
   const { data: { session } } = await getAuthSupabase().auth.getSession();
   return session?.access_token ?? null;
@@ -58,31 +62,53 @@ async function getAccessToken(): Promise<string | null> {
 export const messageService = {
   async getThreads(): Promise<MessageThread[]> {
     const userId = await getCurrentUserId();
-    if (!userId) return [];
+    if (!userId) {
+      console.warn("[messageService] getThreads: no userId — user not authenticated");
+      return [];
+    }
 
-    const sb = getSupabase();
-    const { data: memberRows } = await sb
+    // Use getAuthSupabase() for all thread queries so RLS auth.uid() always
+    // resolves correctly regardless of environment (sandbox proxy vs real domain).
+    const sb = getAuthSupabase();
+
+    const { data: memberRows, error: memberErr } = await sb
       .from("conversation_members")
       .select("conversation_id")
       .eq("user_id", userId);
 
-    if (!memberRows?.length) return [];
+    if (memberErr) {
+      console.error("[messageService] getThreads memberRows error:", memberErr.message);
+      return [];
+    }
+    if (!memberRows?.length) {
+      console.log("[messageService] getThreads: no conversations for user", userId);
+      return [];
+    }
+
     const conversationIds = memberRows.map((r) => r.conversation_id);
 
-    const { data: conversations } = await sb
+    const { data: conversations, error: convErr } = await sb
       .from("conversations")
       .select("*")
       .in("id", conversationIds)
       .order("last_message_at", { ascending: false, nullsFirst: false });
 
+    if (convErr) {
+      console.error("[messageService] getThreads conversations error:", convErr.message);
+      return [];
+    }
     if (!conversations?.length) return [];
 
-    const { data: members } = await sb
+    const { data: members, error: membersErr } = await sb
       .from("conversation_members")
       .select("*, profiles(*)")
       .in("conversation_id", conversationIds);
 
-    return conversations
+    if (membersErr) {
+      console.error("[messageService] getThreads members error:", membersErr.message);
+    }
+
+    const result = conversations
       .map((conv) => {
         const convMembers = (members ?? []).filter(
           (m) => m.conversation_id === conv.id
@@ -94,15 +120,16 @@ export const messageService = {
         );
       })
       .filter((t) => t.participant != null);
+
+    console.log(`[messageService] getThreads: loaded ${result.length} threads for user ${userId}`);
+    return result;
   },
 
   async getMessages(conversationId: string): Promise<Message[]> {
     const userId = await getCurrentUserId();
     if (!userId) return [];
 
-    // Use proxy-aware client (getSupabase) for reads so this works on both
-    // the Orchids sandbox (proxied) and the real domain (direct).
-    const { data, error } = await getSupabase()
+    const { data, error } = await getAuthSupabase()
       .from("messages")
       .select("*")
       .eq("conversation_id", conversationId)
@@ -143,7 +170,7 @@ export const messageService = {
   },
 
   async incrementUnreadForOthers(conversationId: string, senderId: string): Promise<void> {
-    const sb = getSupabase();
+    const sb = getAuthSupabase();
     const { data: members } = await sb
       .from("conversation_members")
       .select("user_id, unread_count")
@@ -166,7 +193,7 @@ export const messageService = {
   async markThreadRead(conversationId: string): Promise<void> {
     const userId = await getCurrentUserId();
     if (!userId) return;
-    await getSupabase()
+    await getAuthSupabase()
       .from("conversation_members")
       .update({ unread_count: 0 })
       .eq("conversation_id", conversationId)
@@ -208,11 +235,11 @@ export const messageService = {
       { conversation_id: conv.id, user_id: participantId },
     ]);
 
+    console.log("[messageService] getOrCreateConversation: created", conv.id);
     return conv.id;
   },
 
   // Per-conversation Realtime subscription (used inside ChatScreen while chat is open).
-  // Authenticates the WS channel with the user's JWT so RLS delivers rows correctly.
   subscribeToMessages(conversationId: string, onMessage: (msg: Message) => void): () => void {
     let channel: ReturnType<ReturnType<typeof getRealtimeSupabase>["channel"]> | null = null;
     let cancelled = false;
@@ -222,12 +249,7 @@ export const messageService = {
       const resolvedId = currentUserId ?? "";
       const rt = getRealtimeSupabase();
 
-      // Authenticate the Realtime connection with the user's JWT.
-      // Required for postgres_changes with RLS — without this, the server
-      // treats the subscriber as anon and RLS blocks all row delivery.
-      if (token) {
-        rt.realtime.setAuth(token);
-      }
+      if (token) rt.realtime.setAuth(token);
 
       channel = rt
         .channel(`messages:conv:${conversationId}`)
@@ -246,10 +268,7 @@ export const messageService = {
           }
         )
         .subscribe((status, err) => {
-          console.log(`[Realtime] subscribeToMessages status: ${status}`, err ?? "");
-          if (status === "CHANNEL_ERROR") {
-            console.error("[Realtime] Channel error for conversation", conversationId, err);
-          }
+          console.log(`[Realtime] subscribeToMessages [${conversationId}] status: ${status}`, err ?? "");
         });
     });
 
@@ -259,8 +278,8 @@ export const messageService = {
     };
   },
 
-  // Global subscription — receives all INSERT events for conversations the user
-  // is a member of. Authenticated via JWT so RLS delivers the correct rows.
+  // Global subscription — receives all INSERT events across all the user's conversations.
+  // Authenticated via JWT so Supabase RLS delivers only authorized rows.
   subscribeToAllMessages(
     idsRef: { current: string[] },
     onMessage: (msg: Message) => void
@@ -273,9 +292,9 @@ export const messageService = {
       const resolvedId = currentUserId ?? "";
       const rt = getRealtimeSupabase();
 
-      if (token) {
-        rt.realtime.setAuth(token);
-      }
+      if (token) rt.realtime.setAuth(token);
+
+      console.log("[Realtime] subscribeToAllMessages: subscribing for user", resolvedId);
 
       channel = rt
         .channel("messages:global")
@@ -311,9 +330,7 @@ export const messageService = {
       if (cancelled) return;
       const rt = getRealtimeSupabase();
 
-      if (token) {
-        rt.realtime.setAuth(token);
-      }
+      if (token) rt.realtime.setAuth(token);
 
       channel = rt
         .channel("conversations:updates")
@@ -323,9 +340,7 @@ export const messageService = {
           (payload) => {
             const updatedId = (payload.new as Record<string, unknown>).id as string;
             console.log("[Realtime] conversation UPDATE:", updatedId);
-            if (idsRef.current.includes(updatedId)) {
-              onUpdate();
-            }
+            if (idsRef.current.includes(updatedId)) onUpdate();
           }
         )
         .subscribe((status, err) => {

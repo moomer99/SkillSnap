@@ -18,7 +18,7 @@ const SUPABASE_CONFIGURED =
 export function useMessages() {
   const { state, dispatch, navigate } = useAppState();
   const [connecting, setConnecting] = useState(false);
-  const [threadsLoading, setThreadsLoading] = useState(!state.threads.length);
+  const [threadsLoading, setThreadsLoading] = useState(true);
 
   const loadThreads = useCallback(async () => {
     if (!SUPABASE_CONFIGURED) {
@@ -29,7 +29,8 @@ export function useMessages() {
     try {
       const threads = await messageService.getThreads();
       dispatch({ type: "SET_THREADS", threads });
-    } catch {
+    } catch (err) {
+      console.error("[useMessages] loadThreads error:", err);
       dispatch({ type: "SET_THREADS", threads: [] });
     } finally {
       setThreadsLoading(false);
@@ -38,8 +39,7 @@ export function useMessages() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Refresh threads when this screen mounts — useGlobalMessages handles
-  // background updates; this catches any changes while the screen was hidden.
+  // Refresh thread list whenever MessagesScreen mounts
   useEffect(() => {
     loadThreads();
   }, [loadThreads]);
@@ -69,10 +69,10 @@ export function useMessages() {
         // Refresh threads so the new conversation appears in the list
         const threads = await messageService.getThreads();
         dispatch({ type: "SET_THREADS", threads });
-        threadIdsRef.current = threads.map((t) => t.id);
         dispatch({ type: "SET_ACTIVE_THREAD", threadId: conversationId, participantId });
         navigate("chat");
-      } catch {
+      } catch (err) {
+        console.error("[useMessages] connectTo error:", err);
         // Auth/network failure — navigate to chat anyway; user sees empty thread
         dispatch({ type: "SET_ACTIVE_THREAD", threadId: "", participantId });
         navigate("chat");
