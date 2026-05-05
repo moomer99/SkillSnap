@@ -230,51 +230,44 @@ export const messageService = {
 
     if (!conv) throw new Error("Failed to create conversation");
 
-    // RLS: user_id = auth.uid() — only the current user can insert their OWN row.
-    // A batch insert of both rows rolls back entirely when the participant row fails.
-    // Insert sender's row first (guaranteed to succeed), then attempt recipient's row
-    // separately so the sender's committed row is never rolled back.
-    const { error: senderErr } = await sb
-      .from("conversation_members")
-      .insert({ conversation_id: conv.id, user_id: userId });
+    // Use the SECURITY DEFINER RPC to insert both member rows.
+    // Direct INSERT is blocked by RLS for the participant row (user_id ≠ auth.uid()).
+    // The RPC validates the caller is a member before inserting the other user.
+    const { error: senderErr } = await sb.rpc("add_conversation_member", {
+      p_conversation_id: conv.id,
+      p_user_id: userId,
+    });
 
     if (senderErr) {
-      console.error("[messageService] getOrCreateConversation: failed to insert sender member:", senderErr.message);
+      console.error("[messageService] getOrCreateConversation: failed to add sender:", senderErr.message);
       throw new Error("Failed to join conversation");
     }
 
-    // Participant's row may fail RLS — that's expected. They auto-join when they
-    // receive the first Realtime message via joinConversation().
-    await sb
-      .from("conversation_members")
-      .insert({ conversation_id: conv.id, user_id: participantId })
-      .then(() => {})
-      .catch(() => {});
+    const { error: participantErr } = await sb.rpc("add_conversation_member", {
+      p_conversation_id: conv.id,
+      p_user_id: participantId,
+    });
+
+    if (participantErr) {
+      console.warn("[messageService] getOrCreateConversation: failed to add participant:", participantErr.message);
+    }
 
     console.log("[messageService] getOrCreateConversation: created", conv.id);
     return conv.id;
   },
 
   // Called by the recipient when they receive a Realtime message for a conversation
-  // they are not yet a member of. Inserts their own row (user_id = auth.uid() — allowed).
+  // they are not yet a member of. Uses the SECURITY DEFINER RPC which only succeeds
+  // if the caller was legitimately added to the conversation by the sender.
   async joinConversation(conversationId: string): Promise<boolean> {
     const userId = await getCurrentUserId();
     if (!userId) return false;
     const sb = getAuthSupabase();
 
-    // No-op if already a member
-    const { data: existing } = await sb
-      .from("conversation_members")
-      .select("conversation_id")
-      .eq("conversation_id", conversationId)
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (existing) return true;
-
-    const { error } = await sb
-      .from("conversation_members")
-      .insert({ conversation_id: conversationId, user_id: userId });
+    const { error } = await sb.rpc("add_conversation_member", {
+      p_conversation_id: conversationId,
+      p_user_id: userId,
+    });
 
     if (error) {
       console.error("[messageService] joinConversation error:", error.message);
