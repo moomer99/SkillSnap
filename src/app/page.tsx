@@ -28,6 +28,7 @@ const BottomNav         = lazy(() => import("@/components/skillsnap/BottomNav"))
 
 import { ToastProvider } from "@/components/skillsnap/shared/Toast";
 import AuthPromptModal from "@/components/skillsnap/shared/AuthPromptModal";
+import { useGlobalMessages } from "@/hooks/useGlobalMessages";
 
 // Screens that show the bottom nav
 const NAV_SCREENS: Screen[] = ["home", "discover", "upload", "messages", "own-profile"];
@@ -40,6 +41,10 @@ const isOrchidsPreview =
 function SkillSnapRouter() {
   const { state, navigate } = useAppState();
   const { screen, authLoading } = state;
+
+  // Persistent background subscription — lives for the entire app session.
+  // Receives messages and thread updates regardless of which screen is active.
+  useGlobalMessages();
 
   const showBottomNav = NAV_SCREENS.includes(screen);
 

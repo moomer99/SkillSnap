@@ -3,12 +3,12 @@
 // useMessages — loads threads via messageService (Supabase).
 // Falls back to MOCK_THREADS when Supabase is not configured.
 // connectTo creates/finds a conversation (Connect flow).
+// Background subscriptions are handled by useGlobalMessages in the app shell.
 // ─────────────────────────────────────────────
-import { useEffect, useCallback, useState, useRef } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useAppState } from "@/state/AppState";
 import { messageService } from "@/services/messageService";
 import { MOCK_THREADS } from "@/mock-data/messages";
-import { showMessageNotification } from "@/hooks/useNotifications";
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -18,9 +18,7 @@ const SUPABASE_CONFIGURED =
 export function useMessages() {
   const { state, dispatch, navigate } = useAppState();
   const [connecting, setConnecting] = useState(false);
-  const [threadsLoading, setThreadsLoading] = useState(true);
-  // Track thread IDs for the Realtime subscription without causing re-subscription loops
-  const threadIdsRef = useRef<string[]>([]);
+  const [threadsLoading, setThreadsLoading] = useState(!state.threads.length);
 
   const loadThreads = useCallback(async () => {
     if (!SUPABASE_CONFIGURED) {
@@ -31,7 +29,6 @@ export function useMessages() {
     try {
       const threads = await messageService.getThreads();
       dispatch({ type: "SET_THREADS", threads });
-      threadIdsRef.current = threads.map((t) => t.id);
     } catch {
       dispatch({ type: "SET_THREADS", threads: [] });
     } finally {
@@ -41,53 +38,11 @@ export function useMessages() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load threads once on mount
+  // Refresh threads when this screen mounts — useGlobalMessages handles
+  // background updates; this catches any changes while the screen was hidden.
   useEffect(() => {
     loadThreads();
   }, [loadThreads]);
-
-  // Subscribe to conversation updates so the thread list stays fresh after messages are sent.
-  // Uses a ref for thread IDs so the subscription isn't torn down and re-created on every load.
-  useEffect(() => {
-    if (!SUPABASE_CONFIGURED) return;
-
-    const unsubConv = messageService.subscribeToConversationUpdates(
-      threadIdsRef,
-      () => { loadThreads(); }
-    );
-
-    // Fix 2 & 4: subscribe to new message INSERTs across ALL user conversations.
-    // This ensures recipients receive messages and triggers background notifications
-    // even when the chat screen is closed.
-    const unsubMsgs = messageService.subscribeToAllMessages(
-      threadIdsRef,
-      (msg) => {
-        // If this conversation isn't known yet (e.g. receiver's first message),
-        // reload the thread list so it appears in the inbox.
-        if (!threadIdsRef.current.includes(msg.threadId)) {
-          loadThreads();
-        }
-        // Dispatch into the correct thread cache (dedup-safe)
-        dispatch({ type: "APPEND_THREAD_MESSAGE_IF_NEW", threadId: msg.threadId, message: msg });
-        // Increment local unread badge for incoming messages
-        if (msg.from === "them") {
-          dispatch({ type: "INCREMENT_THREAD_UNREAD", threadId: msg.threadId });
-          showMessageNotification({
-            senderName: msg.senderName ?? "New message",
-            senderInitial: (msg.senderName ?? "?")[0].toUpperCase(),
-            text: msg.text ?? "Sent you a message",
-          });
-        }
-      }
-    );
-
-    return () => {
-      unsubConv();
-      unsubMsgs();
-    };
-  // Only subscribe once — loadThreads and dispatch are stable
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const openThread = useCallback(
     (threadId: string) => {
