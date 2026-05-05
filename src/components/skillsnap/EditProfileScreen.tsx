@@ -153,8 +153,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
         await new Promise((r) => setTimeout(r, 600));
       }
 
-      const inMemoryAvatarUrl: string | undefined =
-        persistedAvatarUrl ?? (avatarPreview?.startsWith("blob:") ? undefined : (avatarPreview ?? undefined));
+      const inMemoryAvatarUrl: string | undefined = persistedAvatarUrl ??
+        (avatarPreview && !avatarPreview.startsWith("blob:") ? avatarPreview : undefined);
 
       dispatch({
         type: "UPDATE_CURRENT_USER",
@@ -172,7 +172,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
       });
 
       setSaved(true);
-      setTimeout(() => onNavigate("own-profile"), 1200);
+      setTimeout(() => onNavigate("own-profile"), 2000);
     } catch (err) {
       console.error("Save profile error:", err);
       showToast("Failed to save. Please try again.", "info");
