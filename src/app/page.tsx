@@ -4,7 +4,7 @@
 // Navigation is driven by AppState.screen
 // All screens receive onNavigate from here
 // ─────────────────────────────────────────────
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo, useRef, useState, useEffect } from "react";
 import { AppProvider, useAppState } from "@/state/AppState";
 import type { Screen } from "@/types";
 
@@ -47,6 +47,17 @@ function SkillSnapRouter() {
   useGlobalMessages();
 
   const showBottomNav = NAV_SCREENS.includes(screen);
+
+  // Opacity fade between screen changes
+  const [opacity, setOpacity] = useState(1);
+  const prevScreen = useRef(screen);
+  useEffect(() => {
+    if (prevScreen.current === screen) return;
+    prevScreen.current = screen;
+    setOpacity(0);
+    const t = setTimeout(() => setOpacity(1), 50);
+    return () => clearTimeout(t);
+  }, [screen]);
 
   return (
     <div
@@ -176,24 +187,26 @@ function SkillSnapRouter() {
           </div>
         )}
         {/* Screen renderer — eager screens first, rest wrapped in Suspense */}
-        {screen === "landing" && <LandingPage onNavigate={navigate} />}
-        {screen === "auth"    && <AuthScreen  onNavigate={navigate} />}
+        <div style={{ opacity, transition: "opacity 150ms ease" }}>
+          {screen === "landing" && <LandingPage onNavigate={navigate} />}
+          {screen === "auth"    && <AuthScreen  onNavigate={navigate} />}
 
-        <Suspense fallback={<div className="flex-1 bg-[#f8f7f5]" />}>
-          {screen === "onboarding"     && <OnboardingScreen onNavigate={navigate} />}
-          {screen === "search"         && <SearchScreen      onNavigate={navigate} />}
-          {screen === "home"           && <HomeFeed          onNavigate={navigate} />}
-          {screen === "discover"       && <DiscoverScreen    onNavigate={navigate} />}
-          {screen === "own-profile"    && <ProfileScreen     variant="own"    onNavigate={navigate} />}
-          {screen === "client-profile" && <ProfileScreen     variant="client" onNavigate={navigate} />}
-          {screen === "upload"         && <UploadScreen      onNavigate={navigate} />}
-          {screen === "messages"       && <MessagesScreen    onNavigate={navigate} />}
-          {screen === "chat"           && <ChatScreen        onNavigate={navigate} />}
-          {screen === "edit-profile"   && <EditProfileScreen onNavigate={navigate} />}
-          {screen === "settings"       && <SettingsScreen    onNavigate={navigate} />}
-          {screen === "pro"            && <ProScreen         onNavigate={navigate} />}
-          {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
-        </Suspense>
+          <Suspense fallback={<div className="flex-1 bg-[#f8f7f5]" />}>
+            {screen === "onboarding"     && <OnboardingScreen onNavigate={navigate} />}
+            {screen === "search"         && <SearchScreen      onNavigate={navigate} />}
+            {screen === "home"           && <HomeFeed          onNavigate={navigate} />}
+            {screen === "discover"       && <DiscoverScreen    onNavigate={navigate} />}
+            {screen === "own-profile"    && <ProfileScreen     variant="own"    onNavigate={navigate} />}
+            {screen === "client-profile" && <ProfileScreen     variant="client" onNavigate={navigate} />}
+            {screen === "upload"         && <UploadScreen      onNavigate={navigate} />}
+            {screen === "messages"       && <MessagesScreen    onNavigate={navigate} />}
+            {screen === "chat"           && <ChatScreen        onNavigate={navigate} />}
+            {screen === "edit-profile"   && <EditProfileScreen onNavigate={navigate} />}
+            {screen === "settings"       && <SettingsScreen    onNavigate={navigate} />}
+            {screen === "pro"            && <ProScreen         onNavigate={navigate} />}
+            {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
+          </Suspense>
+        </div>
         <AuthPromptModal />
       </div>
 

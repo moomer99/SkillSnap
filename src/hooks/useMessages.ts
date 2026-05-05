@@ -64,18 +64,19 @@ export function useMessages() {
         setConnectingId(null);
         return;
       }
+      // Navigate immediately with a placeholder thread — feels instant to the user.
+      // The real conversation ID resolves in the background and updates the state.
+      dispatch({ type: "SET_ACTIVE_THREAD", threadId: "", participantId });
+      navigate("chat");
       try {
         const conversationId = await messageService.getOrCreateConversation(participantId);
-        // Refresh threads so the new conversation appears in the list
-        const threads = await messageService.getThreads();
-        dispatch({ type: "SET_THREADS", threads });
         dispatch({ type: "SET_ACTIVE_THREAD", threadId: conversationId, participantId });
-        navigate("chat");
+        // Refresh threads in background so Messages screen stays up to date
+        messageService.getThreads().then((threads) => {
+          dispatch({ type: "SET_THREADS", threads });
+        }).catch(() => {});
       } catch (err) {
         console.error("[useMessages] connectTo error:", err);
-        // Auth/network failure — navigate to chat anyway; user sees empty thread
-        dispatch({ type: "SET_ACTIVE_THREAD", threadId: "", participantId });
-        navigate("chat");
       } finally {
         setConnectingId(null);
       }

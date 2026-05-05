@@ -87,8 +87,8 @@ export function useChat() {
     }
     document.addEventListener("visibilitychange", handleVisibility);
 
-    // Polling fallback every 8s — catches messages if Realtime WebSocket drops
-    const pollInterval = setInterval(fetchMessages, 8000);
+    // Polling fallback every 30s — Realtime handles live delivery; this is safety net only
+    const pollInterval = setInterval(fetchMessages, 30000);
 
     return () => {
       unsubRef.current?.();
