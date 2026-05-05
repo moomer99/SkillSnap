@@ -17,7 +17,7 @@ const SUPABASE_CONFIGURED =
 
 export function useMessages() {
   const { state, dispatch, navigate } = useAppState();
-  const [connecting, setConnecting] = useState(false);
+  const [connectingId, setConnectingId] = useState<string | null>(null);
   const [threadsLoading, setThreadsLoading] = useState(true);
 
   const loadThreads = useCallback(async () => {
@@ -57,11 +57,11 @@ export function useMessages() {
 
   const connectTo = useCallback(
     async (participantId: string) => {
-      setConnecting(true);
+      setConnectingId(participantId);
       if (!SUPABASE_CONFIGURED) {
         dispatch({ type: "SET_ACTIVE_THREAD", threadId: "thread_1", participantId });
         navigate("chat");
-        setConnecting(false);
+        setConnectingId(null);
         return;
       }
       try {
@@ -77,7 +77,7 @@ export function useMessages() {
         dispatch({ type: "SET_ACTIVE_THREAD", threadId: "", participantId });
         navigate("chat");
       } finally {
-        setConnecting(false);
+        setConnectingId(null);
       }
     },
     [dispatch, navigate]
@@ -89,7 +89,7 @@ export function useMessages() {
     activeThreadId: state.activeThreadId,
     openThread,
     connectTo,
-    connecting,
+    connecting: connectingId,
     reloadThreads: loadThreads,
   };
 }

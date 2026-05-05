@@ -125,7 +125,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
                 <ProCard
                   key={pin.id}
                   pin={pin}
-                  connecting={connecting}
+                  connecting={connecting === pin.userId}
                   onProfile={() => handleProfileClick(pin.userId)}
                   onConnect={() => requireAuth(() => connectTo(pin.userId))}
                 />

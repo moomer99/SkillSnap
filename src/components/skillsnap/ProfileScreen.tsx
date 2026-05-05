@@ -137,7 +137,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             ) : (
               <>
                 <div className="flex-1">
-                  <ConnectButton onClick={() => requireAuth(() => connectTo(user.id))} fullWidth loading={connecting} />
+                  <ConnectButton onClick={() => requireAuth(() => connectTo(user.id))} fullWidth loading={connecting === user.id} />
                 </div>
                 <button onClick={() => requireAuth(() => toggleFollow(user.id))} className={`flex-1 h-11 rounded-2xl font-semibold text-sm border-2 transition-all active:scale-[0.98] ${isFollowing ? "text-white bg-[#6c47ff] border-[#6c47ff]" : "text-[#6c47ff] bg-white border-[#6c47ff]"}`}>
                   {isFollowing ? "Following" : "Follow"}

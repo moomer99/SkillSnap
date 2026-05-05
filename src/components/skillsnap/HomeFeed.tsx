@@ -280,7 +280,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
                   else navigator.clipboard?.writeText(text).catch(() => {});
                 }}
                 onFullscreen={() => setFullscreenPost(post)}
-                connecting={connecting}
+                connecting={connecting === post.authorId}
                 headerH={headerH}
               />
             ))}
