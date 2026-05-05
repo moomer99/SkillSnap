@@ -63,65 +63,79 @@ export const messageService = {
   async getThreads(): Promise<MessageThread[]> {
     const userId = await getCurrentUserId();
     if (!userId) {
-      console.warn("[messageService] getThreads: no userId — user not authenticated");
+      console.warn("[messageService] getThreads: no userId");
       return [];
     }
 
-    // Use getAuthSupabase() for all thread queries so RLS auth.uid() always
-    // resolves correctly regardless of environment (sandbox proxy vs real domain).
     const sb = getAuthSupabase();
 
-    const { data: memberRows, error: memberErr } = await sb
+    // Query conversation_members with joined conversation and profile data
+    // Never query conversations table directly — RLS blocks it
+    const { data: memberships, error } = await sb
       .from("conversation_members")
-      .select("conversation_id")
-      .eq("user_id", userId);
+      .select(`
+        conversation_id,
+        unread_count,
+        conversations (
+          id,
+          last_message_text,
+          last_message_at
+        )
+      `)
+      .eq("user_id", userId)
+      .order("conversation_id", { ascending: false });
 
-    if (memberErr) {
-      console.error("[messageService] getThreads memberRows error:", memberErr.message);
+    if (error) {
+      console.error("[messageService] getThreads error:", error.message);
       return [];
     }
-    if (!memberRows?.length) {
+
+    if (!memberships?.length) {
       console.log("[messageService] getThreads: no conversations for user", userId);
       return [];
     }
 
-    const conversationIds = memberRows.map((r) => r.conversation_id);
+    const conversationIds = memberships.map((m) => m.conversation_id);
 
-    const { data: conversations, error: convErr } = await sb
-      .from("conversations")
-      .select("*")
-      .in("id", conversationIds)
-      .order("last_message_at", { ascending: false, nullsFirst: false });
-
-    if (convErr) {
-      console.error("[messageService] getThreads conversations error:", convErr.message);
-      return [];
-    }
-    if (!conversations?.length) return [];
-
-    const { data: members, error: membersErr } = await sb
+    // Get other members with their profiles
+    const { data: otherMembers, error: membersErr } = await sb
       .from("conversation_members")
       .select("*, profiles(*)")
-      .in("conversation_id", conversationIds);
+      .in("conversation_id", conversationIds)
+      .neq("user_id", userId);
 
     if (membersErr) {
-      console.error("[messageService] getThreads members error:", membersErr.message);
+      console.error("[messageService] getThreads otherMembers error:", membersErr.message);
     }
 
-    const result = conversations
-      .map((conv) => {
-        const convMembers = (members ?? []).filter(
-          (m) => m.conversation_id === conv.id
-        );
-        return mapThread(
-          conv as Record<string, unknown>,
-          userId,
-          convMembers as Record<string, unknown>[]
-        );
-      })
-      .filter((t) => t.participant != null);
+    const result = memberships
+      .map((membership) => {
+        const conv = membership.conversations as Record<string, unknown>;
+        if (!conv) return null;
 
-    console.log(`[messageService] getThreads: loaded ${result.length} threads for user ${userId}`);
+        const otherMember = (otherMembers ?? []).find(
+          (m) => m.conversation_id === membership.conversation_id
+        );
+        if (!otherMember?.profiles) return null;
+
+        const participant = mapProfile(otherMember.profiles as Record<string, unknown>);
+
+        return {
+          id: membership.conversation_id,
+          participant,
+          lastMessage: (conv.last_message_text as string) ?? "",
+          lastMessageTime: conv.last_message_at
+            ? new Date(conv.last_message_at as string).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "",
+          unreadCount: membership.unread_count ?? 0,
+        } as MessageThread;
+      })
+      .filter(Boolean) as MessageThread[];
+
+    console.log(`[messageService] getThreads: loaded ${result.length} threads`);
     return result;
   },
 
