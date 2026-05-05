@@ -86,10 +86,7 @@ export const messageService = {
 
     // Get other members with their profiles
     const { data: otherMembers, error: membersErr } = await sb
-      .from("conversation_members")
-      .select("*, profiles(*)")
-      .in("conversation_id", conversationIds)
-      .neq("user_id", userId);
+      .rpc("get_thread_participants", { p_conversation_ids: conversationIds });
 
     if (membersErr) {
       console.error("[messageService] getThreads otherMembers error:", membersErr.message);
@@ -100,9 +97,9 @@ export const messageService = {
         const otherMember = (otherMembers ?? []).find(
           (m) => m.conversation_id === membership.conversation_id
         );
-        if (!otherMember?.profiles) return null;
+        if (!otherMember) return null;
 
-        const participant = mapProfile(otherMember.profiles as Record<string, unknown>);
+        const participant = mapProfile(otherMember as Record<string, unknown>);
 
         return {
           id: membership.conversation_id as string,
