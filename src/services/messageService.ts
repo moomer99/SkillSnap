@@ -238,14 +238,12 @@ export const messageService = {
       if (shared) return shared.conversation_id;
     }
 
-    // Create new conversation
-    const { data: conv, error: convError } = await sb
-      .from("conversations")
-      .insert({})
-      .select()
-      .single();
+    // Create new conversation via SECURITY DEFINER RPC — direct INSERT is RLS-blocked
+    const { data: newConvId, error: convError } = await sb.rpc("create_conversation");
 
-    if (convError || !conv) throw new Error("Failed to create conversation");
+    if (convError || !newConvId) throw new Error("Failed to create conversation");
+
+    const conv = { id: newConvId as string };
 
     const { error: senderErr } = await sb.rpc("add_conversation_member", {
       p_conversation_id: conv.id,
