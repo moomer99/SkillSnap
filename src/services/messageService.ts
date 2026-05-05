@@ -205,43 +205,40 @@ export const messageService = {
     if (!userId) throw new Error("Not authenticated");
     const sb = getAuthSupabase();
 
-    const { data: existingMemberships } = await sb
+    // Find existing conversation by checking conversation_members only
+    // Never query conversations table directly — RLS blocks it before membership exists
+    const { data: myMemberships } = await sb
       .from("conversation_members")
       .select("conversation_id")
       .eq("user_id", userId);
 
-    if (existingMemberships?.length) {
-      const ids = existingMemberships.map((m) => m.conversation_id);
+    if (myMemberships?.length) {
+      const myIds = myMemberships.map((m) => m.conversation_id);
       const { data: shared } = await sb
         .from("conversation_members")
         .select("conversation_id")
         .eq("user_id", participantId)
-        .in("conversation_id", ids)
+        .in("conversation_id", myIds)
         .maybeSingle();
 
       if (shared) return shared.conversation_id;
     }
 
-    const { data: conv } = await sb
+    // Create new conversation
+    const { data: conv, error: convError } = await sb
       .from("conversations")
       .insert({})
       .select()
       .single();
 
-    if (!conv) throw new Error("Failed to create conversation");
+    if (convError || !conv) throw new Error("Failed to create conversation");
 
-    // Use the SECURITY DEFINER RPC to insert both member rows.
-    // Direct INSERT is blocked by RLS for the participant row (user_id ≠ auth.uid()).
-    // The RPC validates the caller is a member before inserting the other user.
     const { error: senderErr } = await sb.rpc("add_conversation_member", {
       p_conversation_id: conv.id,
       p_user_id: userId,
     });
 
-    if (senderErr) {
-      console.error("[messageService] getOrCreateConversation: failed to add sender:", senderErr.message);
-      throw new Error("Failed to join conversation");
-    }
+    if (senderErr) throw new Error("Failed to join conversation");
 
     const { error: participantErr } = await sb.rpc("add_conversation_member", {
       p_conversation_id: conv.id,
@@ -249,7 +246,7 @@ export const messageService = {
     });
 
     if (participantErr) {
-      console.warn("[messageService] getOrCreateConversation: failed to add participant:", participantErr.message);
+      console.warn("[messageService] failed to add participant:", participantErr.message);
     }
 
     console.log("[messageService] getOrCreateConversation: created", conv.id);
