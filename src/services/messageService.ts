@@ -219,50 +219,36 @@ export const messageService = {
     if (!userId) throw new Error("Not authenticated");
     const sb = getAuthSupabase();
 
-    // Find existing conversation by checking conversation_members only
-    // Never query conversations table directly — RLS blocks it before membership exists
-    const { data: myMemberships } = await sb
-      .from("conversation_members")
-      .select("conversation_id")
-      .eq("user_id", userId);
+    // Use security definer RPC to find existing conversation
+    // Direct queries on conversation_members can't see other user's rows
+    const { data: existingId } = await sb
+      .rpc("find_existing_conversation", { p_participant_id: participantId });
 
-    if (myMemberships?.length) {
-      const myIds = myMemberships.map((m) => m.conversation_id);
-      const { data: shared } = await sb
-        .from("conversation_members")
-        .select("conversation_id")
-        .eq("user_id", participantId)
-        .in("conversation_id", myIds)
-        .maybeSingle();
-
-      if (shared) return shared.conversation_id;
+    if (existingId) {
+      console.log("[messageService] getOrCreateConversation: found existing", existingId);
+      return existingId;
     }
 
-    // Create new conversation via SECURITY DEFINER RPC — direct INSERT is RLS-blocked
-    const { data: newConvId, error: convError } = await sb.rpc("create_conversation");
+    // Create new conversation
+    const { data: convId, error: convError } = await sb
+      .rpc("create_conversation");
 
-    if (convError || !newConvId) throw new Error("Failed to create conversation");
-
-    const conv = { id: newConvId as string };
+    if (convError || !convId) throw new Error("Failed to create conversation");
 
     const { error: senderErr } = await sb.rpc("add_conversation_member", {
-      p_conversation_id: conv.id,
+      p_conversation_id: convId,
       p_user_id: userId,
     });
 
     if (senderErr) throw new Error("Failed to join conversation");
 
-    const { error: participantErr } = await sb.rpc("add_conversation_member", {
-      p_conversation_id: conv.id,
+    await sb.rpc("add_conversation_member", {
+      p_conversation_id: convId,
       p_user_id: participantId,
     });
 
-    if (participantErr) {
-      console.warn("[messageService] failed to add participant:", participantErr.message);
-    }
-
-    console.log("[messageService] getOrCreateConversation: created", conv.id);
-    return conv.id;
+    console.log("[messageService] getOrCreateConversation: created", convId);
+    return convId as string;
   },
 
   // Called by the recipient when they receive a Realtime message for a conversation
