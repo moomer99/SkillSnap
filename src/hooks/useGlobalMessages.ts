@@ -61,9 +61,12 @@ export function useGlobalMessages() {
     const unsubMsgs = messageService.subscribeToAllMessages(
       threadIdsRef,
       (msg) => {
-        // New conversation the receiver doesn't know about yet → refresh thread list
+        // New conversation the receiver doesn't know about yet → auto-join then reload
         if (!threadIdsRef.current.includes(msg.threadId)) {
-          loadThreads();
+          messageService.joinConversation(msg.threadId).then((joined) => {
+            if (joined) loadThreads();
+          });
+          return;
         }
         dispatch({ type: "APPEND_THREAD_MESSAGE_IF_NEW", threadId: msg.threadId, message: msg });
         if (msg.from === "them") {

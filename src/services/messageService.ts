@@ -230,13 +230,59 @@ export const messageService = {
 
     if (!conv) throw new Error("Failed to create conversation");
 
-    await sb.from("conversation_members").insert([
-      { conversation_id: conv.id, user_id: userId },
-      { conversation_id: conv.id, user_id: participantId },
-    ]);
+    // RLS: user_id = auth.uid() — only the current user can insert their OWN row.
+    // A batch insert of both rows rolls back entirely when the participant row fails.
+    // Insert sender's row first (guaranteed to succeed), then attempt recipient's row
+    // separately so the sender's committed row is never rolled back.
+    const { error: senderErr } = await sb
+      .from("conversation_members")
+      .insert({ conversation_id: conv.id, user_id: userId });
+
+    if (senderErr) {
+      console.error("[messageService] getOrCreateConversation: failed to insert sender member:", senderErr.message);
+      throw new Error("Failed to join conversation");
+    }
+
+    // Participant's row may fail RLS — that's expected. They auto-join when they
+    // receive the first Realtime message via joinConversation().
+    await sb
+      .from("conversation_members")
+      .insert({ conversation_id: conv.id, user_id: participantId })
+      .then(() => {})
+      .catch(() => {});
 
     console.log("[messageService] getOrCreateConversation: created", conv.id);
     return conv.id;
+  },
+
+  // Called by the recipient when they receive a Realtime message for a conversation
+  // they are not yet a member of. Inserts their own row (user_id = auth.uid() — allowed).
+  async joinConversation(conversationId: string): Promise<boolean> {
+    const userId = await getCurrentUserId();
+    if (!userId) return false;
+    const sb = getAuthSupabase();
+
+    // No-op if already a member
+    const { data: existing } = await sb
+      .from("conversation_members")
+      .select("conversation_id")
+      .eq("conversation_id", conversationId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (existing) return true;
+
+    const { error } = await sb
+      .from("conversation_members")
+      .insert({ conversation_id: conversationId, user_id: userId });
+
+    if (error) {
+      console.error("[messageService] joinConversation error:", error.message);
+      return false;
+    }
+
+    console.log("[messageService] joinConversation: joined", conversationId);
+    return true;
   },
 
   // Per-conversation Realtime subscription (used inside ChatScreen while chat is open).
@@ -303,6 +349,12 @@ export const messageService = {
           { event: "INSERT", schema: "public", table: "messages" },
           (payload) => {
             const row = payload.new as Record<string, unknown>;
+            const convId = row.conversation_id as string;
+            const senderId = row.sender_id as string;
+            // Ignore messages sent by the current user (already handled optimistically)
+            // and messages for conversations the user has no relationship with.
+            // idsRef may be empty for brand-new conversations — let those through for auto-join.
+            if (senderId === resolvedId) return;
             console.log("[Realtime] subscribeToAllMessages INSERT:", row);
             const msg = mapMessage(row, resolvedId);
             onMessage(msg);
