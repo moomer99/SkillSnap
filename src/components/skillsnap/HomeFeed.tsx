@@ -100,8 +100,12 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
   }
 
   function handleProfileClick(userId: string) {
-    dispatch({ type: "SET_VIEWING_USER", userId });
-    onNavigate("client-profile");
+    if (userId === state.currentUser?.id) {
+      onNavigate("own-profile");
+    } else {
+      dispatch({ type: "SET_VIEWING_USER", userId });
+      onNavigate("client-profile");
+    }
   }
 
   function dismissPrompt() {
@@ -283,6 +287,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
                 }}
                 onFullscreen={() => setFullscreenPost(post)}
                 connecting={connecting === post.authorId}
+                isOwnPost={post.authorId === state.currentUser?.id}
                 headerH={headerH}
               />
             ))}
@@ -315,6 +320,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
           onProfileClick={() => { setFullscreenPost(null); handleProfileClick(fullscreenPost.authorId); }}
           onLike={() => requireAuth(() => toggleLike(fullscreenPost.id))}
           isLiked={likedPosts.has(fullscreenPost.id)}
+          isOwnPost={fullscreenPost.authorId === state.currentUser?.id}
         />
       )}
     </div>
@@ -323,13 +329,14 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
 
 // ── Full-screen viewer overlay ─────────────────────────────────────────────
 function FullscreenViewer({
-  post, onClose, onProfileClick, onLike, isLiked,
+  post, onClose, onProfileClick, onLike, isLiked, isOwnPost,
 }: {
   post: Post;
   onClose: () => void;
   onProfileClick: () => void;
   onLike: () => void;
   isLiked: boolean;
+  isOwnPost: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -438,12 +445,12 @@ function FullscreenViewer({
 
 // ── Feed card ──────────────────────────────────────────────────────
 function FeedCard({
-  post, isLiked, isSaved, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, connecting, headerH,
+  post, isLiked, isSaved, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, connecting, isOwnPost, headerH,
 }: {
   post: Post; isLiked: boolean; isSaved: boolean;
   onLike: () => void; onSave: () => void; onProfileClick: () => void;
   onConnectClick: () => void; onShare: () => void; onFullscreen: () => void;
-  connecting: boolean; headerH: number;
+  connecting: boolean; isOwnPost: boolean; headerH: number;
 }) {
   const { author } = post;
   const [playing, setPlaying] = useState(false);
@@ -623,7 +630,7 @@ function FeedCard({
           )}
         </div>
 
-        <ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />
+        {!isOwnPost && <ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />}
       </div>
     </div>
   );
