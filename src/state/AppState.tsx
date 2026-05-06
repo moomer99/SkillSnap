@@ -384,6 +384,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    // PKCE OAuth callback: if the URL contains ?code=, exchange it for a session
+    // client-side. The code verifier was stored in localStorage by signInWithOAuth,
+    // so only the browser client can complete this exchange — not the server route.
+    const urlParams = new URLSearchParams(window.location.search);
+    const oauthCode = urlParams.get("code");
+    if (oauthCode) {
+      // Strip the code from the URL immediately to prevent re-use on refresh
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, "", cleanUrl);
+      try {
+        const { error: exchangeError } = await authSb.auth.exchangeCodeForSession(oauthCode);
+        if (exchangeError) {
+          console.error("[AppState] exchangeCodeForSession error:", exchangeError.message);
+        }
+        // onAuthStateChange will fire with SIGNED_IN and hydrate the profile
+      } catch (e) {
+        console.error("[AppState] exchangeCodeForSession threw:", e);
+      }
+    }
+
     // Resolve initial session — use getUser() (live network call) instead of
     // getSession() (localStorage only). This catches the case where a brand-new
     // OAuth user has their session in cookies (set server-side by the callback

@@ -1,85 +1,37 @@
 // ─────────────────────────────────────────────
 // SkillSnap — Supabase OAuth Callback Route
-// Handles the redirect after Google (or any OAuth) login.
-// Exchanges the auth code for a session, then redirects into the app.
-// Supabase's onAuthStateChange in AppState picks up the new session automatically.
+//
+// PKCE flow: the code verifier is stored in the *browser's* localStorage by the
+// Supabase JS client. A server-side handler can never access it, so calling
+// exchangeCodeForSession() here always fails with "Unable to exchange external code".
+//
+// Instead we forward the raw ?code= param to the app root and let the browser-side
+// Supabase client (detectSessionInUrl: true + flowType: 'pkce') complete the exchange.
+// onAuthStateChange in AppState then picks up the resulting SIGNED_IN event.
 // ─────────────────────────────────────────────
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
+  const error = searchParams.get("error");
+  const errorDescription = searchParams.get("error_description");
 
-  if (code) {
-    const cookieStore = await cookies();
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          },
-        },
-      }
+  if (error) {
+    console.error("[auth/callback] OAuth error:", error, errorDescription);
+    return NextResponse.redirect(
+      `${origin}/?auth_error=1&reason=${encodeURIComponent(errorDescription ?? error)}`
     );
-
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (error) {
-      console.error('[auth/callback] exchangeCodeForSession error:', error.message, error.status);
-      return NextResponse.redirect(`${origin}/?auth_error=1&reason=${encodeURIComponent(error.message)}`);
-    }
-
-    if (!error && data.user) {
-      // Ensure the profile row exists — safety net for Google and any OAuth provider.
-      // DB trigger handles this too, but upsert guarantees it even if trigger is absent.
-      try {
-        const meta = data.user.user_metadata ?? {};
-        const displayName: string =
-          (meta.full_name as string) ||
-          (meta.name as string) ||
-          (meta.display_name as string) ||
-          (data.user.email?.split("@")[0] ?? "User");
-        const avatarUrl: string | null =
-          (meta.avatar_url as string) || (meta.picture as string) || null;
-        const rawUsername = displayName.toLowerCase().replace(/[^a-z0-9_]/g, "_");
-        const username =
-          rawUsername.slice(0, 26) + "_" + data.user.id.replace(/-/g, "").slice(0, 4);
-
-        await supabase.from("profiles").upsert(
-          {
-            id: data.user.id,
-            username,
-            display_name: displayName,
-            email: data.user.email ?? null,
-            avatar_url: avatarUrl,
-            avatar_initial: displayName.charAt(0).toUpperCase(),
-            avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
-          },
-          {
-            onConflict: "id",
-            ignoreDuplicates: false, // refresh avatar/name for returning users
-          }
-        );
-      } catch {
-        // Profile upsert failed — non-fatal. AppState will retry on SIGNED_IN event.
-      }
-
-      // Redirect into the app — client AppState hydrates the session and loads the profile
-      return NextResponse.redirect(`${origin}${next}`);
-    }
   }
 
-  // Auth failed or no code — redirect back to auth screen with error param
-  return NextResponse.redirect(`${origin}/?auth_error=1`);
+  if (code) {
+    // Forward the code to the SPA — the browser Supabase client will exchange it
+    // using the PKCE verifier it stored in localStorage during signInWithOAuth.
+    const redirectUrl = new URL(origin + next);
+    redirectUrl.searchParams.set("code", code);
+    return NextResponse.redirect(redirectUrl.toString());
+  }
+
+  return NextResponse.redirect(`${origin}/?auth_error=1&reason=no_code`);
 }
