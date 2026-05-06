@@ -66,7 +66,13 @@ export function useFeed() {
       .catch(() => {
         dispatch({ type: "SET_FEED_LOADING", loading: false });
       });
-  }, [dispatch, state.feedVersion]);
+  }, [dispatch, state.feedVersion, location?.lat, location?.lng, radiusKm]);
+
+  // Re-filter already-loaded posts when location/radius changes without re-fetching
+  useEffect(() => {
+    if (!state.posts.length) return;
+    dispatch({ type: "REFRESH_FEED" });
+  }, [location?.lat, location?.lng, radiusKm]);
 
   // Load next page
   const loadMore = useCallback(async () => {
