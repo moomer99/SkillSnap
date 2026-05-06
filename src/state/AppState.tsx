@@ -364,12 +364,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // getSession() (localStorage only). This catches the case where a brand-new
     // OAuth user has their session in cookies (set server-side by the callback
     // route) but localStorage hasn't been populated yet.
-    authSb.auth.getUser().then(async ({ data: { user } }) => {
+    authSb.auth.getSession().then(async ({ data: { session } }) => {
       clearTimeout(authTimeout);
-      if (user) {
-        await hydrateProfile(user.id, user);
+      if (session?.user) {
+        await hydrateProfile(session.user.id, session.user);
       } else {
-        dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        // No session in localStorage — try live network call as fallback
+        authSb.auth.getUser().then(async ({ data: { user } }) => {
+          if (user) {
+            await hydrateProfile(user.id, user);
+          } else {
+            dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          }
+        }).catch(() => {
+          dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        });
       }
     }).catch(() => {
       clearTimeout(authTimeout);
