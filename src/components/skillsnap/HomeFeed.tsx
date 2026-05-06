@@ -452,7 +452,7 @@ function FullscreenViewer({
           <div className="flex items-center gap-1.5 mb-4">
             <MapPin size={13} className="text-white/70 flex-shrink-0" />
             <span className="text-white/70 text-[12px] font-medium">
-              {author.distanceKm !== undefined ? `${author.distanceKm} km · ` : ""}
+              {author.distanceKm !== undefined ? `${author.distanceKm < 1 ? "<1" : author.distanceKm}km · ` : ""}
               {displayLocation.split(",")[0]}
             </span>
           </div>
@@ -688,12 +688,8 @@ function FeedCard({
               <path d="M7.5 13.5c1 2 8 2 9 0" stroke="#000" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.45"/>
             </svg>
           } />
-          {displayLocation && (
-            <>
-              <VSep />
-              <LocationCell distanceKm={displayDistance} location={displayLocation} onPress={onProfileClick} />
-            </>
-          )}
+          <VSep />
+          <LocationCell distanceKm={displayDistance} location={displayLocation} onPress={onProfileClick} />
         </div>
 
         {!isOwnPost && <ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />}
@@ -785,7 +781,11 @@ function StatCell({ value, label, icon, green }: { value: string; label: string;
 
 function LocationCell({ distanceKm: d, location, onPress }: { distanceKm?: number; location?: string; onPress: () => void }) {
   const suburb = location ? location.split(",")[0].trim() : "";
-  const truncated = suburb.length > 12 ? suburb.slice(0, 12) + "…" : suburb;
+  const truncated = suburb.length > 10 ? suburb.slice(0, 10) + "…" : suburb;
+  // Value line: distance if available, else suburb, else "Not set"
+  const valueLine = d !== undefined ? `${d < 1 ? "<1" : d}km` : (truncated || "Not set");
+  // Label line: suburb when showing distance, nothing otherwise
+  const labelLine = d !== undefined ? (truncated || "Nearby") : "";
   return (
     <button className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 px-1 active:opacity-70 transition-opacity"
       onClick={(e) => { e.stopPropagation(); onPress(); }}>
@@ -794,12 +794,8 @@ function LocationCell({ distanceKm: d, location, onPress }: { distanceKm?: numbe
           <path d="M5.5 0A5.5 5.5 0 000 5.5C0 9.625 5.5 14 5.5 14S11 9.625 11 5.5A5.5 5.5 0 005.5 0zm0 7.5a2 2 0 110-4 2 2 0 010 4z"/>
         </svg>
       </span>
-      <span className="text-[14px] font-extrabold leading-tight tracking-tight text-white">
-        {d !== undefined ? `${d < 1 ? "<1" : d}km` : truncated || "—"}
-      </span>
-      <span className="text-[10px] text-white/55 font-medium leading-tight text-center">
-        {d !== undefined ? truncated || "Nearby" : "Location"}
-      </span>
+      <span className="text-[14px] font-extrabold leading-tight tracking-tight text-white">{valueLine}</span>
+      {labelLine ? <span className="text-[10px] text-white/55 font-medium leading-tight text-center">{labelLine}</span> : null}
     </button>
   );
 }
