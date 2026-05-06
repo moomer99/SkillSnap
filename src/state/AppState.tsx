@@ -72,6 +72,7 @@ type Action =
   | { type: "INCREMENT_THREAD_UNREAD"; threadId: string }
   | { type: "PREPEND_POST"; post: Post }
   | { type: "DELETE_POST"; postId: string }
+  | { type: "UPDATE_POST"; postId: string; patch: Partial<Pick<Post, "caption" | "skill" | "location">> }
   | { type: "SKIP_AUTH" }
   | { type: "SHOW_AUTH_PROMPT" }
   | { type: "HIDE_AUTH_PROMPT" };
@@ -298,6 +299,14 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         localPosts: state.localPosts.filter((p) => p.id !== action.postId),
         posts: state.posts.filter((p) => p.id !== action.postId),
       };
+    case "UPDATE_POST": {
+      const patchPost = (p: Post) => p.id === action.postId ? { ...p, ...action.patch } : p;
+      return {
+        ...state,
+        localPosts: state.localPosts.map(patchPost),
+        posts: state.posts.map(patchPost),
+      };
+    }
     case "SKIP_AUTH":
       return {
         ...state,

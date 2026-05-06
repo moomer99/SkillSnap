@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { Heart, Share2, Bookmark, MapPin, Volume2, VolumeX, Navigation, X, Play } from "lucide-react";
+import { Heart, Share2, Bookmark, MapPin, Volume2, VolumeX, Navigation, X, Play, MoreVertical } from "lucide-react";
 import type { Post } from "@/types";
 import type { Screen } from "@/types";
 import { formatLikes } from "@/mock-data/posts";
@@ -15,6 +15,8 @@ import SkillSnapLogo from "./shared/SkillSnapLogo";
 import ConnectButton from "./shared/ConnectButton";
 import LocationPickerSheet from "./shared/LocationPickerSheet";
 import { useToast } from "./shared/Toast";
+import { postService } from "@/services/postService";
+import { SKILL_CATEGORIES } from "@/constants/config";
 
 interface HomeFeedProps {
   onNavigate: (s: Screen) => void;
@@ -308,6 +310,9 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
                 connecting={connecting === post.authorId}
                 isOwnPost={post.authorId === state.currentUser?.id}
                 headerH={headerH}
+                viewerLat={location?.lat}
+                viewerLng={location?.lng}
+                dispatch={dispatch}
               />
             ))}
             {/* Infinite scroll sentinel */}
@@ -465,18 +470,25 @@ function FullscreenViewer({
 
 // ── Feed card ──────────────────────────────────────────────────────
 function FeedCard({
-  post, isLiked, isSaved, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, connecting, isOwnPost, headerH,
+  post, isLiked, isSaved, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, connecting, isOwnPost, headerH, viewerLat, viewerLng, dispatch,
 }: {
   post: Post; isLiked: boolean; isSaved: boolean;
   onLike: () => void; onSave: () => void; onProfileClick: () => void;
   onConnectClick: () => void; onShare: () => void; onFullscreen: () => void;
   connecting: boolean; isOwnPost: boolean; headerH: number;
+  viewerLat?: number; viewerLng?: number;
+  dispatch: (a: unknown) => void;
 }) {
   const { author } = post;
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [editMode, setEditMode] = useState<"caption" | "skill" | "location" | "delete" | null>(null);
+  const [editCaption, setEditCaption] = useState(post.caption ?? "");
+  const [editSkill, setEditSkill] = useState<string>(post.skill ?? "");
+  const [editLocation, setEditLocation] = useState(post.location ?? "");
 
   useEffect(() => {
     if (post.type !== "video" || !post.mediaUrl) return;
@@ -517,9 +529,32 @@ function FeedCard({
 
   const handleMediaTap = useCallback(() => { onFullscreen(); }, [onFullscreen]);
   const displayLocation = post.location ?? author.location;
+  // Distance: only show if viewer has location AND author has location AND it's not their own post
+  const displayDistance = useMemo(() => {
+    if (isOwnPost) return undefined;
+    if (viewerLat == null || viewerLng == null) return undefined;
+    const aLat = author.lat ?? (author as Record<string, unknown>).lat as number | undefined;
+    const aLng = author.lng ?? (author as Record<string, unknown>).lng as number | undefined;
+    if (aLat == null || aLng == null) return undefined;
+    const d = distanceKm(viewerLat, viewerLng, aLat, aLng);
+    return Math.round(d * 10) / 10;
+  }, [isOwnPost, viewerLat, viewerLng, author]);
   const happyPct = author.happyPercent !== undefined && author.happyPercent !== null
     ? `${author.happyPercent}%` : "—";
   const showPlayOverlay = post.type === "video" && !playing;
+
+  async function handleSaveEdit() {
+    const patch = { caption: editCaption, skill: editSkill || null, location: editLocation };
+    dispatch({ type: "UPDATE_POST", postId: post.id, patch });
+    postService.updatePost(post.id, patch).catch(() => {});
+    setEditMode(null);
+  }
+
+  async function handleDeleteConfirm() {
+    dispatch({ type: "DELETE_POST", postId: post.id });
+    postService.deletePost(post.id).catch(() => {});
+    setEditMode(null);
+  }
 
   return (
     <div
@@ -564,15 +599,25 @@ function FeedCard({
       {/* Top bar */}
       <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-4 z-10">
         <span className="text-white/70 text-[12px] font-medium">{timeAgo(post.createdAt)}</span>
-        {post.type === "video" && post.mediaUrl && (
-          <button
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-sm text-white active:bg-black/60 transition-colors"
-            onClick={(e) => { e.stopPropagation(); setMuted(m => !m); }}
-          >
-            {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
-            <span className="text-[11px] font-semibold">{muted ? "Tap for sound" : "Mute"}</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {post.type === "video" && post.mediaUrl && (
+            <button
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-sm text-white active:bg-black/60 transition-colors"
+              onClick={(e) => { e.stopPropagation(); setMuted(m => !m); }}
+            >
+              {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+              <span className="text-[11px] font-semibold">{muted ? "Tap for sound" : "Mute"}</span>
+            </button>
+          )}
+          {isOwnPost && (
+            <button
+              className="w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-sm active:bg-black/60 transition-colors"
+              onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
+            >
+              <MoreVertical size={16} color="white" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Play overlay */}
@@ -646,13 +691,84 @@ function FeedCard({
           {displayLocation && (
             <>
               <VSep />
-              <LocationCell distanceKm={author.distanceKm} location={displayLocation} onPress={onProfileClick} />
+              <LocationCell distanceKm={displayDistance} location={displayLocation} onPress={onProfileClick} />
             </>
           )}
         </div>
 
         {!isOwnPost && <ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />}
       </div>
+
+      {/* Three-dot menu bottom sheet */}
+      {menuOpen && (
+        <div className="absolute inset-0 z-50 flex flex-col justify-end" onClick={() => setMenuOpen(false)}>
+          <div className="bg-white rounded-t-3xl p-4 pb-8 mx-0" onClick={(e) => e.stopPropagation()}>
+            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+            {[
+              { label: "Edit Caption", mode: "caption" as const },
+              { label: "Edit Skill", mode: "skill" as const },
+              { label: "Edit Location", mode: "location" as const },
+            ].map(({ label, mode }) => (
+              <button key={mode} className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-[#1a1a1a] active:bg-gray-50 rounded-xl"
+                onClick={() => { setMenuOpen(false); setEditMode(mode); }}>
+                {label}
+              </button>
+            ))}
+            <button className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-red-500 active:bg-red-50 rounded-xl"
+              onClick={() => { setMenuOpen(false); setEditMode("delete"); }}>
+              Delete Post
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Edit modals */}
+      {(editMode === "caption" || editMode === "skill" || editMode === "location") && (
+        <div className="absolute inset-0 z-50 flex flex-col justify-end" onClick={() => setEditMode(null)}>
+          <div className="bg-white rounded-t-3xl p-5 pb-8" onClick={(e) => e.stopPropagation()}>
+            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+            <p className="font-bold text-[16px] text-[#1a1a1a] mb-4">
+              {editMode === "caption" ? "Edit Caption" : editMode === "skill" ? "Edit Skill" : "Edit Location"}
+            </p>
+            {editMode === "caption" && (
+              <textarea className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-[14px] text-[#1a1a1a] resize-none outline-none focus:border-[#6c47ff]"
+                rows={4} value={editCaption} onChange={(e) => setEditCaption(e.target.value)} />
+            )}
+            {editMode === "skill" && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {SKILL_CATEGORIES.map((cat) => (
+                  <button key={cat} onClick={() => setEditSkill(cat)}
+                    className={`px-3 py-1.5 rounded-full text-[13px] font-semibold border transition-all ${editSkill === cat ? "bg-[#6c47ff] text-white border-[#6c47ff]" : "bg-white text-[#1a1a1a] border-gray-200"}`}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
+            {editMode === "location" && (
+              <input className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-[14px] text-[#1a1a1a] outline-none focus:border-[#6c47ff]"
+                value={editLocation} onChange={(e) => setEditLocation(e.target.value)} placeholder="e.g. Sydney, NSW" />
+            )}
+            <div className="flex gap-3 mt-4">
+              <button onClick={() => setEditMode(null)} className="flex-1 h-11 rounded-2xl border border-gray-200 text-[14px] font-semibold text-[#7a7570]">Cancel</button>
+              <button onClick={handleSaveEdit} className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-white" style={{ background: "#6c47ff" }}>Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation */}
+      {editMode === "delete" && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setEditMode(null)}>
+          <div className="bg-white rounded-3xl p-6 mx-6 w-full" onClick={(e) => e.stopPropagation()}>
+            <p className="font-bold text-[16px] text-[#1a1a1a] mb-2">Delete this post?</p>
+            <p className="text-[13px] text-[#7a7570] mb-6">This cannot be undone.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setEditMode(null)} className="flex-1 h-11 rounded-2xl border border-gray-200 text-[14px] font-semibold text-[#7a7570]">Cancel</button>
+              <button onClick={handleDeleteConfirm} className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-white bg-red-500">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

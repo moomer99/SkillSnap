@@ -157,6 +157,13 @@ export const postService = {
     return "";
   },
 
+  async updatePost(postId: string, patch: { caption?: string; skill?: string | null; location?: string }): Promise<void> {
+    const sb = getSupabase();
+    const { data: { user: authUser } } = await sb.auth.getUser();
+    if (!authUser) return;
+    await sb.from("posts").update(patch).eq("id", postId).eq("author_id", authUser.id);
+  },
+
   async deletePost(postId: string): Promise<void> {
     const sb = getSupabase();
     const { data: { user: authUser } } = await sb.auth.getUser();
