@@ -104,8 +104,8 @@ export const authService = {
   async signInWithGoogle(): Promise<{ error?: string }> {
     const redirectTo =
       typeof window !== "undefined"
-        ? window.location.origin
-        : (process.env.NEXT_PUBLIC_SITE_URL ?? "");
+        ? `${window.location.origin}/auth/callback`
+        : `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/auth/callback`;
 
     const { error } = await getAuthSupabase().auth.signInWithOAuth({
       provider: "google",
@@ -113,7 +113,7 @@ export const authService = {
         redirectTo,
         queryParams: {
           access_type: "offline",
-          prompt: "select_account",
+          prompt: "consent",
         },
       },
     });
