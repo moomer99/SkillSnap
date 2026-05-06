@@ -6,6 +6,23 @@ type SupabaseClient = ReturnType<typeof createClient<any>>;
 const REAL_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// Dual-storage adapter: writes to both localStorage and sessionStorage so the
+// PKCE code verifier survives Chrome's cross-origin redirect chain, where some
+// browsers clear one storage type but not the other during OAuth redirects.
+const customStorage = typeof window !== "undefined" ? {
+  getItem: (key: string) => {
+    return localStorage.getItem(key) ?? sessionStorage.getItem(key);
+  },
+  setItem: (key: string, value: string) => {
+    localStorage.setItem(key, value);
+    sessionStorage.setItem(key, value);
+  },
+  removeItem: (key: string) => {
+    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
+  },
+} : undefined;
+
 // ONE shared client instance for the entire app.
 // Multiple createClient instances sharing the same localStorage key fight over
 // the auth token lock (5000ms timeout → stale JWT → RLS blocks all queries).
@@ -32,12 +49,11 @@ function getClient(): SupabaseClient {
 
     _client = createClient(url, ANON_KEY, {
       auth: {
-        storage: typeof window !== "undefined" ? window.localStorage : undefined,
+        storage: customStorage,
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
         flowType: 'pkce',
-        storageKey: 'skillsnap-auth',
       },
       global: {
         fetch: (...args) => fetch(...args),
