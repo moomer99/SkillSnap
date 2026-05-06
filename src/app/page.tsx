@@ -169,9 +169,8 @@ function SkillSnapRouter() {
         className="relative w-full bg-[#f8f7f5] overflow-hidden"
         style={{ maxWidth: "min(100vw, 430px)", minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
       >
-        {/* Auth loading splash — shown while session resolves.
-            Excluded: landing (public, no auth needed — show immediately),
-            auth (has its own UI), home (has its own skeleton) */}
+        {/* Auth loading splash — shown for ALL screens while session resolves.
+            Covers the landing/auth flash that occurs after Google OAuth redirects back. */}
         {authLoading && (
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
             <div
