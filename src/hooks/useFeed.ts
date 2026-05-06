@@ -8,6 +8,8 @@ import { useEffect, useCallback, useRef, useState } from "react";
 import { useAppState } from "@/state/AppState";
 import { postService } from "@/services/postService";
 import { MOCK_POSTS } from "@/mock-data/posts";
+import { useLocation, distanceKm } from "@/hooks/useLocation";
+import type { Post } from "@/types";
 
 const PAGE_SIZE = 10;
 
@@ -16,8 +18,18 @@ const SUPABASE_CONFIGURED =
   !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref");
 
+function filterByRadius(posts: Post[], lat: number, lng: number, radiusKm: number): Post[] {
+  return posts.filter((post) => {
+    const authorLat = post.author?.lat;
+    const authorLng = post.author?.lng;
+    if (!authorLat || !authorLng) return true; // show posts with no location data
+    return distanceKm(lat, lng, authorLat, authorLng) <= radiusKm;
+  });
+}
+
 export function useFeed() {
   const { state, dispatch } = useAppState();
+  const { location, radiusKm } = useLocation();
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const offsetRef = useRef(0);
@@ -46,7 +58,10 @@ export function useFeed() {
       .then(({ posts, likedIds, savedIds }) => {
         offsetRef.current = posts.length;
         setHasMore(posts.length === PAGE_SIZE);
-        dispatch({ type: "SET_POSTS", posts });
+        const filtered = (location?.lat && location?.lng)
+          ? filterByRadius(posts, location.lat, location.lng, radiusKm)
+          : posts;
+        dispatch({ type: "SET_POSTS", posts: filtered });
         dispatch({ type: "SET_INTERACTIONS", likedIds, savedIds });
         dispatch({ type: "SET_FEED_LOADING", loading: false });
       })
@@ -67,8 +82,10 @@ export function useFeed() {
       }
       offsetRef.current += newPosts.length;
       setHasMore(newPosts.length === PAGE_SIZE);
-      // Append to existing posts (SET_POSTS replaces — use APPEND_POSTS pattern via SET_POSTS with combined list)
-      const combined = [...state.posts, ...newPosts.filter(p => !state.posts.some(e => e.id === p.id))];
+      const filteredNew = (location?.lat && location?.lng)
+        ? filterByRadius(newPosts, location.lat, location.lng, radiusKm)
+        : newPosts;
+      const combined = [...state.posts, ...filteredNew.filter(p => !state.posts.some(e => e.id === p.id))];
       dispatch({ type: "SET_POSTS", posts: combined });
       dispatch({ type: "SET_INTERACTIONS", likedIds, savedIds });
     } catch {
