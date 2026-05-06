@@ -689,7 +689,7 @@ function FeedCard({
             </svg>
           } />
           <VSep />
-          <LocationCell distanceKm={displayDistance} location={displayLocation} onPress={onProfileClick} />
+          <LocationCell distanceKm={displayDistance} location={displayLocation} isOwn={isOwnPost} onPress={onProfileClick} />
         </div>
 
         {!isOwnPost && <ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />}
@@ -779,10 +779,10 @@ function StatCell({ value, label, icon, green }: { value: string; label: string;
   );
 }
 
-function LocationCell({ distanceKm: d, location, onPress }: { distanceKm?: number; location?: string; onPress: () => void }) {
+function LocationCell({ distanceKm: d, location, isOwn, onPress }: { distanceKm?: number; location?: string; isOwn?: boolean; onPress: () => void }) {
   const suburb = location ? location.split(",")[0].trim() : "";
   const truncated = suburb.length > 10 ? suburb.slice(0, 10) + "…" : (suburb || "—");
-  const distanceValue = d !== undefined ? `${d < 1 ? "<1" : d}km` : "—";
+  const distanceValue = isOwn ? "Mine" : (d !== undefined ? `${d < 1 ? "<1" : d}km` : "—");
   return (
     <button className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 px-1 active:opacity-70 transition-opacity"
       onClick={(e) => { e.stopPropagation(); onPress(); }}>
