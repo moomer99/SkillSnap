@@ -96,23 +96,6 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
     return () => obs.disconnect();
   }, [loadMore]);
 
-  // Restore video src when returning to the tab after being away
-  useEffect(() => {
-    function handleVisibility() {
-      if (document.visibilityState === "visible") {
-        document.querySelectorAll("video").forEach((video) => {
-          const dataSrc = video.getAttribute("data-src");
-          if (dataSrc && (!video.src || video.src === window.location.href || video.src === "")) {
-            video.src = dataSrc;
-            video.load();
-          }
-        });
-      }
-    }
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, []);
-
   function requireAuth(action: () => void) {
     if (state.isGuest) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
     action();
@@ -389,7 +372,7 @@ function FullscreenViewer({
             data-src={post.mediaUrl}
             className="w-full h-full object-contain"
             loop playsInline
-            preload="metadata"
+            preload="auto"
             muted={muted}
             poster={post.thumbnailUrl}
           />
@@ -501,12 +484,8 @@ function FeedCard({
 
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
-        // Restore src if it was cleared when the card left the viewport
-        if (!video!.src || video!.src === window.location.href) {
-          video!.src = post.mediaUrl!;
-        }
-        video!.load();
         video!.addEventListener("canplay", tryPlay, { once: true });
+        tryPlay();
       } else {
         video!.removeEventListener("canplay", tryPlay);
         video!.pause();
@@ -566,7 +545,7 @@ function FeedCard({
             data-src={post.mediaUrl}
             className="w-full h-full object-cover"
             loop playsInline
-            preload="metadata"
+            preload="auto"
             muted={muted}
             poster={post.thumbnailUrl}
             onPlay={() => setPlaying(true)}
