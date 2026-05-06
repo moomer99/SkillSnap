@@ -359,6 +359,7 @@ function FullscreenViewer({
             src={post.mediaUrl}
             className="w-full h-full object-contain"
             loop playsInline
+            preload="metadata"
             muted={muted}
             poster={post.thumbnailUrl}
           />
@@ -505,7 +506,7 @@ function FeedCard({
             src={post.mediaUrl}
             className="w-full h-full object-cover"
             loop playsInline
-            preload="none"
+            preload="metadata"
             muted={muted}
             poster={post.thumbnailUrl}
             onPlay={() => setPlaying(true)}
