@@ -36,7 +36,7 @@ function getClient(): SupabaseClient {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
-        flowType: 'pkce',
+        flowType: 'implicit',
         debug: false,
       },
       global: {

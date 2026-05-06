@@ -107,15 +107,13 @@ export const authService = {
         ? `${window.location.origin}/auth/callback`
         : `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/auth/callback`;
 
-    // Use the auth client (always real Supabase URL) so the PKCE code verifier
-    // and post-callback session cookies share the same storage key.
     const { error } = await getAuthSupabase().auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo,
         queryParams: {
           access_type: "offline",
-          prompt: "consent",
+          prompt: "select_account",
         },
       },
     });
