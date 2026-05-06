@@ -37,7 +37,7 @@ function getClient(): SupabaseClient {
         autoRefreshToken: true,
         detectSessionInUrl: true,
         flowType: 'pkce',
-        debug: false,
+        storageKey: 'skillsnap-auth',
       },
       global: {
         fetch: (...args) => fetch(...args),
