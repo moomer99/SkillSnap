@@ -78,7 +78,44 @@ function VideoCard({ gradient, name, skill, jobs, delay }: {
   );
 }
 
+const MOCK_CARDS = [
+  { gradient: "linear-gradient(160deg,#667eea,#764ba2)", name: "Marcus T.", skill: "✂️ Barber", jobs: 142 },
+  { gradient: "linear-gradient(160deg,#f093fb,#f5576c)", name: "Priya K.", skill: "💄 Makeup", jobs: 89 },
+  { gradient: "linear-gradient(160deg,#4facfe,#00c6ff)", name: "Jake M.", skill: "🧱 Tiler", jobs: 211 },
+];
+
+const CARD_GRADIENTS = [
+  "linear-gradient(160deg,#667eea,#764ba2)",
+  "linear-gradient(160deg,#f093fb,#f5576c)",
+  "linear-gradient(160deg,#4facfe,#00c6ff)",
+];
+
+function useRealUsers() {
+  const [cards, setCards] = useState(MOCK_CARDS);
+  useEffect(() => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || supabaseUrl.includes("your-project-ref") || !supabaseKey) return;
+    fetch(`${supabaseUrl}/rest/v1/profiles?select=display_name,skill,jobs_done&not.skill.is=null&jobs_done=gt.0&order=created_at.desc&limit=3`, {
+      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` },
+    })
+      .then(r => r.json())
+      .then((data: Array<{ display_name: string; skill: string; jobs_done: number }>) => {
+        if (!Array.isArray(data) || data.length === 0) return;
+        setCards(data.map((u, i) => ({
+          gradient: CARD_GRADIENTS[i % CARD_GRADIENTS.length],
+          name: u.display_name ?? "Pro",
+          skill: u.skill ?? "Skilled Pro",
+          jobs: u.jobs_done ?? 0,
+        })));
+      })
+      .catch(() => {});
+  }, []);
+  return cards;
+}
+
 export default function LandingPage({ onNavigate }: LandingPageProps) {
+  const proCards = useRealUsers();
   function goToAuth() { onNavigate("auth"); }
 
   return (
@@ -153,9 +190,9 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         {/* Video cards — lazy rendered via FadeIn + contentVisibility */}
         <FadeIn delay={320} className="w-full mt-10">
           <div className="flex gap-3 justify-center overflow-x-auto no-scrollbar pb-2 px-2">
-            <VideoCard gradient="linear-gradient(160deg,#667eea,#764ba2)" name="Marcus T." skill="✂️ Barber" jobs={142} delay={0} />
-            <VideoCard gradient="linear-gradient(160deg,#f093fb,#f5576c)" name="Priya K." skill="💄 Makeup" jobs={89} delay={80} />
-            <VideoCard gradient="linear-gradient(160deg,#4facfe,#00c6ff)" name="Jake M." skill="🧱 Tiler" jobs={211} delay={160} />
+            {proCards.map((c, i) => (
+              <VideoCard key={i} gradient={c.gradient} name={c.name} skill={c.skill} jobs={c.jobs} delay={i * 80} />
+            ))}
           </div>
         </FadeIn>
 

@@ -398,7 +398,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       void (async () => {
         try {
           await authSb.auth.exchangeCodeForSession(oauthCode);
-          // onAuthStateChange fires SIGNED_IN after exchange completes
+          // Brief delay so onAuthStateChange SIGNED_IN can fire and hydrate
+          // the profile before the spinner clears — prevents flash to landing
+          await new Promise(res => setTimeout(res, 500));
         } catch (e) {
           console.error("[AppState] exchangeCodeForSession threw:", e);
           dispatch({ type: "SET_AUTH_LOADING", loading: false });

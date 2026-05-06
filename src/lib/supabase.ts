@@ -6,22 +6,52 @@ type SupabaseClient = ReturnType<typeof createClient<any>>;
 const REAL_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// In-memory fallback for browsers where localStorage/sessionStorage is blocked
+const memoryStore: Record<string, string> = {};
+const memoryStorage = {
+  getItem: (key: string) => memoryStore[key] ?? null,
+  setItem: (key: string, value: string) => { memoryStore[key] = value; },
+  removeItem: (key: string) => { delete memoryStore[key]; },
+};
+
+function safeLocalStorage() {
+  try {
+    localStorage.setItem("__test__", "1");
+    localStorage.removeItem("__test__");
+    return true;
+  } catch { return false; }
+}
+
+function safeSessionStorage() {
+  try {
+    sessionStorage.setItem("__test__", "1");
+    sessionStorage.removeItem("__test__");
+    return true;
+  } catch { return false; }
+}
+
 // Dual-storage adapter: writes to both localStorage and sessionStorage so the
-// PKCE code verifier survives Chrome's cross-origin redirect chain, where some
-// browsers clear one storage type but not the other during OAuth redirects.
-const customStorage = typeof window !== "undefined" ? {
-  getItem: (key: string) => {
-    return localStorage.getItem(key) ?? sessionStorage.getItem(key);
-  },
-  setItem: (key: string, value: string) => {
-    localStorage.setItem(key, value);
-    sessionStorage.setItem(key, value);
-  },
-  removeItem: (key: string) => {
-    localStorage.removeItem(key);
-    sessionStorage.removeItem(key);
-  },
-} : undefined;
+// PKCE code verifier survives Chrome's cross-origin redirect chain. Falls back
+// to in-memory storage if either API is blocked (private browsing, iframe, etc).
+const customStorage = typeof window !== "undefined" ? (() => {
+  const hasLocal = safeLocalStorage();
+  const hasSession = safeSessionStorage();
+  if (!hasLocal && !hasSession) return memoryStorage;
+  return {
+    getItem: (key: string) => {
+      if (hasLocal) return localStorage.getItem(key) ?? (hasSession ? sessionStorage.getItem(key) : null);
+      return hasSession ? sessionStorage.getItem(key) : null;
+    },
+    setItem: (key: string, value: string) => {
+      if (hasLocal) localStorage.setItem(key, value);
+      if (hasSession) sessionStorage.setItem(key, value);
+    },
+    removeItem: (key: string) => {
+      if (hasLocal) localStorage.removeItem(key);
+      if (hasSession) sessionStorage.removeItem(key);
+    },
+  };
+})() : undefined;
 
 // ONE shared client instance for the entire app.
 // Multiple createClient instances sharing the same localStorage key fight over
