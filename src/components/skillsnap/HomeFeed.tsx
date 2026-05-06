@@ -94,6 +94,25 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
     return () => obs.disconnect();
   }, [loadMore]);
 
+  // Restore video src when returning to the tab after being away
+  useEffect(() => {
+    function handleVisibility() {
+      if (document.visibilityState === "visible") {
+        document.querySelectorAll("video").forEach((video) => {
+          if (!video.src || video.src === window.location.href) {
+            const dataSrc = video.getAttribute("data-src");
+            if (dataSrc) {
+              video.src = dataSrc;
+              video.load();
+            }
+          }
+        });
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, []);
+
   function requireAuth(action: () => void) {
     if (state.isGuest) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
     action();
@@ -364,6 +383,7 @@ function FullscreenViewer({
           <video
             ref={videoRef}
             src={post.mediaUrl}
+            data-src={post.mediaUrl}
             className="w-full h-full object-contain"
             loop playsInline
             preload="metadata"
@@ -513,6 +533,7 @@ function FeedCard({
           <video
             ref={videoRef}
             src={post.mediaUrl}
+            data-src={post.mediaUrl}
             className="w-full h-full object-cover"
             loop playsInline
             preload="metadata"
