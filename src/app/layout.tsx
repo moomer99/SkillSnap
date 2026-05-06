@@ -60,9 +60,9 @@ export default function RootLayout({
         />
         {children}
         <VisualEditsMessenger />
-        <Script id="sw-register" strategy="afterInteractive">{`
+        <Script id="sw-unregister" strategy="afterInteractive">{`
           if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(() => {});
+            navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
           }
         `}</Script>
         <Analytics />
