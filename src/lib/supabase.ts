@@ -36,6 +36,16 @@ function getClient(): SupabaseClient {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
+        flowType: 'pkce',
+        debug: false,
+      },
+      global: {
+        fetch: (...args) => fetch(...args),
+      },
+      realtime: {
+        params: {
+          eventsPerSecond: 2,
+        },
       },
     });
   }

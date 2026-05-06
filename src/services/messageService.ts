@@ -42,16 +42,15 @@ function mapMessage(row: Record<string, unknown>, currentUserId: string): Messag
   };
 }
 
-// Uses getSession() (localStorage — instant, no network) first, falls back to
-// getUser() (live network call). This prevents getThreads/getMessages from
-// returning empty just because the auth server is momentarily slow.
+let cachedUserId: string | null = null;
+let cacheTime = 0;
+
 async function getCurrentUserId(): Promise<string | null> {
-  const sb = getAuthSupabase();
-  const { data: { session } } = await sb.auth.getSession();
-  if (session?.user?.id) return session.user.id;
-  // Session not in localStorage yet (e.g. first load after OAuth) — try live call
-  const { data: { user } } = await sb.auth.getUser();
-  return user?.id ?? null;
+  if (cachedUserId && Date.now() - cacheTime < 30000) return cachedUserId;
+  const { data: { session } } = await getAuthSupabase().auth.getSession();
+  cachedUserId = session?.user?.id ?? null;
+  cacheTime = Date.now();
+  return cachedUserId;
 }
 
 async function getAccessToken(): Promise<string | null> {
