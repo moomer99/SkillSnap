@@ -130,7 +130,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
       if (locationText.trim() && (resolvedLat === undefined || resolvedLng === undefined)) {
         try {
           const geoRes = await fetch(
-            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationText.trim())}&format=json&limit=1`,
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationText.trim() + ", Australia")}&format=json&limit=1&countrycodes=au`,
             { headers: { "Accept-Language": "en" } }
           );
           const geoData = await geoRes.json();
