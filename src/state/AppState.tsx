@@ -328,6 +328,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Hydrate auth state from Supabase session on mount
   useEffect(() => {
+    // Immediately check localStorage for existing session to prevent auth flash
+    const existingSession = localStorage.getItem('sb-dnraeyxjzdmpdvrkzyfd-auth-token');
+    if (existingSession) {
+      try {
+        const parsed = JSON.parse(existingSession);
+        if (parsed?.user && parsed?.expires_at && parsed.expires_at * 1000 > Date.now()) {
+          // Session looks valid — navigate away from auth/onboarding immediately
+          // The full hydration below will confirm and load the profile
+          dispatch({ type: "NAVIGATE", screen: "home" });
+        }
+      } catch {
+        // Invalid JSON — ignore
+      }
+    }
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
     if (!supabaseUrl || supabaseUrl.includes("your-project-ref")) {
       dispatch({ type: "SET_AUTH_LOADING", loading: false });
