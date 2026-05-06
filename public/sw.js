@@ -1,6 +1,27 @@
 // SkillSnap Service Worker — handles background push notifications
 self.addEventListener("install", () => self.skipWaiting());
-self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
+
+// Clear all old caches on activate and claim clients immediately
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.map(key => caches.delete(key)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+// Never cache Supabase calls or API routes — always go to network
+self.addEventListener("fetch", (event) => {
+  const url = event.request.url;
+  if (
+    url.includes("supabase.co") ||
+    url.includes("/api/") ||
+    url.includes("/rest/v1/") ||
+    url.includes("/auth/")
+  ) {
+    event.respondWith(fetch(event.request));
+  }
+});
 
 self.addEventListener("push", (event) => {
   if (!event.data) return;
