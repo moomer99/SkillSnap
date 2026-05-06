@@ -124,6 +124,27 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
       const isAuthenticated = SUPABASE_CONFIGURED && !!state.currentUser && !state.isGuest;
       let persistedAvatarUrl: string | undefined = user?.avatarUrl;
 
+      // Resolve coordinates — use GPS coords if available, otherwise geocode the text
+      let resolvedLat = locationLat;
+      let resolvedLng = locationLng;
+      if (locationText.trim() && (resolvedLat === undefined || resolvedLng === undefined)) {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationText)}&format=json&limit=1`,
+            { headers: { "Accept-Language": "en" } }
+          );
+          const results = await res.json();
+          if (results?.[0]) {
+            resolvedLat = parseFloat(results[0].lat);
+            resolvedLng = parseFloat(results[0].lon);
+            setLocationLat(resolvedLat);
+            setLocationLng(resolvedLng);
+          }
+        } catch {
+          // Geocoding failed — save without coordinates
+        }
+      }
+
       if (isAuthenticated) {
         if (avatarFile) {
           try {
@@ -140,8 +161,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
             username: `@${username.trim()}`,
             bio: bio.trim(),
             location: locationText.trim(),
-            ...(locationLat !== undefined ? { lat: locationLat } : {}),
-            ...(locationLng !== undefined ? { lng: locationLng } : {}),
+            ...(resolvedLat !== undefined ? { lat: resolvedLat } : {}),
+            ...(resolvedLng !== undefined ? { lng: resolvedLng } : {}),
             locationPrivate,
             skill: resolvedSkill || null,
             ...(persistedAvatarUrl ? { avatarUrl: persistedAvatarUrl } : {}),
@@ -163,8 +184,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
           username: `@${username.trim()}`,
           bio: bio.trim(),
           location: locationText.trim(),
-          ...(locationLat !== undefined ? { lat: locationLat } : {}),
-          ...(locationLng !== undefined ? { lng: locationLng } : {}),
+          ...(resolvedLat !== undefined ? { lat: resolvedLat } : {}),
+          ...(resolvedLng !== undefined ? { lng: resolvedLng } : {}),
           locationPrivate,
           skill: (resolvedSkill || null) as SkillCategory | null,
           ...(inMemoryAvatarUrl !== undefined ? { avatarUrl: inMemoryAvatarUrl } : {}),
