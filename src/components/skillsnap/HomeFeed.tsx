@@ -781,21 +781,18 @@ function StatCell({ value, label, icon, green }: { value: string; label: string;
 
 function LocationCell({ distanceKm: d, location, onPress }: { distanceKm?: number; location?: string; onPress: () => void }) {
   const suburb = location ? location.split(",")[0].trim() : "";
-  const truncated = suburb.length > 10 ? suburb.slice(0, 10) + "…" : suburb;
-  // Value line: distance if available, else suburb, else "Not set"
-  const valueLine = d !== undefined ? `${d < 1 ? "<1" : d}km` : (truncated || "Not set");
-  // Label line: suburb when showing distance, nothing otherwise
-  const labelLine = d !== undefined ? (truncated || "Nearby") : "";
+  const truncated = suburb.length > 10 ? suburb.slice(0, 10) + "…" : (suburb || "—");
+  const distanceValue = d !== undefined ? `${d < 1 ? "<1" : d}km` : "—";
   return (
     <button className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 px-1 active:opacity-70 transition-opacity"
       onClick={(e) => { e.stopPropagation(); onPress(); }}>
       <span className="leading-none mb-0.5">
-        <svg width="11" height="14" viewBox="0 0 11 14" fill="white">
+        <svg width="14" height="14" viewBox="0 0 11 14" fill="white">
           <path d="M5.5 0A5.5 5.5 0 000 5.5C0 9.625 5.5 14 5.5 14S11 9.625 11 5.5A5.5 5.5 0 005.5 0zm0 7.5a2 2 0 110-4 2 2 0 010 4z"/>
         </svg>
       </span>
-      <span className="text-[14px] font-extrabold leading-tight tracking-tight text-white">{valueLine}</span>
-      {labelLine ? <span className="text-[10px] text-white/55 font-medium leading-tight text-center">{labelLine}</span> : null}
+      <span className="text-[14px] font-extrabold leading-tight tracking-tight text-white">{distanceValue}</span>
+      <span className="text-[10px] text-white/55 font-medium leading-tight text-center">{truncated}</span>
     </button>
   );
 }
