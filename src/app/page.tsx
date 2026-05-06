@@ -172,7 +172,7 @@ function SkillSnapRouter() {
         {/* Auth loading splash — shown while session resolves.
             Excluded: landing (public, no auth needed — show immediately),
             auth (has its own UI), home (has its own skeleton) */}
-        {authLoading && screen !== "landing" && screen !== "auth" && screen !== "home" && (
+        {authLoading && (
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
             <div
               className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4"
