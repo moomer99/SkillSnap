@@ -124,24 +124,23 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
       const isAuthenticated = SUPABASE_CONFIGURED && !!state.currentUser && !state.isGuest;
       let persistedAvatarUrl: string | undefined = user?.avatarUrl;
 
-      // Resolve coordinates — use GPS coords if available, otherwise geocode the text
       let resolvedLat = locationLat;
       let resolvedLng = locationLng;
+
       if (locationText.trim() && (resolvedLat === undefined || resolvedLng === undefined)) {
         try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationText)}&format=json&limit=1`,
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationText.trim())}&format=json&limit=1`,
             { headers: { "Accept-Language": "en" } }
           );
-          const results = await res.json();
-          if (results?.[0]) {
-            resolvedLat = parseFloat(results[0].lat);
-            resolvedLng = parseFloat(results[0].lon);
-            setLocationLat(resolvedLat);
-            setLocationLng(resolvedLng);
+          const geoData = await geoRes.json();
+          if (Array.isArray(geoData) && geoData.length > 0 && geoData[0].lat && geoData[0].lon) {
+            resolvedLat = parseFloat(geoData[0].lat);
+            resolvedLng = parseFloat(geoData[0].lon);
+            console.log("[EditProfile] geocoded:", resolvedLat, resolvedLng);
           }
-        } catch {
-          // Geocoding failed — save without coordinates
+        } catch (geoErr) {
+          console.warn("[EditProfile] geocoding failed:", geoErr);
         }
       }
 
