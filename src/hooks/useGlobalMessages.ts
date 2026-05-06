@@ -80,8 +80,19 @@ export function useGlobalMessages() {
       }
     );
 
-    // Intentionally no cleanup — this hook lives for the entire app session
+    function handleVisibility() {
+      if (document.visibilityState === "hidden") {
+        unsubConv?.();
+        unsubMsgs?.();
+        subscribedRef.current = false;
+      } else if (document.visibilityState === "visible") {
+        subscribedRef.current = false; // force re-subscribe
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
+      document.removeEventListener("visibilitychange", handleVisibility);
       subscribedRef.current = false;
       unsubConv();
       unsubMsgs();

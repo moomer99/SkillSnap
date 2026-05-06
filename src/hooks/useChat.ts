@@ -87,8 +87,8 @@ export function useChat() {
     }
     document.addEventListener("visibilitychange", handleVisibility);
 
-    // Polling fallback every 30s — Realtime handles live delivery; this is safety net only
-    const pollInterval = setInterval(fetchMessages, 30000);
+    // Polling fallback every 60s — Realtime handles live delivery; this is safety net only
+    const pollInterval = setInterval(fetchMessages, 60000);
 
     return () => {
       unsubRef.current?.();
