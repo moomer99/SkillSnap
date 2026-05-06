@@ -15,8 +15,8 @@ export const metadata: Metadata = {
   title: "SkillSnap — Watch. Trust. Connect.",
   description: "Discover skilled professionals through real video proof. No more guessing — watch the work.",
   icons: {
-    icon: "/logo-icon.svg",
-    shortcut: "/logo-icon.svg",
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
     apple: "/logo-icon.svg",
   },
   openGraph: {
@@ -56,6 +56,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/logo-icon.svg" type="image/svg+xml" />
+      </head>
       <body
         className={`${geistSans.variable} antialiased`}
       >
