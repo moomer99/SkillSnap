@@ -54,6 +54,14 @@ function getClient(): SupabaseClient {
         autoRefreshToken: true,
         detectSessionInUrl: true,
         flowType: 'pkce',
+        lock: async (name, _acquireTimeout, fn) => {
+          try {
+            return await navigator.locks.request(name, { timeout: 3000 }, fn);
+          } catch {
+            // Lock timed out — run without it (safe for read operations)
+            return await fn();
+          }
+        },
       },
       global: {
         fetch: (...args) => fetch(...args),
