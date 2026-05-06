@@ -332,6 +332,8 @@ interface AppContextValue {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
+let isExchangingCode = false;
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
@@ -390,19 +392,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const urlParams = new URLSearchParams(window.location.search);
     const oauthCode = urlParams.get("code");
     if (oauthCode) {
-      // Strip the code from the URL immediately to prevent re-use on refresh
+      isExchangingCode = true;
+      dispatch({ type: "SET_AUTH_LOADING", loading: true });
       window.history.replaceState({}, "", window.location.pathname);
       void (async () => {
         try {
-          const { error: exchangeError } = await authSb.auth.exchangeCodeForSession(oauthCode);
-          if (exchangeError) {
-            console.error("[AppState] exchangeCodeForSession error:", exchangeError.message);
-          }
-          // onAuthStateChange fires SIGNED_IN and hydrates the profile
+          await authSb.auth.exchangeCodeForSession(oauthCode);
+          // onAuthStateChange fires SIGNED_IN after exchange completes
         } catch (e) {
           console.error("[AppState] exchangeCodeForSession threw:", e);
+          dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        } finally {
+          isExchangingCode = false;
         }
       })();
+      return;
     }
 
     // Resolve initial session via getSession() — reads localStorage without acquiring
