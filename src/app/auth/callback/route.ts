@@ -35,6 +35,11 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
+    if (error) {
+      console.error('[auth/callback] exchangeCodeForSession error:', error.message, error.status);
+      return NextResponse.redirect(`${origin}/?auth_error=1&reason=${encodeURIComponent(error.message)}`);
+    }
+
     if (!error && data.user) {
       // Ensure the profile row exists — safety net for Google and any OAuth provider.
       // DB trigger handles this too, but upsert guarantees it even if trigger is absent.
