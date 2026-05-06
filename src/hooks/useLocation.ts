@@ -13,7 +13,7 @@ export interface UserLocation {
 }
 
 const STORAGE_KEY = "skillsnap_location";
-const DEFAULT_RADIUS_KM = 15;
+const DEFAULT_RADIUS_KM = 25;
 const STORAGE_RADIUS_KEY = "skillsnap_radius";
 
 // Free geocoding via Nominatim (OpenStreetMap) — no API key needed

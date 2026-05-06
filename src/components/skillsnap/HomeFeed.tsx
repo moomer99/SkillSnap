@@ -24,7 +24,7 @@ interface HomeFeedProps {
 
 const HEADER_H_NO_LOC = 88;
 const HEADER_H_WITH_LOC = 120;
-const RADIUS_OPTIONS = [5, 10, 15, 25];
+const RADIUS_OPTIONS = [5, 10, 25, 50];
 
 function timeAgo(iso: string): string {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
