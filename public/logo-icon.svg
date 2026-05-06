@@ -11,7 +11,7 @@
       }
 
       .st1 {
-        fill: #1a1a1a;
+        fill: none;
       }
 
       .st2 {
