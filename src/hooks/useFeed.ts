@@ -68,11 +68,12 @@ export function useFeed() {
       });
   }, [dispatch, state.feedVersion, location?.lat, location?.lng, radiusKm]);
 
-  // Re-filter already-loaded posts when location/radius changes without re-fetching
+  // Re-fetch when location/radius changes after initial mount
+  const mountedRef = useRef(false);
   useEffect(() => {
-    if (!state.posts.length) return;
+    if (!mountedRef.current) { mountedRef.current = true; return; }
     dispatch({ type: "REFRESH_FEED" });
-  }, [location?.lat, location?.lng, radiusKm]);
+  }, [location?.lat, location?.lng, radiusKm, dispatch]);
 
   // Load next page
   const loadMore = useCallback(async () => {
