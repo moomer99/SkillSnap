@@ -275,9 +275,11 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
                 onProfileClick={() => handleProfileClick(post.authorId)}
                 onConnectClick={() => requireAuth(() => connectTo(post.authorId))}
                 onShare={() => {
-                  const text = post.caption || "Check out this skill on SkillSnap!";
-                  if (navigator.share) navigator.share({ title: "SkillSnap", text }).catch(() => {});
-                  else navigator.clipboard?.writeText(text).catch(() => {});
+                  if (navigator.share) {
+                    navigator.share({ title: "SkillSnap", text: "Check out this work on SkillSnap!", url: "https://skillsnap.com.au" }).catch(() => {});
+                  } else {
+                    navigator.clipboard?.writeText("https://skillsnap.com.au").catch(() => {});
+                  }
                 }}
                 onFullscreen={() => setFullscreenPost(post)}
                 connecting={connecting === post.authorId}
