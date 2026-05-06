@@ -464,16 +464,18 @@ function FeedCard({
 
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
-        // If media not loaded yet, trigger load then wait for canplay
-        if (video!.readyState === 0) video!.load();
-        if (video!.readyState >= 3) {
-          tryPlay();
-        } else {
-          video!.addEventListener("canplay", tryPlay, { once: true });
+        // Restore src if it was cleared when the card left the viewport
+        if (!video!.src || video!.src === window.location.href) {
+          video!.src = post.mediaUrl!;
         }
+        video!.load();
+        video!.addEventListener("canplay", tryPlay, { once: true });
       } else {
         video!.removeEventListener("canplay", tryPlay);
         video!.pause();
+        // Free memory by unloading the video when it's off-screen
+        video!.src = "";
+        video!.load();
         setPlaying(false);
       }
     }, { threshold: 0.6 });
