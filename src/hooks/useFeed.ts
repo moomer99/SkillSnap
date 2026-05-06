@@ -18,14 +18,6 @@ const SUPABASE_CONFIGURED =
   !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref");
 
-function filterByRadius(posts: Post[], lat: number, lng: number, radiusKm: number): Post[] {
-  return posts.filter((post) => {
-    const authorLat = post.author?.lat;
-    const authorLng = post.author?.lng;
-    if (!authorLat || !authorLng) return true; // show posts with no location data
-    return distanceKm(lat, lng, authorLat, authorLng) <= radiusKm;
-  });
-}
 
 export function useFeed() {
   const { state, dispatch } = useAppState();
@@ -59,7 +51,13 @@ export function useFeed() {
         offsetRef.current = posts.length;
         setHasMore(posts.length === PAGE_SIZE);
         const filtered = (location?.lat && location?.lng)
-          ? filterByRadius(posts, location.lat, location.lng, radiusKm)
+          ? posts.filter(post => {
+              const authorLat = post.author?.lat;
+              const authorLng = post.author?.lng;
+              if (!authorLat || !authorLng) return true;
+              const dist = distanceKm(location.lat, location.lng, authorLat, authorLng);
+              return dist <= radiusKm;
+            })
           : posts;
         dispatch({ type: "SET_POSTS", posts: filtered });
         dispatch({ type: "SET_INTERACTIONS", likedIds, savedIds });
@@ -83,7 +81,13 @@ export function useFeed() {
       offsetRef.current += newPosts.length;
       setHasMore(newPosts.length === PAGE_SIZE);
       const filteredNew = (location?.lat && location?.lng)
-        ? filterByRadius(newPosts, location.lat, location.lng, radiusKm)
+        ? newPosts.filter(post => {
+            const authorLat = post.author?.lat;
+            const authorLng = post.author?.lng;
+            if (!authorLat || !authorLng) return true;
+            const dist = distanceKm(location.lat, location.lng, authorLat, authorLng);
+            return dist <= radiusKm;
+          })
         : newPosts;
       const combined = [...state.posts, ...filteredNew.filter(p => !state.posts.some(e => e.id === p.id))];
       dispatch({ type: "SET_POSTS", posts: combined });
