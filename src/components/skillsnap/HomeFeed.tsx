@@ -101,12 +101,10 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
     function handleVisibility() {
       if (document.visibilityState === "visible") {
         document.querySelectorAll("video").forEach((video) => {
-          if (!video.src || video.src === window.location.href) {
-            const dataSrc = video.getAttribute("data-src");
-            if (dataSrc) {
-              video.src = dataSrc;
-              video.load();
-            }
+          const dataSrc = video.getAttribute("data-src");
+          if (dataSrc && (!video.src || video.src === window.location.href || video.src === "")) {
+            video.src = dataSrc;
+            video.load();
           }
         });
       }
@@ -512,9 +510,6 @@ function FeedCard({
       } else {
         video!.removeEventListener("canplay", tryPlay);
         video!.pause();
-        // Free memory by unloading the video when it's off-screen
-        video!.src = "";
-        video!.load();
         setPlaying(false);
       }
     }, { threshold: 0.6 });
