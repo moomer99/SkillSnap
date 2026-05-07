@@ -25,7 +25,7 @@ export default function BottomNav({ active, onNavigate }: BottomNavProps) {
 
   return (
     <nav
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-[#e8e4df] flex items-center justify-around px-2 z-50"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-[#e8e4df] flex items-center justify-around px-2 z-50 lg:hidden"
       style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
     >
       <NavItem icon={<Home size={22} />} label="Home" active={active === "home"} onClick={() => guardedNavigate("home")} />

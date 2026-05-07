@@ -30,6 +30,8 @@ const AboutScreen       = lazy(() => import("@/components/skillsnap/AboutScreen"
 const TermsScreen            = lazy(() => import("@/components/skillsnap/TermsScreen"));
 const ResetPasswordScreen    = lazy(() => import("@/components/skillsnap/ResetPasswordScreen"));
 const BottomNav         = lazy(() => import("@/components/skillsnap/BottomNav"));
+const LeftSidebar       = lazy(() => import("@/components/skillsnap/LeftSidebar"));
+const RightSidebar      = lazy(() => import("@/components/skillsnap/RightSidebar"));
 
 import { ToastProvider } from "@/components/skillsnap/shared/Toast";
 import AuthPromptModal from "@/components/skillsnap/shared/AuthPromptModal";
@@ -72,6 +74,11 @@ function SkillSnapRouter() {
         background: "#f0eff7",
       }}
     >
+      {/* Desktop three-column layout wrapper */}
+      <Suspense fallback={null}>
+        <LeftSidebar onNavigate={navigate} />
+      </Suspense>
+
       {/* Desktop background — only visible on sm+ screens, fixed so it doesn't scroll */}
       <div className="hidden sm:block fixed inset-0 overflow-hidden pointer-events-none">
 
@@ -169,9 +176,9 @@ function SkillSnapRouter() {
 
       </div>
 
-      {/* App shell — full width on mobile, capped at 430px on larger screens */}
+      {/* App shell — full width on mobile, capped at 430px on tablet, 600px on desktop */}
       <div
-        className="relative w-full bg-[#f8f7f5] overflow-hidden"
+        className="relative w-full bg-[#f8f7f5] overflow-hidden lg:!max-w-[600px]"
         style={{ maxWidth: "min(100vw, 430px)", minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
       >
         {/* Auth loading splash — shown for ALL screens while session resolves.
@@ -218,6 +225,11 @@ function SkillSnapRouter() {
         </div>
         <AuthPromptModal />
       </div>
+
+      {/* Right sidebar — desktop only */}
+      <Suspense fallback={null}>
+        <RightSidebar onNavigate={navigate} />
+      </Suspense>
 
       {/* Dev screen switcher — Orchids preview only, never shown on real domain */}
       {isOrchidsPreview && (
