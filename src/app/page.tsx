@@ -131,14 +131,16 @@ function SkillSnapRouter() {
         <img src="/skillsnap-icon.svg" alt="SkillSnap" width={34} height={34} />
       </div>
 
-      {/* Card 2 — Nav icons, fixed vertically centred */}
+      {/* Card 2 — Merged nav + utility, fixed vertically centred */}
       <div className="ss-sidebar-card" style={{
         position: "fixed", top: "50%", left: "16px", transform: "translateY(-50%)", zIndex: 100,
-        background: "white", border: "1px solid #e8e4df", borderRadius: "14px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)",
+        border: "0.5px solid rgba(0,0,0,0.08)", borderRadius: "20px",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
         flexDirection: "column", alignItems: "center",
-        padding: "14px 10px", gap: "12px",
+        padding: "14px 10px", gap: "10px", width: "52px",
       }}>
+        {/* Nav icons */}
         {(
           [
             { icon: Home,          label: "Feed",     s: "home"        },
@@ -157,12 +159,11 @@ function SkillSnapRouter() {
               className="ss-nav-btn"
               onClick={() => navigate(s)}
               style={{
-                width: "40px", height: "40px", borderRadius: "10px",
+                width: "40px", height: "40px", borderRadius: "8px",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                background: isPost ? "#6c47ff" : active ? "#eef0ff" : "transparent",
+                background: isPost ? "#6c63ff" : active ? "#eef0ff" : "transparent",
                 color: isPost ? "white" : active ? "#6c47ff" : "#7a7570",
-                border: "none", cursor: "pointer", transition: "background 0.15s",
-                flexShrink: 0,
+                border: "none", cursor: "pointer", transition: "background 0.15s", flexShrink: 0,
               }}
               onMouseEnter={e => { if (!isPost && !active) (e.currentTarget as HTMLButtonElement).style.background = "#f5f3ff"; }}
               onMouseLeave={e => { if (!isPost && !active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
@@ -171,23 +172,17 @@ function SkillSnapRouter() {
             </button>
           );
         })}
-      </div>
 
-      {/* Card 3 — Utility icons, fixed bottom-left */}
-      <div className="ss-sidebar-card" style={{
-        position: "fixed", bottom: "16px", left: "16px", zIndex: 100,
-        background: "white", border: "1px solid #e8e4df", borderRadius: "14px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-        flexDirection: "column", alignItems: "center",
-        padding: "8px 6px", gap: "6px",
-        width: "52px",
-      }}>
+        {/* Divider */}
+        <div style={{ width: "60%", height: "1px", background: "#e8e4df", flexShrink: 0 }} />
+
+        {/* Settings */}
         <button
           data-tooltip="Settings"
           className="ss-nav-btn"
           onClick={() => { setMoreOpen(false); navigate("settings"); }}
           style={{
-            width: "40px", height: "40px", borderRadius: "10px",
+            width: "40px", height: "40px", borderRadius: "8px",
             display: "flex", alignItems: "center", justifyContent: "center",
             background: screen === "settings" ? "#eef0ff" : "transparent",
             color: screen === "settings" ? "#6c47ff" : "#b0aaa5",
@@ -196,7 +191,7 @@ function SkillSnapRouter() {
           onMouseEnter={e => { if (screen !== "settings") (e.currentTarget as HTMLButtonElement).style.background = "#f5f3ff"; }}
           onMouseLeave={e => { if (screen !== "settings") (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
         >
-          <Settings size={20} strokeWidth={1.8} />
+          <Settings size={22} strokeWidth={1.8} />
         </button>
 
         {/* 3-dots + popover */}
@@ -206,14 +201,14 @@ function SkillSnapRouter() {
             className="ss-nav-btn"
             onClick={() => setMoreOpen(o => !o)}
             style={{
-              width: "40px", height: "40px", borderRadius: "10px",
+              width: "40px", height: "40px", borderRadius: "8px",
               display: "flex", alignItems: "center", justifyContent: "center",
               background: moreOpen ? "#eef0ff" : "transparent",
               color: moreOpen ? "#6c47ff" : "#b0aaa5",
               border: "none", cursor: "pointer", transition: "background 0.15s",
             }}
           >
-            <MoreHorizontal size={20} strokeWidth={1.8} />
+            <MoreHorizontal size={22} strokeWidth={1.8} />
           </button>
           {moreOpen && (
             <div style={{
