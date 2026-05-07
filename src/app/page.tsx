@@ -5,7 +5,7 @@
 // All screens receive onNavigate from here
 // ─────────────────────────────────────────────
 import { lazy, Suspense, useMemo, useRef, useState, useEffect } from "react";
-import { Home, Compass, PlusCircle, MessageCircle, User, Settings, MoreHorizontal } from "lucide-react";
+import { Home, Compass, PlusCircle, MessageCircle, User, Settings, MoreHorizontal, HelpCircle, LogOut } from "lucide-react";
 import { AppProvider, useAppState } from "@/state/AppState";
 import type { Screen } from "@/types";
 
@@ -66,102 +66,223 @@ function SkillSnapRouter() {
     return () => clearTimeout(t);
   }, [screen]);
 
+  // More popover state
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!moreOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [moreOpen]);
+
+  async function handleLogOut() {
+    setMoreOpen(false);
+    try {
+      const { getSupabase } = await import("@/lib/supabase");
+      await getSupabase().auth.signOut();
+    } catch { /* ignore */ }
+    navigate("landing");
+  }
+
   return (
-    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f0eff7", fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif" }}>
+    <div style={{ minHeight: "100vh", backgroundColor: "#f0eff7", fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif" }}>
 
-      {/* Left column — 72px icon-only (logged in) or 240px (logged out), desktop only */}
-      <div
-        className="hidden lg:flex flex-col"
-        style={{
-          width: state.isAuthenticated && !state.isGuest ? "72px" : "240px",
-          flexShrink: 0,
-          padding: "20px 12px",
-        }}
-      >
-        {/* Logged-out: logo card only */}
-        {(!state.isAuthenticated || state.isGuest) && (
-          <div className="rounded-2xl bg-white shadow-sm" style={{ padding: "18px" }}>
-            <img src="/skillsnap-icon.svg" alt="SkillSnap" width={54} height={54} />
-            <p className="text-xs font-bold text-[#1a1a1a] mt-2 leading-tight">SkillSnap</p>
+      {/* ── Centred 3-column wrapper ─────────────────────────────── */}
+      <div className="hidden lg:flex" style={{ maxWidth: "1100px", margin: "0 auto", alignItems: "flex-start" }}>
+
+        {/* LEFT SIDEBAR — 56px, fixed height, full viewport */}
+        <div
+          style={{
+            width: "56px", flexShrink: 0, position: "sticky", top: 0, height: "100vh",
+            backgroundColor: "white", borderRight: "0.5px solid #e8e4df",
+            display: "flex", flexDirection: "column", alignItems: "center",
+            paddingTop: "16px", paddingBottom: "12px",
+          }}
+        >
+          {/* Logo */}
+          <div style={{ marginBottom: "12px" }}>
+            <img src="/skillsnap-icon.svg" alt="SkillSnap" width={34} height={34} />
           </div>
-        )}
+          <div style={{ width: "32px", height: "1px", background: "#f0eeea", marginBottom: "8px" }} />
 
-        {/* Logged-in: Threads-style icon-only sidebar */}
-        {state.isAuthenticated && !state.isGuest && (
-          <div className="rounded-2xl bg-white shadow-sm flex flex-col items-center py-4 gap-0" style={{ minHeight: "420px" }}>
-            {/* Logo at top */}
-            <div style={{ padding: "0 11px 12px" }}>
-              <img src="/skillsnap-icon.svg" alt="SkillSnap" width={38} height={38} />
-            </div>
-
-            <div className="w-8 h-px bg-[#f0eeea] mx-auto mb-2" />
-
-            {/* Main nav icons — vertically centred */}
-            <div className="flex flex-col items-center gap-1 flex-1 justify-center">
-              {(
+          {/* Nav icons — centred vertically */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            {(state.isAuthenticated && !state.isGuest) ? (
+              (
                 [
-                  { icon: Home,          label: "Feed",     screen: "home",        activeIcon: Home          },
-                  { icon: Compass,       label: "Discover", screen: "discover",    activeIcon: Compass       },
-                  { icon: PlusCircle,    label: "Post",     screen: "upload",      activeIcon: PlusCircle    },
-                  { icon: MessageCircle, label: "Messages", screen: "messages",    activeIcon: MessageCircle },
-                  { icon: User,          label: "Profile",  screen: "own-profile", activeIcon: User          },
-                ] as { icon: React.ElementType; label: string; screen: Screen; activeIcon: React.ElementType }[]
-              ).map(({ icon: Icon, label, screen: s }) => {
+                  { icon: Home,          label: "Feed",     s: "home"        },
+                  { icon: Compass,       label: "Discover", s: "discover"    },
+                  { icon: PlusCircle,    label: "Post",     s: "upload"      },
+                  { icon: MessageCircle, label: "Messages", s: "messages"    },
+                  { icon: User,          label: "Profile",  s: "own-profile" },
+                ] as { icon: React.ElementType; label: string; s: Screen }[]
+              ).map(({ icon: Icon, label, s }) => {
                 const active = screen === s;
                 return (
                   <button
                     key={s}
                     onClick={() => navigate(s)}
                     title={label}
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
-                      active
-                        ? "bg-[#f0ebff] text-[#6c47ff]"
-                        : "text-[#7a7570] hover:bg-[#f5f3ff] hover:text-[#1a1a1a]"
-                    }`}
+                    style={{
+                      width: "40px", height: "40px", borderRadius: "12px",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      background: active ? "#f0ebff" : "transparent",
+                      color: active ? "#6c47ff" : "#7a7570",
+                      border: "none", cursor: "pointer", transition: "background 0.15s",
+                    }}
+                    onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "#f5f3ff"; }}
+                    onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
                   >
-                    <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
+                    <Icon size={23} strokeWidth={active ? 2.4 : 1.8} />
                   </button>
                 );
-              })}
-            </div>
+              })
+            ) : (
+              /* Logged-out: just a placeholder so logo isn't floating alone */
+              null
+            )}
+          </div>
 
-            {/* Bottom utility icons */}
-            <div className="flex flex-col items-center gap-1 mt-2 pt-2 border-t border-[#f0eeea] w-full">
+          {/* Bottom utility */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", borderTop: "1px solid #f0eeea", paddingTop: "8px", width: "100%" }}>
+            {(state.isAuthenticated && !state.isGuest) && (
               <button
                 title="Settings"
-                onClick={() => navigate("settings")}
-                className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
-                  screen === "settings" ? "bg-[#f0ebff] text-[#6c47ff]" : "text-[#b0aaa5] hover:bg-[#f5f3ff] hover:text-[#1a1a1a]"
-                }`}
+                onClick={() => { setMoreOpen(false); navigate("settings"); }}
+                style={{
+                  width: "40px", height: "40px", borderRadius: "12px",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: screen === "settings" ? "#f0ebff" : "transparent",
+                  color: screen === "settings" ? "#6c47ff" : "#b0aaa5",
+                  border: "none", cursor: "pointer", transition: "background 0.15s",
+                }}
+                onMouseEnter={e => { if (screen !== "settings") (e.currentTarget as HTMLButtonElement).style.background = "#f5f3ff"; }}
+                onMouseLeave={e => { if (screen !== "settings") (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
               >
                 <Settings size={20} strokeWidth={1.8} />
               </button>
+            )}
+
+            {/* More / 3-dots with popover */}
+            <div ref={moreRef} style={{ position: "relative" }}>
               <button
                 title="More"
-                className="w-11 h-11 rounded-xl flex items-center justify-center text-[#b0aaa5] hover:bg-[#f5f3ff] hover:text-[#1a1a1a] transition-all"
+                onClick={() => setMoreOpen(o => !o)}
+                style={{
+                  width: "40px", height: "40px", borderRadius: "12px",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: moreOpen ? "#f0ebff" : "transparent",
+                  color: moreOpen ? "#6c47ff" : "#b0aaa5",
+                  border: "none", cursor: "pointer", transition: "background 0.15s",
+                }}
               >
                 <MoreHorizontal size={20} strokeWidth={1.8} />
               </button>
+
+              {/* Popover */}
+              {moreOpen && (
+                <div style={{
+                  position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)",
+                  background: "white", border: "1px solid #e8e4df", borderRadius: "12px",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.10)", padding: "6px", minWidth: "160px", zIndex: 200,
+                }}>
+                  <button
+                    onClick={() => { setMoreOpen(false); navigate("settings"); }}
+                    style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#1a1a1a" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#f5f3ff")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                  >
+                    <Settings size={15} /> Settings
+                  </button>
+                  <button
+                    onClick={() => { setMoreOpen(false); navigate("help"); }}
+                    style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#1a1a1a" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#f5f3ff")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                  >
+                    <HelpCircle size={15} /> Help &amp; Support
+                  </button>
+                  {(state.isAuthenticated && !state.isGuest) && (
+                    <button
+                      onClick={handleLogOut}
+                      style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#e53e3e" }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "#fff5f5")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                    >
+                      <LogOut size={15} /> Log Out
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
+
+        {/* CENTRE — app shell */}
+        <div style={{ flex: "0 0 auto" }}>
+          <div
+            className="relative bg-[#f8f7f5] overflow-hidden"
+            style={{ width: "600px", minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
+          >
+          {authLoading && (
+            <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
+              <div
+                className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4"
+                style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
+              >
+                <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+                  <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="2.5" fill="none" />
+                  <circle cx="20" cy="20" r="5" fill="white" />
+                </svg>
+              </div>
+              <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
+            </div>
+          )}
+          <div style={{ opacity, transition: "opacity 150ms ease" }}>
+            {screen === "landing" && <LandingPage onNavigate={navigate} />}
+            {screen === "auth"    && <AuthScreen  onNavigate={navigate} />}
+            <Suspense fallback={<div className="flex-1 bg-[#f8f7f5]" />}>
+              {screen === "onboarding"     && <OnboardingScreen onNavigate={navigate} />}
+              {screen === "search"         && <SearchScreen      onNavigate={navigate} />}
+              {screen === "home"           && <HomeFeed          onNavigate={navigate} />}
+              {screen === "discover"       && <DiscoverScreen    onNavigate={navigate} />}
+              {screen === "own-profile"    && <ProfileScreen     variant="own"    onNavigate={navigate} />}
+              {screen === "client-profile" && <ProfileScreen     variant="client" onNavigate={navigate} />}
+              {screen === "upload"         && <UploadScreen      onNavigate={navigate} />}
+              {screen === "messages"       && <MessagesScreen    onNavigate={navigate} />}
+              {screen === "chat"           && <ChatScreen        onNavigate={navigate} />}
+              {screen === "edit-profile"   && <EditProfileScreen onNavigate={navigate} />}
+              {screen === "settings"       && <SettingsScreen    onNavigate={navigate} />}
+              {screen === "pro"            && <ProScreen         onNavigate={navigate} />}
+              {screen === "contact"        && <ContactScreen     onNavigate={navigate} />}
+              {screen === "help"           && <HelpScreen        onNavigate={navigate} />}
+              {screen === "about"          && <AboutScreen       onNavigate={navigate} />}
+              {screen === "terms"          && <TermsScreen          onNavigate={navigate} />}
+              {screen === "reset-password" && <ResetPasswordScreen onNavigate={navigate} />}
+              {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
+            </Suspense>
+          </div>
+          <AuthPromptModal />
+          </div>
+        </div>
+
+        {/* RIGHT SIDEBAR — immediately beside centre, 280px, content-height cards */}
+        <div style={{ width: "280px", flexShrink: 0, padding: "20px 0 20px 22px" }}>
+          <Suspense fallback={null}>
+            <RightSidebar onNavigate={navigate} />
+          </Suspense>
+        </div>
+
       </div>
 
-      {/* Centre — fills remaining space and centres the app shell */}
-      <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-        {/* App shell — full width on mobile, 430px on tablet, 600px on desktop */}
-        <div
-          className="relative w-full bg-[#f8f7f5] overflow-hidden max-w-[430px] lg:max-w-[600px] lg:w-[600px]"
-          style={{ minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
-        >
-        {/* Auth loading splash — shown for ALL screens while session resolves.
-            Covers the landing/auth flash that occurs after Google OAuth redirects back. */}
+      {/* ── Mobile / tablet fallback (< lg) — single column ─────── */}
+      <div className="lg:hidden relative w-full bg-[#f8f7f5] overflow-hidden" style={{ minHeight: "100dvh" }}>
         {authLoading && (
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
-            <div
-              className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
-            >
+            <div className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4" style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}>
               <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
                 <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="2.5" fill="none" />
                 <circle cx="20" cy="20" r="5" fill="white" />
@@ -170,11 +291,9 @@ function SkillSnapRouter() {
             <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
           </div>
         )}
-        {/* Screen renderer — eager screens first, rest wrapped in Suspense */}
         <div style={{ opacity, transition: "opacity 150ms ease" }}>
           {screen === "landing" && <LandingPage onNavigate={navigate} />}
           {screen === "auth"    && <AuthScreen  onNavigate={navigate} />}
-
           <Suspense fallback={<div className="flex-1 bg-[#f8f7f5]" />}>
             {screen === "onboarding"     && <OnboardingScreen onNavigate={navigate} />}
             {screen === "search"         && <SearchScreen      onNavigate={navigate} />}
@@ -197,14 +316,6 @@ function SkillSnapRouter() {
           </Suspense>
         </div>
         <AuthPromptModal />
-        </div>
-      </div>
-
-      {/* Right column — 320px, desktop only, tighter gap to centre */}
-      <div className="hidden lg:flex flex-col" style={{ width: "320px", flexShrink: 0, padding: "20px 16px 20px 6px" }}>
-        <Suspense fallback={null}>
-          <RightSidebar onNavigate={navigate} />
-        </Suspense>
       </div>
 
       {/* Dev screen switcher — Orchids preview only, never shown on real domain */}
