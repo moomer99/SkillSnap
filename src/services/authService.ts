@@ -83,8 +83,7 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
       },
       {
         onConflict: "id",
-        // For returning users: refresh avatar and name from the provider
-        ignoreDuplicates: false,
+        ignoreDuplicates: true, // never overwrite existing profile data on re-login
       }
     )
     .select("*")
