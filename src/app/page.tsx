@@ -68,15 +68,17 @@ function SkillSnapRouter() {
   }, [screen]);
 
   return (
-    <div
-      className="min-h-screen lg:flex lg:flex-row lg:justify-center"
-      style={{
-        fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif",
-        background: "#f0eff7",
-      }}
-    >
-      {/* Left sidebar — desktop only */}
-      <aside className="hidden lg:flex flex-col w-[240px] shrink-0 sticky top-0 h-screen border-r border-[#e8e4df] bg-white p-4">
+    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f0eff7", fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif" }}>
+
+      {/* Left sidebar — fixed to left edge, desktop only */}
+      <div
+        className="hidden lg:flex"
+        style={{
+          width: "240px", flexShrink: 0, position: "sticky", top: 0,
+          height: "100vh", backgroundColor: "white", borderRight: "1px solid #e8e4df",
+          flexDirection: "column", padding: "16px", overflowY: "auto",
+        }}
+      >
         {(state.isGuest || !state.isAuthenticated || screen === "landing" || screen === "auth" || screen === "onboarding") ? (
           <div className="flex flex-col h-full">
             <div className="mb-8">
@@ -115,13 +117,15 @@ function SkillSnapRouter() {
             </nav>
           </div>
         )}
-      </aside>
+      </div>
 
-      {/* App shell — full width on mobile, 430px on tablet, 600px on desktop */}
-      <div
-        className="relative w-full bg-[#f8f7f5] overflow-hidden shrink-0 max-w-[430px] lg:max-w-[600px] lg:w-[600px]"
-        style={{ minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
-      >
+      {/* Centre — fills remaining space and centres the app shell */}
+      <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+        {/* App shell — full width on mobile, 430px on tablet, 600px on desktop */}
+        <div
+          className="relative w-full bg-[#f8f7f5] overflow-hidden max-w-[430px] lg:max-w-[600px] lg:w-[600px]"
+          style={{ minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
+        >
         {/* Auth loading splash — shown for ALL screens while session resolves.
             Covers the landing/auth flash that occurs after Google OAuth redirects back. */}
         {authLoading && (
@@ -165,12 +169,22 @@ function SkillSnapRouter() {
           </Suspense>
         </div>
         <AuthPromptModal />
+        </div>
       </div>
 
-      {/* Right sidebar — desktop only */}
-      <Suspense fallback={null}>
-        <RightSidebar onNavigate={navigate} />
-      </Suspense>
+      {/* Right sidebar — fixed to right edge, desktop only */}
+      <div
+        className="hidden lg:flex"
+        style={{
+          width: "300px", flexShrink: 0, position: "sticky", top: 0,
+          height: "100vh", backgroundColor: "white", borderLeft: "1px solid #e8e4df",
+          flexDirection: "column", padding: "16px", overflowY: "auto",
+        }}
+      >
+        <Suspense fallback={null}>
+          <RightSidebar onNavigate={navigate} />
+        </Suspense>
+      </div>
 
       {/* Dev screen switcher — Orchids preview only, never shown on real domain */}
       {isOrchidsPreview && (

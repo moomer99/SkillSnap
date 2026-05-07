@@ -61,8 +61,8 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
   const trendingSkills = useTrendingSkills();
 
   return (
-    <aside className="hidden lg:flex flex-col w-[300px] sticky top-0 h-screen border-l border-[#e8e4df] bg-white shrink-0 overflow-y-auto">
-      <div className="px-4 pt-6 flex flex-col gap-5">
+    <div className="flex flex-col w-full">
+      <div className="flex flex-col gap-5">
 
         {/* Guest state */}
         {(isGuest || !isAuthenticated) && (
@@ -170,6 +170,6 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
           © 2026 SkillSnap Australia · Sydney, NSW
         </p>
       </div>
-    </aside>
+    </div>
   );
 }
