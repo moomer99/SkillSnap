@@ -78,9 +78,9 @@ function SkillSnapRouter() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [moreOpen]);
 
-  const GUEST_BLOCKED: Screen[] = ["upload", "messages", "own-profile", "client-profile", "chat", "edit-profile"];
+  const AUTH_REQUIRED: Screen[] = ["upload", "messages", "own-profile", "client-profile", "chat", "edit-profile"];
   function handleNavClick(s: Screen) {
-    if (state.isGuest && GUEST_BLOCKED.includes(s)) {
+    if (!state.isAuthenticated && AUTH_REQUIRED.includes(s)) {
       dispatch({ type: "SHOW_AUTH_PROMPT" });
       return;
     }
@@ -89,7 +89,6 @@ function SkillSnapRouter() {
 
   async function handleLogOut() {
     setMoreOpen(false);
-    localStorage.removeItem("skillsnap_guest");
     try {
       const { getSupabase } = await import("@/lib/supabase");
       await getSupabase().auth.signOut();
@@ -142,8 +141,8 @@ function SkillSnapRouter() {
         <img src="/skillsnap-icon.svg" alt="SkillSnap" width={34} height={34} />
       </div>
 
-      {/* Card 2 — Merged nav + utility — hidden on landing + auth, shown for guest + logged-in */}
-      {screen !== "landing" && screen !== "auth" && <div className="ss-sidebar-card" style={{
+      {/* Card 2 — Merged nav + utility — hidden only on auth screen */}
+      {screen !== "auth" && <div className="ss-sidebar-card" style={{
         position: "fixed", top: "50%", left: "16px", transform: "translateY(-50%)", zIndex: 100,
         background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)",
         border: "0.5px solid rgba(0,0,0,0.08)", borderRadius: "20px",
@@ -184,11 +183,11 @@ function SkillSnapRouter() {
           );
         })}
 
-        {/* Divider */}
-        <div style={{ width: "60%", height: "1px", background: "#e8e4df", flexShrink: 0 }} />
+        {/* Divider — only shown when logged in (Settings + LogOut shown) */}
+        {state.isAuthenticated && <div style={{ width: "60%", height: "1px", background: "#e8e4df", flexShrink: 0 }} />}
 
-        {/* Settings */}
-        <button
+        {/* Settings — only shown when logged in */}
+        {state.isAuthenticated && <button
           data-tooltip="Settings"
           className="ss-nav-btn"
           onClick={() => { setMoreOpen(false); navigate("settings"); }}
@@ -203,7 +202,7 @@ function SkillSnapRouter() {
           onMouseLeave={e => { if (screen !== "settings") (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
         >
           <Settings size={22} strokeWidth={1.8} />
-        </button>
+        </button>}
 
         {/* 3-dots + popover */}
         <div ref={moreRef} style={{ position: "relative" }}>
@@ -227,17 +226,19 @@ function SkillSnapRouter() {
               background: "white", border: "1px solid #e8e4df", borderRadius: "12px",
               boxShadow: "0 8px 24px rgba(0,0,0,0.10)", padding: "6px", minWidth: "160px", zIndex: 300,
             }}>
-              <button onClick={() => { setMoreOpen(false); navigate("settings"); }}
-                style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#1a1a1a" }}
-                onMouseEnter={e => (e.currentTarget.style.background = "#f5f3ff")}
-                onMouseLeave={e => (e.currentTarget.style.background = "none")}
-              ><Settings size={15} /> Settings</button>
+              {state.isAuthenticated && (
+                <button onClick={() => { setMoreOpen(false); navigate("settings"); }}
+                  style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#1a1a1a" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#f5f3ff")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                ><Settings size={15} /> Settings</button>
+              )}
               <button onClick={() => { setMoreOpen(false); navigate("help"); }}
                 style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#1a1a1a" }}
                 onMouseEnter={e => (e.currentTarget.style.background = "#f5f3ff")}
                 onMouseLeave={e => (e.currentTarget.style.background = "none")}
               ><HelpCircle size={15} /> Help &amp; Support</button>
-              {(state.isAuthenticated && !state.isGuest) && (
+              {state.isAuthenticated && (
                 <button onClick={handleLogOut}
                   style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#e53e3e" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "#fff5f5")}

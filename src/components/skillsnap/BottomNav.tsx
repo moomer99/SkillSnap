@@ -16,7 +16,7 @@ export default function BottomNav({ active, onNavigate }: BottomNavProps) {
   const { state, dispatch } = useAppState();
 
   function guardedNavigate(screen: Screen) {
-    if (state.isGuest && (screen === "upload" || screen === "messages" || screen === "own-profile")) {
+    if (!state.isAuthenticated && (screen === "upload" || screen === "messages" || screen === "own-profile")) {
       dispatch({ type: "SHOW_AUTH_PROMPT" });
       return;
     }

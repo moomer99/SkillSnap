@@ -66,7 +66,7 @@ function skillColor(skill: string) {
 }
 
 export default function RightSidebar({ onNavigate }: RightSidebarProps) {
-  const { state, dispatch } = useAppState();
+  const { state } = useAppState();
   const { isGuest, isAuthenticated, currentUser } = state;
   const trendingSkills = useTrendingSkills();
 
@@ -94,14 +94,6 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
             className="w-full h-10 rounded-xl font-bold text-sm text-[#6c47ff] border-2 border-[#6c47ff] flex items-center justify-center hover:bg-[#f0ebff] transition-colors"
           >
             Log In
-          </button>
-          <div style={{ height: "1px", background: "#e8e4df", margin: "2px 0" }} />
-          <button
-            onClick={() => dispatch({ type: "SKIP_AUTH" })}
-            className="w-full text-center bg-transparent border-none cursor-pointer hover:underline"
-            style={{ fontSize: "13px", color: "#b0aaa5" }}
-          >
-            Continue as guest →
           </button>
         </div>
       )}

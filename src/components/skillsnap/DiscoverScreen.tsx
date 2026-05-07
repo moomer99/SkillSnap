@@ -21,7 +21,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
   const [showMapTeaser, setShowMapTeaser] = useState(true);
 
   function requireAuth(action: () => void) {
-    if (state.isGuest) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
+    if (!state.isAuthenticated) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
     action();
   }
 

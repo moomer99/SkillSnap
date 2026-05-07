@@ -263,16 +263,6 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
               </button>
             </p>
 
-            {/* Guest link — below Log In */}
-            <p className="text-center pb-8">
-              <button
-                type="button"
-                onClick={() => dispatch({ type: "SKIP_AUTH" })}
-                className="text-[13px] text-[#b0aaa5] hover:underline bg-transparent border-none cursor-pointer"
-              >
-                Continue as guest →
-              </button>
-            </p>
           </form>
         </div>
       </div>
@@ -355,13 +345,6 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
             <p className="text-sm text-red-600 text-center">{error}</p>
           </div>
         )}
-
-        <button
-          onClick={() => dispatch({ type: "SKIP_AUTH" })}
-          className="w-full text-center text-sm text-[#7a7570] font-semibold py-1"
-        >
-          Browse as guest
-        </button>
 
         <p className="text-center text-[11px] text-[#b0aaa5]">
           By continuing, you agree to our Terms &amp; Privacy Policy

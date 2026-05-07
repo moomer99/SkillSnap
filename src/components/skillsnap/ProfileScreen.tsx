@@ -32,7 +32,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
   const { state, navigate, dispatch } = useAppState();
 
   function requireAuth(action: () => void) {
-    if (state.isGuest) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
+    if (!state.isAuthenticated) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
     action();
   }
 
