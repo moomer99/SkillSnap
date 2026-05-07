@@ -29,7 +29,7 @@ export default function TermsScreen({ onNavigate }: TermsScreenProps) {
         <p className="text-xs text-[#b0aaa5] mb-6">Last updated: May 2025</p>
 
         <Section title="1. About SkillSnap">
-          <p>SkillSnap is an Australian platform operated by SkillSnap Pty Ltd ("we", "us", "our") that connects skilled professionals with local clients through video portfolios. By creating an account or using SkillSnap, you agree to these Terms and our Privacy Policy.</p>
+          <p>SkillSnap is an Australian platform operated by SkillSnap Australia ("we", "us", "our") that connects skilled professionals with local clients through video portfolios. By creating an account or using SkillSnap, you agree to these Terms and our Privacy Policy.</p>
           <p>SkillSnap is intended for users aged 18 and over. By using the platform you confirm you meet this requirement.</p>
         </Section>
 
@@ -57,17 +57,17 @@ export default function TermsScreen({ onNavigate }: TermsScreenProps) {
           <p>Location data is only used to show you nearby professionals. It is stored only while you have location enabled and is never shared with other users without your consent.</p>
           <p>Messages sent through SkillSnap are stored on our servers to enable the messaging feature. We do not read private messages except where required by law or to investigate reported abuse.</p>
           <p>We use Supabase (data storage), Vercel (hosting), and Google (authentication) as service providers. Each operates under their own privacy policies.</p>
-          <p>To request deletion of your account and data, use Settings → Delete Account or contact us at hello@skillsnap.com.au.</p>
+          <p>To request deletion of your account and data, use Settings → Delete Account or contact us using the button below.</p>
         </Section>
 
         <Section title="5. Payments & Pro Features">
           <p>The core SkillSnap platform is free to use for both clients and professionals. A Pro subscription tier is planned for future release and will be subject to separate pricing terms published at that time.</p>
-          <p>SkillSnap does not process payments between clients and professionals. Any financial arrangements are made directly between the parties and SkillSnap is not responsible for disputes arising from those transactions.</p>
+          <p>SkillSnap does not process payments between clients and professionals. Any financial arrangements are made directly between the parties and SkillSnap Australia is not responsible for disputes arising from those transactions.</p>
         </Section>
 
         <Section title="6. Disclaimers & Liability">
           <p>SkillSnap provides a platform for users to connect. We do not verify the qualifications, licences, or quality of work of professionals listed on the platform. You are responsible for conducting your own due diligence before engaging any professional.</p>
-          <p>To the maximum extent permitted by Australian law, SkillSnap is not liable for any direct, indirect, or consequential loss arising from your use of the platform or your interactions with other users.</p>
+          <p>To the maximum extent permitted by Australian law, SkillSnap Australia is not liable for any direct, indirect, or consequential loss arising from your use of the platform or your interactions with other users.</p>
           <p>The platform is provided "as is" without warranties of any kind. We will make reasonable efforts to keep the service available but do not guarantee uninterrupted access.</p>
         </Section>
 
@@ -76,13 +76,12 @@ export default function TermsScreen({ onNavigate }: TermsScreenProps) {
         </Section>
 
         <Section title="8. Contact">
-          <p>If you have questions about these Terms or our Privacy Policy, please contact us:</p>
-          <p className="font-semibold text-[#6c47ff]">hello@skillsnap.com.au</p>
-          <p>SkillSnap Pty Ltd · Sydney, NSW, Australia</p>
+          <p>If you have questions about these Terms or our Privacy Policy, please reach out via the Contact Us button below.</p>
+          <p>SkillSnap Australia · Sydney, NSW, Australia</p>
         </Section>
 
         <div className="mt-4 mb-8 rounded-2xl p-4 text-center" style={{ background: "linear-gradient(135deg,#ede9fe,#f5f3ff)", border: "1.5px solid rgba(108,71,255,0.15)" }}>
-          <p className="text-xs text-[#7a7570]">Questions? We're happy to help.</p>
+          <p className="text-xs text-[#7a7570]">Questions about our terms or privacy policy?</p>
           <button
             onClick={() => onNavigate("contact")}
             className="mt-2 px-5 py-2 rounded-xl font-bold text-sm text-white"
