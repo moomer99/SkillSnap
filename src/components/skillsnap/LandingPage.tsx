@@ -126,10 +126,6 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         style={{ background: "#0d0a1a", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <SkillSnapLogo variant="full" size="sm" dark />
         <div className="flex items-center gap-3">
-          {/* Full logo — visible on desktop only */}
-          <span className="hidden lg:block">
-            <SkillSnapLogo variant="full" size="md" dark />
-          </span>
           <button
             onClick={goToAuth}
             className="text-xs font-bold px-4 py-2 rounded-full transition-all active:scale-95"
