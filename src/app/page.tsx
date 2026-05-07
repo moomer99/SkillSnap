@@ -68,13 +68,13 @@ function SkillSnapRouter() {
 
   return (
     <div
-      className="relative w-full min-h-screen flex justify-center"
+      className="min-h-screen lg:flex lg:flex-row lg:justify-center"
       style={{
         fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif",
         background: "#f0eff7",
       }}
     >
-      {/* Desktop three-column layout wrapper */}
+      {/* Left sidebar — desktop only */}
       <Suspense fallback={null}>
         <LeftSidebar onNavigate={navigate} />
       </Suspense>
@@ -176,10 +176,10 @@ function SkillSnapRouter() {
 
       </div>
 
-      {/* App shell — full width on mobile, capped at 430px on tablet, 600px on desktop */}
+      {/* App shell — full width on mobile, 430px on tablet, 600px on desktop */}
       <div
-        className="relative w-full bg-[#f8f7f5] overflow-hidden lg:!max-w-[600px]"
-        style={{ maxWidth: "min(100vw, 430px)", minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
+        className="relative w-full bg-[#f8f7f5] overflow-hidden shrink-0 max-w-[430px] lg:max-w-[600px] lg:w-[600px]"
+        style={{ minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
       >
         {/* Auth loading splash — shown for ALL screens while session resolves.
             Covers the landing/auth flash that occurs after Google OAuth redirects back. */}

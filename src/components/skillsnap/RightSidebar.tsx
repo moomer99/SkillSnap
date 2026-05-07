@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Edit3, MapPin } from "lucide-react";
-import type { Screen, SkillCategory } from "@/types";
+import type { Screen } from "@/types";
 import { useAppState } from "@/state/AppState";
 import { getSupabase } from "@/lib/supabase";
 
@@ -61,8 +61,8 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
   const trendingSkills = useTrendingSkills();
 
   return (
-    <div className="hidden lg:flex flex-col w-[300px] sticky top-0 h-screen border-l border-[#e8e4df] bg-white overflow-y-auto">
-      <div className="px-5 pt-6 flex flex-col gap-5">
+    <aside className="hidden lg:flex flex-col w-[300px] sticky top-0 h-screen border-l border-[#e8e4df] bg-white shrink-0 overflow-y-auto">
+      <div className="px-4 pt-6 flex flex-col gap-5">
 
         {/* Guest state */}
         {(isGuest || !isAuthenticated) && (
@@ -151,10 +151,25 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
           </div>
         )}
 
-        <p className="text-[11px] text-[#b0aaa5] mt-auto pb-4">
-          © 2025 SkillSnap Australia · Sydney, NSW
+        {/* Mobile prompt + QR code */}
+        <div className="rounded-2xl border border-[#e8e4df] bg-[#fafafa] p-4 flex flex-col items-center gap-3 text-center">
+          <p className="text-sm font-semibold text-[#1a1a1a]">📱 Best on mobile</p>
+          <p className="text-xs text-[#7a7570] leading-relaxed">
+            For the best experience, open SkillSnap on your phone.
+          </p>
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://skillsnap.com.au"
+            alt="Scan to open SkillSnap on mobile"
+            width={120}
+            height={120}
+            className="rounded-xl border border-[#e8e4df]"
+          />
+        </div>
+
+        <p className="text-[11px] text-[#b0aaa5] pb-4">
+          © 2026 SkillSnap Australia · Sydney, NSW
         </p>
       </div>
-    </div>
+    </aside>
   );
 }

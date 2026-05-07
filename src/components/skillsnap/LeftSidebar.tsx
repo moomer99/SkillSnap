@@ -28,7 +28,7 @@ export default function LeftSidebar({ onNavigate }: LeftSidebarProps) {
   }
 
   return (
-    <div className="hidden lg:flex flex-col w-[240px] sticky top-0 h-screen border-r border-[#e8e4df] bg-white overflow-y-auto">
+    <aside className="hidden lg:flex flex-col w-[240px] sticky top-0 h-screen border-r border-[#e8e4df] bg-white shrink-0 overflow-y-auto">
       <div className="px-5 pt-6 pb-4">
         <SkillSnapLogo size="sm" />
       </div>
@@ -65,6 +65,6 @@ export default function LeftSidebar({ onNavigate }: LeftSidebarProps) {
           Post
         </button>
       </nav>
-    </div>
+    </aside>
   );
 }
