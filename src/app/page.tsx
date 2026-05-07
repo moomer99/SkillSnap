@@ -27,6 +27,7 @@ const ProScreen         = lazy(() => import("@/components/skillsnap/ProScreen"))
 const ContactScreen     = lazy(() => import("@/components/skillsnap/ContactScreen"));
 const HelpScreen        = lazy(() => import("@/components/skillsnap/HelpScreen"));
 const AboutScreen       = lazy(() => import("@/components/skillsnap/AboutScreen"));
+const TermsScreen       = lazy(() => import("@/components/skillsnap/TermsScreen"));
 const BottomNav         = lazy(() => import("@/components/skillsnap/BottomNav"));
 
 import { ToastProvider } from "@/components/skillsnap/shared/Toast";
@@ -209,6 +210,7 @@ function SkillSnapRouter() {
             {screen === "contact"        && <ContactScreen     onNavigate={navigate} />}
             {screen === "help"           && <HelpScreen        onNavigate={navigate} />}
             {screen === "about"          && <AboutScreen       onNavigate={navigate} />}
+            {screen === "terms"          && <TermsScreen       onNavigate={navigate} />}
             {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
           </Suspense>
         </div>

@@ -168,8 +168,7 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
             icon={<FileText size={16} className="text-[#7a7570]" />}
             iconBg="#f0eeea"
             label="Terms & Privacy Policy"
-            onPress={() => {}}
-            badge="Soon"
+            onPress={() => onNavigate("terms")}
           />
         </SettingsGroup>
 

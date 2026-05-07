@@ -168,4 +168,5 @@ export type Screen =
   | "pro"
   | "contact"
   | "help"
-  | "about";
+  | "about"
+  | "terms";
