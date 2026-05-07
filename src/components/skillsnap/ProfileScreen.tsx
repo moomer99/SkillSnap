@@ -4,7 +4,7 @@
 // FIX 3: Show user's actual skill tag instead of hardcoded "Client" badge
 // FIX UX4: Proper empty state on both own and client profile grids
 // ─────────────────────────────────────────────
-import { MapPin, ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, Loader2, Bookmark, Settings, Zap, Star, TrendingUp, Video, Shield, Gift, Sparkles, ChevronUp } from "lucide-react";
+import { MapPin, ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, Loader2, Bookmark, Menu, Zap, Star, TrendingUp, Video, Shield, Gift, Sparkles, ChevronUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import type { Screen, ProfileVariant, Post, SkillCategory } from "@/types";
 import { MOCK_WORK_GRID } from "@/mock-data/posts";
@@ -85,8 +85,8 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
         </button>
         <span className="font-semibold text-[#1a1a1a] text-sm flex-1">{user.username}</span>
         {isOwn ? (
-          <button onClick={() => onNavigate("settings")} className="w-9 h-9 flex items-center justify-center text-[#7a7570] active:text-[#6c47ff] transition-colors">
-            <Settings size={20} />
+          <button onClick={() => onNavigate("settings")} className="text-[#7a7570]">
+            <Menu size={22} />
           </button>
         ) : (
           /* FIX 3 — Show user's actual skill instead of hardcoded "Client" */
