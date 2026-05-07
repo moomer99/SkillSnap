@@ -40,16 +40,26 @@ function useTrendingSkills() {
 }
 
 const SKILL_COLORS: Record<string, string> = {
-  "Barber": "#fde68a",
+  "Barber":        "#fde68a",
   "Makeup Artist": "#fbcfe8",
-  "Tiler": "#d1fae5",
-  "Cleaning": "#bfdbfe",
-  "Fitness / PT": "#fed7aa",
-  "Plumber": "#c7d2fe",
-  "Electrician": "#fef08a",
-  "Landscaping": "#bbf7d0",
-  "Nails": "#fce7f3",
+  "Nail Tech":     "#fce7f3",
+  "Tiler":         "#d1fae5",
+  "Cleaning":      "#bfdbfe",
+  "Cleaner":       "#bfdbfe",
+  "Fitness / PT":  "#fed7aa",
+  "Plumber":       "#c7d2fe",
+  "Electrician":   "#fef08a",
+  "Landscaping":   "#bbf7d0",
+  "Nails":         "#fce7f3",
+  "Carpenter":     "#fef3c7",
+  "Mechanic":      "#e0f2fe",
+  "Mover":         "#ede9fe",
 };
+
+const FALLBACK_SKILLS = [
+  "Barber", "Cleaner", "Plumber", "Electrician",
+  "Carpenter", "Mechanic", "Nail Tech", "Makeup Artist", "Mover",
+];
 
 function skillColor(skill: string) {
   return SKILL_COLORS[skill] ?? "#ede9fe";
@@ -130,23 +140,28 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
         </div>
       )}
 
-      {/* Trending Skills card */}
-      {trendingSkills.length > 0 && (
-        <div className="rounded-2xl bg-white shadow-sm p-4">
-          <h3 className="font-bold text-[#1a1a1a] text-sm mb-3">Trending Skills</h3>
-          <div className="flex flex-wrap gap-2">
-            {trendingSkills.map(({ skill }) => (
-              <span
-                key={skill}
-                className="text-xs font-semibold text-[#4a4540] rounded-full px-3 py-1.5"
-                style={{ background: skillColor(skill) }}
-              >
-                {skill}
-              </span>
-            ))}
+      {/* Trending Skills card — always shown, padded with fallbacks */}
+      {(() => {
+        const liveSkillNames = trendingSkills.map(s => s.skill);
+        const extra = FALLBACK_SKILLS.filter(s => !liveSkillNames.includes(s));
+        const displaySkills = [...liveSkillNames, ...extra].slice(0, 9);
+        return (
+          <div className="rounded-2xl bg-white shadow-sm p-4">
+            <h3 className="font-bold text-[#1a1a1a] text-sm mb-3">Trending Skills</h3>
+            <div className="flex flex-wrap gap-2">
+              {displaySkills.map((skill) => (
+                <span
+                  key={skill}
+                  className="text-xs font-semibold text-[#4a4540] rounded-full px-3 py-1.5"
+                  style={{ background: skillColor(skill) }}
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* QR / mobile card */}
       <div className="rounded-2xl bg-white shadow-sm p-4 flex flex-col items-center gap-3 text-center">

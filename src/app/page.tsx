@@ -5,7 +5,7 @@
 // All screens receive onNavigate from here
 // ─────────────────────────────────────────────
 import { lazy, Suspense, useMemo, useRef, useState, useEffect } from "react";
-import { Home, Compass, PlusCircle, MessageCircle, User } from "lucide-react";
+import { Home, Compass, PlusCircle, MessageCircle, User, Settings, MoreHorizontal } from "lucide-react";
 import { AppProvider, useAppState } from "@/state/AppState";
 import type { Screen } from "@/types";
 
@@ -69,41 +69,82 @@ function SkillSnapRouter() {
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f0eff7", fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif" }}>
 
-      {/* Left column — 240px, desktop only */}
-      <div className="hidden lg:flex flex-col" style={{ width: "240px", flexShrink: 0, padding: "20px 12px" }}>
-        {/* Floating card — content height only */}
-        <div className="rounded-2xl bg-white shadow-sm p-4">
-          {/* SK icon */}
-          <img src="/skillsnap-icon.svg" alt="SkillSnap" width={48} height={48} className="mb-1" />
+      {/* Left column — 72px icon-only (logged in) or 240px (logged out), desktop only */}
+      <div
+        className="hidden lg:flex flex-col"
+        style={{
+          width: state.isAuthenticated && !state.isGuest ? "72px" : "240px",
+          flexShrink: 0,
+          padding: "20px 12px",
+        }}
+      >
+        {/* Logged-out: logo card only */}
+        {(!state.isAuthenticated || state.isGuest) && (
+          <div className="rounded-2xl bg-white shadow-sm" style={{ padding: "18px" }}>
+            <img src="/skillsnap-icon.svg" alt="SkillSnap" width={54} height={54} />
+            <p className="text-xs font-bold text-[#1a1a1a] mt-2 leading-tight">SkillSnap</p>
+          </div>
+        )}
 
-          {/* Nav links — only when logged in */}
-          {state.isAuthenticated && !state.isGuest && (
-            <nav className="flex flex-col gap-0.5 mt-3">
+        {/* Logged-in: Threads-style icon-only sidebar */}
+        {state.isAuthenticated && !state.isGuest && (
+          <div className="rounded-2xl bg-white shadow-sm flex flex-col items-center py-4 gap-0" style={{ minHeight: "420px" }}>
+            {/* Logo at top */}
+            <div style={{ padding: "0 11px 12px" }}>
+              <img src="/skillsnap-icon.svg" alt="SkillSnap" width={38} height={38} />
+            </div>
+
+            <div className="w-8 h-px bg-[#f0eeea] mx-auto mb-2" />
+
+            {/* Main nav icons — vertically centred */}
+            <div className="flex flex-col items-center gap-1 flex-1 justify-center">
               {(
                 [
-                  { icon: Home,          label: "Feed",     screen: "home"        },
-                  { icon: Compass,       label: "Discover", screen: "discover"    },
-                  { icon: PlusCircle,    label: "Post",     screen: "upload"      },
-                  { icon: MessageCircle, label: "Messages", screen: "messages"    },
-                  { icon: User,          label: "Profile",  screen: "own-profile" },
-                ] as { icon: React.ElementType; label: string; screen: Screen }[]
-              ).map(({ icon: Icon, label, screen: s }) => (
-                <button
-                  key={s}
-                  onClick={() => navigate(s)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all w-full text-left ${
-                    screen === s
-                      ? "bg-[#f0ebff] text-[#6c47ff]"
-                      : "text-[#7a7570] hover:bg-[#f5f3ff] hover:text-[#1a1a1a]"
-                  }`}
-                >
-                  <Icon size={19} />
-                  {label}
-                </button>
-              ))}
-            </nav>
-          )}
-        </div>
+                  { icon: Home,          label: "Feed",     screen: "home",        activeIcon: Home          },
+                  { icon: Compass,       label: "Discover", screen: "discover",    activeIcon: Compass       },
+                  { icon: PlusCircle,    label: "Post",     screen: "upload",      activeIcon: PlusCircle    },
+                  { icon: MessageCircle, label: "Messages", screen: "messages",    activeIcon: MessageCircle },
+                  { icon: User,          label: "Profile",  screen: "own-profile", activeIcon: User          },
+                ] as { icon: React.ElementType; label: string; screen: Screen; activeIcon: React.ElementType }[]
+              ).map(({ icon: Icon, label, screen: s }) => {
+                const active = screen === s;
+                return (
+                  <button
+                    key={s}
+                    onClick={() => navigate(s)}
+                    title={label}
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
+                      active
+                        ? "bg-[#f0ebff] text-[#6c47ff]"
+                        : "text-[#7a7570] hover:bg-[#f5f3ff] hover:text-[#1a1a1a]"
+                    }`}
+                  >
+                    <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Bottom utility icons */}
+            <div className="flex flex-col items-center gap-1 mt-2 pt-2 border-t border-[#f0eeea] w-full">
+              <button
+                title="Settings"
+                onClick={() => navigate("settings")}
+                className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
+                  screen === "settings" ? "bg-[#f0ebff] text-[#6c47ff]" : "text-[#b0aaa5] hover:bg-[#f5f3ff] hover:text-[#1a1a1a]"
+                }`}
+              >
+                <Settings size={20} strokeWidth={1.8} />
+              </button>
+              <button
+                title="More"
+                className="w-11 h-11 rounded-xl flex items-center justify-center text-[#b0aaa5] hover:bg-[#f5f3ff] hover:text-[#1a1a1a] transition-all"
+              >
+                <MoreHorizontal size={20} strokeWidth={1.8} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Centre — fills remaining space and centres the app shell */}
@@ -159,8 +200,8 @@ function SkillSnapRouter() {
         </div>
       </div>
 
-      {/* Right column — 300px, desktop only */}
-      <div className="hidden lg:flex flex-col" style={{ width: "300px", flexShrink: 0, padding: "20px 12px" }}>
+      {/* Right column — 320px, desktop only, tighter gap to centre */}
+      <div className="hidden lg:flex flex-col" style={{ width: "320px", flexShrink: 0, padding: "20px 16px 20px 6px" }}>
         <Suspense fallback={null}>
           <RightSidebar onNavigate={navigate} />
         </Suspense>
