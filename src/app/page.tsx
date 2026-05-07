@@ -8,7 +8,6 @@ import { lazy, Suspense, useMemo, useRef, useState, useEffect } from "react";
 import { Home, Compass, PlusCircle, MessageCircle, User } from "lucide-react";
 import { AppProvider, useAppState } from "@/state/AppState";
 import type { Screen } from "@/types";
-import SkillSnapLogo from "@/components/skillsnap/shared/SkillSnapLogo";
 
 // Landing + Auth load eagerly — they're the first thing every visitor sees
 import LandingPage from "@/components/skillsnap/LandingPage";
@@ -70,28 +69,16 @@ function SkillSnapRouter() {
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f0eff7", fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif" }}>
 
-      {/* Left sidebar — fixed to left edge, desktop only */}
-      <div
-        className="hidden lg:flex"
-        style={{
-          width: "240px", flexShrink: 0, position: "sticky", top: 0,
-          height: "100vh", backgroundColor: "white", borderRight: "1px solid #e8e4df",
-          flexDirection: "column", padding: "16px", overflowY: "auto",
-        }}
-      >
-        {(state.isGuest || !state.isAuthenticated || screen === "landing" || screen === "auth" || screen === "onboarding") ? (
-          <div className="flex flex-col h-full">
-            <div className="mb-8">
-              <SkillSnapLogo variant="full" size="md" />
-              <p className="text-xs text-[#7a7570] mt-2">Sydney&apos;s Skills Platform</p>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col h-full">
-            <div className="mb-8">
-              <SkillSnapLogo variant="full" size="md" />
-            </div>
-            <nav className="flex flex-col gap-1">
+      {/* Left column — 240px, desktop only */}
+      <div className="hidden lg:flex flex-col" style={{ width: "240px", flexShrink: 0, padding: "20px 12px" }}>
+        {/* Floating card — content height only */}
+        <div className="rounded-2xl bg-white shadow-sm p-4">
+          {/* SK icon */}
+          <img src="/skillsnap-icon.svg" alt="SkillSnap" width={48} height={48} className="mb-1" />
+
+          {/* Nav links — only when logged in */}
+          {state.isAuthenticated && !state.isGuest && (
+            <nav className="flex flex-col gap-0.5 mt-3">
               {(
                 [
                   { icon: Home,          label: "Feed",     screen: "home"        },
@@ -104,19 +91,19 @@ function SkillSnapRouter() {
                 <button
                   key={s}
                   onClick={() => navigate(s)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all w-full text-left ${
                     screen === s
                       ? "bg-[#f0ebff] text-[#6c47ff]"
                       : "text-[#7a7570] hover:bg-[#f5f3ff] hover:text-[#1a1a1a]"
                   }`}
                 >
-                  <Icon size={20} />
+                  <Icon size={19} />
                   {label}
                 </button>
               ))}
             </nav>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Centre — fills remaining space and centres the app shell */}
@@ -172,15 +159,8 @@ function SkillSnapRouter() {
         </div>
       </div>
 
-      {/* Right sidebar — fixed to right edge, desktop only */}
-      <div
-        className="hidden lg:flex"
-        style={{
-          width: "300px", flexShrink: 0, position: "sticky", top: 0,
-          height: "100vh", backgroundColor: "white", borderLeft: "1px solid #e8e4df",
-          flexDirection: "column", padding: "16px", overflowY: "auto",
-        }}
-      >
+      {/* Right column — 300px, desktop only */}
+      <div className="hidden lg:flex flex-col" style={{ width: "300px", flexShrink: 0, padding: "20px 12px" }}>
         <Suspense fallback={null}>
           <RightSidebar onNavigate={navigate} />
         </Suspense>
