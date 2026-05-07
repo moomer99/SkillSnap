@@ -89,10 +89,12 @@ function SkillSnapRouter() {
 
   async function handleLogOut() {
     setMoreOpen(false);
+    localStorage.removeItem("skillsnap_guest");
     try {
       const { getSupabase } = await import("@/lib/supabase");
       await getSupabase().auth.signOut();
     } catch { /* ignore */ }
+    dispatch({ type: "CLEAR_AUTH" });
     navigate("landing");
   }
 
@@ -140,8 +142,8 @@ function SkillSnapRouter() {
         <img src="/skillsnap-icon.svg" alt="SkillSnap" width={34} height={34} />
       </div>
 
-      {/* Card 2 — Merged nav + utility, fixed vertically centred — hidden on landing */}
-      {screen !== "landing" && <div className="ss-sidebar-card" style={{
+      {/* Card 2 — Merged nav + utility — hidden on landing + auth, shown for guest + logged-in */}
+      {screen !== "landing" && screen !== "auth" && <div className="ss-sidebar-card" style={{
         position: "fixed", top: "50%", left: "16px", transform: "translateY(-50%)", zIndex: 100,
         background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)",
         border: "0.5px solid rgba(0,0,0,0.08)", borderRadius: "20px",

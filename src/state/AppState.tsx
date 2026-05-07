@@ -106,6 +106,9 @@ const initialState: AppStateShape = {
 function appReducer(state: AppStateShape, action: Action): AppStateShape {
   switch (action.type) {
     case "SET_AUTH":
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("skillsnap_guest");
+      }
       return {
         ...state,
         currentUser: action.user,
@@ -116,6 +119,9 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         screen: (state.screen === "auth" || state.screen === "onboarding" || state.screen === "landing") ? "home" : state.screen,
       };
     case "CLEAR_AUTH":
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("skillsnap_guest");
+      }
       return { ...initialState, authLoading: false };
     case "SET_AUTH_LOADING":
       // If no session found and we're on onboarding, stay there
@@ -308,6 +314,10 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       };
     }
     case "SKIP_AUTH":
+      // Set localStorage flag — guest mode persists until sign-in or explicit logout
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("skillsnap_guest", "true");
+      }
       return {
         ...state,
         isGuest: true,
@@ -339,6 +349,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Hydrate auth state from Supabase session on mount
   useEffect(() => {
+    // Guest flag takes priority — skip Supabase entirely for guest sessions
+    if (localStorage.getItem("skillsnap_guest") === "true") {
+      dispatch({ type: "SKIP_AUTH" });
+      return;
+    }
+
     // Immediately check localStorage for existing session to prevent auth flash
     const existingSession = localStorage.getItem('sb-dnraeyxjzdmpdvrkzyfd-auth-token');
     if (existingSession) {
