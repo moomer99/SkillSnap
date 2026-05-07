@@ -4,7 +4,8 @@
 // Navigation is driven by AppState.screen
 // All screens receive onNavigate from here
 // ─────────────────────────────────────────────
-import { lazy, Suspense, useMemo, useRef, useState, useEffect } from "react";
+import { lazy, Suspense, useRef, useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { Home, Compass, PlusCircle, MessageCircle, User, Settings, MoreHorizontal, HelpCircle, LogOut } from "lucide-react";
 import { AppProvider, useAppState } from "@/state/AppState";
 import type { Screen } from "@/types";
@@ -33,8 +34,13 @@ const ResetPasswordScreen    = lazy(() => import("@/components/skillsnap/ResetPa
 const BottomNav         = lazy(() => import("@/components/skillsnap/BottomNav"));
 const RightSidebar      = lazy(() => import("@/components/skillsnap/RightSidebar"));
 
+// Auth prompt modal — no SSR needed (reads client state only, never shown on server)
+const AuthPromptModal = dynamic(
+  () => import("@/components/skillsnap/shared/AuthPromptModal"),
+  { ssr: false }
+);
+
 import { ToastProvider } from "@/components/skillsnap/shared/Toast";
-import AuthPromptModal from "@/components/skillsnap/shared/AuthPromptModal";
 import { useGlobalMessages } from "@/hooks/useGlobalMessages";
 
 // Screens that show the bottom nav

@@ -14,7 +14,6 @@ import { mapProfile, ensureProfile } from "@/services/authService";
 interface AppStateShape {
   currentUser: User | null;
   isAuthenticated: boolean;
-  isGuest: boolean;
   authLoading: boolean; // true while session is being resolved on mount
   showAuthPrompt: boolean;
 
@@ -73,7 +72,6 @@ type Action =
   | { type: "PREPEND_POST"; post: Post }
   | { type: "DELETE_POST"; postId: string }
   | { type: "UPDATE_POST"; postId: string; patch: Partial<Pick<Post, "caption" | "skill" | "location">> }
-  | { type: "SKIP_AUTH" }
   | { type: "SHOW_AUTH_PROMPT" }
   | { type: "HIDE_AUTH_PROMPT" };
 
@@ -81,7 +79,6 @@ type Action =
 const initialState: AppStateShape = {
   currentUser: null,
   isAuthenticated: false,
-  isGuest: false,
   authLoading: true, // start true — resolve on mount
   showAuthPrompt: false,
   screen: "landing", // always start here; useEffect corrects immediately
@@ -110,7 +107,6 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         ...state,
         currentUser: action.user,
         isAuthenticated: true,
-        isGuest: false,
         showAuthPrompt: false,
         authLoading: false,
         screen: (state.screen === "auth" || state.screen === "onboarding" || state.screen === "landing") ? "home" : state.screen,
@@ -307,13 +303,6 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         posts: state.posts.map(patchPost),
       };
     }
-    case "SKIP_AUTH":
-      return {
-        ...state,
-        isGuest: true,
-        authLoading: false,
-        screen: "home",
-      };
     case "SHOW_AUTH_PROMPT":
       return { ...state, showAuthPrompt: true };
     case "HIDE_AUTH_PROMPT":

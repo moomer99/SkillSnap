@@ -20,7 +20,7 @@ export default function LeftSidebar({ onNavigate }: LeftSidebarProps) {
   const { screen } = state;
 
   function guardedNavigate(s: Screen) {
-    if (state.isGuest && (s === "upload" || s === "messages" || s === "own-profile")) {
+    if (!state.isAuthenticated && (s === "upload" || s === "messages" || s === "own-profile")) {
       dispatch({ type: "SHOW_AUTH_PROMPT" });
       return;
     }

@@ -121,7 +121,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
     }
     setSaving(true);
     try {
-      const isAuthenticated = SUPABASE_CONFIGURED && !!state.currentUser && !state.isGuest;
+      const isAuthenticated = SUPABASE_CONFIGURED && !!state.currentUser;
       let persistedAvatarUrl: string | undefined = user?.avatarUrl;
 
       let resolvedLat = locationLat;

@@ -236,7 +236,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             dispatch({ type: "DELETE_POST", postId });
             setPosts((prev) => prev.filter((p) => p.id !== postId));
             setViewingPost(null);
-            if (SUPABASE_CONFIGURED && state.currentUser && !state.isGuest) {
+            if (SUPABASE_CONFIGURED && state.currentUser) {
               try { const { postService } = await import("@/services/postService"); await postService.deletePost(postId); } catch (e) { console.warn("Delete post from DB failed:", e); }
             }
           }}

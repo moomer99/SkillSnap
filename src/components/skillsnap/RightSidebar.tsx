@@ -67,14 +67,14 @@ function skillColor(skill: string) {
 
 export default function RightSidebar({ onNavigate }: RightSidebarProps) {
   const { state } = useAppState();
-  const { isGuest, isAuthenticated, currentUser } = state;
+  const { isAuthenticated, currentUser } = state;
   const trendingSkills = useTrendingSkills();
 
   return (
     <div className="flex flex-col gap-3 w-full">
 
-      {/* Guest: Join SkillSnap card */}
-      {(isGuest || !isAuthenticated) && (
+      {/* Unauthenticated: Join SkillSnap card */}
+      {!isAuthenticated && (
         <div className="rounded-2xl bg-white shadow-sm p-5 flex flex-col gap-3">
           <div>
             <h3 className="font-bold text-[#1a1a1a] text-base">Join SkillSnap</h3>

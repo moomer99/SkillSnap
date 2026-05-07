@@ -133,7 +133,6 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
   }
 
   function openUserProfile(user: User) {
-    if (state.isGuest && user.id === state.currentUser?.id) return;
     dispatch({ type: "SET_VIEWING_USER", userId: user.id });
     navigate(user.id === state.currentUser?.id ? "own-profile" : "client-profile");
   }
