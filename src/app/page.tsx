@@ -90,136 +90,161 @@ function SkillSnapRouter() {
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f0eff7", fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif" }}>
 
-      {/* ── Centred 3-column wrapper ─────────────────────────────── */}
-      <div className="hidden lg:flex" style={{ maxWidth: "1100px", margin: "0 auto", alignItems: "flex-start" }}>
+      {/* ── LEFT SIDEBAR — three fixed floating cards, desktop only ── */}
+      <style>{`
+        @media (min-width: 768px) {
+          .ss-sidebar-card { display: flex; }
+        }
+        @media (max-width: 767px) {
+          .ss-sidebar-card { display: none !important; }
+        }
+        .ss-nav-btn { position: relative; }
+        .ss-nav-btn::after {
+          content: attr(data-tooltip);
+          position: absolute;
+          left: calc(100% + 8px);
+          top: 50%;
+          transform: translateY(-50%);
+          background: #1a1a1a;
+          color: white;
+          font-size: 12px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 6px;
+          white-space: nowrap;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.12s;
+          z-index: 300;
+        }
+        .ss-nav-btn:hover::after { opacity: 1; }
+      `}</style>
 
-        {/* LEFT SIDEBAR — 56px, fixed height, full viewport */}
-        <div
+      {/* Card 1 — Logo, fixed top-left */}
+      <div className="ss-sidebar-card" style={{
+        position: "fixed", top: "16px", left: "16px", zIndex: 100,
+        background: "white", border: "1px solid #e8e4df", borderRadius: "10px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        width: "52px", height: "52px",
+        alignItems: "center", justifyContent: "center",
+      }}>
+        <img src="/skillsnap-icon.svg" alt="SkillSnap" width={34} height={34} />
+      </div>
+
+      {/* Card 2 — Nav icons, fixed vertically centred */}
+      <div className="ss-sidebar-card" style={{
+        position: "fixed", top: "50%", left: "16px", transform: "translateY(-50%)", zIndex: 100,
+        background: "white", border: "1px solid #e8e4df", borderRadius: "14px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        flexDirection: "column", alignItems: "center",
+        padding: "8px 6px", gap: "6px",
+      }}>
+        {(
+          [
+            { icon: Home,          label: "Feed",     s: "home"        },
+            { icon: Compass,       label: "Discover", s: "discover"    },
+            { icon: PlusCircle,    label: "Post",     s: "upload"      },
+            { icon: MessageCircle, label: "Messages", s: "messages"    },
+            { icon: User,          label: "Profile",  s: "own-profile" },
+          ] as { icon: React.ElementType; label: string; s: Screen }[]
+        ).map(({ icon: Icon, label, s }) => {
+          const active = screen === s;
+          const isPost = s === "upload";
+          return (
+            <button
+              key={s}
+              data-tooltip={label}
+              className="ss-nav-btn"
+              onClick={() => navigate(s)}
+              style={{
+                width: "40px", height: "40px", borderRadius: "10px",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: isPost ? "#6c47ff" : active ? "#eef0ff" : "transparent",
+                color: isPost ? "white" : active ? "#6c47ff" : "#7a7570",
+                border: "none", cursor: "pointer", transition: "background 0.15s",
+                flexShrink: 0,
+              }}
+              onMouseEnter={e => { if (!isPost && !active) (e.currentTarget as HTMLButtonElement).style.background = "#f5f3ff"; }}
+              onMouseLeave={e => { if (!isPost && !active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+            >
+              <Icon size={22} strokeWidth={isPost ? 2.2 : active ? 2.4 : 1.8} />
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Card 3 — Utility icons, fixed bottom-left */}
+      <div className="ss-sidebar-card" style={{
+        position: "fixed", bottom: "16px", left: "16px", zIndex: 100,
+        background: "white", border: "1px solid #e8e4df", borderRadius: "14px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        flexDirection: "column", alignItems: "center",
+        padding: "8px 6px", gap: "6px",
+        width: "52px",
+      }}>
+        <button
+          data-tooltip="Settings"
+          className="ss-nav-btn"
+          onClick={() => { setMoreOpen(false); navigate("settings"); }}
           style={{
-            width: "56px", flexShrink: 0, position: "sticky", top: 0, height: "100vh",
-            backgroundColor: "white", borderRight: "0.5px solid #e8e4df",
-            display: "flex", flexDirection: "column", alignItems: "center",
-            paddingTop: "16px", paddingBottom: "12px",
+            width: "40px", height: "40px", borderRadius: "10px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: screen === "settings" ? "#eef0ff" : "transparent",
+            color: screen === "settings" ? "#6c47ff" : "#b0aaa5",
+            border: "none", cursor: "pointer", transition: "background 0.15s",
           }}
+          onMouseEnter={e => { if (screen !== "settings") (e.currentTarget as HTMLButtonElement).style.background = "#f5f3ff"; }}
+          onMouseLeave={e => { if (screen !== "settings") (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
         >
-          {/* Logo */}
-          <div style={{ marginBottom: "12px" }}>
-            <img src="/skillsnap-icon.svg" alt="SkillSnap" width={34} height={34} />
-          </div>
-          <div style={{ width: "32px", height: "1px", background: "#f0eeea", marginBottom: "8px" }} />
+          <Settings size={20} strokeWidth={1.8} />
+        </button>
 
-          {/* Nav icons — centred vertically */}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-            {(state.isAuthenticated && !state.isGuest) ? (
-              (
-                [
-                  { icon: Home,          label: "Feed",     s: "home"        },
-                  { icon: Compass,       label: "Discover", s: "discover"    },
-                  { icon: PlusCircle,    label: "Post",     s: "upload"      },
-                  { icon: MessageCircle, label: "Messages", s: "messages"    },
-                  { icon: User,          label: "Profile",  s: "own-profile" },
-                ] as { icon: React.ElementType; label: string; s: Screen }[]
-              ).map(({ icon: Icon, label, s }) => {
-                const active = screen === s;
-                return (
-                  <button
-                    key={s}
-                    onClick={() => navigate(s)}
-                    title={label}
-                    style={{
-                      width: "40px", height: "40px", borderRadius: "12px",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      background: active ? "#f0ebff" : "transparent",
-                      color: active ? "#6c47ff" : "#7a7570",
-                      border: "none", cursor: "pointer", transition: "background 0.15s",
-                    }}
-                    onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "#f5f3ff"; }}
-                    onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
-                  >
-                    <Icon size={23} strokeWidth={active ? 2.4 : 1.8} />
-                  </button>
-                );
-              })
-            ) : (
-              /* Logged-out: just a placeholder so logo isn't floating alone */
-              null
-            )}
-          </div>
-
-          {/* Bottom utility */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", borderTop: "1px solid #f0eeea", paddingTop: "8px", width: "100%" }}>
-            {(state.isAuthenticated && !state.isGuest) && (
-              <button
-                title="Settings"
-                onClick={() => { setMoreOpen(false); navigate("settings"); }}
-                style={{
-                  width: "40px", height: "40px", borderRadius: "12px",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: screen === "settings" ? "#f0ebff" : "transparent",
-                  color: screen === "settings" ? "#6c47ff" : "#b0aaa5",
-                  border: "none", cursor: "pointer", transition: "background 0.15s",
-                }}
-                onMouseEnter={e => { if (screen !== "settings") (e.currentTarget as HTMLButtonElement).style.background = "#f5f3ff"; }}
-                onMouseLeave={e => { if (screen !== "settings") (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
-              >
-                <Settings size={20} strokeWidth={1.8} />
-              </button>
-            )}
-
-            {/* More / 3-dots with popover */}
-            <div ref={moreRef} style={{ position: "relative" }}>
-              <button
-                title="More"
-                onClick={() => setMoreOpen(o => !o)}
-                style={{
-                  width: "40px", height: "40px", borderRadius: "12px",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: moreOpen ? "#f0ebff" : "transparent",
-                  color: moreOpen ? "#6c47ff" : "#b0aaa5",
-                  border: "none", cursor: "pointer", transition: "background 0.15s",
-                }}
-              >
-                <MoreHorizontal size={20} strokeWidth={1.8} />
-              </button>
-
-              {/* Popover */}
-              {moreOpen && (
-                <div style={{
-                  position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)",
-                  background: "white", border: "1px solid #e8e4df", borderRadius: "12px",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.10)", padding: "6px", minWidth: "160px", zIndex: 200,
-                }}>
-                  <button
-                    onClick={() => { setMoreOpen(false); navigate("settings"); }}
-                    style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#1a1a1a" }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "#f5f3ff")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "none")}
-                  >
-                    <Settings size={15} /> Settings
-                  </button>
-                  <button
-                    onClick={() => { setMoreOpen(false); navigate("help"); }}
-                    style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#1a1a1a" }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "#f5f3ff")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "none")}
-                  >
-                    <HelpCircle size={15} /> Help &amp; Support
-                  </button>
-                  {(state.isAuthenticated && !state.isGuest) && (
-                    <button
-                      onClick={handleLogOut}
-                      style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#e53e3e" }}
-                      onMouseEnter={e => (e.currentTarget.style.background = "#fff5f5")}
-                      onMouseLeave={e => (e.currentTarget.style.background = "none")}
-                    >
-                      <LogOut size={15} /> Log Out
-                    </button>
-                  )}
-                </div>
+        {/* 3-dots + popover */}
+        <div ref={moreRef} style={{ position: "relative" }}>
+          <button
+            data-tooltip="More"
+            className="ss-nav-btn"
+            onClick={() => setMoreOpen(o => !o)}
+            style={{
+              width: "40px", height: "40px", borderRadius: "10px",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              background: moreOpen ? "#eef0ff" : "transparent",
+              color: moreOpen ? "#6c47ff" : "#b0aaa5",
+              border: "none", cursor: "pointer", transition: "background 0.15s",
+            }}
+          >
+            <MoreHorizontal size={20} strokeWidth={1.8} />
+          </button>
+          {moreOpen && (
+            <div style={{
+              position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)",
+              background: "white", border: "1px solid #e8e4df", borderRadius: "12px",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.10)", padding: "6px", minWidth: "160px", zIndex: 300,
+            }}>
+              <button onClick={() => { setMoreOpen(false); navigate("settings"); }}
+                style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#1a1a1a" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "#f5f3ff")}
+                onMouseLeave={e => (e.currentTarget.style.background = "none")}
+              ><Settings size={15} /> Settings</button>
+              <button onClick={() => { setMoreOpen(false); navigate("help"); }}
+                style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#1a1a1a" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "#f5f3ff")}
+                onMouseLeave={e => (e.currentTarget.style.background = "none")}
+              ><HelpCircle size={15} /> Help &amp; Support</button>
+              {(state.isAuthenticated && !state.isGuest) && (
+                <button onClick={handleLogOut}
+                  style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#e53e3e" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#fff5f5")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                ><LogOut size={15} /> Log Out</button>
               )}
             </div>
-          </div>
+          )}
         </div>
+      </div>
+
+      {/* ── Centred 3-column wrapper (no left sidebar slot — it's fixed) ── */}
+      <div className="hidden lg:flex" style={{ maxWidth: "1100px", margin: "0 auto", alignItems: "flex-start" }}>
 
         {/* CENTRE — app shell */}
         <div style={{ flex: "0 0 auto" }}>
