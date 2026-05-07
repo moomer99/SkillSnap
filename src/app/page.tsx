@@ -247,13 +247,13 @@ function SkillSnapRouter() {
       <style>{`
         @media (max-width: 1200px) { .ss-right-sidebar { display: none !important; } }
       `}</style>
-      <div className="hidden lg:flex" style={{ maxWidth: "820px", margin: "0 auto", paddingLeft: "80px", alignItems: "flex-start", gap: "24px" }}>
+      <div className="hidden lg:flex" style={{ paddingLeft: "120px", paddingRight: "0", alignItems: "flex-start", gap: "24px", justifyContent: "center" }}>
 
         {/* CENTRE — app shell, max 480px */}
-        <div style={{ flex: "1 1 0", minWidth: 0, maxWidth: "480px" }}>
+        <div style={{ flex: "0 0 auto" }}>
           <div
             className="relative bg-[#f8f7f5] overflow-hidden"
-            style={{ width: "100%", maxWidth: "480px", minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
+            style={{ width: "600px", minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
           >
           {authLoading && (
             <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
