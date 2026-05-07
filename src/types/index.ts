@@ -165,4 +165,7 @@ export type Screen =
   | "client-profile"   // Client Profile
   | "edit-profile"
   | "settings"
-  | "pro";
+  | "pro"
+  | "contact"
+  | "help"
+  | "about";

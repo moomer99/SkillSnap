@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { ArrowLeft, ChevronRight, User, Lock, Bell, Shield, HelpCircle, FileText, LogOut, Trash2, Loader2, CheckCircle, Zap } from "lucide-react";
+import { ArrowLeft, ChevronRight, User, Lock, Bell, Shield, HelpCircle, FileText, LogOut, Trash2, Loader2, CheckCircle, Zap, Info, Mail } from "lucide-react";
 import type { Screen } from "@/types";
 import { useAppState } from "@/state/AppState";
 import { getNotifPermission, requestNotifPermission } from "@/hooks/useNotifications";
@@ -144,11 +144,24 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
         <SectionHeader title="Support" />
         <SettingsGroup>
           <SettingsRow
-            icon={<HelpCircle size={16} className="text-[#7a7570]" />}
-            iconBg="#f0eeea"
+            icon={<HelpCircle size={16} className="text-[#6c47ff]" />}
+            iconBg="#ede9fe"
             label="Help & FAQ"
-            onPress={() => {}}
-            badge="Soon"
+            onPress={() => onNavigate("help")}
+          />
+          <Divider />
+          <SettingsRow
+            icon={<Mail size={16} className="text-[#0284c7]" />}
+            iconBg="#e0f2fe"
+            label="Contact Us"
+            onPress={() => onNavigate("contact")}
+          />
+          <Divider />
+          <SettingsRow
+            icon={<Info size={16} className="text-[#7a7570]" />}
+            iconBg="#f0eeea"
+            label="About SkillSnap"
+            onPress={() => onNavigate("about")}
           />
           <Divider />
           <SettingsRow
@@ -246,41 +259,38 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
 
       {/* ── Change password sheet ── */}
       {showChangePassword && (
-        <ChangePasswordSheet onClose={() => setShowChangePassword(false)} />
+        <ChangePasswordSheet onClose={() => setShowChangePassword(false)} userEmail={user.email ?? ""} />
       )}
     </div>
   );
 }
 
 // ── Change Password Sheet ──────────────────────────────────────────────────
-function ChangePasswordSheet({ onClose }: { onClose: () => void }) {
-  const [current, setCurrent]   = useState("");
-  const [next, setNext]         = useState("");
-  const [confirm, setConfirm]   = useState("");
-  const [saving, setSaving]     = useState(false);
-  const [done, setDone]         = useState(false);
-  const [error, setError]       = useState("");
+function ChangePasswordSheet({ onClose, userEmail }: { onClose: () => void; userEmail: string }) {
+  const [email, setEmail]   = useState(userEmail);
+  const [sending, setSending] = useState(false);
+  const [done, setDone]       = useState(false);
+  const [error, setError]     = useState("");
 
-  async function handleSave() {
+  async function handleSend() {
     setError("");
-    if (!current || !next || !confirm) { setError("Please fill in all fields."); return; }
-    if (next.length < 8) { setError("New password must be at least 8 characters."); return; }
-    if (next !== confirm) { setError("Passwords don't match."); return; }
-    setSaving(true);
+    if (!email.trim()) { setError("Please enter your email."); return; }
+    setSending(true);
     try {
       if (SUPABASE_CONFIGURED) {
         const { getSupabase } = await import("@/lib/supabase");
-        const { error: err } = await getSupabase().auth.updateUser({ password: next });
-        if (err) { setError(err.message); setSaving(false); return; }
+        const { error: err } = await getSupabase().auth.resetPasswordForEmail(email, {
+          redirectTo: "https://skillsnap.com.au",
+        });
+        if (err) { setError(err.message); setSending(false); return; }
       } else {
         await new Promise((r) => setTimeout(r, 800));
       }
       setDone(true);
-      setTimeout(onClose, 1500);
     } catch {
-      setError("Failed to update password. Please try again.");
+      setError("Failed to send reset email. Please try again.");
     } finally {
-      setSaving(false);
+      setSending(false);
     }
   }
 
@@ -291,24 +301,30 @@ function ChangePasswordSheet({ onClose }: { onClose: () => void }) {
           <div className="w-14 h-14 rounded-full bg-[#dcfce7] flex items-center justify-center mb-3">
             <CheckCircle size={28} className="text-green-500" />
           </div>
-          <p className="font-bold text-[#1a1a1a] text-base">Password updated!</p>
+          <p className="font-bold text-[#1a1a1a] text-base mb-1">Reset link sent!</p>
+          <p className="text-sm text-[#7a7570]">Check your email to reset your password.</p>
         </div>
       ) : (
         <>
-          <h3 className="font-bold text-[#1a1a1a] text-base mb-4">Change Password</h3>
-          <div className="flex flex-col gap-3 mb-4">
-            <PasswordField label="Current password" value={current} onChange={setCurrent} />
-            <PasswordField label="New password" value={next} onChange={setNext} />
-            <PasswordField label="Confirm new password" value={confirm} onChange={setConfirm} />
+          <h3 className="font-bold text-[#1a1a1a] text-base mb-2">Change Password</h3>
+          <p className="text-sm text-[#7a7570] mb-4 leading-relaxed">We'll send a password reset link to your email.</p>
+          <div className="mb-4">
+            <label className="text-xs font-semibold text-[#7a7570] mb-1.5 block">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full h-12 px-4 rounded-2xl border border-[#e8e4df] bg-[#f8f7f5] text-sm text-[#1a1a1a] outline-none focus:border-[#6c47ff] transition-colors"
+            />
           </div>
           {error && <p className="text-xs text-red-500 mb-3 text-center">{error}</p>}
           <button
-            onClick={handleSave}
-            disabled={saving}
-            className="w-full h-13 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 disabled:opacity-60"
+            onClick={handleSend}
+            disabled={sending}
+            className="w-full rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 disabled:opacity-60"
             style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)", height: 52 }}
           >
-            {saving ? <><Loader2 size={18} className="animate-spin" /> Saving…</> : "Update Password"}
+            {sending ? <><Loader2 size={18} className="animate-spin" /> Sending…</> : "Send Reset Link"}
           </button>
         </>
       )}
@@ -381,27 +397,6 @@ function SettingsRow({ icon, iconBg, label, value, valueColor, onPress, badge, h
   );
 }
 
-function PasswordField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  const [show, setShow] = useState(false);
-  return (
-    <div>
-      <label className="text-xs font-semibold text-[#7a7570] mb-1.5 block">{label}</label>
-      <div className="flex items-center bg-[#f0eeea] rounded-xl px-4 h-11 gap-2">
-        <input
-          type={show ? "text" : "password"}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="flex-1 bg-transparent text-sm text-[#1a1a1a] outline-none placeholder-[#b0aaa5]"
-          placeholder="••••••••"
-          autoComplete="new-password"
-        />
-        <button type="button" onClick={() => setShow((s) => !s)} className="text-[#b0aaa5] text-xs font-semibold">
-          {show ? "Hide" : "Show"}
-        </button>
-      </div>
-    </div>
-  );
-}
 
 function BottomSheet({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
