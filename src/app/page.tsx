@@ -137,7 +137,7 @@ function SkillSnapRouter() {
         background: "white", border: "1px solid #e8e4df", borderRadius: "14px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
         flexDirection: "column", alignItems: "center",
-        padding: "8px 6px", gap: "6px",
+        padding: "14px 10px", gap: "12px",
       }}>
         {(
           [
@@ -243,14 +243,17 @@ function SkillSnapRouter() {
         </div>
       </div>
 
-      {/* ── Centred 3-column wrapper (no left sidebar slot — it's fixed) ── */}
-      <div className="hidden lg:flex" style={{ maxWidth: "1100px", margin: "0 auto", alignItems: "flex-start" }}>
+      {/* ── Centred content block (feed + right sidebar), offset for fixed left sidebar ── */}
+      <style>{`
+        @media (max-width: 1200px) { .ss-right-sidebar { display: none !important; } }
+      `}</style>
+      <div className="hidden lg:flex" style={{ maxWidth: "820px", margin: "0 auto", paddingLeft: "80px", alignItems: "flex-start", gap: "24px" }}>
 
-        {/* CENTRE — app shell */}
-        <div style={{ flex: "0 0 auto" }}>
+        {/* CENTRE — app shell, max 480px */}
+        <div style={{ flex: "1 1 0", minWidth: 0, maxWidth: "480px" }}>
           <div
             className="relative bg-[#f8f7f5] overflow-hidden"
-            style={{ width: "600px", minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
+            style={{ width: "100%", maxWidth: "480px", minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
           >
           {authLoading && (
             <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
@@ -294,8 +297,15 @@ function SkillSnapRouter() {
           </div>
         </div>
 
-        {/* RIGHT SIDEBAR — immediately beside centre, 280px, content-height cards */}
-        <div style={{ width: "280px", flexShrink: 0, padding: "20px 0 20px 22px" }}>
+        {/* RIGHT SIDEBAR — sticky, 300px, hidden below 1200px */}
+        <div
+          className="ss-right-sidebar"
+          style={{
+            width: "300px", flexShrink: 0,
+            position: "sticky", top: "16px", alignSelf: "flex-start",
+            paddingTop: "20px",
+          }}
+        >
           <Suspense fallback={null}>
             <RightSidebar onNavigate={navigate} />
           </Suspense>
