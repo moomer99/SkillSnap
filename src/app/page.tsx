@@ -46,7 +46,7 @@ const isOrchidsPreview =
   window.location.hostname.includes("orchids.cloud");
 
 function SkillSnapRouter() {
-  const { state, navigate } = useAppState();
+  const { state, navigate, dispatch } = useAppState();
   const { screen, authLoading } = state;
 
   // Persistent background subscription — lives for the entire app session.
@@ -77,6 +77,15 @@ function SkillSnapRouter() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [moreOpen]);
+
+  const GUEST_BLOCKED: Screen[] = ["upload", "messages", "own-profile", "client-profile", "chat", "edit-profile"];
+  function handleNavClick(s: Screen) {
+    if (state.isGuest && GUEST_BLOCKED.includes(s)) {
+      dispatch({ type: "SHOW_AUTH_PROMPT" });
+      return;
+    }
+    navigate(s);
+  }
 
   async function handleLogOut() {
     setMoreOpen(false);
@@ -131,8 +140,8 @@ function SkillSnapRouter() {
         <img src="/skillsnap-icon.svg" alt="SkillSnap" width={34} height={34} />
       </div>
 
-      {/* Card 2 — Merged nav + utility, fixed vertically centred */}
-      <div className="ss-sidebar-card" style={{
+      {/* Card 2 — Merged nav + utility, fixed vertically centred — hidden on landing */}
+      {screen !== "landing" && <div className="ss-sidebar-card" style={{
         position: "fixed", top: "50%", left: "16px", transform: "translateY(-50%)", zIndex: 100,
         background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)",
         border: "0.5px solid rgba(0,0,0,0.08)", borderRadius: "20px",
@@ -157,7 +166,7 @@ function SkillSnapRouter() {
               key={s}
               data-tooltip={label}
               className="ss-nav-btn"
-              onClick={() => navigate(s)}
+              onClick={() => handleNavClick(s)}
               style={{
                 width: "40px", height: "40px", borderRadius: "8px",
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -236,13 +245,13 @@ function SkillSnapRouter() {
             </div>
           )}
         </div>
-      </div>
+      </div>}
 
       {/* ── Centred content block (feed + right sidebar), offset for fixed left sidebar ── */}
       <style>{`
         @media (max-width: 1200px) { .ss-right-sidebar { display: none !important; } }
       `}</style>
-      <div className="hidden lg:flex" style={{ paddingLeft: "120px", paddingRight: "0", alignItems: "flex-start", gap: "24px", justifyContent: "center" }}>
+      <div className="hidden lg:flex" style={{ paddingLeft: "80px", paddingRight: "0", alignItems: "flex-start", gap: "24px", justifyContent: "center" }}>
 
         {/* CENTRE — app shell, max 480px */}
         <div style={{ flex: "0 0 auto" }}>
@@ -292,18 +301,14 @@ function SkillSnapRouter() {
           </div>
         </div>
 
-        {/* RIGHT SIDEBAR — sticky, 300px, hidden below 1200px */}
-        <div
-          className="ss-right-sidebar"
-          style={{
-            width: "300px", flexShrink: 0,
-            position: "sticky", top: "16px", alignSelf: "flex-start",
-            paddingTop: "20px",
-          }}
-        >
-          <Suspense fallback={null}>
-            <RightSidebar onNavigate={navigate} />
-          </Suspense>
+        {/* RIGHT SIDEBAR — fixed to viewport, 300px, hidden below 1200px */}
+        {/* Spacer holds flex width; inner div is position:fixed so sidebar doesn't scroll away */}
+        <div className="ss-right-sidebar" style={{ width: "300px", flexShrink: 0 }}>
+          <div style={{ position: "fixed", top: "70px", width: "300px" }}>
+            <Suspense fallback={null}>
+              <RightSidebar onNavigate={navigate} />
+            </Suspense>
+          </div>
         </div>
 
       </div>

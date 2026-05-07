@@ -252,7 +252,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
             </button>
 
             {/* Toggle mode */}
-            <p className="text-center text-sm text-[#7a7570] pb-8">
+            <p className="text-center text-sm text-[#7a7570]">
               {mode === "signup" ? "Already have an account? " : "Don't have an account? "}
               <button
                 type="button"
@@ -260,6 +260,17 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                 className="text-[#6c47ff] font-semibold"
               >
                 {mode === "signup" ? "Log in" : "Sign up"}
+              </button>
+            </p>
+
+            {/* Guest link — below Log In */}
+            <p className="text-center pb-8">
+              <button
+                type="button"
+                onClick={() => dispatch({ type: "SKIP_AUTH" })}
+                className="text-[13px] text-[#b0aaa5] hover:underline bg-transparent border-none cursor-pointer"
+              >
+                Continue as guest →
               </button>
             </p>
           </form>

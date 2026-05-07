@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { Screen } from "@/types";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
+import { useAppState } from "@/state/AppState";
 
 interface LandingPageProps {
   onNavigate: (s: Screen) => void;
@@ -115,6 +116,8 @@ function useRealUsers() {
 }
 
 export default function LandingPage({ onNavigate }: LandingPageProps) {
+  const { dispatch } = useAppState();
+  function browseAsGuest() { dispatch({ type: "SKIP_AUTH" }); }
   const proCards = useRealUsers();
   function goToAuth() { onNavigate("auth"); }
 
@@ -392,6 +395,12 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
             </svg>
           </button>
           <p className="text-[11px] mt-3" style={{ color: "rgba(255,255,255,0.25)" }}>No credit card required · Takes 30 seconds</p>
+          <button
+            onClick={browseAsGuest}
+            className="mt-3 text-[13px] text-[#7a7570] hover:underline bg-transparent border-none cursor-pointer"
+          >
+            Just browsing? Continue as guest →
+          </button>
         </FadeIn>
       </section>
 
