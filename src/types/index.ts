@@ -169,4 +169,5 @@ export type Screen =
   | "contact"
   | "help"
   | "about"
-  | "terms";
+  | "terms"
+  | "reset-password";

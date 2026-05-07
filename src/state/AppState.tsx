@@ -411,6 +411,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Handle password reset callback — Supabase appends #access_token=...&type=recovery
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get("access_token");
+    const recoveryType = hashParams.get("type");
+    if (accessToken && recoveryType === "recovery") {
+      window.history.replaceState({}, "", window.location.pathname);
+      dispatch({ type: "NAVIGATE", screen: "reset-password" });
+    }
+
     // Resolve initial session via getSession() — reads localStorage without acquiring
     // a lock. getUser() holds the lock for a full network round-trip, contending with
     // onAuthStateChange and causing 5000ms timeouts. INITIAL_SESSION from
