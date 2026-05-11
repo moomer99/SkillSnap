@@ -79,6 +79,7 @@ export const BRAND = {
 } as const;
 
 export const SKILL_CATEGORIES = [
+  "Client",
   "Barber",
   "Tiler",
   "Makeup Artist",

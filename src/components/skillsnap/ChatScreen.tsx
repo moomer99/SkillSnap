@@ -87,6 +87,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
 
   // Job-done flow
   const [jobStatus, setJobStatus] = useState<JobDoneStatus>("idle");
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [rating, setRating] = useState<JobRating | null>(null);
   const [comment, setComment] = useState("");
@@ -140,6 +141,45 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [showFeedback, showChatMenu]);
+
+  async function handleRequestJobDone() {
+    setJobStatus("requested");
+    if (!SUPABASE_CONFIGURED || !currentUser || !participantId || !threadId) return;
+    try {
+      const { jobsDoneService, insertJobsDoneNotification } = await import("@/services/jobsDoneService");
+      const jobId = await jobsDoneService.requestVerification(threadId, participantId);
+      if (jobId) {
+        setActiveJobId(jobId);
+        await insertJobsDoneNotification(participantId, currentUser.id, currentUser.displayName);
+      }
+    } catch (e) {
+      console.warn("[ChatScreen] handleRequestJobDone failed:", e);
+    }
+  }
+
+  async function handleClientConfirm() {
+    setJobStatus("confirmed");
+    setShowFeedback(true);
+    if (!SUPABASE_CONFIGURED || !activeJobId) return;
+    try {
+      const { jobsDoneService } = await import("@/services/jobsDoneService");
+      await jobsDoneService.confirmJob(activeJobId);
+    } catch (e) {
+      console.warn("[ChatScreen] handleClientConfirm failed:", e);
+    }
+  }
+
+  async function handleClientDecline() {
+    setJobStatus("declined");
+    if (!SUPABASE_CONFIGURED || !activeJobId) return;
+    try {
+      const { jobsDoneService } = await import("@/services/jobsDoneService");
+      await jobsDoneService.declineJob(activeJobId);
+      setActiveJobId(null);
+    } catch (e) {
+      console.warn("[ChatScreen] handleClientDecline failed:", e);
+    }
+  }
 
   function sendMessageWithTracking() {
     if (activeThread && !activeThread.startedAt) {
@@ -196,8 +236,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             <p className="text-sm font-bold text-[#1a1a1a] leading-tight truncate">{displayParticipant.displayName}</p>
             <p className="text-[11px] text-[#6c47ff] font-medium truncate">
               {[
-                displayParticipant.skill,
-                displayParticipant.role ? (displayParticipant.role === "pro" ? "Pro" : "Client") : null,
+                displayParticipant.role === "client" ? "Client"
+                  : displayParticipant.skill ?? null,
                 displayParticipant.location,
               ].filter(Boolean).join(" · ")}
             </p>
@@ -325,9 +365,9 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
               <p className="text-xs text-[#7a7570] leading-snug">Did they complete the work to your satisfaction? Confirm to leave feedback.</p>
             </div>
             <div className="flex border-t border-[#e8e4df]">
-              <button className="flex-1 py-3 text-sm font-semibold text-[#7a7570] active:bg-gray-50 transition-colors" onClick={() => setJobStatus("declined")}>Decline</button>
+              <button className="flex-1 py-3 text-sm font-semibold text-[#7a7570] active:bg-gray-50 transition-colors" onClick={handleClientDecline}>Decline</button>
               <div className="w-px bg-[#e8e4df]" />
-              <button className="flex-1 py-3 text-sm font-bold text-[#6c47ff] active:bg-[#f5f0ff] transition-colors" onClick={() => { setJobStatus("confirmed"); setShowFeedback(true); }}>Yes, Confirm ✓</button>
+              <button className="flex-1 py-3 text-sm font-bold text-[#6c47ff] active:bg-[#f5f0ff] transition-colors" onClick={handleClientConfirm}>Yes, Confirm ✓</button>
             </div>
           </div>
         )}
@@ -385,7 +425,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         <div className="px-4 pb-2">
           {canRequestJobDone ? (
             <button
-              onClick={() => setJobStatus("requested")}
+              onClick={handleRequestJobDone}
               className="w-full h-10 rounded-2xl font-semibold text-xs border-2 border-[#6c47ff]/30 text-[#6c47ff] flex items-center justify-center gap-2 bg-[#f5f0ff] transition-all active:scale-[0.98]"
             >
               <CheckCircle size={14} />

@@ -102,15 +102,21 @@ const initialState: AppStateShape = {
 // ── Reducer ──────────────────────────────────
 function appReducer(state: AppStateShape, action: Action): AppStateShape {
   switch (action.type) {
-    case "SET_AUTH":
+    case "SET_AUTH": {
+      const needsRoleSetup = !action.user.role;
+      const comingFromAuthFlow = ["auth", "onboarding", "landing", "role-setup"].includes(state.screen);
+      const nextScreen = comingFromAuthFlow
+        ? (needsRoleSetup ? "role-setup" : "home")
+        : state.screen;
       return {
         ...state,
         currentUser: action.user,
         isAuthenticated: true,
         showAuthPrompt: false,
         authLoading: false,
-        screen: "home",
+        screen: nextScreen,
       };
+    }
     case "CLEAR_AUTH":
       return { ...initialState, authLoading: false };
     case "SET_AUTH_LOADING":
@@ -422,10 +428,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
 
       if (event === "SIGNED_IN") {
-        console.log("[AppState] SIGNED_IN — hydrating profile and navigating to home");
+        console.log("[AppState] SIGNED_IN — hydrating profile");
         clearTimeout(authTimeout);
         await hydrateProfile(session.user.id, session.user);
-        dispatch({ type: "NAVIGATE", screen: "home" });
+        // SET_AUTH reducer handles screen transition (role-setup or home)
         return;
       }
 
@@ -443,7 +449,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.log("[AppState] getSession found session for", session.user.id);
         initializedByGetSession = true;
         await hydrateProfile(session.user.id, session.user);
-        dispatch({ type: "NAVIGATE", screen: "home" });
+        // SET_AUTH reducer handles screen transition (role-setup or home)
       } else {
         console.log("[AppState] getSession: no session, showing landing");
         dispatch({ type: "SET_AUTH_LOADING", loading: false });

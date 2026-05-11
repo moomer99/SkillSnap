@@ -21,6 +21,22 @@ async function getCurrentUserId(): Promise<string | null> {
   return user?.id ?? null;
 }
 
+export async function insertJobsDoneNotification(
+  clientId: string,
+  skillerUserId: string,
+  skillerName: string
+): Promise<void> {
+  await getAuthSupabase()
+    .from("notifications")
+    .insert({
+      user_id: clientId,
+      type: "jobs_done_request",
+      from_user_id: skillerUserId,
+      message: `${skillerName} requested a Jobs Done confirmation`,
+      read: false,
+    });
+}
+
 export const jobsDoneService = {
   async getJobsForUser(userId: string): Promise<JobRecord[]> {
     const { data } = await getSupabase()
@@ -73,6 +89,22 @@ export const jobsDoneService = {
       .update({ client_confirmed: true })
       .eq("id", jobId)
       .eq("client_id", userId);
+  },
+
+  // Client declines — delete the job row
+  async declineJob(jobId: string): Promise<void> {
+    await getAuthSupabase()
+      .from("jobs_done")
+      .delete()
+      .eq("id", jobId);
+  },
+
+  // Mark a notification as read
+  async markNotificationRead(notificationId: string): Promise<void> {
+    await getAuthSupabase()
+      .from("notifications")
+      .update({ read: true })
+      .eq("id", notificationId);
   },
 
   // Get pending (unconfirmed) job requests for current user as client

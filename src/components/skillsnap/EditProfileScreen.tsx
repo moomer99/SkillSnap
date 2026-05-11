@@ -41,8 +41,6 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
   const [skill, setSkill] = useState<string>(isCustom ? "Other" : stored);
   const [customSkill, setCustomSkill] = useState(isCustom ? stored : "");
 
-  const [role, setRole] = useState<'client' | 'pro' | null>(user?.role ?? null);
-
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatarUrl ?? null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
@@ -157,6 +155,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
         }
         try {
           const { userService } = await import("@/services/userService");
+          const derivedRole: 'client' | 'pro' | null = resolvedSkill === "Client" ? "client" : resolvedSkill ? "pro" : null;
+          const derivedSkill = resolvedSkill === "Client" ? null : (resolvedSkill || null);
           await userService.updateProfile({
             displayName: displayName.trim(),
             username: `@${username.trim()}`,
@@ -165,8 +165,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
             ...(resolvedLat !== undefined ? { lat: resolvedLat } : {}),
             ...(resolvedLng !== undefined ? { lng: resolvedLng } : {}),
             locationPrivate,
-            skill: resolvedSkill || null,
-            role,
+            skill: derivedSkill,
+            role: derivedRole,
             ...(persistedAvatarUrl ? { avatarUrl: persistedAvatarUrl } : {}),
           });
         } catch (e) {
@@ -179,6 +179,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
       const inMemoryAvatarUrl: string | undefined = persistedAvatarUrl ??
         (avatarPreview && !avatarPreview.startsWith("blob:") ? avatarPreview : undefined);
 
+      const derivedRole: 'client' | 'pro' | null = resolvedSkill === "Client" ? "client" : resolvedSkill ? "pro" : null;
+      const derivedSkill = resolvedSkill === "Client" ? null : (resolvedSkill || null);
       dispatch({
         type: "UPDATE_CURRENT_USER",
         patch: {
@@ -189,8 +191,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
           ...(resolvedLat !== undefined ? { lat: resolvedLat } : {}),
           ...(resolvedLng !== undefined ? { lng: resolvedLng } : {}),
           locationPrivate,
-          skill: (resolvedSkill || null) as SkillCategory | null,
-          role,
+          skill: derivedSkill as SkillCategory | null,
+          role: derivedRole,
           ...(inMemoryAvatarUrl !== undefined ? { avatarUrl: inMemoryAvatarUrl } : {}),
         },
       });
@@ -417,43 +419,19 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
 
               {resolvedSkill ? (
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: "#b0aaa5", textTransform: "uppercase", letterSpacing: 1 }}>Preview:</span>
-                  <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 999, background: "#ede9fe", color: "#5b3dd8" }}>
-                    {resolvedSkill}
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#b0aaa5", textTransform: "uppercase", letterSpacing: 1 }}>Role:</span>
+                  <span style={{
+                    fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 999,
+                    background: resolvedSkill === "Client" ? "#f0f0f0" : "#ede9fe",
+                    color: resolvedSkill === "Client" ? "#7a7570" : "#5b3dd8",
+                  }}>
+                    {resolvedSkill === "Client" ? "Client" : resolvedSkill}
                   </span>
+                  {resolvedSkill !== "Client" && (
+                    <span style={{ fontSize: 11, color: "#b0aaa5" }}>→ Pro</span>
+                  )}
                 </div>
               ) : null}
-            </Field>
-
-            {/* Role */}
-            <Field label="I am a...">
-              <div style={{ display: "flex", gap: 12 }}>
-                {(["client", "pro"] as const).map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setRole(role === r ? null : r)}
-                    style={{
-                      flex: 1,
-                      padding: "14px 0",
-                      borderRadius: 16,
-                      border: `2px solid ${role === r ? "#6c47ff" : "#e8e4df"}`,
-                      background: role === r ? "#6c47ff" : "#fff",
-                      color: role === r ? "#fff" : "#7a7570",
-                      fontWeight: 700,
-                      fontSize: 15,
-                      cursor: "pointer",
-                      transition: "all 0.15s",
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    {r === "pro" ? "Pro" : "Client"}
-                  </button>
-                ))}
-              </div>
-              <p style={{ fontSize: 12, color: "#b0aaa5", paddingLeft: 4, marginTop: 6 }}>
-                {role === "pro" ? "You can post work and get hired by clients." : role === "client" ? "You hire skilled pros for jobs." : "Select your role so others know how to work with you."}
-              </p>
             </Field>
 
             <button

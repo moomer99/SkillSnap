@@ -31,6 +31,7 @@ const HelpScreen        = lazy(() => import("@/components/skillsnap/HelpScreen")
 const AboutScreen       = lazy(() => import("@/components/skillsnap/AboutScreen"));
 const TermsScreen            = lazy(() => import("@/components/skillsnap/TermsScreen"));
 const ResetPasswordScreen    = lazy(() => import("@/components/skillsnap/ResetPasswordScreen"));
+const RoleSetupScreen        = lazy(() => import("@/components/skillsnap/RoleSetupScreen"));
 const BottomNav         = lazy(() => import("@/components/skillsnap/BottomNav"));
 const RightSidebar      = lazy(() => import("@/components/skillsnap/RightSidebar"));
 
@@ -310,6 +311,7 @@ function SkillSnapRouter() {
               {screen === "about"          && <AboutScreen       onNavigate={navigate} />}
               {screen === "terms"          && <TermsScreen          onNavigate={navigate} />}
               {screen === "reset-password" && <ResetPasswordScreen onNavigate={navigate} />}
+              {screen === "role-setup"     && <RoleSetupScreen />}
               {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
             </Suspense>
           </div>
@@ -391,7 +393,7 @@ function SkillSnapRouter() {
               onClick={() => { setShowPostRestriction(false); navigate("edit-profile"); }}
               style={{ width: "100%", padding: "14px 0", borderRadius: 14, background: "linear-gradient(135deg, #6c47ff, #8b6af5)", color: "white", fontWeight: 700, fontSize: 15, border: "none", cursor: "pointer", marginBottom: 10, boxShadow: "0 4px 16px rgba(108,71,255,0.28)" }}
             >
-              Switch to Pro
+              Update Profile
             </button>
             <button
               onClick={() => setShowPostRestriction(false)}
