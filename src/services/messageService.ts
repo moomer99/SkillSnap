@@ -104,7 +104,15 @@ export const messageService = {
         );
         if (!otherMember) return null;
 
-        const participant = mapProfile(otherMember as Record<string, unknown>);
+        // Normalize the RPC row: get_thread_participants returns `user_id` not `id`.
+        // mapProfile expects `id`, so alias it here if missing.
+        const raw = otherMember as Record<string, unknown>;
+        const normalized: Record<string, unknown> = {
+          ...raw,
+          id: raw.id || raw.user_id,
+        };
+        console.log("[messageService] getThreads participant row:", { user_id: raw.user_id, id: raw.id, resolved_id: normalized.id });
+        const participant = mapProfile(normalized);
 
         return {
           id: membership.conversation_id as string,

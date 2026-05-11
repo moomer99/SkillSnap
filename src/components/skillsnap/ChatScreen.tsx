@@ -159,6 +159,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
     // Get the other participant's ID directly from the thread object — never rely on
     // displayParticipant which may be a mock fallback, or activeThreadParticipantId which can be null.
     const thread = state.threads.find((t) => t.id === (conversationId ?? state.activeThreadId));
+    console.log("[ChatScreen] active thread:", thread);
     const clientId = thread?.participant?.id ?? null;
     console.log("[JobsDone] fixed values:", {
       skiller_id: currentUser?.id,
