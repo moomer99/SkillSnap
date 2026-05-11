@@ -195,7 +195,11 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           <div className="min-w-0">
             <p className="text-sm font-bold text-[#1a1a1a] leading-tight truncate">{displayParticipant.displayName}</p>
             <p className="text-[11px] text-[#6c47ff] font-medium truncate">
-              {[displayParticipant.skill, displayParticipant.location].filter(Boolean).join(" · ")}
+              {[
+                displayParticipant.skill,
+                displayParticipant.role ? (displayParticipant.role === "pro" ? "Pro" : "Client") : null,
+                displayParticipant.location,
+              ].filter(Boolean).join(" · ")}
             </p>
           </div>
         </button>

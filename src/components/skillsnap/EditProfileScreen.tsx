@@ -41,6 +41,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
   const [skill, setSkill] = useState<string>(isCustom ? "Other" : stored);
   const [customSkill, setCustomSkill] = useState(isCustom ? stored : "");
 
+  const [role, setRole] = useState<'client' | 'pro' | null>(user?.role ?? null);
+
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatarUrl ?? null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
@@ -164,6 +166,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
             ...(resolvedLng !== undefined ? { lng: resolvedLng } : {}),
             locationPrivate,
             skill: resolvedSkill || null,
+            role,
             ...(persistedAvatarUrl ? { avatarUrl: persistedAvatarUrl } : {}),
           });
         } catch (e) {
@@ -187,6 +190,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
           ...(resolvedLng !== undefined ? { lng: resolvedLng } : {}),
           locationPrivate,
           skill: (resolvedSkill || null) as SkillCategory | null,
+          role,
           ...(inMemoryAvatarUrl !== undefined ? { avatarUrl: inMemoryAvatarUrl } : {}),
         },
       });
@@ -419,6 +423,37 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                   </span>
                 </div>
               ) : null}
+            </Field>
+
+            {/* Role */}
+            <Field label="I am a...">
+              <div style={{ display: "flex", gap: 12 }}>
+                {(["client", "pro"] as const).map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRole(role === r ? null : r)}
+                    style={{
+                      flex: 1,
+                      padding: "14px 0",
+                      borderRadius: 16,
+                      border: `2px solid ${role === r ? "#6c47ff" : "#e8e4df"}`,
+                      background: role === r ? "#6c47ff" : "#fff",
+                      color: role === r ? "#fff" : "#7a7570",
+                      fontWeight: 700,
+                      fontSize: 15,
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                      textTransform: "capitalize",
+                    }}
+                  >
+                    {r === "pro" ? "Pro" : "Client"}
+                  </button>
+                ))}
+              </div>
+              <p style={{ fontSize: 12, color: "#b0aaa5", paddingLeft: 4, marginTop: 6 }}>
+                {role === "pro" ? "You can post work and get hired by clients." : role === "client" ? "You hire skilled pros for jobs." : "Select your role so others know how to work with you."}
+              </p>
             </Field>
 
             <button

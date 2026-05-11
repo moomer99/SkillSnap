@@ -39,6 +39,7 @@ export interface User {
   following: number;
   postCount: number;
   isClient: boolean;
+  role: 'client' | 'pro' | null;
   distanceKm?: number;         // distance from viewer (populated at query time)
 }
 

@@ -33,6 +33,7 @@ function mapProfile(profile: Record<string, unknown>): User {
       following: Number(profile.following_count ?? 0),
       postCount: Number(profile.post_count ?? 0),
       isClient: Boolean(profile.is_client ?? false),
+      role: (profile.role as 'client' | 'pro' | null) ?? null,
     };
   } catch (e) {
     console.error("[mapProfile] failed to map profile:", e, profile);
@@ -56,6 +57,7 @@ function mapProfile(profile: Record<string, unknown>): User {
       following: 0,
       postCount: 0,
       isClient: false,
+      role: null,
     };
   }
 }

@@ -74,6 +74,8 @@ function SkillSnapRouter() {
 
   // More popover state
   const [moreOpen, setMoreOpen] = useState(false);
+  // Post restriction modal — shown when non-Pro users tap the Post (+) button
+  const [showPostRestriction, setShowPostRestriction] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!moreOpen) return;
@@ -88,6 +90,11 @@ function SkillSnapRouter() {
   function handleNavClick(s: Screen) {
     if (!state.isAuthenticated && AUTH_REQUIRED.includes(s)) {
       dispatch({ type: "SHOW_AUTH_PROMPT" });
+      return;
+    }
+    // Only Pro users can post — block clients and users with no role
+    if (s === "upload" && state.currentUser?.role !== "pro") {
+      setShowPostRestriction(true);
       return;
     }
     navigate(s);
@@ -363,6 +370,39 @@ function SkillSnapRouter() {
       </div>
 
       {/* Dev screen switcher — Orchids preview only, never shown on real domain */}
+      {/* ── Post Restriction Modal — only Pro users can post ── */}
+      {showPostRestriction && (
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center", background: "rgba(0,0,0,0.45)", padding: "0 0 0 0" }}
+          className="md:items-center"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowPostRestriction(false); }}
+        >
+          <div
+            style={{ background: "white", borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 480, padding: "28px 24px 40px", boxShadow: "0 -8px 40px rgba(0,0,0,0.18)" }}
+            className="md:rounded-[16px] md:mb-0"
+          >
+            <div style={{ width: 36, height: 4, background: "#e8e4df", borderRadius: 99, margin: "0 auto 24px" }} className="md:hidden" />
+            <div style={{ fontSize: 28, marginBottom: 12, textAlign: "center" }}>🎬</div>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#1a1a1a", textAlign: "center", marginBottom: 10 }}>Share your work on SkillSnap</h2>
+            <p style={{ fontSize: 14, color: "#7a7570", textAlign: "center", lineHeight: 1.55, marginBottom: 28 }}>
+              Switch to Pro to post videos and showcase your skills to clients nearby.
+            </p>
+            <button
+              onClick={() => { setShowPostRestriction(false); navigate("edit-profile"); }}
+              style={{ width: "100%", padding: "14px 0", borderRadius: 14, background: "linear-gradient(135deg, #6c47ff, #8b6af5)", color: "white", fontWeight: 700, fontSize: 15, border: "none", cursor: "pointer", marginBottom: 10, boxShadow: "0 4px 16px rgba(108,71,255,0.28)" }}
+            >
+              Switch to Pro
+            </button>
+            <button
+              onClick={() => setShowPostRestriction(false)}
+              style={{ width: "100%", padding: "12px 0", borderRadius: 14, background: "none", color: "#7a7570", fontWeight: 600, fontSize: 14, border: "1.5px solid #e8e4df", cursor: "pointer" }}
+            >
+              Maybe later
+            </button>
+          </div>
+        </div>
+      )}
+
       {isOrchidsPreview && (
         <div
           className="hidden sm:flex fixed right-0 top-1/2 z-50 flex-col items-stretch gap-1 bg-white/90 backdrop-blur-sm rounded-l-2xl px-2 py-3 shadow-lg border border-r-0 border-[#e8e4df]"

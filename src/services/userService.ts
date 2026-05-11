@@ -101,6 +101,7 @@ export const userService = {
     if (patch.skill !== undefined) dbPatch.skill = patch.skill;
     if (patch.avatarUrl !== undefined) dbPatch.avatar_url = patch.avatarUrl;
     if (patch.avatarGradient !== undefined) dbPatch.avatar_gradient = patch.avatarGradient;
+    if (patch.role !== undefined) dbPatch.role = patch.role;
 
     const { data, error } = await getAuthSupabase()
       .from("profiles")
