@@ -104,7 +104,7 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
     .from("profiles")
     .select("id, avatar_url, display_name")
     .eq("id", authUser.id)
-    .maybeSingle();
+    .single();
 
   const upsertData: Record<string, unknown> = {
     id: authUser.id,
@@ -184,8 +184,8 @@ export const authService = {
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) return { success: false, error: error.message };
     if (!data.user) return { success: false, error: "No user returned" };
-    // Ensure profile row exists (handles users created before migration or via admin)
-    const user = await ensureProfile(data.user);
+    // Fetch existing profile only — never overwrite user-edited fields on login
+    const user = await fetchProfile(data.user.id);
     return { success: true, user: user ?? undefined };
   },
 

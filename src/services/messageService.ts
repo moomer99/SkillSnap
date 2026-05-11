@@ -32,6 +32,7 @@ function mapThread(
 
 function mapMessage(row: Record<string, unknown>, currentUserId: string): Message {
   const profile = row.profiles as Record<string, unknown> | undefined;
+  const msgType = row.message_type as string | undefined;
   return {
     id: row.id as string,
     threadId: row.conversation_id as string,
@@ -39,6 +40,7 @@ function mapMessage(row: Record<string, unknown>, currentUserId: string): Messag
     text: row.text as string,
     time: new Date(row.created_at as string).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     senderName: profile?.display_name as string | undefined,
+    isSystem: msgType === "system",
   };
 }
 
@@ -374,8 +376,14 @@ export const messageService = {
     };
   },
 
-  async sendJobCompletionRequest(_conversationId: string): Promise<void> {
-    // TODO: insert jobs_done record with skiller_confirmed=true
+  // Inserts a system message (e.g. Jobs Done request) that persists in chat history
+  async sendSystemMessage(conversationId: string, text: string): Promise<void> {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    const { error } = await getAuthSupabase()
+      .from("messages")
+      .insert({ conversation_id: conversationId, sender_id: userId, text, message_type: "system" });
+    if (error) console.error("[messageService] sendSystemMessage failed:", error.message);
   },
 
   async startThread(participantId: string): Promise<{ id: string }> {

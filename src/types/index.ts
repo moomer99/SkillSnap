@@ -86,6 +86,7 @@ export interface Message {
   time: string;
   senderName?: string;
   failed?: boolean; // true when DB insert failed — shown with retry indicator
+  isSystem?: boolean; // true for system messages (e.g. Jobs Done request)
 }
 
 export interface MessageThread {

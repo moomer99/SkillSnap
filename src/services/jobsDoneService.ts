@@ -42,7 +42,8 @@ export async function insertJobsDoneNotification(
   skillerUserId: string,
   skillerName: string
 ): Promise<void> {
-  await getAuthSupabase()
+  console.log("[JobsDone] inserting notification", { clientId, skillerUserId, skillerName });
+  const { data, error } = await getAuthSupabase()
     .from("notifications")
     .insert({
       user_id: clientId,
@@ -50,7 +51,13 @@ export async function insertJobsDoneNotification(
       from_user_id: skillerUserId,
       message: `${skillerName} requested a Jobs Done confirmation`,
       read: false,
-    });
+    })
+    .select("id")
+    .single();
+  console.log("[JobsDone] notification insert result:", data, error);
+  if (error) {
+    console.error("[JobsDone] notification insert failed:", error.message, error.code, error.details);
+  }
 }
 
 export const jobsDoneService = {
@@ -76,22 +83,38 @@ export const jobsDoneService = {
 
   // Skiller initiates — creates a pending job record tied to the conversation
   async requestVerification(conversationId: string, clientId: string, description?: string): Promise<string | null> {
+    console.log("[JobsDone] requestVerification called", { conversationId, clientId });
     const userId = await getCurrentUserId();
-    if (!userId) return null;
+    console.log("[JobsDone] current user id:", userId);
+    if (!userId) {
+      console.error("[JobsDone] requestVerification: no authenticated user");
+      return null;
+    }
 
-    const { data, error } = await getSupabase()
+    console.log("[JobsDone] attempting insert", { skiller_id: userId, client_id: clientId, conversation_id: conversationId });
+
+    const { data, error } = await getAuthSupabase()
       .from("jobs_done")
       .insert({
         skiller_id: userId,
         client_id: clientId,
         conversation_id: conversationId,
         description: description ?? null,
-        skiller_confirmed: true, // skiller confirms by initiating
+        skiller_confirmed: true,
       })
       .select("id")
       .single();
 
-    if (error || !data) return null;
+    console.log("[JobsDone] insert result:", data, error);
+    if (error) {
+      console.error("[JobsDone] insert failed:", error.message, error.code, error.details);
+      return null;
+    }
+    if (!data) {
+      console.error("[JobsDone] insert returned no data");
+      return null;
+    }
+    console.log("[JobsDone] insert succeeded, job id:", data.id);
     return data.id;
   },
 
@@ -100,11 +123,13 @@ export const jobsDoneService = {
     const userId = await getCurrentUserId();
     if (!userId) return;
 
-    await getSupabase()
+    console.log("[JobsDone] confirmJob", { jobId, userId });
+    const { error } = await getAuthSupabase()
       .from("jobs_done")
       .update({ client_confirmed: true })
       .eq("id", jobId)
       .eq("client_id", userId);
+    if (error) console.error("[JobsDone] confirmJob failed:", error.message, error.code);
   },
 
   // Client declines — delete the job row

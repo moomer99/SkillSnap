@@ -155,17 +155,25 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   }, [showFeedback, showChatMenu]);
 
   async function handleRequestJobDone() {
+    console.log("[ChatScreen] handleRequestJobDone tapped", { threadId, participantId, currentUserId: currentUser?.id, SUPABASE_CONFIGURED });
     setJobStatus("requested");
-    if (!SUPABASE_CONFIGURED || !currentUser || !participantId || !threadId) return;
+    if (!SUPABASE_CONFIGURED || !currentUser || !participantId || !threadId) {
+      console.warn("[ChatScreen] handleRequestJobDone: missing required values", { SUPABASE_CONFIGURED, currentUser: !!currentUser, participantId, threadId });
+      return;
+    }
     try {
       const { jobsDoneService, insertJobsDoneNotification } = await import("@/services/jobsDoneService");
       const jobId = await jobsDoneService.requestVerification(threadId, participantId);
+      console.log("[ChatScreen] requestVerification returned jobId:", jobId);
       if (jobId) {
         setActiveJobId(jobId);
         await insertJobsDoneNotification(participantId, currentUser.id, currentUser.displayName);
+        // Persist a system message so both parties see the request on re-open
+        const { messageService } = await import("@/services/messageService");
+        await messageService.sendSystemMessage(threadId, "✅ Jobs Done requested — waiting for client confirmation");
       }
     } catch (e) {
-      console.warn("[ChatScreen] handleRequestJobDone failed:", e);
+      console.error("[ChatScreen] handleRequestJobDone failed:", e);
     }
   }
 
@@ -326,7 +334,17 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             <p className="text-xs text-[#b0aaa5]">Say hello to {displayParticipant.displayName} 👋</p>
           </div>
         ) : (
-          messages.map((msg) => (
+          messages.map((msg) => {
+            if (msg.isSystem) {
+              return (
+                <div key={msg.id} className="flex justify-center my-1">
+                  <span className="text-[11px] font-semibold text-[#6c47ff] bg-[#f0ecff] px-3 py-1.5 rounded-full border border-[#ddd5ff]">
+                    {msg.text}
+                  </span>
+                </div>
+              );
+            }
+            return (
             <div key={msg.id} className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"}`}>
               <div className="max-w-[78%] flex flex-col gap-0.5">
                 {msg.imageUrl ? (
@@ -361,7 +379,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                 </span>
               </div>
             </div>
-          ))
+            );
+          })
         )}
 
         {/* ── Job done status cards ── */}
