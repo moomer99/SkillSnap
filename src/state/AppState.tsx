@@ -7,7 +7,7 @@
 import { createContext, useContext, useReducer, useEffect, type ReactNode } from "react";
 import type { User, Post, MessageThread, Message, Screen } from "@/types";
 import type { DiscoveryFilter } from "@/mock-data/discovery";
-import { getSupabase, getAuthSupabase } from "@/lib/supabase";
+import { getAuthSupabase } from "@/lib/supabase";
 import { mapProfile, ensureProfile } from "@/services/authService";
 
 // ── State Shape ──────────────────────────────
@@ -349,7 +349,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     const authSb = getAuthSupabase();
-    const sb = getSupabase();
+    const sb = authSb;
 
     // Safety net — if auth resolution hangs for >8s, stop the spinner
     const authTimeout = setTimeout(() => {

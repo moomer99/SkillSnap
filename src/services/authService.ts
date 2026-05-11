@@ -36,7 +36,7 @@ function mapProfile(profile: Record<string, unknown>): User {
 }
 
 async function fetchProfile(userId: string): Promise<User | null> {
-  const sb = getSupabase();
+  const sb = getAuthSupabase();
   const { data, error } = await sb
     .from("profiles")
     .select("*")
@@ -49,7 +49,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
 // Upserts a profile row from Supabase auth user data.
 // Safe to call on every login — uses ON CONFLICT to prevent duplicates.
 async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
-  const sb = getSupabase();
+  const sb = getAuthSupabase();
   const meta = authUser.user_metadata ?? {};
 
   const displayName: string =
@@ -90,6 +90,7 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
     .single();
 
   if (error || !data) {
+    console.error("[ensureProfile] upsert failed:", error?.message, error?.code);
     // Upsert failed — try plain fetch in case the row exists
     return fetchProfile(authUser.id);
   }
