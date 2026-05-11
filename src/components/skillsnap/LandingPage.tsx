@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { Screen } from "@/types";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
+import { getAuthSupabase } from "@/lib/supabase";
 
 interface LandingPageProps {
   onNavigate: (s: Screen) => void;
@@ -94,22 +95,30 @@ function useRealUsers() {
   const [cards, setCards] = useState(MOCK_CARDS);
   useEffect(() => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!supabaseUrl || supabaseUrl.includes("your-project-ref") || !supabaseKey) return;
-    fetch(`${supabaseUrl}/rest/v1/profiles?select=display_name,skill,jobs_done&not.skill.is=null&jobs_done=gt.0&order=created_at.desc&limit=3`, {
-      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` },
-    })
-      .then(r => r.json())
-      .then((data: Array<{ display_name: string; skill: string; jobs_done: number }>) => {
-        if (!Array.isArray(data) || data.length === 0) return;
-        setCards(data.map((u, i) => ({
-          gradient: CARD_GRADIENTS[i % CARD_GRADIENTS.length],
-          name: u.display_name ?? "Pro",
-          skill: u.skill ?? "Skilled Pro",
-          jobs: u.jobs_done ?? 0,
-        })));
-      })
-      .catch(() => {});
+    if (!supabaseUrl || supabaseUrl.includes("your-project-ref")) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await getAuthSupabase()
+        .from("profiles")
+        .select("display_name, skill, jobs_done")
+        .not("skill", "is", null)
+        .gt("jobs_done", 0)
+        .order("created_at", { ascending: false })
+        .limit(3);
+      if (cancelled) return;
+      if (error) {
+        console.error("[LandingPage] featured profiles query failed:", error.message, error.code);
+        return;
+      }
+      if (!data || data.length === 0) return;
+      setCards(data.map((u, i) => ({
+        gradient: CARD_GRADIENTS[i % CARD_GRADIENTS.length],
+        name: u.display_name ?? "Pro",
+        skill: u.skill ?? "Skilled Pro",
+        jobs: u.jobs_done ?? 0,
+      })));
+    })();
+    return () => { cancelled = true; };
   }, []);
   return cards;
 }
