@@ -47,7 +47,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
 }
 
 // Upserts a profile row from Supabase auth user data.
-// Safe to call on every login — uses ON CONFLICT to prevent duplicates.
+// Safe to call on every login — inserts on first login, fetches on re-login.
 async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
   const sb = getAuthSupabase();
   const meta = authUser.user_metadata ?? {};
@@ -69,6 +69,11 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
 
   const avatarInitial = displayName.charAt(0).toUpperCase();
 
+  console.log("[ensureProfile] upserting profile for", authUser.id);
+
+  // ignoreDuplicates:false — on conflict update only the fields that should
+  // reflect the latest auth metadata; never touch user-editable fields like bio/skill.
+  // Using ignoreDuplicates:true returns empty data on conflict, breaking .single().
   const { data, error } = await sb
     .from("profiles")
     .upsert(
@@ -83,7 +88,7 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
       },
       {
         onConflict: "id",
-        ignoreDuplicates: true, // never overwrite existing profile data on re-login
+        ignoreDuplicates: false,
       }
     )
     .select("*")
@@ -91,9 +96,11 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
 
   if (error || !data) {
     console.error("[ensureProfile] upsert failed:", error?.message, error?.code);
-    // Upsert failed — try plain fetch in case the row exists
+    // Upsert failed — try plain fetch (row may already exist from DB trigger)
     return fetchProfile(authUser.id);
   }
+
+  console.log("[ensureProfile] upsert succeeded for", authUser.id);
   return mapProfile(data as Record<string, unknown>);
 }
 
