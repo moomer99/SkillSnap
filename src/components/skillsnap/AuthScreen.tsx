@@ -153,9 +153,9 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
         <div className="flex-1 flex flex-col px-6 pt-4 gap-4">
           {/* Google button — top of form */}
-          <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} />
+          {/* <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} /> */}
 
-          <OrDivider />
+          {/* <OrDivider /> */}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {/* Display name — sign up only */}
@@ -322,9 +322,9 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
       {/* CTA section */}
       <div className="px-5 pt-5 pb-10 flex flex-col gap-3 bg-white">
         {/* Google — primary */}
-        <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} />
+        {/* <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} /> */}
 
-        <OrDivider />
+        {/* <OrDivider /> */}
 
         <button
           onClick={() => setMode("signup")}
