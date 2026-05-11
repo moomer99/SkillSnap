@@ -216,15 +216,16 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         });
       if (notifError) console.error("[JobsDone] notification insert failed:", notifError.message, notifError.code);
 
-      // Persist a system message so the request survives navigation
-      await sb
+      // Persist a system message so the request survives navigation.
+      // messages table has no message_type column — only id, conversation_id, sender_id, text, created_at.
+      const { error: msgError } = await sb
         .from("messages")
         .insert({
           conversation_id: conversationId,
           sender_id: currentUser.id,
           text: "✅ Jobs Done requested — waiting for client confirmation",
-          message_type: "system",
         });
+      if (msgError) console.error("[JobsDone] message insert failed:", msgError.message, msgError.code, msgError.details);
     } catch (e) {
       console.error("[ChatScreen] handleRequestJobDone failed:", e);
     }

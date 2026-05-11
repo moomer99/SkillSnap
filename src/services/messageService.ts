@@ -32,15 +32,17 @@ function mapThread(
 
 function mapMessage(row: Record<string, unknown>, currentUserId: string): Message {
   const profile = row.profiles as Record<string, unknown> | undefined;
-  const msgType = row.message_type as string | undefined;
+  const text = row.text as string;
+  // messages table has no message_type column — detect system messages by text sentinel
+  const isSystem = text?.startsWith("✅ Jobs Done");
   return {
     id: row.id as string,
     threadId: row.conversation_id as string,
     from: row.sender_id === currentUserId ? "me" : "them",
-    text: row.text as string,
+    text,
     time: new Date(row.created_at as string).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     senderName: profile?.display_name as string | undefined,
-    isSystem: msgType === "system",
+    isSystem,
   };
 }
 
@@ -403,14 +405,15 @@ export const messageService = {
     };
   },
 
-  // Inserts a system message (e.g. Jobs Done request) that persists in chat history
+  // Inserts a system message (e.g. Jobs Done request) that persists in chat history.
+  // messages table schema: id, conversation_id, sender_id, text, created_at — no message_type column.
   async sendSystemMessage(conversationId: string, text: string): Promise<void> {
     const userId = await getCurrentUserId();
     if (!userId) return;
     const { error } = await getAuthSupabase()
       .from("messages")
-      .insert({ conversation_id: conversationId, sender_id: userId, text, message_type: "system" });
-    if (error) console.error("[messageService] sendSystemMessage failed:", error.message);
+      .insert({ conversation_id: conversationId, sender_id: userId, text });
+    if (error) console.error("[messageService] sendSystemMessage failed:", error.message, error.code);
   },
 
   async startThread(participantId: string): Promise<{ id: string }> {
