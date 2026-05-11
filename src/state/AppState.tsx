@@ -394,17 +394,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // PKCE OAuth callback: ?code= is in the URL after Google redirects back.
-    // IMPORTANT: subscribe to onAuthStateChange FIRST so we don't miss SIGNED_IN,
-    // then exchange the code. Previously the early `return` here skipped subscribing.
-    const urlParams = new URLSearchParams(window.location.search);
-    const oauthCode = urlParams.get("code");
-
     // Track whether getSession already hydrated so INITIAL_SESSION doesn't double-fire
     let initializedByGetSession = false;
 
-    // Subscribe to auth state changes — covers SIGNED_IN from PKCE exchange,
-    // INITIAL_SESSION on regular page loads, token refresh, sign-out.
+    // Subscribe to auth state changes — covers SIGNED_IN from PKCE exchange
+    // (handled server-side by auth/callback/route.ts via @supabase/ssr),
+    // INITIAL_SESSION on regular page loads, token refresh, and sign-out.
     const { data: { subscription } } = authSb.auth.onAuthStateChange(async (event, session) => {
       console.log("[AppState] onAuthStateChange", event, session?.user?.id ?? "no session");
 
@@ -439,42 +434,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    if (oauthCode) {
-      // Strip the code from the URL immediately so back-navigation doesn't re-exchange
-      // Remove ?code from URL cleanly — Supabase client handles PKCE exchange automatically
-     // Exchange PKCE code — delay slightly to let onAuthStateChange subscribe first
-      console.log("[AppState] PKCE code detected — scheduling exchange");
-      setTimeout(() => {
-        window.history.replaceState({}, "", window.location.pathname);
-        authSb.auth.exchangeCodeForSession(oauthCode).then(({ error }) => {
-          if (error) {
-            console.error("[AppState] exchangeCodeForSession error:", error.message);
-            dispatch({ type: "SET_AUTH_LOADING", loading: false });
-          }
-          // onAuthStateChange SIGNED_IN handles the rest
-        }).catch((e) => {
-          console.error("[AppState] exchangeCodeForSession threw:", e);
-          dispatch({ type: "SET_AUTH_LOADING", loading: false });
-        });
-      }, 100);
-      // Normal page load (no OAuth code) — check for existing session
-      authSb.auth.getSession().then(async ({ data: { session } }) => {
-        clearTimeout(authTimeout);
-        if (session?.user) {
-          console.log("[AppState] getSession found session for", session.user.id);
-          initializedByGetSession = true;
-          await hydrateProfile(session.user.id, session.user);
-          dispatch({ type: "NAVIGATE", screen: "home" });
-        } else {
-          console.log("[AppState] getSession: no session, showing landing");
-          dispatch({ type: "SET_AUTH_LOADING", loading: false });
-        }
-      }).catch((e) => {
-        console.error("[AppState] getSession threw:", e);
-        clearTimeout(authTimeout);
+    // Check for an existing session on every page load.
+    // After a Google OAuth redirect, auth/callback/route.ts has already exchanged
+    // the code server-side and set the session cookie, so getSession() finds it here.
+    authSb.auth.getSession().then(async ({ data: { session } }) => {
+      clearTimeout(authTimeout);
+      if (session?.user) {
+        console.log("[AppState] getSession found session for", session.user.id);
+        initializedByGetSession = true;
+        await hydrateProfile(session.user.id, session.user);
+        dispatch({ type: "NAVIGATE", screen: "home" });
+      } else {
+        console.log("[AppState] getSession: no session, showing landing");
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
-      });
-    }
+      }
+    }).catch((e) => {
+      console.error("[AppState] getSession threw:", e);
+      clearTimeout(authTimeout);
+      dispatch({ type: "SET_AUTH_LOADING", loading: false });
+    });
 
     return () => subscription.unsubscribe();
   }, []);

@@ -1,15 +1,14 @@
 // ─────────────────────────────────────────────
 // SkillSnap — Supabase OAuth Callback Route
 //
-// PKCE flow: the code verifier is stored in the *browser's* localStorage by the
-// Supabase JS client. A server-side handler can never access it, so calling
-// exchangeCodeForSession() here always fails with "Unable to exchange external code".
-//
-// Instead we forward the raw ?code= param to the app root and let the browser-side
-// Supabase client (detectSessionInUrl: true + flowType: 'pkce') complete the exchange.
-// onAuthStateChange in AppState then picks up the resulting SIGNED_IN event.
+// Uses @supabase/ssr createServerClient so the PKCE code verifier is read
+// from cookies (where the browser client stored it) and the exchange succeeds
+// server-side. After exchange the session cookie is set and the user is
+// redirected to the app root where onAuthStateChange fires SIGNED_IN.
 // ─────────────────────────────────────────────
 import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -26,11 +25,34 @@ export async function GET(request: NextRequest) {
   }
 
   if (code) {
-    // Forward the code to the SPA — the browser Supabase client will exchange it
-    // using the PKCE verifier it stored in localStorage during signInWithOAuth.
-    const redirectUrl = new URL(origin + next);
-    redirectUrl.searchParams.set("code", code);
-    return NextResponse.redirect(redirectUrl.toString());
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          },
+        },
+      }
+    );
+
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+    if (exchangeError) {
+      console.error("[auth/callback] exchangeCodeForSession failed:", exchangeError.message);
+      return NextResponse.redirect(
+        `${origin}/?auth_error=1&reason=${encodeURIComponent(exchangeError.message)}`
+      );
+    }
+
+    console.log("[auth/callback] PKCE exchange succeeded, redirecting to", next);
+    return NextResponse.redirect(`${origin}${next}`);
   }
 
   return NextResponse.redirect(`${origin}/?auth_error=1&reason=no_code`);
