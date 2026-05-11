@@ -216,21 +216,15 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         });
       if (notifError) console.error("[JobsDone] notification insert failed:", notifError.message, notifError.code);
 
-      // Persist a system message so the request survives navigation.
-      const now = new Date().toISOString();
-      const { error: msgError } = await sb
-        .from("messages")
-        .insert({
-          conversation_id: conversationId,
-          topic: `room:${conversationId}`,
-          sender_id: currentUser.id,
-          extension: "jobs_done_request",
-          text: `${currentUser.displayName} requested a Jobs Done confirmation`,
-          created_at: now,
-          updated_at: now,
-          inserted_at: now,
-        });
-      if (msgError) console.error("[JobsDone] message insert failed:", msgError.message, msgError.code, msgError.details);
+      // Persist a system message — same minimal payload as sendMessage (only known columns).
+      const msgPayload = {
+        conversation_id: conversationId,
+        sender_id: currentUser.id,
+        text: `${currentUser.displayName} requested a Jobs Done confirmation`,
+      };
+      console.log("[JobsDone] message insert payload:", msgPayload);
+      const { error: msgError } = await sb.from("messages").insert(msgPayload);
+      if (msgError) console.error("[JobsDone] message insert error:", msgError.message, msgError.details, msgError.hint);
     } catch (e) {
       console.error("[ChatScreen] handleRequestJobDone failed:", e);
     }
