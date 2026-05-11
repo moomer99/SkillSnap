@@ -32,6 +32,7 @@ export function getSupabase(): SupabaseClient {
         autoRefreshToken: true,
         detectSessionInUrl: true,
         flowType: "pkce",
+        lock: async (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => fn(),
       },
     });
   }
