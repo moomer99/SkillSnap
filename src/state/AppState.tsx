@@ -442,9 +442,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (oauthCode) {
       // Strip the code from the URL immediately so back-navigation doesn't re-exchange
       // Remove ?code from URL cleanly — Supabase client handles PKCE exchange automatically
-      window.history.replaceState({}, "", window.location.pathname);
-      console.log("[AppState] PKCE code detected — letting Supabase client handle exchange");
-    } else {
+     // Exchange PKCE code — delay slightly to let onAuthStateChange subscribe first
+      console.log("[AppState] PKCE code detected — scheduling exchange");
+      setTimeout(() => {
+        window.history.replaceState({}, "", window.location.pathname);
+        authSb.auth.exchangeCodeForSession(oauthCode).then(({ error }) => {
+          if (error) {
+            console.error("[AppState] exchangeCodeForSession error:", error.message);
+            dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          }
+          // onAuthStateChange SIGNED_IN handles the rest
+        }).catch((e) => {
+          console.error("[AppState] exchangeCodeForSession threw:", e);
+          dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        });
+      }, 100);
       // Normal page load (no OAuth code) — check for existing session
       authSb.auth.getSession().then(async ({ data: { session } }) => {
         clearTimeout(authTimeout);
