@@ -97,6 +97,10 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (mode === "signup" && !displayName.trim()) {
+      setError("Full name is required.");
+      return;
+    }
     setLoading(true);
 
     // Safety net — never leave spinner running forever
@@ -158,16 +162,17 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
           {/* <OrDivider /> */}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {/* Display name — sign up only */}
+            {/* Full Name — sign up only, required */}
             {mode === "signup" && (
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Your name</label>
+                <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Full Name</label>
                 <input
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="e.g. Marcus Thompson"
+                  placeholder="Your full name"
                   autoComplete="name"
+                  required
                   className="h-12 rounded-xl border border-[#e8e4df] px-4 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
                 />
               </div>

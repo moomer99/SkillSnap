@@ -131,9 +131,9 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
   const showLocationBanner = !location && !locationPromptDismissed;
   const headerH = location ? HEADER_H_WITH_LOC : HEADER_H_NO_LOC;
 
-  // Role setup banner — shown once per session until role is set
+  // Role setup banner — shown once per session until role/skill is set
   const [roleBannerDismissed, setRoleBannerDismissed] = useState(false);
-  const showRoleBanner = state.isAuthenticated && !state.currentUser?.role && !roleBannerDismissed;
+  const showRoleBanner = state.isAuthenticated && !state.currentUser?.role && !state.currentUser?.skill && !roleBannerDismissed;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
@@ -196,7 +196,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
           >
             <div className="flex-1 min-w-0">
               <p className="text-[13px] font-bold" style={{ color: "#4c35c4" }}>Complete your profile</p>
-              <p className="text-[11px] leading-snug" style={{ color: "#6c55d4" }}>Let people know if you&apos;re a Client or Pro</p>
+              <p className="text-[11px] leading-snug" style={{ color: "#6c55d4" }}>Let people know if you&apos;re a Client or a skilled Pro</p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button

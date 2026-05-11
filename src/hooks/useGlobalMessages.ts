@@ -9,6 +9,8 @@ import { useEffect, useRef, useCallback } from "react";
 import { useAppState } from "@/state/AppState";
 import { messageService } from "@/services/messageService";
 import { showMessageNotification } from "@/hooks/useNotifications";
+import { getAuthSupabase } from "@/lib/supabase";
+import { getPendingJobId } from "@/services/jobsDoneService";
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -19,6 +21,7 @@ export function useGlobalMessages() {
   const { state, dispatch } = useAppState();
   const threadIdsRef = useRef<string[]>([]);
   const subscribedRef = useRef(false);
+  const notifChannelRef = useRef<ReturnType<ReturnType<typeof getAuthSupabase>["channel"]> | null>(null);
 
   // Keep threadIdsRef in sync whenever AppState threads change
   useEffect(() => {
@@ -100,4 +103,49 @@ export function useGlobalMessages() {
   // Re-subscribe only when auth changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isAuthenticated]);
+
+  // Realtime subscription for jobs_done_request notifications
+  useEffect(() => {
+    if (!SUPABASE_CONFIGURED || !state.isAuthenticated || !state.currentUser) return;
+    const userId = state.currentUser.id;
+
+    const sb = getAuthSupabase();
+    const channel = sb
+      .channel(`notifications:${userId}`)
+      .on(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        "postgres_changes" as any,
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${userId}`,
+        },
+        async (payload: { new: Record<string, unknown> }) => {
+          const row = payload.new;
+          if (row.type !== "jobs_done_request") return;
+          const fromUserId = row.from_user_id as string;
+          const fromName = (row.message as string) ?? "A pro";
+          const notificationId = row.id as string;
+
+          // Look up the pending job record so the client can confirm/decline
+          const jobId = await getPendingJobId(fromUserId);
+          if (!jobId) return;
+
+          dispatch({
+            type: "SET_PENDING_JOBS_REQUEST",
+            request: { jobId, fromName, notificationId },
+          });
+        }
+      )
+      .subscribe();
+
+    notifChannelRef.current = channel;
+    return () => {
+      sb.removeChannel(channel);
+      notifChannelRef.current = null;
+    };
+  // Re-subscribe when auth user changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.isAuthenticated, state.currentUser?.id]);
 }

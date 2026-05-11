@@ -98,6 +98,18 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const currentUser = state.currentUser;
   const isSkiller = !!(currentUser?.skill);
 
+  // Incoming realtime jobs_done_request — received via useGlobalMessages subscription
+  const pendingRequest = state.pendingJobsRequest;
+
+  // When a realtime jobs_done_request arrives for this client, pre-populate activeJobId
+  // and set jobStatus so the confirm/decline card appears automatically
+  useEffect(() => {
+    if (!pendingRequest || isSkiller) return;
+    if (jobStatus !== "idle" && jobStatus !== "requested") return;
+    setActiveJobId(pendingRequest.jobId);
+    setJobStatus("requested");
+  }, [pendingRequest, isSkiller]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const activeThread = useMemo(
     () => state.threads.find((t) => t.id === state.activeThreadId),
     [state.threads, state.activeThreadId]
@@ -160,10 +172,14 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   async function handleClientConfirm() {
     setJobStatus("confirmed");
     setShowFeedback(true);
+    dispatch({ type: "SET_PENDING_JOBS_REQUEST", request: null });
     if (!SUPABASE_CONFIGURED || !activeJobId) return;
     try {
       const { jobsDoneService } = await import("@/services/jobsDoneService");
       await jobsDoneService.confirmJob(activeJobId);
+      if (pendingRequest?.notificationId) {
+        await jobsDoneService.markNotificationRead(pendingRequest.notificationId);
+      }
     } catch (e) {
       console.warn("[ChatScreen] handleClientConfirm failed:", e);
     }
@@ -171,10 +187,14 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
 
   async function handleClientDecline() {
     setJobStatus("declined");
+    dispatch({ type: "SET_PENDING_JOBS_REQUEST", request: null });
     if (!SUPABASE_CONFIGURED || !activeJobId) return;
     try {
       const { jobsDoneService } = await import("@/services/jobsDoneService");
       await jobsDoneService.declineJob(activeJobId);
+      if (pendingRequest?.notificationId) {
+        await jobsDoneService.markNotificationRead(pendingRequest.notificationId);
+      }
       setActiveJobId(null);
     } catch (e) {
       console.warn("[ChatScreen] handleClientDecline failed:", e);

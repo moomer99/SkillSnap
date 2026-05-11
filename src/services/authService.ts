@@ -98,26 +98,27 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
 
   console.log("[ensureProfile] attempting upsert for user:", authUser.id, "email:", authUser.email);
 
-  // ignoreDuplicates:false — on conflict update only the fields that should
-  // reflect the latest auth metadata; never touch user-editable fields like bio/skill.
-  // Using ignoreDuplicates:true returns empty data on conflict, breaking .single().
+  // Check if a profile row already exists — if so, never overwrite display_name or avatar_url
+  // (those are user-editable fields set on first login or via Edit Profile).
+  const { data: existing } = await sb
+    .from("profiles")
+    .select("id, avatar_url, display_name")
+    .eq("id", authUser.id)
+    .maybeSingle();
+
+  const upsertData: Record<string, unknown> = {
+    id: authUser.id,
+    username,
+    email: authUser.email ?? null,
+    avatar_initial: avatarInitial,
+    avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+    // Only set on first login — never overwrite user-edited values
+    ...(!existing ? { display_name: displayName, avatar_url: avatarUrl } : {}),
+  };
+
   const { data, error } = await sb
     .from("profiles")
-    .upsert(
-      {
-        id: authUser.id,
-        username,
-        display_name: displayName,
-        email: authUser.email ?? null,
-        avatar_url: avatarUrl,
-        avatar_initial: avatarInitial,
-        avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
-      },
-      {
-        onConflict: "id",
-        ignoreDuplicates: false,
-      }
-    )
+    .upsert(upsertData, { onConflict: "id", ignoreDuplicates: false })
     .select("*")
     .single();
 

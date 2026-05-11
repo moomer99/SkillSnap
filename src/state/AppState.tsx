@@ -38,6 +38,7 @@ interface AppStateShape {
   savedPosts: Set<string>;
   followedUsers: Set<string>;
   modals: { jobsDoneInfo: boolean };
+  pendingJobsRequest: { jobId: string; fromName: string; notificationId: string } | null;
 }
 
 // ── Actions ──────────────────────────────────
@@ -73,7 +74,8 @@ type Action =
   | { type: "DELETE_POST"; postId: string }
   | { type: "UPDATE_POST"; postId: string; patch: Partial<Pick<Post, "caption" | "skill" | "location">> }
   | { type: "SHOW_AUTH_PROMPT" }
-  | { type: "HIDE_AUTH_PROMPT" };
+  | { type: "HIDE_AUTH_PROMPT" }
+  | { type: "SET_PENDING_JOBS_REQUEST"; request: { jobId: string; fromName: string; notificationId: string } | null };
 
 // ── Initial State ────────────────────────────
 const initialState: AppStateShape = {
@@ -97,6 +99,7 @@ const initialState: AppStateShape = {
   savedPosts: new Set(),
   followedUsers: new Set(),
   modals: { jobsDoneInfo: false },
+  pendingJobsRequest: null,
 };
 
 // ── Reducer ──────────────────────────────────
@@ -313,6 +316,8 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       return { ...state, showAuthPrompt: true };
     case "HIDE_AUTH_PROMPT":
       return { ...state, showAuthPrompt: false };
+    case "SET_PENDING_JOBS_REQUEST":
+      return { ...state, pendingJobsRequest: action.request };
     default:
       return state;
   }

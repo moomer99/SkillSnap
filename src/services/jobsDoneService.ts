@@ -21,6 +21,22 @@ async function getCurrentUserId(): Promise<string | null> {
   return user?.id ?? null;
 }
 
+// Find the pending job record for the current user as client from a given skiller
+export async function getPendingJobId(skillerId: string): Promise<string | null> {
+  const userId = await getCurrentUserId();
+  if (!userId) return null;
+  const { data } = await getAuthSupabase()
+    .from("jobs_done")
+    .select("id")
+    .eq("client_id", userId)
+    .eq("skiller_id", skillerId)
+    .eq("skiller_confirmed", true)
+    .eq("client_confirmed", false)
+    .is("verified_at", null)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
 export async function insertJobsDoneNotification(
   clientId: string,
   skillerUserId: string,
