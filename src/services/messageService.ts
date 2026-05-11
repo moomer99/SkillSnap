@@ -33,8 +33,8 @@ function mapThread(
 function mapMessage(row: Record<string, unknown>, currentUserId: string): Message {
   const profile = row.profiles as Record<string, unknown> | undefined;
   const text = row.text as string;
-  // messages table has no message_type column — detect system messages by text sentinel
-  const isSystem = text?.startsWith("✅ Jobs Done");
+  const extension = row.extension as string | undefined;
+  const isSystem = extension === "jobs_done_request" || extension === "system";
   return {
     id: row.id as string,
     threadId: row.conversation_id as string,
@@ -406,14 +406,23 @@ export const messageService = {
   },
 
   // Inserts a system message (e.g. Jobs Done request) that persists in chat history.
-  // messages table schema: id, conversation_id, sender_id, text, created_at — no message_type column.
-  async sendSystemMessage(conversationId: string, text: string): Promise<void> {
+  async sendSystemMessage(conversationId: string, text: string, extension = "system"): Promise<void> {
     const userId = await getCurrentUserId();
     if (!userId) return;
+    const now = new Date().toISOString();
     const { error } = await getAuthSupabase()
       .from("messages")
-      .insert({ conversation_id: conversationId, sender_id: userId, text });
-    if (error) console.error("[messageService] sendSystemMessage failed:", error.message, error.code);
+      .insert({
+        conversation_id: conversationId,
+        topic: `room:${conversationId}`,
+        sender_id: userId,
+        extension,
+        text,
+        created_at: now,
+        updated_at: now,
+        inserted_at: now,
+      });
+    if (error) console.error("[messageService] sendSystemMessage failed:", error.message, error.code, error.details);
   },
 
   async startThread(participantId: string): Promise<{ id: string }> {
