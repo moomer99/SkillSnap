@@ -344,13 +344,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Falls back to ensureProfile (upsert) if the row doesn't exist yet,
     // which is the normal path for first-time Google OAuth login.
     async function hydrateProfile(userId: string, authUser: import("@supabase/supabase-js").User) {
-      console.log("[AppState] hydrateProfile start", userId);
-      try {
-        const { data, error: fetchErr } = await authSb
-          .from("profiles")
-          .select("*")
-          .eq("id", userId)
-          .single();
+      const { data } = await authSb
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
 
         if (data) {
           console.log("[AppState] profile found, dispatching SET_AUTH");
