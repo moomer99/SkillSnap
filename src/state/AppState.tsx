@@ -328,14 +328,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Hydrate auth state from Supabase session on mount
   useEffect(() => {
-    // Immediately check localStorage for existing session to prevent auth flash
+    // Immediately check localStorage for existing session to suppress landing flash.
+    // The definitive hydration happens below — this is just a fast pre-render hint.
     const existingSession = localStorage.getItem('sb-dnraeyxjzdmpdvrkzyfd-auth-token');
     if (existingSession) {
       try {
         const parsed = JSON.parse(existingSession);
         if (parsed?.user && parsed?.expires_at && parsed.expires_at * 1000 > Date.now()) {
-          // Session looks valid — navigate away from auth/onboarding immediately
-          // The full hydration below will confirm and load the profile
           dispatch({ type: "NAVIGATE", screen: "home" });
         }
       } catch {
@@ -349,35 +348,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Use the auth client (always real URL) for session/auth operations.
-    // The proxy client used for DB queries has a different storage key, which
-    // causes getSession() to return null after an OAuth callback.
     const authSb = getAuthSupabase();
-    const sb = getSupabase(); // used only for profile DB queries below
+    const sb = getSupabase();
 
     // Safety net — if auth resolution hangs for >8s, stop the spinner
     const authTimeout = setTimeout(() => {
       dispatch({ type: "SET_AUTH_LOADING", loading: false });
     }, 8000);
 
+    // hydrateProfile — fetches the profile row and dispatches SET_AUTH.
+    // Falls back to ensureProfile (upsert) if the row doesn't exist yet
+    // (common for first Google OAuth login where the DB trigger may not have run).
     async function hydrateProfile(userId: string, authUser: import("@supabase/supabase-js").User) {
-      const { data } = await sb
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-      if (data) {
-        dispatch({ type: "SET_AUTH", user: mapProfile(data as Record<string, unknown>) });
-      } else {
+      try {
+        const { data } = await sb
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .single();
+        if (data) {
+          dispatch({ type: "SET_AUTH", user: mapProfile(data as Record<string, unknown>) });
+          return;
+        }
+        // No profile row yet — create one from Google/auth metadata silently
         const user = await ensureProfile(authUser);
-        if (user) dispatch({ type: "SET_AUTH", user });
-        else dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        if (user) {
+          dispatch({ type: "SET_AUTH", user });
+        } else {
+          // ensureProfile failed — do a plain fetch as last resort
+          const { data: retryData } = await sb
+            .from("profiles")
+            .select("*")
+            .eq("id", userId)
+            .single();
+          if (retryData) {
+            dispatch({ type: "SET_AUTH", user: mapProfile(retryData as Record<string, unknown>) });
+          } else {
+            dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          }
+        }
+      } catch {
+        dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }
     }
 
-    // PKCE OAuth callback: if the URL contains ?code=, exchange it for a session
-    // client-side. The code verifier was stored in localStorage by signInWithOAuth,
-    // so only the browser client can complete this exchange — not the server route.
+    // PKCE OAuth callback: exchange the ?code= param client-side.
     const urlParams = new URLSearchParams(window.location.search);
     const oauthCode = urlParams.get("code");
     if (oauthCode) {
@@ -387,8 +402,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       void (async () => {
         try {
           await authSb.auth.exchangeCodeForSession(oauthCode);
-          // Brief delay so onAuthStateChange SIGNED_IN can fire and hydrate
-          // the profile before the spinner clears — prevents flash to landing
+          // Give onAuthStateChange SIGNED_IN time to fire and hydrate the profile
           await new Promise(res => setTimeout(res, 500));
         } catch (e) {
           console.error("[AppState] exchangeCodeForSession threw:", e);
@@ -400,7 +414,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Handle password reset callback — Supabase appends #access_token=...&type=recovery
+    // Handle password reset callback
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const accessToken = hashParams.get("access_token");
     const recoveryType = hashParams.get("type");
@@ -409,14 +423,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       dispatch({ type: "NAVIGATE", screen: "reset-password" });
     }
 
-    // Resolve initial session via getSession() — reads localStorage without acquiring
-    // a lock. getUser() holds the lock for a full network round-trip, contending with
-    // onAuthStateChange and causing 5000ms timeouts. INITIAL_SESSION from
-    // onAuthStateChange below handles any session that arrives after this point.
+    // initializedByGetSession prevents onAuthStateChange from double-hydrating
+    // the profile when INITIAL_SESSION fires right after getSession() already did.
+    let initializedByGetSession = false;
+
+    // Primary session check — reads localStorage without a network round-trip.
     authSb.auth.getSession().then(async ({ data: { session } }) => {
       clearTimeout(authTimeout);
       if (session?.user) {
+        initializedByGetSession = true;
         await hydrateProfile(session.user.id, session.user);
+        // Ensure the user lands on feed after Google OAuth (belt-and-suspenders)
+        dispatch({ type: "NAVIGATE", screen: "home" });
       } else {
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }
@@ -425,25 +443,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
       dispatch({ type: "SET_AUTH_LOADING", loading: false });
     });
 
-    // Keep session in sync across tabs, token refresh, and post-OAuth redirects.
-    // INITIAL_SESSION fires when the page loads with an existing session (e.g. after
-    // an OAuth callback redirect) — handle it so the user lands on home, not landing.
+    // Keep session in sync: new sign-ins, token refreshes, tab sync, post-OAuth.
     const { data: { subscription } } = authSb.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
         dispatch({ type: "CLEAR_AUTH" });
-      } else if (
-        session &&
-        (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION")
-      ) {
+        return;
+      }
+
+      if (!session) return;
+
+      if (event === "INITIAL_SESSION") {
+        // Skip if getSession() already handled this session to avoid double hydration
+        if (initializedByGetSession) return;
         await hydrateProfile(session.user.id, session.user);
-        // Safety net for Google OAuth: after a fresh SIGNED_IN event the user may be
-        // sitting on the landing page (OAuth redirects back to the root URL).
-        // SET_AUTH already handles this via its screen transition, but dispatching an
-        // explicit NAVIGATE after profile hydration guarantees they reach the feed
-        // even if the screen state was updated before SET_AUTH ran.
-        if (event === "SIGNED_IN") {
-          dispatch({ type: "NAVIGATE", screen: "home" });
-        }
+        return;
+      }
+
+      if (event === "SIGNED_IN") {
+        // New sign-in (including post-OAuth code exchange) — always hydrate and navigate
+        await hydrateProfile(session.user.id, session.user);
+        dispatch({ type: "NAVIGATE", screen: "home" });
+        return;
+      }
+
+      if (event === "TOKEN_REFRESHED") {
+        // Token refreshed — re-hydrate silently without navigating
+        await hydrateProfile(session.user.id, session.user);
       }
     });
 
