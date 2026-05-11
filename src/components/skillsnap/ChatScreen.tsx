@@ -216,13 +216,6 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         });
       if (notifError) console.error("[JobsDone] notification insert failed:", notifError.message, notifError.code);
 
-      // Persist a system message using the same sendMessage path that regular chat uses.
-      try {
-        const { messageService } = await import("@/services/messageService");
-        await messageService.sendMessage(conversationId, "✓ Jobs Done requested — waiting for confirmation");
-      } catch (msgErr) {
-        console.error("[JobsDone] system message send failed:", msgErr);
-      }
     } catch (e) {
       console.error("[ChatScreen] handleRequestJobDone failed:", e);
     }

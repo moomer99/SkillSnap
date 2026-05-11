@@ -104,46 +104,63 @@ export function useGlobalMessages() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isAuthenticated]);
 
-  // Realtime subscription for jobs_done_request notifications
+  // Realtime subscription for jobs_done_request notifications.
+  // Must set JWT via realtime.setAuth() before subscribing — without it the anon key
+  // is used and the user_id filter is blocked by RLS, so no events are delivered.
   useEffect(() => {
     if (!SUPABASE_CONFIGURED || !state.isAuthenticated || !state.currentUser) return;
     const userId = state.currentUser.id;
 
     const sb = getAuthSupabase();
-    const channel = sb
-      .channel(`notifications:${userId}`)
-      .on(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        "postgres_changes" as any,
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${userId}`,
-        },
-        async (payload: { new: Record<string, unknown> }) => {
-          const row = payload.new;
-          if (row.type !== "jobs_done_request") return;
-          const fromUserId = row.from_user_id as string;
-          const fromName = (row.message as string) ?? "A pro";
-          const notificationId = row.id as string;
 
-          // Look up the pending job record so the client can confirm/decline
-          const jobId = await getPendingJobId(fromUserId);
-          if (!jobId) return;
+    let channel: ReturnType<typeof sb.channel> | null = null;
 
-          dispatch({
-            type: "SET_PENDING_JOBS_REQUEST",
-            request: { jobId, fromName, notificationId },
-          });
-        }
-      )
-      .subscribe();
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (session?.access_token) {
+        sb.realtime.setAuth(session.access_token);
+      }
 
-    notifChannelRef.current = channel;
+      channel = sb
+        .channel(`user-notifications:${userId}`)
+        .on(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          "postgres_changes" as any,
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${userId}`,
+          },
+          async (payload: { new: Record<string, unknown> }) => {
+            const row = payload.new;
+            console.log("[useGlobalMessages] notification received:", row);
+            if (row.type !== "jobs_done_request") return;
+            const fromUserId = row.from_user_id as string;
+            const fromName = (row.message as string) ?? "A pro";
+            const notificationId = row.id as string;
+
+            // Look up the pending job record so the client can confirm/decline
+            const jobId = await getPendingJobId(fromUserId);
+            if (!jobId) return;
+
+            dispatch({
+              type: "SET_PENDING_JOBS_REQUEST",
+              request: { jobId, fromName, notificationId },
+            });
+          }
+        )
+        .subscribe((status, err) => {
+          console.log(`[useGlobalMessages] notifications channel status: ${status}`, err ?? "");
+        });
+
+      notifChannelRef.current = channel;
+    });
+
     return () => {
-      sb.removeChannel(channel);
-      notifChannelRef.current = null;
+      if (notifChannelRef.current) {
+        sb.removeChannel(notifChannelRef.current);
+        notifChannelRef.current = null;
+      }
     };
   // Re-subscribe when auth user changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
