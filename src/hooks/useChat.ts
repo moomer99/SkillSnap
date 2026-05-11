@@ -22,7 +22,6 @@ export function useChat() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(false);
   const unsubRef = useRef<(() => void) | null>(null);
-  const subscribedThreadRef = useRef<string | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const threadId = state.activeThreadId ?? "";
@@ -72,14 +71,11 @@ export function useChat() {
 
     fetchMessages();
 
-    // Tear down any previous subscription before creating a new one
+    // Tear down any previous subscription before creating a new one.
+    // messageService.subscribeToMessages also cleans up the old channel synchronously,
+    // so calling unsub here is a belt-and-suspenders safety measure only.
     unsubRef.current?.();
     unsubRef.current = null;
-    subscribedThreadRef.current = null;
-
-    // Guard against duplicate subscriptions for the same thread
-    if (subscribedThreadRef.current === threadId) return;
-    subscribedThreadRef.current = threadId;
 
     // Subscribe to Realtime inserts — skip if message already in state (echo dedup)
     unsubRef.current = messageService.subscribeToMessages(threadId, (msg) => {
@@ -99,7 +95,6 @@ export function useChat() {
     return () => {
       unsubRef.current?.();
       unsubRef.current = null;
-      subscribedThreadRef.current = null;
       document.removeEventListener("visibilitychange", handleVisibility);
       clearInterval(pollInterval);
     };

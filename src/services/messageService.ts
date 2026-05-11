@@ -47,6 +47,10 @@ function mapMessage(row: Record<string, unknown>, currentUserId: string): Messag
 let cachedUserId: string | null = null;
 let cacheTime = 0;
 
+// Module-level channel registry — prevents reusing a channel that is already subscribed.
+// keyed by conversationId so cleanup is O(1) and synchronous.
+const perConvChannels = new Map<string, ReturnType<ReturnType<typeof getRealtimeSupabase>["channel"]>>();
+
 async function getCurrentUserId(): Promise<string | null> {
   if (cachedUserId && Date.now() - cacheTime < 30000) return cachedUserId;
   const { data: { session } } = await getAuthSupabase().auth.getSession();
@@ -257,27 +261,28 @@ export const messageService = {
 
   // Per-conversation Realtime subscription (used inside ChatScreen while chat is open).
   subscribeToMessages(conversationId: string, onMessage: (msg: Message) => void): () => void {
-    let channel: ReturnType<ReturnType<typeof getRealtimeSupabase>["channel"]> | null = null;
     let cancelled = false;
-    const channelName = `messages:conv:${conversationId}`;
 
-    Promise.all([getCurrentUserId(), getAccessToken()]).then(async ([currentUserId, token]) => {
+    // Synchronously tear down any existing channel for this conversation.
+    // This must happen before the async work so rt.channel() never returns a
+    // still-subscribed instance (which triggers "cannot add callbacks after subscribe()").
+    const stale = perConvChannels.get(conversationId);
+    if (stale) {
+      getRealtimeSupabase().removeChannel(stale);
+      perConvChannels.delete(conversationId);
+    }
+
+    let channel: ReturnType<ReturnType<typeof getRealtimeSupabase>["channel"]> | null = null;
+
+    Promise.all([getCurrentUserId(), getAccessToken()]).then(([currentUserId, token]) => {
       if (cancelled) return;
       const resolvedId = currentUserId ?? "";
       const rt = getRealtimeSupabase();
 
       if (token) rt.realtime.setAuth(token);
 
-      // Remove any stale channel for this conversation before creating a new one
-      const existing = rt.getChannels().find((c) => c.topic === channelName);
-      if (existing) {
-        await rt.removeChannel(existing);
-      }
-
-      if (cancelled) return;
-
       channel = rt
-        .channel(channelName)
+        .channel(`messages:conv:${conversationId}`)
         .on(
           "postgres_changes",
           {
@@ -295,11 +300,16 @@ export const messageService = {
         .subscribe((status, err) => {
           console.log(`[Realtime] subscribeToMessages [${conversationId}] status: ${status}`, err ?? "");
         });
+
+      perConvChannels.set(conversationId, channel);
     });
 
     return () => {
       cancelled = true;
-      if (channel) getRealtimeSupabase().removeChannel(channel);
+      if (channel) {
+        getRealtimeSupabase().removeChannel(channel);
+        perConvChannels.delete(conversationId);
+      }
     };
   },
 
