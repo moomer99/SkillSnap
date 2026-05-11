@@ -69,7 +69,7 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
 
   const avatarInitial = displayName.charAt(0).toUpperCase();
 
-  console.log("[ensureProfile] upserting profile for", authUser.id);
+  console.log("[ensureProfile] attempting upsert for user:", authUser.id, "email:", authUser.email);
 
   // ignoreDuplicates:false — on conflict update only the fields that should
   // reflect the latest auth metadata; never touch user-editable fields like bio/skill.
@@ -93,6 +93,8 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
     )
     .select("*")
     .single();
+
+  console.log("[ensureProfile] upsert result — data:", data, "error:", error?.message, "code:", error?.code);
 
   if (error || !data) {
     console.error("[ensureProfile] upsert failed:", error?.message, error?.code);

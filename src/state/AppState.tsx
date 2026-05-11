@@ -351,31 +351,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
           .eq("id", userId)
           .single();
 
+        console.log("[AppState] hydrateProfile fetch result — data:", data, "error:", fetchErr?.message, "code:", fetchErr?.code);
+
         if (data) {
           console.log("[AppState] profile found, dispatching SET_AUTH");
           dispatch({ type: "SET_AUTH", user: mapProfile(data as Record<string, unknown>) });
           return;
         }
 
-        console.log("[AppState] no profile row, running ensureProfile", fetchErr?.message);
-        const user = await ensureProfile(authUser);
-        if (user) {
-          console.log("[AppState] ensureProfile succeeded, dispatching SET_AUTH");
-          dispatch({ type: "SET_AUTH", user });
+        // PGRST116 = no rows found — expected for new users, proceed to ensureProfile
+        // Any other error code = real problem
+        if (fetchErr && fetchErr.code !== "PGRST116") {
+          console.error("[AppState] unexpected profile fetch error:", fetchErr.message, fetchErr.code);
+          dispatch({ type: "SET_AUTH_LOADING", loading: false });
           return;
         }
 
-        // Last resort: fetch again — the DB trigger may have created the row by now
-        console.warn("[AppState] ensureProfile returned null, retrying fetch");
-        const { data: retryData } = await authSb
-          .from("profiles")
-          .select("*")
-          .eq("id", userId)
-          .single();
-        if (retryData) {
-          dispatch({ type: "SET_AUTH", user: mapProfile(retryData as Record<string, unknown>) });
+        console.log("[AppState] no profile row found, creating via ensureProfile");
+        const user = await ensureProfile(authUser);
+        if (user) {
+          console.log("[AppState] profile created successfully");
+          dispatch({ type: "SET_AUTH", user });
         } else {
-          console.error("[AppState] hydrateProfile: all attempts failed for", userId);
+          console.error("[AppState] ensureProfile failed to create profile");
           dispatch({ type: "SET_AUTH_LOADING", loading: false });
         }
       } catch (e) {
