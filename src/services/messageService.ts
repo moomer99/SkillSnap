@@ -259,16 +259,25 @@ export const messageService = {
   subscribeToMessages(conversationId: string, onMessage: (msg: Message) => void): () => void {
     let channel: ReturnType<ReturnType<typeof getRealtimeSupabase>["channel"]> | null = null;
     let cancelled = false;
+    const channelName = `messages:conv:${conversationId}`;
 
-    Promise.all([getCurrentUserId(), getAccessToken()]).then(([currentUserId, token]) => {
+    Promise.all([getCurrentUserId(), getAccessToken()]).then(async ([currentUserId, token]) => {
       if (cancelled) return;
       const resolvedId = currentUserId ?? "";
       const rt = getRealtimeSupabase();
 
       if (token) rt.realtime.setAuth(token);
 
+      // Remove any stale channel for this conversation before creating a new one
+      const existing = rt.getChannels().find((c) => c.topic === channelName);
+      if (existing) {
+        await rt.removeChannel(existing);
+      }
+
+      if (cancelled) return;
+
       channel = rt
-        .channel(`messages:conv:${conversationId}`)
+        .channel(channelName)
         .on(
           "postgres_changes",
           {

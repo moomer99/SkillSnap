@@ -155,23 +155,72 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   }, [showFeedback, showChatMenu]);
 
   async function handleRequestJobDone() {
-    console.log("[ChatScreen] handleRequestJobDone tapped", { threadId, participantId, currentUserId: currentUser?.id, SUPABASE_CONFIGURED });
+    const conversationId = threadId || activeThread?.id || null;
+    const clientId = displayParticipant.id || participantId || null;
+    console.log("[JobsDone] values:", {
+      skiller_id: currentUser?.id,
+      client_id: clientId,
+      conversation_id: conversationId,
+      thread: activeThread?.id,
+      activeThreadId: state.activeThreadId,
+    });
     setJobStatus("requested");
-    if (!SUPABASE_CONFIGURED || !currentUser || !participantId || !threadId) {
-      console.warn("[ChatScreen] handleRequestJobDone: missing required values", { SUPABASE_CONFIGURED, currentUser: !!currentUser, participantId, threadId });
+    if (!SUPABASE_CONFIGURED || !currentUser || !clientId || !conversationId) {
+      console.warn("[ChatScreen] handleRequestJobDone: missing required values", {
+        SUPABASE_CONFIGURED,
+        currentUser: !!currentUser,
+        clientId,
+        conversationId,
+      });
       return;
     }
     try {
-      const { jobsDoneService, insertJobsDoneNotification } = await import("@/services/jobsDoneService");
-      const jobId = await jobsDoneService.requestVerification(threadId, participantId);
-      console.log("[ChatScreen] requestVerification returned jobId:", jobId);
-      if (jobId) {
-        setActiveJobId(jobId);
-        await insertJobsDoneNotification(participantId, currentUser.id, currentUser.displayName);
-        // Persist a system message so both parties see the request on re-open
-        const { messageService } = await import("@/services/messageService");
-        await messageService.sendSystemMessage(threadId, "✅ Jobs Done requested — waiting for client confirmation");
+      const { getAuthSupabase } = await import("@/lib/supabase");
+      const sb = getAuthSupabase();
+
+      // Insert jobs_done record
+      const { data: jobData, error: jobError } = await sb
+        .from("jobs_done")
+        .insert({
+          skiller_id: currentUser.id,
+          client_id: clientId,
+          conversation_id: conversationId,
+          skiller_confirmed: true,
+          client_confirmed: false,
+        })
+        .select()
+        .single();
+
+      console.log("[JobsDone] insert result:", jobData, jobError);
+      if (jobError) {
+        console.error("[JobsDone] insert failed:", jobError.message, jobError.code);
+        return;
       }
+
+      const jobId = jobData?.id as string | null;
+      if (jobId) setActiveJobId(jobId);
+
+      // Insert notification for the client
+      const { error: notifError } = await sb
+        .from("notifications")
+        .insert({
+          user_id: clientId,
+          type: "jobs_done_request",
+          from_user_id: currentUser.id,
+          message: `${currentUser.displayName} requested a Jobs Done confirmation`,
+          read: false,
+        });
+      if (notifError) console.error("[JobsDone] notification insert failed:", notifError.message, notifError.code);
+
+      // Persist a system message so the request survives navigation
+      await sb
+        .from("messages")
+        .insert({
+          conversation_id: conversationId,
+          sender_id: currentUser.id,
+          text: "✅ Jobs Done requested — waiting for client confirmation",
+          message_type: "system",
+        });
     } catch (e) {
       console.error("[ChatScreen] handleRequestJobDone failed:", e);
     }
