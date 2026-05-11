@@ -436,6 +436,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION")
       ) {
         await hydrateProfile(session.user.id, session.user);
+        // Safety net for Google OAuth: after a fresh SIGNED_IN event the user may be
+        // sitting on the landing page (OAuth redirects back to the root URL).
+        // SET_AUTH already handles this via its screen transition, but dispatching an
+        // explicit NAVIGATE after profile hydration guarantees they reach the feed
+        // even if the screen state was updated before SET_AUTH ran.
+        if (event === "SIGNED_IN") {
+          dispatch({ type: "NAVIGATE", screen: "home" });
+        }
       }
     });
 
