@@ -156,12 +156,15 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
 
   async function handleRequestJobDone() {
     const conversationId = threadId || activeThread?.id || null;
-    const clientId = displayParticipant.id || participantId || null;
-    console.log("[JobsDone] values:", {
+    // Get the other participant's ID directly from the thread object — never rely on
+    // displayParticipant which may be a mock fallback, or activeThreadParticipantId which can be null.
+    const thread = state.threads.find((t) => t.id === (conversationId ?? state.activeThreadId));
+    const clientId = thread?.participant?.id ?? null;
+    console.log("[JobsDone] fixed values:", {
       skiller_id: currentUser?.id,
       client_id: clientId,
       conversation_id: conversationId,
-      thread: activeThread?.id,
+      thread_participant: thread?.participant?.id,
       activeThreadId: state.activeThreadId,
     });
     setJobStatus("requested");
