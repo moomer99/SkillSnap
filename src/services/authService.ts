@@ -12,27 +12,52 @@ export interface AuthResult {
 }
 
 function mapProfile(profile: Record<string, unknown>): User {
-  return {
-    id: profile.id as string,
-    username: profile.username as string,
-    displayName: profile.display_name as string,
-    avatarUrl: (profile.avatar_url as string | null) ?? undefined,
-    avatarGradient: profile.avatar_gradient as string,
-    avatarInitial: profile.avatar_initial as string,
-    location: (profile.location as string) ?? "",
-    lat: (profile.lat as number | null) ?? undefined,
-    lng: (profile.lng as number | null) ?? undefined,
-    locationPrivate: Boolean(profile.location_private ?? false),
-    bio: (profile.bio as string) ?? "",
-    skill: (profile.skill as User["skill"]) ?? null,
-    isVerified: Boolean(profile.is_verified),
-    jobsDone: Number(profile.jobs_done ?? 0),
-    happyPercent: Number(profile.happy_percent ?? 0),
-    followers: Number(profile.followers_count ?? 0),
-    following: Number(profile.following_count ?? 0),
-    postCount: Number(profile.post_count ?? 0),
-    isClient: Boolean(profile.is_client),
-  };
+  try {
+    return {
+      id: (profile.id as string) ?? "",
+      username: (profile.username as string) ?? "",
+      displayName: (profile.display_name as string) ?? "User",
+      avatarUrl: (profile.avatar_url as string | null) ?? undefined,
+      avatarGradient: (profile.avatar_gradient as string) ?? "linear-gradient(135deg, #6c47ff, #a78bfa)",
+      avatarInitial: (profile.avatar_initial as string) ?? "U",
+      location: (profile.location as string) ?? "",
+      lat: (profile.lat as number | null) ?? undefined,
+      lng: (profile.lng as number | null) ?? undefined,
+      locationPrivate: Boolean(profile.location_private ?? false),
+      bio: (profile.bio as string) ?? "",
+      skill: (profile.skill as User["skill"]) ?? null,
+      isVerified: Boolean(profile.is_verified ?? false),
+      jobsDone: Number(profile.jobs_done ?? 0),
+      happyPercent: Number(profile.happy_percent ?? 0),
+      followers: Number(profile.followers_count ?? 0),
+      following: Number(profile.following_count ?? 0),
+      postCount: Number(profile.post_count ?? 0),
+      isClient: Boolean(profile.is_client ?? false),
+    };
+  } catch (e) {
+    console.error("[mapProfile] failed to map profile:", e, profile);
+    return {
+      id: (profile.id as string) ?? "",
+      username: (profile.username as string) ?? "",
+      displayName: (profile.display_name as string) ?? "User",
+      avatarUrl: undefined,
+      avatarGradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+      avatarInitial: "U",
+      location: "",
+      lat: undefined,
+      lng: undefined,
+      locationPrivate: false,
+      bio: "",
+      skill: null,
+      isVerified: false,
+      jobsDone: 0,
+      happyPercent: 0,
+      followers: 0,
+      following: 0,
+      postCount: 0,
+      isClient: false,
+    };
+  }
 }
 
 async function fetchProfile(userId: string): Promise<User | null> {

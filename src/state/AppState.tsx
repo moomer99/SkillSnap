@@ -343,7 +343,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // hydrateProfile — fetches the profile row and dispatches SET_AUTH.
     // Falls back to ensureProfile (upsert) if the row doesn't exist yet,
     // which is the normal path for first-time Google OAuth login.
- async function hydrateProfile(userId: string, authUser: import("@supabase/supabase-js").User) {
+    async function hydrateProfile(userId: string, authUser: import("@supabase/supabase-js").User) {
       try {
         const { data, error: fetchErr } = await authSb
           .from("profiles")
@@ -351,33 +351,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
           .eq("id", userId)
           .single();
 
-        console.log("[AppState] hydrateProfile fetch result — data:", data, "error:", fetchErr?.message, "code:", fetchErr?.code);
+        console.log("[AppState] hydrateProfile fetch — data:", !!data, "error:", fetchErr?.message, "code:", fetchErr?.code);
 
         if (data) {
-          console.log("[AppState] profile found, dispatching SET_AUTH");
-          dispatch({ type: "SET_AUTH", user: mapProfile(data as Record<string, unknown>) });
+          console.log("[AppState] profile found, mapping and dispatching SET_AUTH");
+          const mappedUser = mapProfile(data as Record<string, unknown>);
+          console.log("[AppState] mapped user:", mappedUser.id, mappedUser.displayName);
+          dispatch({ type: "SET_AUTH", user: mappedUser });
           return;
         }
 
         // PGRST116 = no rows found — expected for new users, proceed to ensureProfile
         // Any other error code = real problem
         if (fetchErr && fetchErr.code !== "PGRST116") {
-          console.error("[AppState] unexpected profile fetch error:", fetchErr.message, fetchErr.code);
+          console.error("[AppState] unexpected fetch error:", fetchErr.message, fetchErr.code);
           dispatch({ type: "SET_AUTH_LOADING", loading: false });
           return;
         }
 
-        console.log("[AppState] no profile row found, creating via ensureProfile");
+        console.log("[AppState] no profile row, calling ensureProfile");
         const user = await ensureProfile(authUser);
         if (user) {
-          console.log("[AppState] profile created successfully");
+          console.log("[AppState] ensureProfile returned user:", user.id);
           dispatch({ type: "SET_AUTH", user });
         } else {
-          console.error("[AppState] ensureProfile failed to create profile");
+          console.error("[AppState] ensureProfile returned null");
           dispatch({ type: "SET_AUTH_LOADING", loading: false });
         }
       } catch (e) {
-        console.error("[AppState] hydrateProfile threw:", e);
+        console.error("[AppState] hydrateProfile CRASHED:", e);
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }
     }

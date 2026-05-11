@@ -4,7 +4,7 @@
 // Navigation is driven by AppState.screen
 // All screens receive onNavigate from here
 // ─────────────────────────────────────────────
-import { lazy, Suspense, useRef, useState, useEffect } from "react";
+import React, { lazy, Suspense, useRef, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Home, Compass, PlusCircle, MessageCircle, User, Settings, MoreHorizontal, HelpCircle, LogOut } from "lucide-react";
 import { AppProvider, useAppState } from "@/state/AppState";
@@ -405,12 +405,47 @@ function SkillSnapRouter() {
   );
 }
 
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: string }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: "" };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error: error.message };
+  }
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("[ErrorBoundary] caught:", error.message, info.componentStack);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100dvh", gap: "16px", padding: "24px", background: "#f8f7f5" }}>
+          <div style={{ fontSize: "18px", fontWeight: 700, color: "#1a1a1a" }}>Something went wrong</div>
+          <div style={{ fontSize: "13px", color: "#7a7570", maxWidth: "400px", textAlign: "center", wordBreak: "break-word" }}>{this.state.error}</div>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ padding: "10px 24px", borderRadius: "10px", background: "#6c47ff", color: "white", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 600 }}
+          >
+            Reload
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function SkillSnapApp() {
   return (
-    <AppProvider>
-      <ToastProvider>
-        <SkillSnapRouter />
-      </ToastProvider>
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <ToastProvider>
+          <SkillSnapRouter />
+        </ToastProvider>
+      </AppProvider>
+    </ErrorBoundary>
   );
 }
