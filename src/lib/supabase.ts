@@ -1,4 +1,3 @@
-import { createBrowserClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,36 +13,29 @@ function isOrchidsSandbox(): boolean {
   );
 }
 
-// Singleton instances — one per client type.
-// createBrowserClient as singleton is correct for session persistence.
-// Multiple instances cause lock conflicts and session reading failures on return visits.
-let _browserClient: SupabaseClient | null = null;
-let _proxyClient: SupabaseClient | null = null;
-
-function getBrowserClient(): SupabaseClient {
-  if (!_browserClient) {
-    _browserClient = createBrowserClient(REAL_URL, ANON_KEY) as unknown as SupabaseClient;
-  }
-  return _browserClient;
-}
-
-function getProxyClient(): SupabaseClient {
-  if (!_proxyClient) {
-    const url = `${window.location.origin}/api/proxy`;
-    _proxyClient = createClient(url, ANON_KEY) as unknown as SupabaseClient;
-  }
-  return _proxyClient;
-}
+// Single singleton client for the entire app lifetime.
+// Uses standard createClient (localStorage-based) — no Web Lock API,
+// no cookie conflicts. The server-side callback route handles PKCE exchange.
+let _client: SupabaseClient | null = null;
 
 export function getSupabase(): SupabaseClient {
-  if (typeof window === "undefined") {
-    // SSR — return a plain client, never used for auth
-    return createClient(REAL_URL, ANON_KEY) as unknown as SupabaseClient;
+  if (!_client) {
+    const url =
+      typeof window !== "undefined" && isOrchidsSandbox()
+        ? `${window.location.origin}/api/proxy`
+        : REAL_URL;
+    _client = createClient(url, ANON_KEY, {
+      auth: {
+        persistSession: true,
+        storageKey: "sb-skillsnap-auth-token",
+        storage: typeof window !== "undefined" ? window.localStorage : undefined,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: "pkce",
+      },
+    });
   }
-  if (isOrchidsSandbox()) {
-    return getProxyClient();
-  }
-  return getBrowserClient();
+  return _client;
 }
 
 export function getAuthSupabase(): SupabaseClient {
@@ -55,6 +47,5 @@ export function getRealtimeSupabase(): SupabaseClient {
 }
 
 export function resetSupabaseClient() {
-  _browserClient = null;
-  _proxyClient = null;
+  _client = null;
 }
