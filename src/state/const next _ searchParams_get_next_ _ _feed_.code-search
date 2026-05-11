@@ -1,0 +1,9 @@
+# Query: const next = searchParams.get("next") ?? "/feed";
+# ContextLines: 1
+
+1 result - 1 file
+
+src/app/auth/callback/route.ts:
+  16    const code = searchParams.get("code");
+  17: const next = searchParams.get("next") ?? "/";
+  18    const error = searchParams.get("error");
