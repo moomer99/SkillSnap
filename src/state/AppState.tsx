@@ -109,7 +109,7 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         isAuthenticated: true,
         showAuthPrompt: false,
         authLoading: false,
-        screen: (state.screen === "auth" || state.screen === "onboarding" || state.screen === "landing") ? "home" : state.screen,
+        screen: "home",
       };
     case "CLEAR_AUTH":
       return { ...initialState, authLoading: false };
