@@ -130,28 +130,32 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
     });
   }, [threadId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // On every chat open, fetch any pending jobs_done row for this conversation and restore
-  // the card state. jobStatus resets to "idle" on mount, so this always runs fresh.
+  // On every chat open, fetch the most recent jobs_done row for this conversation and
+  // restore the correct card state. Priority: completed > pending > idle.
   useEffect(() => {
     if (!SUPABASE_CONFIGURED || !threadId || !currentUser?.id) return;
 
-    const userId = currentUser.id;
     import("@/lib/supabase").then(({ getAuthSupabase }) => {
       getAuthSupabase()
         .from("jobs_done")
-        .select("id, skiller_id, client_id")
+        .select("id, skiller_id, client_id, skiller_confirmed, client_confirmed, verified_at")
         .eq("conversation_id", threadId)
         .eq("skiller_confirmed", true)
-        .eq("client_confirmed", false)
-        .is("verified_at", null)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle()
         .then(({ data }) => {
           if (!data) return;
           setActiveJobId(data.id);
-          setJobStatus("requested");
-          console.log("[JobsDone] restored pending card for", data.skiller_id === userId ? "skiller" : "client");
+          if (data.client_confirmed && data.verified_at) {
+            // Completed — show the confirmation card for both parties
+            setJobStatus("confirmed");
+            console.log("[JobsDone] restored completed card");
+          } else {
+            // Pending — skiller waiting for client to confirm/decline
+            setJobStatus("requested");
+            console.log("[JobsDone] restored pending card");
+          }
         });
     });
   }, [threadId, currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
