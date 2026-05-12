@@ -105,6 +105,31 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
     setJobStatus("requested");
   }, [pendingRequest, isSkiller]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Fetch conversation created_at from DB and set threadStartedAt if not already present.
+  // This ensures the Jobs Done unlock timer reflects the actual conversation age, not just
+  // the moment the first message was sent in the current session.
+  useEffect(() => {
+    if (!SUPABASE_CONFIGURED || !threadId) return;
+    if (activeThread?.startedAt) return; // already set
+
+    import("@/lib/supabase").then(({ getAuthSupabase }) => {
+      getAuthSupabase()
+        .from("conversations")
+        .select("created_at")
+        .eq("id", threadId)
+        .single()
+        .then(({ data }) => {
+          if (data?.created_at) {
+            dispatch({
+              type: "SET_THREAD_STARTED_AT",
+              threadId,
+              startedAt: data.created_at as string,
+            });
+          }
+        });
+    });
+  }, [threadId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Fix 2: On every chat open, fetch any pending jobs_done row for this conversation.
   // This makes the card persist across navigation without relying on message table inserts.
   useEffect(() => {
@@ -146,7 +171,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const threadStartedAt = activeThread?.startedAt;
   const hoursIn = threadStartedAt ? hoursElapsed(threadStartedAt) : 0;
   const minHours = JOBS_DONE_CONFIG.MIN_CONVERSATION_HOURS;
-  const hoursRemaining = Math.max(0, Math.ceil(24 - hoursIn));
+  const hoursRemaining = Math.max(0, Math.ceil(minHours - hoursIn));
 
   const canRequestJobDone = hasMessages && hoursIn >= minHours;
   const lockedLabel = `Available in ~${hoursRemaining}h · conversation must be 24h old`;
