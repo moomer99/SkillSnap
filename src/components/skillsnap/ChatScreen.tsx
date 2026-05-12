@@ -130,15 +130,15 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
     });
   }, [threadId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Fix 2: On every chat open, fetch any pending jobs_done row for this conversation.
-  // This makes the card persist across navigation without relying on message table inserts.
+  // On every chat open, fetch any pending jobs_done row for this conversation and restore
+  // the card state. jobStatus resets to "idle" on mount, so this always runs fresh.
   useEffect(() => {
-    if (!SUPABASE_CONFIGURED || !threadId || !currentUser) return;
-    if (jobStatus !== "idle") return; // don't clobber an in-progress flow
+    if (!SUPABASE_CONFIGURED || !threadId || !currentUser?.id) return;
 
+    const userId = currentUser.id;
     import("@/lib/supabase").then(({ getAuthSupabase }) => {
-      const sb = getAuthSupabase();
-      sb.from("jobs_done")
+      getAuthSupabase()
+        .from("jobs_done")
         .select("id, skiller_id, client_id")
         .eq("conversation_id", threadId)
         .eq("skiller_confirmed", true)
@@ -150,14 +150,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         .then(({ data }) => {
           if (!data) return;
           setActiveJobId(data.id);
-          // Show the correct card depending on role
-          if (data.skiller_id === currentUser.id) {
-            // Current user is the pro — show "waiting for confirmation"
-            setJobStatus("requested");
-          } else if (data.client_id === currentUser.id) {
-            // Current user is the client — show confirm/decline
-            setJobStatus("requested");
-          }
+          setJobStatus("requested");
+          console.log("[JobsDone] restored pending card for", data.skiller_id === userId ? "skiller" : "client");
         });
     });
   }, [threadId, currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
