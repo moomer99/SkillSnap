@@ -40,25 +40,59 @@ function useTrendingSkills() {
 }
 
 const SKILL_COLORS: Record<string, string> = {
-  "Barber":        "#fde68a",
-  "Makeup Artist": "#fbcfe8",
-  "Nail Tech":     "#fce7f3",
-  "Tiler":         "#d1fae5",
-  "Cleaning":      "#bfdbfe",
-  "Cleaner":       "#bfdbfe",
-  "Fitness / PT":  "#fed7aa",
-  "Plumber":       "#c7d2fe",
-  "Electrician":   "#fef08a",
-  "Landscaping":   "#bbf7d0",
-  "Nails":         "#fce7f3",
-  "Carpenter":     "#fef3c7",
-  "Mechanic":      "#e0f2fe",
-  "Mover":         "#ede9fe",
+  "Barber":             "#fde68a",
+  "Makeup Artist":      "#fbcfe8",
+  "Nail Tech":          "#fce7f3",
+  "Tiler":              "#d1fae5",
+  "Cleaning":           "#bfdbfe",
+  "Cleaner":            "#bfdbfe",
+  "Fitness / PT":       "#fed7aa",
+  "Plumber":            "#c7d2fe",
+  "Electrician":        "#fef08a",
+  "Landscaping":        "#bbf7d0",
+  "Nails":              "#fce7f3",
+  "Carpenter":          "#fef3c7",
+  "Mechanic":           "#e0f2fe",
+  "Mover":              "#ede9fe",
+  "Photographer":       "#fce7f3",
+  "Videographer":       "#dbeafe",
+  "Singer":             "#fde68a",
+  "Musician":           "#fef3c7",
+  "DJ":                 "#ede9fe",
+  "Personal Trainer":   "#fed7aa",
+  "Chef":               "#ffedd5",
+  "Restaurant":         "#ffedd5",
+  "Café":               "#fef3c7",
+  "Tattoo Artist":      "#e0e7ff",
+  "Florist":            "#d1fae5",
+  "Event Planner":      "#fce7f3",
+  "Wedding Stylist":    "#fbcfe8",
+  "Interior Designer":  "#e0f2fe",
+  "Graphic Designer":   "#dbeafe",
+  "Web Developer":      "#c7d2fe",
+  "Tutor":              "#fef08a",
+  "Life Coach":         "#d1fae5",
+  "Yoga Instructor":    "#d1fae5",
+  "Personal Shopper":   "#fce7f3",
+  "Pet Groomer":        "#fde68a",
+  "Landscaper":         "#bbf7d0",
+  "Plasterer":          "#e0e7ff",
+  "Concreter":          "#f1f5f9",
+  "Roofer":             "#fef3c7",
+  "Welder":             "#e0f2fe",
+  "Automotive":         "#e0f2fe",
+  "Driving Instructor": "#fef08a",
+  "Painter":            "#dbeafe",
 };
 
 const FALLBACK_SKILLS = [
-  "Barber", "Cleaner", "Plumber", "Electrician",
-  "Carpenter", "Mechanic", "Nail Tech", "Makeup Artist", "Mover",
+  "Barber", "Cleaner", "Plumber", "Electrician", "Carpenter", "Mechanic",
+  "Nail Tech", "Makeup Artist", "Mover", "Painter", "Photographer", "Videographer",
+  "Singer", "Musician", "DJ", "Personal Trainer", "Chef", "Restaurant", "Café",
+  "Tattoo Artist", "Florist", "Event Planner", "Wedding Stylist", "Interior Designer",
+  "Graphic Designer", "Web Developer", "Tutor", "Life Coach", "Yoga Instructor",
+  "Personal Shopper", "Pet Groomer", "Landscaper", "Plasterer", "Concreter",
+  "Tiler", "Roofer", "Welder", "Automotive", "Driving Instructor",
 ];
 
 function skillColor(skill: string) {
@@ -144,7 +178,7 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
       {(() => {
         const liveSkillNames = trendingSkills.map(s => s.skill);
         const extra = FALLBACK_SKILLS.filter(s => !liveSkillNames.includes(s));
-        const displaySkills = [...liveSkillNames, ...extra].slice(0, 9);
+        const displaySkills = [...liveSkillNames, ...extra].slice(0, 20);
         return (
           <div className="rounded-2xl bg-white shadow-sm p-4">
             <h3 className="font-bold text-[#1a1a1a] text-sm mb-3">Trending Skills</h3>

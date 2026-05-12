@@ -158,7 +158,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
             style={{ background: "rgba(108,71,255,0.15)", border: "1px solid rgba(108,71,255,0.35)" }}>
             <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse" />
-            <span className="text-[11px] font-bold text-[#a78bfa] tracking-wider uppercase">Sydney's Skills Platform</span>
+            <span className="text-[11px] font-bold text-[#a78bfa] tracking-wider uppercase">Show Your Work. Get Discovered.</span>
           </div>
         </FadeIn>
 
@@ -173,7 +173,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
 
         <FadeIn delay={160}>
           <p className="text-[15px] leading-relaxed max-w-[280px] mb-8" style={{ color: "rgba(255,255,255,0.55)" }}>
-            Discover skilled barbers, tradies &amp; cleaners in Sydney — through real video portfolios.
+            Discover talented people near you — through real video portfolios. No reviews, no guessing. Just real work.
           </p>
         </FadeIn>
 
@@ -311,9 +311,9 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                     <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
                   </svg>
                 </div>
-                <h3 className="text-[18px] font-extrabold text-white mb-2">I'm a Skilled Pro</h3>
+                <h3 className="text-[18px] font-extrabold text-white mb-2">I'm a Creator or Pro</h3>
                 <p className="text-[13px] leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  Show your work, build your reputation, and get hired by clients in your suburb — without paying for ads.
+                  Show your work, build your reputation, and get discovered by people near you — without paying for ads.
                 </p>
                 <ul className="flex flex-col gap-2">
                   {["Upload video portfolios", "Appear in local discovery", "Get direct client messages", "Track jobs done & happy %"].map((f) => (
@@ -347,9 +347,9 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                   </svg>
                 </div>
-                <h3 className="text-[18px] font-extrabold text-white mb-2">I'm Looking to Hire</h3>
+                <h3 className="text-[18px] font-extrabold text-white mb-2">I'm Looking to Discover</h3>
                 <p className="text-[13px] leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  Watch real work before you book. Find trusted local pros by suburb with verified job histories.
+                  Watch real work before you reach out. Find talented people near you with verified track records.
                 </p>
                 <ul className="flex flex-col gap-2">
                   {["Browse video work samples", "Filter by your suburb", "See jobs done & ratings", "Message pros directly"].map((f) => (
@@ -389,7 +389,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
             </span>
           </h2>
           <p className="text-[14px] mb-8 max-w-[240px]" style={{ color: "rgba(255,255,255,0.45)" }}>
-            Free to join. No subscription. Sydney's skills community.
+            Free to join. No subscription. Australia's skills community.
           </p>
           <button
             onClick={goToAuth}

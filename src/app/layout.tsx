@@ -13,7 +13,7 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: "SkillSnap — Watch. Trust. Connect.",
-  description: "Discover skilled professionals through real video proof. No more guessing — watch the work.",
+  description: "Show your work and get discovered. SkillSnap lets creators, tradies, artists and business owners showcase real video proof of their talent — no reviews, just results.",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "SkillSnap — Watch. Trust. Connect.",
-    description: "Discover skilled professionals through real video proof. No more guessing — watch the work.",
+    description: "Show your work and get discovered. SkillSnap lets creators, tradies, artists and business owners showcase real video proof of their talent — no reviews, just results.",
     url: "https://skillsnap.com.au",
     siteName: "SkillSnap",
     images: [
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "SkillSnap — Watch. Trust. Connect.",
-    description: "Discover skilled professionals through real video proof. No more guessing — watch the work.",
+    description: "Show your work and get discovered. SkillSnap lets creators, tradies, artists and business owners showcase real video proof of their talent — no reviews, just results.",
     images: ["https://skillsnap.com.au/og-image.png"],
   },
 };
