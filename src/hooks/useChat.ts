@@ -60,9 +60,13 @@ export function useChat() {
     function fetchMessages() {
       messageService.getMessages(threadId).then((msgs) => {
         if (msgs.length > 0) {
-          // Merge strategy: DB is authoritative but preserves in-flight optimistic messages.
-          // Prevents messages disappearing when fetchMessages runs mid-send.
-          dispatch({ type: "MERGE_THREAD_MESSAGES", threadId, messages: msgs });
+          // Sort ascending by time so messages always appear oldest-first below the Jobs Done card.
+          const sorted = [...msgs].sort((a, b) => {
+            const ta = a.time ?? "";
+            const tb = b.time ?? "";
+            return ta < tb ? -1 : ta > tb ? 1 : 0;
+          });
+          dispatch({ type: "MERGE_THREAD_MESSAGES", threadId, messages: sorted });
         }
         setLoading(false);
       }).catch(() => {
@@ -95,11 +99,10 @@ export function useChat() {
     const pollInterval = setInterval(fetchMessages, 60000);
 
     return () => {
-      unsubRef.current?.();
-      unsubRef.current = null;
-      subscribedConvRef.current = null;
       document.removeEventListener("visibilitychange", handleVisibility);
       clearInterval(pollInterval);
+      // Do NOT unsubscribe or reset subscribedConvRef here —
+      // subscription persists across re-renders for the same conversation
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [threadId]);
