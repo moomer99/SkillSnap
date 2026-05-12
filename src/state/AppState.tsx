@@ -367,7 +367,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Falls back to ensureProfile (upsert) if the row doesn't exist yet,
     // which is the normal path for first-time Google OAuth login.
     async function hydrateProfile(userId: string, authUser: import("@supabase/supabase-js").User) {
+      let fallbackFired = false;
       const timeoutId = setTimeout(() => {
+        fallbackFired = true;
         console.error("[AppState] hydrateProfile timed out — using session fallback");
         const fallbackUser = mapProfile({
           id: authUser.id,
@@ -380,6 +382,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           happy_percent: 0,
         });
         dispatch({ type: "SET_AUTH", user: fallbackUser });
+        // Fetch continues in background — SET_AUTH will fire again with full profile on completion
       }, 5000);
 
       try {
@@ -391,31 +394,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
           .single();
 
         clearTimeout(timeoutId);
-        console.log("[AppState] hydrateProfile fetch complete", !!data, fetchErr?.message);
+        console.log("[AppState] hydrateProfile fetch complete", !!data, fetchErr?.message, fallbackFired ? "(replacing fallback)" : "");
 
         if (data) {
-          // Always dispatch full profile — overwrites fallback if timeout already fired
           const mappedUser = mapProfile(data as Record<string, unknown>);
           dispatch({ type: "SET_AUTH", user: mappedUser });
           return;
         }
 
         if (fetchErr && fetchErr.code !== "PGRST116") {
-          // Don't overwrite SET_AUTH with a loading:false if fallback already fired
           console.error("[AppState] profile fetch error:", fetchErr.message);
+          if (!fallbackFired) dispatch({ type: "SET_AUTH_LOADING", loading: false });
           return;
         }
 
         const user = await ensureProfile(authUser);
         if (user) {
           dispatch({ type: "SET_AUTH", user });
-        } else {
+        } else if (!fallbackFired) {
           dispatch({ type: "SET_AUTH_LOADING", loading: false });
         }
       } catch (e) {
         clearTimeout(timeoutId);
         console.error("[AppState] hydrateProfile CRASHED:", e);
-        dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        if (!fallbackFired) dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }
     }
 
