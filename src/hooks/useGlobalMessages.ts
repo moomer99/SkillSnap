@@ -63,9 +63,13 @@ export function useGlobalMessages() {
     if (subscribedRef.current) return;
     subscribedRef.current = true;
 
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     const unsubConv = messageService.subscribeToConversationUpdates(
       threadIdsRef,
-      () => { loadThreads(); }
+      () => {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => { loadThreads(); }, 2000);
+      }
     );
 
     const unsubMsgs = messageService.subscribeToAllMessages(
@@ -90,19 +94,8 @@ export function useGlobalMessages() {
       }
     );
 
-    function handleVisibility() {
-      if (document.visibilityState === "hidden") {
-        unsubConv?.();
-        unsubMsgs?.();
-        subscribedRef.current = false;
-      } else if (document.visibilityState === "visible") {
-        subscribedRef.current = false; // force re-subscribe
-      }
-    }
-    document.addEventListener("visibilitychange", handleVisibility);
-
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibility);
+      if (debounceTimer) clearTimeout(debounceTimer);
       subscribedRef.current = false;
       unsubConv();
       unsubMsgs();

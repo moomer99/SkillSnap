@@ -39,10 +39,16 @@ export function useMessages() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Refresh thread list whenever MessagesScreen mounts
+  // Seed mock threads in demo mode only — real threads come from useGlobalMessages
   useEffect(() => {
-    loadThreads();
-  }, [loadThreads]);
+    if (!SUPABASE_CONFIGURED) {
+      dispatch({ type: "SET_THREADS", threads: MOCK_THREADS });
+      setThreadsLoading(false);
+    } else {
+      setThreadsLoading(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const openThread = useCallback(
     (threadId: string) => {
