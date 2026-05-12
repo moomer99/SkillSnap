@@ -31,6 +31,7 @@ export function useGlobalMessages() {
     try {
       const threads = await messageService.getThreads();
       dispatch({ type: "SET_THREADS", threads });
+      dispatch({ type: "CLEAR_ALL_THREAD_UNREAD" });
       threadIdsRef.current = threads.map((t) => t.id);
     } catch (err) {
       console.error("[useGlobalMessages] loadThreads error:", err);
