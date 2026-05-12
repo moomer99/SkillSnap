@@ -96,41 +96,49 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
 
   const avatarInitial = displayName.charAt(0).toUpperCase();
 
-  console.log("[ensureProfile] attempting upsert for user:", authUser.id, "email:", authUser.email);
+  console.log("[ensureProfile] checking for existing profile:", authUser.id);
 
-  // Check if a profile row already exists — if so, never overwrite display_name or avatar_url
-  // (those are user-editable fields set on first login or via Edit Profile).
+  // Check if a profile row already exists.
   const { data: existing } = await sb
     .from("profiles")
-    .select("id, avatar_url, display_name")
+    .select("id")
     .eq("id", authUser.id)
-    .single();
+    .maybeSingle();
 
-  const upsertData: Record<string, unknown> = {
-    id: authUser.id,
-    username,
-    email: authUser.email ?? null,
-    avatar_initial: avatarInitial,
-    avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
-    // Only set on first login — never overwrite user-edited values
-    ...(!existing ? { display_name: displayName, avatar_url: avatarUrl } : {}),
-  };
-
-  const { data, error } = await sb
-    .from("profiles")
-    .upsert(upsertData, { onConflict: "id", ignoreDuplicates: false })
-    .select("*")
-    .single();
-
-  console.log("[ensureProfile] upsert result — data:", data, "error:", error?.message, "code:", error?.code);
-
-  if (error || !data) {
-    console.error("[ensureProfile] upsert failed:", error?.message, error?.code);
-    // Upsert failed — try plain fetch (row may already exist from DB trigger)
+  if (existing) {
+    // Profile exists — only update non-user-editable fields (email, username slug).
+    // Never touch display_name or avatar_url after first creation.
+    await sb
+      .from("profiles")
+      .update({ email: authUser.email ?? null })
+      .eq("id", authUser.id);
     return fetchProfile(authUser.id);
   }
 
-  console.log("[ensureProfile] upsert succeeded for", authUser.id);
+  // First-ever login — create the profile with display_name and avatar_url.
+  const { data, error } = await sb
+    .from("profiles")
+    .insert({
+      id: authUser.id,
+      username,
+      email: authUser.email ?? null,
+      display_name: displayName,
+      avatar_url: avatarUrl,
+      avatar_initial: avatarInitial,
+      avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+    })
+    .select("*")
+    .single();
+
+  console.log("[ensureProfile] insert result — data:", !!data, "error:", error?.message, "code:", error?.code);
+
+  if (error || !data) {
+    console.error("[ensureProfile] insert failed:", error?.message, error?.code);
+    // Row may have been created by a DB trigger in the meantime — just fetch it.
+    return fetchProfile(authUser.id);
+  }
+
+  console.log("[ensureProfile] new profile created for", authUser.id);
   return mapProfile(data as Record<string, unknown>);
 }
 
