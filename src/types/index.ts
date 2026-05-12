@@ -5,18 +5,8 @@
 
 export type ProfileVariant = "own" | "client";
 
-export type SkillCategory =
-  | "Barber"
-  | "Makeup Artist"
-  | "Tiler"
-  | "Cleaning"
-  | "Fitness / PT"
-  | "Plumber"
-  | "Electrician"
-  | "Landscaping"
-  | "Nails"
-  | "Other"
-  | (string & {});
+import type { SKILL_CATEGORIES } from "@/constants/config";
+export type SkillCategory = (typeof SKILL_CATEGORIES)[number] | (string & {});
 
 // ── User / Profile ──────────────────────────
 export interface User {

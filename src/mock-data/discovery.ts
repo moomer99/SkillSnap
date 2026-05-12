@@ -13,5 +13,15 @@ export const MOCK_DISCOVERY_PINS: DiscoveryPin[] = [
   { id: "pin_6", userId: "user_leo",    name: "Leo P.",    skill: "Barber",       color: "#6c47ff", rating: 4.5, jobsDone: 12, x: "62%", y: "68%" },
 ];
 
-export const DISCOVERY_FILTER_CHIPS = ["All", "Nearby", "Top Rated", "Barber", "Cleaning", "Fitness", "Tiler", "Beauty"] as const;
+export const DISCOVERY_FILTER_CHIPS = [
+  "All", "Nearby", "Top Rated",
+  "Automotive", "Barber", "Carpenter", "Chef", "Cleaner", "Concreter",
+  "Driving Instructor", "Electrician", "Event Planner", "Florist",
+  "Graphic Designer", "Interior Designer", "Landscaper", "Life Coach",
+  "Makeup Artist", "Mechanic", "Mover", "Musician", "Nail Tech", "Painter",
+  "Personal Trainer", "Pet Groomer", "DJ", "Photographer", "Plasterer",
+  "Plumber", "Roofer", "Singer", "Tattoo Artist", "Tiler", "Tutor",
+  "Videographer", "Web Developer", "Wedding Stylist", "Welder",
+  "Yoga Instructor", "Other",
+] as const;
 export type DiscoveryFilter = (typeof DISCOVERY_FILTER_CHIPS)[number];
