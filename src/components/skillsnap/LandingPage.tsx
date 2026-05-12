@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import type { Screen } from "@/types";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
 import { getAuthSupabase } from "@/lib/supabase";
@@ -42,85 +41,195 @@ function FadeIn({ children, delay = 0, className = "" }: { children: React.React
   );
 }
 
-// Lazy video mock card — uses CSS gradient as placeholder (no real image needed)
-function VideoCard({ gradient, name, skill, jobs, delay }: {
-  gradient: string; name: string; skill: string; jobs: number; delay?: number;
-}) {
+interface FeaturedCard {
+  // identity
+  name: string;
+  skill: string;
+  jobs: number;
+  // visuals — real or fallback
+  avatarUrl: string | null;
+  avatarGradient: string;
+  avatarInitial: string;
+  // post media — real or fallback
+  thumbnailUrl: string | null;
+  mediaUrl: string | null;
+  postType: "video" | "photo";
+  cardGradient: string; // shown when no thumbnail
+}
+
+const MOCK_CARDS: FeaturedCard[] = [
+  { name: "Marcus T.", skill: "✂️ Barber",  jobs: 142, avatarUrl: null, avatarGradient: "linear-gradient(160deg,#667eea,#764ba2)", avatarInitial: "M", thumbnailUrl: null, mediaUrl: null, postType: "video", cardGradient: "linear-gradient(160deg,#667eea,#764ba2)" },
+  { name: "Priya K.",  skill: "💄 Makeup",  jobs: 89,  avatarUrl: null, avatarGradient: "linear-gradient(160deg,#f093fb,#f5576c)", avatarInitial: "P", thumbnailUrl: null, mediaUrl: null, postType: "video", cardGradient: "linear-gradient(160deg,#f093fb,#f5576c)" },
+  { name: "Jake M.",   skill: "🧱 Tiler",   jobs: 211, avatarUrl: null, avatarGradient: "linear-gradient(160deg,#4facfe,#00c6ff)", avatarInitial: "J", thumbnailUrl: null, mediaUrl: null, postType: "video", cardGradient: "linear-gradient(160deg,#4facfe,#00c6ff)" },
+];
+
+const FALLBACK_GRADIENTS = [
+  "linear-gradient(160deg,#667eea,#764ba2)",
+  "linear-gradient(160deg,#f093fb,#f5576c)",
+  "linear-gradient(160deg,#4facfe,#00c6ff)",
+];
+
+function useRealUsers(): FeaturedCard[] {
+  const [cards, setCards] = useState<FeaturedCard[]>(MOCK_CARDS);
+
+  useEffect(() => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl || supabaseUrl.includes("your-project-ref")) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        // Fetch top Pro users who have at least one post, ordered by jobs_done desc.
+        // We join from posts so we only get users who have posted, and grab their
+        // most recent post thumbnail in the same query via the profiles join.
+        const sb = getAuthSupabase();
+
+        // Step 1: top 3 pro profiles with posts, ordered by jobs_done desc
+        const { data: profiles, error: profErr } = await sb
+          .from("profiles")
+          .select("id, display_name, skill, jobs_done, avatar_url, avatar_gradient, avatar_initial")
+          .eq("role", "pro")
+          .not("skill", "is", null)
+          .order("jobs_done", { ascending: false })
+          .limit(10); // fetch more than 3 so we can filter to those with posts
+
+        if (cancelled) return;
+        if (profErr) {
+          console.error("[LandingPage] profiles query failed:", profErr.message);
+          return;
+        }
+        if (!profiles || profiles.length === 0) return;
+
+        // Step 2: for each profile, fetch their most recent post thumbnail
+        const profileIds = profiles.map((p: Record<string, unknown>) => p.id as string);
+        const { data: posts, error: postsErr } = await sb
+          .from("posts")
+          .select("author_id, type, thumbnail_url, thumbnail_gradient, media_url")
+          .in("author_id", profileIds)
+          .order("created_at", { ascending: false });
+
+        if (cancelled) return;
+        if (postsErr) {
+          console.error("[LandingPage] posts query failed:", postsErr.message);
+          return;
+        }
+
+        // Build a map: authorId → most recent post (first occurrence since sorted desc)
+        const latestPost: Record<string, { type: string; thumbnail_url: string | null; thumbnail_gradient: string | null; media_url: string | null }> = {};
+        for (const post of (posts ?? []) as Array<{ author_id: string; type: string; thumbnail_url: string | null; thumbnail_gradient: string | null; media_url: string | null }>) {
+          if (!latestPost[post.author_id]) latestPost[post.author_id] = post;
+        }
+
+        // Keep only profiles that have at least one post, take top 3
+        const featured = (profiles as Array<{ id: string; display_name: string; skill: string | null; jobs_done: number; avatar_url: string | null; avatar_gradient: string | null; avatar_initial: string | null }>)
+          .filter((p) => !!latestPost[p.id])
+          .slice(0, 3);
+
+        if (featured.length === 0) return;
+
+        const realCards: FeaturedCard[] = featured.map((p, i) => {
+          const post = latestPost[p.id];
+          return {
+            name: p.display_name ?? "Pro",
+            skill: p.skill ?? "Skilled Pro",
+            jobs: p.jobs_done ?? 0,
+            avatarUrl: p.avatar_url ?? null,
+            avatarGradient: p.avatar_gradient ?? FALLBACK_GRADIENTS[i % FALLBACK_GRADIENTS.length],
+            avatarInitial: p.avatar_initial ?? (p.display_name?.[0]?.toUpperCase() ?? "P"),
+            thumbnailUrl: post.thumbnail_url ?? null,
+            mediaUrl: post.media_url ?? null,
+            postType: (post.type === "photo" ? "photo" : "video") as "video" | "photo",
+            cardGradient: post.thumbnail_gradient ?? FALLBACK_GRADIENTS[i % FALLBACK_GRADIENTS.length],
+          };
+        });
+
+        // Fill any remaining slots with mock fallbacks
+        const merged = [
+          ...realCards,
+          ...MOCK_CARDS.slice(realCards.length),
+        ].slice(0, 3);
+
+        setCards(merged);
+      } catch (e) {
+        console.error("[LandingPage] featured profiles fetch failed:", e);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, []);
+
+  return cards;
+}
+
+function VideoCard({ card, delay }: { card: FeaturedCard; delay?: number }) {
   const { ref, visible } = useFadeIn();
+  const hasThumbnail = !!card.thumbnailUrl;
+
   return (
     <div
       ref={ref}
       className="relative flex-shrink-0 rounded-2xl overflow-hidden shadow-2xl"
       style={{
         width: 136, height: 196,
-        background: gradient,
+        background: card.cardGradient,
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0) scale(1)" : "translateY(20px) scale(0.96)",
         transition: `opacity 0.6s ease ${delay ?? 0}ms, transform 0.6s ease ${delay ?? 0}ms`,
         contentVisibility: "auto",
       } as React.CSSProperties}
     >
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-11 h-11 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(255,255,255,0.22)", backdropFilter: "blur(6px)", border: "1.5px solid rgba(255,255,255,0.35)" }}>
-          <svg width="14" height="16" viewBox="0 0 14 16" fill="white"><path d="M1 1l12 7-12 7V1z"/></svg>
+      {/* Real post thumbnail */}
+      {hasThumbnail && (
+        <img
+          src={card.thumbnailUrl!}
+          alt={card.name}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+        />
+      )}
+
+      {/* Play button — always shown for video, hidden for photo */}
+      {card.postType === "video" && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-11 h-11 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(255,255,255,0.22)", backdropFilter: "blur(6px)", border: "1.5px solid rgba(255,255,255,0.35)" }}>
+            <svg width="14" height="16" viewBox="0 0 14 16" fill="white"><path d="M1 1l12 7-12 7V1z"/></svg>
+          </div>
         </div>
-      </div>
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.78) 100%)" }} />
+      )}
+
+      {/* Gradient scrim */}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.82) 100%)" }} />
+
+      {/* Avatar + name row */}
       <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
-        <p className="text-white font-bold text-[12px] leading-tight">{name}</p>
-        <p className="text-white/65 text-[10px] mt-0.5">{skill}</p>
+        <div className="flex items-center gap-1.5 mb-1">
+          {card.avatarUrl ? (
+            <img
+              src={card.avatarUrl}
+              alt={card.name}
+              className="w-5 h-5 rounded-full object-cover border border-white/30 flex-shrink-0"
+              loading="lazy"
+            />
+          ) : (
+            <div
+              className="w-5 h-5 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 border border-white/30"
+              style={{ fontSize: 8, background: card.avatarGradient }}
+            >
+              {card.avatarInitial}
+            </div>
+          )}
+          <p className="text-white font-bold text-[12px] leading-tight truncate">{card.name}</p>
+        </div>
+        <p className="text-white/65 text-[10px] mt-0.5">{card.skill}</p>
         <div className="flex items-center gap-1.5 mt-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-          <span className="text-white/60 text-[9px] font-semibold">{jobs} jobs</span>
+          <span className="text-white/60 text-[9px] font-semibold">{card.jobs} jobs</span>
         </div>
       </div>
     </div>
   );
-}
-
-const MOCK_CARDS = [
-  { gradient: "linear-gradient(160deg,#667eea,#764ba2)", name: "Marcus T.", skill: "✂️ Barber", jobs: 142 },
-  { gradient: "linear-gradient(160deg,#f093fb,#f5576c)", name: "Priya K.", skill: "💄 Makeup", jobs: 89 },
-  { gradient: "linear-gradient(160deg,#4facfe,#00c6ff)", name: "Jake M.", skill: "🧱 Tiler", jobs: 211 },
-];
-
-const CARD_GRADIENTS = [
-  "linear-gradient(160deg,#667eea,#764ba2)",
-  "linear-gradient(160deg,#f093fb,#f5576c)",
-  "linear-gradient(160deg,#4facfe,#00c6ff)",
-];
-
-function useRealUsers() {
-  const [cards, setCards] = useState(MOCK_CARDS);
-  useEffect(() => {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (!supabaseUrl || supabaseUrl.includes("your-project-ref")) return;
-    let cancelled = false;
-    (async () => {
-      const { data, error } = await getAuthSupabase()
-        .from("profiles")
-        .select("display_name, skill, jobs_done")
-        .not("skill", "is", null)
-        .gt("jobs_done", 0)
-        .order("created_at", { ascending: false })
-        .limit(3);
-      if (cancelled) return;
-      if (error) {
-        console.error("[LandingPage] featured profiles query failed:", error.message, error.code);
-        return;
-      }
-      if (!data || data.length === 0) return;
-      setCards(data.map((u, i) => ({
-        gradient: CARD_GRADIENTS[i % CARD_GRADIENTS.length],
-        name: u.display_name ?? "Pro",
-        skill: u.skill ?? "Skilled Pro",
-        jobs: u.jobs_done ?? 0,
-      })));
-    })();
-    return () => { cancelled = true; };
-  }, []);
-  return cards;
 }
 
 export default function LandingPage({ onNavigate }: LandingPageProps) {
@@ -203,7 +312,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         <FadeIn delay={320} className="w-full mt-10">
           <div className="flex gap-3 justify-center overflow-x-auto no-scrollbar pb-2 px-2">
             {proCards.map((c, i) => (
-              <VideoCard key={i} gradient={c.gradient} name={c.name} skill={c.skill} jobs={c.jobs} delay={i * 80} />
+              <VideoCard key={i} card={c} delay={i * 80} />
             ))}
           </div>
         </FadeIn>
