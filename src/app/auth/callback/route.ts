@@ -43,12 +43,20 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
     if (exchangeError) {
       console.error("[auth/callback] exchangeCodeForSession failed:", exchangeError.message);
       return NextResponse.redirect(
         `${origin}/?auth_error=1&reason=${encodeURIComponent(exchangeError.message)}`
       );
+    }
+
+    if (data.session) {
+      const isRecovery = data.user?.recovery_sent_at != null;
+      if (isRecovery) {
+        console.log("[auth/callback] recovery session detected, redirecting to reset-password");
+        return NextResponse.redirect(`${origin}/?type=recovery`);
+      }
     }
 
     console.log("[auth/callback] PKCE exchange succeeded, redirecting to", next);

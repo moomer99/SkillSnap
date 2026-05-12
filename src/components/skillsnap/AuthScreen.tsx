@@ -92,8 +92,8 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
     try {
       const { getAuthSupabase } = await import("@/lib/supabase");
       const redirectTo = typeof window !== "undefined"
-        ? `${window.location.origin}/?type=recovery`
-        : "/?type=recovery";
+        ? `${window.location.origin}/auth/callback`
+        : "/auth/callback";
       const { error: err } = await getAuthSupabase().auth.resetPasswordForEmail(forgotEmail.trim(), { redirectTo });
       if (err) { setForgotError(err.message); return; }
       setForgotSent(true);
