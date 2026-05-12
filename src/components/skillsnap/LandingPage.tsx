@@ -58,9 +58,9 @@ interface FeaturedCard {
 }
 
 const MOCK_CARDS: FeaturedCard[] = [
-  { name: "Marcus T.", skill: "✂️ Barber",  jobs: 142, avatarUrl: null, avatarGradient: "linear-gradient(160deg,#667eea,#764ba2)", avatarInitial: "M", thumbnailUrl: null, mediaUrl: null, postType: "video", cardGradient: "linear-gradient(160deg,#667eea,#764ba2)" },
-  { name: "Priya K.",  skill: "💄 Makeup",  jobs: 89,  avatarUrl: null, avatarGradient: "linear-gradient(160deg,#f093fb,#f5576c)", avatarInitial: "P", thumbnailUrl: null, mediaUrl: null, postType: "video", cardGradient: "linear-gradient(160deg,#f093fb,#f5576c)" },
-  { name: "Jake M.",   skill: "🧱 Tiler",   jobs: 211, avatarUrl: null, avatarGradient: "linear-gradient(160deg,#4facfe,#00c6ff)", avatarInitial: "J", thumbnailUrl: null, mediaUrl: null, postType: "video", cardGradient: "linear-gradient(160deg,#4facfe,#00c6ff)" },
+  { name: "Marcus T.", skill: "✂️ Barber",  jobs: 142, avatarUrl: null, avatarGradient: "linear-gradient(160deg,#667eea,#764ba2)", avatarInitial: "M", thumbnailUrl: null,                    mediaUrl: null, postType: "video", cardGradient: "linear-gradient(160deg,#667eea,#764ba2)" },
+  { name: "Priya K.",  skill: "💄 Makeup",  jobs: 2,   avatarUrl: null, avatarGradient: "linear-gradient(160deg,#f093fb,#f5576c)", avatarInitial: "P", thumbnailUrl: "/landing-priya.png", mediaUrl: null, postType: "photo", cardGradient: "linear-gradient(160deg,#f093fb,#f5576c)" },
+  { name: "Jake M.",   skill: "🧱 Tiler",   jobs: 5,   avatarUrl: null, avatarGradient: "linear-gradient(160deg,#4facfe,#00c6ff)", avatarInitial: "J", thumbnailUrl: "/landing-jake.png",  mediaUrl: null, postType: "photo", cardGradient: "linear-gradient(160deg,#4facfe,#00c6ff)" },
 ];
 
 const FALLBACK_GRADIENTS = [
