@@ -66,7 +66,7 @@ export function useFeed() {
       .catch(() => {
         dispatch({ type: "SET_FEED_LOADING", loading: false });
       });
-  }, [dispatch, state.feedVersion, location?.lat, location?.lng, radiusKm]);
+  }, [dispatch, state.feedVersion, state.currentUser?.id, location?.lat, location?.lng, radiusKm]);
 
   // Re-fetch when location/radius changes after initial mount
   const mountedRef = useRef(false);
