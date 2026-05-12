@@ -367,57 +367,48 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Falls back to ensureProfile (upsert) if the row doesn't exist yet,
     // which is the normal path for first-time Google OAuth login.
     async function hydrateProfile(userId: string, authUser: import("@supabase/supabase-js").User) {
-      let fallbackFired = false;
       const timeoutId = setTimeout(() => {
-        fallbackFired = true;
-        console.error("[AppState] hydrateProfile timed out — using session fallback");
-        const fallbackUser = mapProfile({
-          id: authUser.id,
-          email: authUser.email,
-          display_name: authUser.user_metadata?.full_name ?? authUser.email,
-          username: authUser.user_metadata?.username ?? authUser.email,
-          avatar_url: authUser.user_metadata?.avatar_url ?? null,
-          role: authUser.user_metadata?.role ?? "client",
-          jobs_done: 0,
-          happy_percent: 0,
-        });
-        dispatch({ type: "SET_AUTH", user: fallbackUser });
-        // Fetch continues in background — SET_AUTH will fire again with full profile on completion
-      }, 5000);
+        console.error("[AppState] hydrateProfile timed out");
+        dispatch({ type: "SET_AUTH_LOADING", loading: false });
+      }, 8000);
 
       try {
-        const sb = getAuthSupabase();
-        const { data, error: fetchErr } = await sb
-          .from("profiles")
-          .select("*")
-          .eq("id", userId)
-          .single();
-
-        clearTimeout(timeoutId);
-        console.log("[AppState] hydrateProfile fetch complete", !!data, fetchErr?.message, fallbackFired ? "(replacing fallback)" : "");
-
-        if (data) {
-          const mappedUser = mapProfile(data as Record<string, unknown>);
-          dispatch({ type: "SET_AUTH", user: mappedUser });
-          return;
-        }
-
-        if (fetchErr && fetchErr.code !== "PGRST116") {
-          console.error("[AppState] profile fetch error:", fetchErr.message);
-          if (!fallbackFired) dispatch({ type: "SET_AUTH_LOADING", loading: false });
-          return;
-        }
-
-        const user = await ensureProfile(authUser);
-        if (user) {
-          dispatch({ type: "SET_AUTH", user });
-        } else if (!fallbackFired) {
+        // Read token directly from localStorage — bypasses Supabase client lock entirely
+        const tokenData = JSON.parse(
+          localStorage.getItem("sb-skillsnap-auth-token") ?? "{}"
+        );
+        const accessToken = tokenData?.access_token;
+        if (!accessToken) {
+          clearTimeout(timeoutId);
           dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          return;
+        }
+
+        // Use fetch directly — completely bypasses Supabase client lock
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=*`,
+          {
+            headers: {
+              "apikey": process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+              "Authorization": `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            }
+          }
+        );
+        const rows = await response.json();
+        clearTimeout(timeoutId);
+        const data = rows?.[0];
+        if (data) {
+          dispatch({ type: "SET_AUTH", user: mapProfile(data as Record<string, unknown>) });
+        } else {
+          const user = await ensureProfile(authUser);
+          if (user) dispatch({ type: "SET_AUTH", user });
+          else dispatch({ type: "SET_AUTH_LOADING", loading: false });
         }
       } catch (e) {
         clearTimeout(timeoutId);
         console.error("[AppState] hydrateProfile CRASHED:", e);
-        if (!fallbackFired) dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }
     }
 
