@@ -271,27 +271,39 @@ export const messageService = {
   // Per-conversation Realtime subscription (used inside ChatScreen while chat is open).
   subscribeToMessages(conversationId: string, onMessage: (msg: Message) => void): () => void {
     let cancelled = false;
-
-    // Synchronously tear down any existing channel for this conversation.
-    // This must happen before the async work so rt.channel() never returns a
-    // still-subscribed instance (which triggers "cannot add callbacks after subscribe()").
-    const stale = perConvChannels.get(conversationId);
-    if (stale) {
-      getRealtimeSupabase().removeChannel(stale);
-      perConvChannels.delete(conversationId);
-    }
-
     let channel: ReturnType<ReturnType<typeof getRealtimeSupabase>["channel"]> | null = null;
 
-    Promise.all([getCurrentUserId(), getAccessToken()]).then(([currentUserId, token]) => {
-      if (cancelled) return;
-      const resolvedId = currentUserId ?? "";
+    const channelName = `messages:conv:${conversationId}`;
+
+    async function setup() {
       const rt = getRealtimeSupabase();
 
+      // Remove any channel with the same topic from both our registry and Supabase's internal
+      // registry before creating a new one — prevents "cannot add callbacks after subscribe()".
+      const staleLocal = perConvChannels.get(conversationId);
+      if (staleLocal) {
+        await rt.removeChannel(staleLocal);
+        perConvChannels.delete(conversationId);
+      }
+
+      // Also sweep Supabase's own channel list (topic is prefixed with "realtime:" internally)
+      const existing = rt.getChannels().find(
+        (c) => c.topic === channelName || c.topic === `realtime:${channelName}`
+      );
+      if (existing) {
+        await rt.removeChannel(existing);
+      }
+
+      if (cancelled) return;
+
+      const [currentUserId, token] = await Promise.all([getCurrentUserId(), getAccessToken()]);
+      if (cancelled) return;
+
+      const resolvedId = currentUserId ?? "";
       if (token) rt.realtime.setAuth(token);
 
       channel = rt
-        .channel(`messages:conv:${conversationId}`)
+        .channel(channelName)
         .on(
           "postgres_changes",
           {
@@ -311,13 +323,24 @@ export const messageService = {
         });
 
       perConvChannels.set(conversationId, channel);
-    });
+    }
+
+    setup();
 
     return () => {
       cancelled = true;
       if (channel) {
         getRealtimeSupabase().removeChannel(channel);
         perConvChannels.delete(conversationId);
+        channel = null;
+      } else {
+        // channel not yet assigned (setup still in-flight) — clean up via registry
+        const rt = getRealtimeSupabase();
+        const stale = perConvChannels.get(conversationId);
+        if (stale) {
+          rt.removeChannel(stale);
+          perConvChannels.delete(conversationId);
+        }
       }
     };
   },
