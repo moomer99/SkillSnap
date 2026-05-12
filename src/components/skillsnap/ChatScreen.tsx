@@ -146,9 +146,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const hoursIn = threadStartedAt ? hoursElapsed(threadStartedAt) : 0;
   const hoursRemaining = Math.max(0, Math.ceil(24 - hoursIn));
 
-  const UNLOCK_THRESHOLD_HOURS = 1 / 60; // TEMP: 1 minute for testing — change back to 24
-  console.log("[JobsDone] conversation age hours:", hoursIn);
-  const canRequestJobDone = hasMessages && hoursIn >= UNLOCK_THRESHOLD_HOURS;
+  const canRequestJobDone = hasMessages && hoursIn >= 24;
   const lockedLabel = `Available in ~${hoursRemaining}h · conversation must be 24h old`;
 
   useEffect(() => {
