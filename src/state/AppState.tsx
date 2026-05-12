@@ -348,7 +348,8 @@ const AppContext = createContext<AppContextValue | null>(null);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const hydratingRef = useRef<string | null>(null);
-  const onlineUserIds = usePresence(state.currentUser?.id ?? null);
+  usePresence(state.currentUser?.id ?? null);
+  const onlineUserIds = new Set<string>();
 
   // Hydrate auth state from Supabase session on mount
   useEffect(() => {

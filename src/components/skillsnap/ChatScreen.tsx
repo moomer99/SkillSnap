@@ -457,14 +457,14 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             <div key={msg.id} className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"}`}>
               <div className="max-w-[78%] flex flex-col gap-0.5">
                 {msg.imageUrl ? (
-                  <div className={`relative rounded-2xl overflow-hidden shadow-sm ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
+                  <a href={msg.uploading ? undefined : msg.imageUrl} target="_blank" rel="noopener noreferrer" className={`relative rounded-2xl overflow-hidden shadow-sm block ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
                     <img src={msg.imageUrl} alt={msg.text} className="w-full max-w-[220px] object-cover rounded-2xl" style={{ maxHeight: 260 }} />
                     {msg.uploading && (
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-2xl">
                         <Loader2 size={24} className="text-white animate-spin" />
                       </div>
                     )}
-                  </div>
+                  </a>
                 ) : (
                   <>
                     <div
@@ -580,9 +580,9 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
               <div key={msg.id} className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"}`}>
                 <div className="max-w-[78%] flex flex-col gap-0.5">
                   {msg.imageUrl ? (
-                    <div className={`rounded-2xl overflow-hidden shadow-sm ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
+                    <a href={msg.imageUrl} target="_blank" rel="noopener noreferrer" className={`rounded-2xl overflow-hidden shadow-sm block ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
                       <img src={msg.imageUrl} alt={msg.text} className="w-full max-w-[220px] object-cover rounded-2xl" style={{ maxHeight: 260 }} />
-                    </div>
+                    </a>
                   ) : (
                     <>
                       <div
