@@ -9,7 +9,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { useAppState } from "@/state/AppState";
 import { messageService } from "@/services/messageService";
 import { showMessageNotification } from "@/hooks/useNotifications";
-import { getAuthSupabase } from "@/lib/supabase";
+import { getAuthSupabase, getRealtimeSupabase } from "@/lib/supabase";
 import { getPendingJobId } from "@/services/jobsDoneService";
 
 const SUPABASE_CONFIGURED =
@@ -113,24 +113,26 @@ export function useGlobalMessages() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isAuthenticated]);
 
-  // Realtime subscription for jobs_done_request notifications.
-  // Must set JWT via realtime.setAuth() before subscribing — without it the anon key
-  // is used and the user_id filter is blocked by RLS, so no events are delivered.
+  // Realtime subscription for notifications (jobs_done_request, etc.).
+  // Uses getRealtimeSupabase() — a dedicated client that always connects to the real
+  // Supabase URL, bypassing the sandbox HTTP proxy which would break WebSockets.
+  // JWT is injected via realtime.setAuth() so the user_id RLS filter is honoured.
   useEffect(() => {
     if (!SUPABASE_CONFIGURED || !state.isAuthenticated || !state.currentUser) return;
     const userId = state.currentUser.id;
 
-    const sb = getAuthSupabase();
+    const authSb = getAuthSupabase();
+    const rtSb = getRealtimeSupabase();
 
-    let channel: ReturnType<typeof sb.channel> | null = null;
-
-    sb.auth.getSession().then(({ data: { session } }) => {
+    authSb.auth.getSession().then(({ data: { session } }) => {
       if (session?.access_token) {
-        sb.realtime.setAuth(session.access_token);
+        rtSb.realtime.setAuth(session.access_token);
       }
 
-      channel = sb
-        .channel(`user-notifications:${userId}`)
+      console.log("[Notifications] subscribed for user:", userId);
+
+      const channel = rtSb
+        .channel(`notifications:${userId}`)
         .on(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           "postgres_changes" as any,
@@ -142,9 +144,8 @@ export function useGlobalMessages() {
           },
           async (payload: { new: Record<string, unknown> }) => {
             const row = payload.new;
-            console.log("[useGlobalMessages] notification received:", row);
+            console.log("[Notifications] received:", payload);
 
-            // Always increment badge for any new notification
             dispatch({ type: "INCREMENT_UNREAD_NOTIF_COUNT" });
 
             if (row.type !== "jobs_done_request") return;
@@ -152,7 +153,6 @@ export function useGlobalMessages() {
             const fromName = (row.message as string) ?? "A pro";
             const notificationId = row.id as string;
 
-            // Look up the pending job record so the client can confirm/decline
             const jobId = await getPendingJobId(fromUserId);
             if (!jobId) return;
 
@@ -163,7 +163,7 @@ export function useGlobalMessages() {
           }
         )
         .subscribe((status, err) => {
-          console.log(`[useGlobalMessages] notifications channel status: ${status}`, err ?? "");
+          console.log(`[Notifications] channel status: ${status}`, err ?? "");
         });
 
       notifChannelRef.current = channel;
@@ -171,7 +171,7 @@ export function useGlobalMessages() {
 
     return () => {
       if (notifChannelRef.current) {
-        sb.removeChannel(notifChannelRef.current);
+        rtSb.removeChannel(notifChannelRef.current);
         notifChannelRef.current = null;
       }
     };

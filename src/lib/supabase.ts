@@ -13,9 +13,7 @@ function isOrchidsSandbox(): boolean {
   );
 }
 
-// Single singleton client for the entire app lifetime.
-// Uses standard createClient (localStorage-based) — no Web Lock API,
-// no cookie conflicts. The server-side callback route handles PKCE exchange.
+// Primary client — may use proxy URL on Orchids sandbox for HTTP requests.
 let _client: SupabaseClient | null = null;
 
 export function getSupabase(): SupabaseClient {
@@ -32,7 +30,8 @@ export function getSupabase(): SupabaseClient {
         autoRefreshToken: true,
         detectSessionInUrl: true,
         flowType: "pkce",
-        lock: async (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => fn(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        lock: (async (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => fn()) as any,
       },
     });
   }
@@ -43,8 +42,26 @@ export function getAuthSupabase(): SupabaseClient {
   return getSupabase();
 }
 
+// Realtime client — always uses the real Supabase URL so WebSocket connections
+// are not routed through the sandbox proxy (which breaks Realtime entirely).
+let _realtimeClient: SupabaseClient | null = null;
+
 export function getRealtimeSupabase(): SupabaseClient {
-  return getSupabase();
+  if (!_realtimeClient) {
+    _realtimeClient = createClient(REAL_URL, ANON_KEY, {
+      auth: {
+        persistSession: false,
+        storageKey: "sb-skillsnap-auth-token",
+        storage: typeof window !== "undefined" ? window.localStorage : undefined,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+        flowType: "pkce",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        lock: (async (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => fn()) as any,
+      },
+    });
+  }
+  return _realtimeClient;
 }
 
 export function resetSupabaseClient() {
