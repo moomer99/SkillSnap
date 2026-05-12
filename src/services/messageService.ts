@@ -40,6 +40,7 @@ function mapMessage(row: Record<string, unknown>, currentUserId: string): Messag
     from: row.sender_id === currentUserId ? "me" : "them",
     text,
     time: new Date(row.created_at as string).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    createdAt: row.created_at as string,
     senderName: profile?.display_name as string | undefined,
     isSystem,
   };

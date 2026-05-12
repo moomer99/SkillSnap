@@ -87,6 +87,7 @@ export interface Message {
   senderName?: string;
   failed?: boolean; // true when DB insert failed — shown with retry indicator
   isSystem?: boolean; // true for system messages (e.g. Jobs Done request)
+  createdAt?: string; // ISO timestamp from DB — used for splitting messages around Jobs Done card
 }
 
 export interface MessageThread {

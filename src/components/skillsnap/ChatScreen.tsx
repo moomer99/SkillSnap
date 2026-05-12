@@ -83,6 +83,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   // Job-done flow
   const [jobStatus, setJobStatus] = useState<JobDoneStatus>("idle");
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [jobVerifiedAt, setJobVerifiedAt] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [rating, setRating] = useState<JobRating | null>(null);
   const [comment, setComment] = useState("");
@@ -150,6 +151,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           if (data.client_confirmed && data.verified_at) {
             // Completed — show the confirmation card for both parties
             setJobStatus("confirmed");
+            setJobVerifiedAt(data.verified_at as string);
             console.log("[JobsDone] restored completed card");
           } else {
             // Pending — skiller waiting for client to confirm/decline
@@ -166,6 +168,23 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   );
 
   const hasMessages = messages.length > 0;
+
+  // Split messages around the Jobs Done confirmation timestamp so messages sent
+  // after the job was confirmed appear BELOW the card, not above it.
+  const cardActive = jobStatus !== "idle" && jobStatus !== "declined";
+  const { messagesBeforeCard, messagesAfterCard } = useMemo(() => {
+    if (!cardActive || !jobVerifiedAt) return { messagesBeforeCard: messages, messagesAfterCard: [] };
+    const cutoff = new Date(jobVerifiedAt).getTime();
+    const before: typeof messages = [];
+    const after: typeof messages = [];
+    for (const m of messages) {
+      // optimistic messages have no ISO timestamp — put them after the card
+      const ts = m.createdAt ? new Date(m.createdAt).getTime() : cutoff + 1;
+      if (ts <= cutoff) before.push(m);
+      else after.push(m);
+    }
+    return { messagesBeforeCard: before, messagesAfterCard: after };
+  }, [messages, cardActive, jobVerifiedAt]);
   const threadStartedAt = activeThread?.startedAt;
   const hoursIn = threadStartedAt ? hoursElapsed(threadStartedAt) : 0;
   const minHours = JOBS_DONE_CONFIG.MIN_CONVERSATION_HOURS;
@@ -268,6 +287,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
 
   async function handleClientConfirm() {
     setJobStatus("confirmed");
+    setJobVerifiedAt(new Date().toISOString());
     setShowFeedback(true);
     dispatch({ type: "SET_PENDING_JOBS_REQUEST", request: null });
     if (!SUPABASE_CONFIGURED || !activeJobId) return;
@@ -433,7 +453,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             <p className="text-xs text-[#b0aaa5]">Say hello to {displayParticipant.displayName} 👋</p>
           </div>
         ) : (
-          messages.map((msg) => {
+          messagesBeforeCard.map((msg) => {
             if (msg.isSystem) {
               return (
                 <div key={msg.id} className="flex justify-center my-1">
@@ -545,6 +565,59 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
           <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
           <p className="text-sm font-semibold text-[#1a1a1a]">Thanks for your feedback! 🎉</p>
+        </div>
+      )}
+
+      {/* Messages sent after the Jobs Done confirmation — always below the card */}
+      {messagesAfterCard.length > 0 && (
+        <div className="px-4 flex flex-col gap-2.5 pt-2">
+          {messagesAfterCard.map((msg) => {
+            if (msg.isSystem) {
+              return (
+                <div key={msg.id} className="flex justify-center my-1">
+                  <span className="text-[11px] font-semibold text-[#6c47ff] bg-[#f0ecff] px-3 py-1.5 rounded-full border border-[#ddd5ff]">
+                    {msg.text}
+                  </span>
+                </div>
+              );
+            }
+            return (
+              <div key={msg.id} className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"}`}>
+                <div className="max-w-[78%] flex flex-col gap-0.5">
+                  {msg.imageUrl ? (
+                    <div className={`rounded-2xl overflow-hidden shadow-sm ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
+                      <img src={msg.imageUrl} alt={msg.text} className="w-full max-w-[220px] object-cover rounded-2xl" style={{ maxHeight: 260 }} />
+                    </div>
+                  ) : (
+                    <>
+                      <div
+                        className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                          msg.from === "me"
+                            ? "text-white rounded-br-sm"
+                            : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
+                        } ${msg.failed ? "opacity-60" : ""}`}
+                        style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #6c47ff, #8b6af5)" } : {}}
+                      >
+                        {msg.text}
+                      </div>
+                      {msg.failed && (
+                        <span className="text-[10px] text-red-400 font-medium px-1">Not delivered · check connection</span>
+                      )}
+                    </>
+                  )}
+                  <span className={`text-[10px] text-[#b0aaa5] flex items-center gap-0.5 ${msg.from === "me" ? "justify-end" : "justify-start"} px-1`}>
+                    {msg.time}
+                    {msg.from === "me" && !msg.failed && (
+                      <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="ml-0.5 flex-shrink-0">
+                        <path d="M1 4l2.5 2.5L8 1" stroke="#6c47ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M5.5 4l2.5 2.5L13 1" stroke="#6c47ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
