@@ -18,10 +18,10 @@ export const API_CONFIG = {
 
 // Auth — swap with real provider config (Supabase / Firebase / Auth0)
 export const AUTH_CONFIG = {
-  PROVIDER: "", // e.g. "supabase"
-  AUTH_URL: "", // e.g. process.env.NEXT_PUBLIC_SUPABASE_URL
-  ANON_KEY: "", // e.g. process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-} as const;
+  PROVIDER: "supabase",
+  AUTH_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+  ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
+};
 
 // Database — swap with real DB connection details
 export const DB_CONFIG = {
@@ -41,8 +41,8 @@ export const MAP_CONFIG = {
 
 // Media storage — swap with real storage bucket config
 export const MEDIA_CONFIG = {
-  PROVIDER: "", // e.g. "supabase-storage" | "s3" | "cloudinary"
-  BUCKET_URL: "",
+  PROVIDER: "supabase-storage",
+  BUCKET_URL: "https://dnraeyxjzdmpdvrkzyfd.supabase.co/storage/v1/object/public",
   MAX_VIDEO_SIZE_MB: 60,
   MAX_PHOTO_SIZE_MB: 10,
   ACCEPTED_VIDEO_TYPES: ["video/mp4", "video/quicktime"],
@@ -51,12 +51,12 @@ export const MEDIA_CONFIG = {
 
 // Feature flags — flip to true as features ship
 export const FEATURES = {
-  REAL_AUTH: false,
-  REAL_FEED: false,
-  REAL_MESSAGES: false,
-  REAL_DISCOVERY: false,
-  REAL_UPLOAD: false,
-  NOTIFICATIONS: false,
+  REAL_AUTH: true,
+  REAL_FEED: true,
+  REAL_MESSAGES: true,
+  REAL_DISCOVERY: true,
+  REAL_UPLOAD: true,
+  NOTIFICATIONS: true,
 } as const;
 
 // Jobs Done trust system
