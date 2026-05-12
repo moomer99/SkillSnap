@@ -10,6 +10,9 @@ import type { DiscoveryFilter } from "@/mock-data/discovery";
 import { getAuthSupabase } from "@/lib/supabase";
 import { mapProfile, ensureProfile } from "@/services/authService";
 
+// Module-level guard — survives re-renders, reset on sign-out
+let globalHydrated = false;
+
 // ── State Shape ──────────────────────────────
 interface AppStateShape {
   currentUser: User | null;
@@ -367,6 +370,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Falls back to ensureProfile (upsert) if the row doesn't exist yet,
     // which is the normal path for first-time Google OAuth login.
     async function hydrateProfile(userId: string, authUser: import("@supabase/supabase-js").User) {
+      if (globalHydrated) return;
+      globalHydrated = true;
       try {
         const { data, error: fetchErr } = await authSb
           .from("profiles")
@@ -463,6 +468,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.log("[AppState] onAuthStateChange", event, session?.user?.id ?? "no session");
 
       if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
+        globalHydrated = false;
         dispatch({ type: "CLEAR_AUTH" });
         return;
       }
@@ -500,9 +506,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      if (event === "TOKEN_REFRESHED") {
-        await hydrateProfile(session.user.id, session.user);
-      }
+      // TOKEN_REFRESHED — session is still valid, no need to re-hydrate profile
     });
 
     // Check for an existing session on every page load.
