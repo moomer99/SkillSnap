@@ -6,6 +6,7 @@
 import { Home, MapPin, Plus, MessageCircle, User } from "lucide-react";
 import type { Screen } from "@/types";
 import { useAppState } from "@/state/AppState";
+import { getAuthSupabase } from "@/lib/supabase";
 
 interface BottomNavProps {
   active: Screen;
@@ -20,7 +21,18 @@ export default function BottomNav({ active, onNavigate }: BottomNavProps) {
       dispatch({ type: "SHOW_AUTH_PROMPT" });
       return;
     }
-    if (screen === "messages") dispatch({ type: "CLEAR_UNREAD_NOTIF_COUNT" });
+    if (screen === "messages") {
+      dispatch({ type: "CLEAR_UNREAD_NOTIF_COUNT" });
+      const userId = state.currentUser?.id;
+      if (userId) {
+        getAuthSupabase()
+          .from("notifications")
+          .update({ read: true })
+          .eq("user_id", userId)
+          .eq("read", false)
+          .then(() => {});
+      }
+    }
     onNavigate(screen);
   }
 
