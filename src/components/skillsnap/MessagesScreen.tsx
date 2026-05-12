@@ -87,12 +87,12 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
     const now = new Date().toISOString();
     await sb.from("jobs_done").update({ client_confirmed: true, verified_at: now }).eq("id", req.jobId);
     // Increment skiller's jobs_done count
-    await sb.rpc("increment_jobs_done", { skiller_id: req.fromUserId }).catch(() => {
+    const { error: rpcErr } = await sb.rpc("increment_jobs_done", { skiller_id: req.fromUserId });
+    if (rpcErr) {
       // Fallback: direct update if RPC not available
-      sb.from("profiles").select("jobs_done").eq("id", req.fromUserId).single().then(({ data }) => {
-        if (data) sb.from("profiles").update({ jobs_done: (data.jobs_done ?? 0) + 1 }).eq("id", req.fromUserId);
-      });
-    });
+      const { data: profileData } = await sb.from("profiles").select("jobs_done").eq("id", req.fromUserId).single();
+      if (profileData) await sb.from("profiles").update({ jobs_done: (profileData.jobs_done ?? 0) + 1 }).eq("id", req.fromUserId);
+    }
     setJobsRequests((prev) => prev.filter((r) => r.jobId !== req.jobId));
     setProcessingId(null);
   }, []);
