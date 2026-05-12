@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
           persistSession: true,
           storageKey: "sb-skillsnap-auth-token",
           detectSessionInUrl: false,
-          flowType: "pkce",
+          flowType: "implicit",
         },
       });
 

@@ -90,11 +90,18 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
     if (!forgotEmail.trim()) { setForgotError("Please enter your email."); return; }
     setForgotLoading(true);
     try {
-      const { getAuthSupabase } = await import("@/lib/supabase");
-      const redirectTo = typeof window !== "undefined"
-        ? `${window.location.origin}/auth/callback`
-        : "/auth/callback";
-      const { error: err } = await getAuthSupabase().auth.resetPasswordForEmail(forgotEmail.trim(), { redirectTo });
+      // Use an implicit-flow client so Supabase embeds the token in the URL hash
+      // (#access_token=...&type=recovery) instead of a PKCE ?code=.
+      // PKCE reset links fail when the user opens the email in a different browser/tab
+      // because the code verifier lives in localStorage of the original session.
+      const { createClient } = await import("@supabase/supabase-js");
+      const implicitClient = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { auth: { flowType: "implicit", storageKey: "sb-skillsnap-auth-token" } }
+      );
+      const redirectTo = `${window.location.origin}/reset-password`;
+      const { error: err } = await implicitClient.auth.resetPasswordForEmail(forgotEmail.trim(), { redirectTo });
       if (err) { setForgotError(err.message); return; }
       setForgotSent(true);
     } catch {
