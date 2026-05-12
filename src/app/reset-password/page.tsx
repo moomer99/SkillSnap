@@ -16,7 +16,7 @@ function makeClient(): SupabaseClient {
       auth: {
         persistSession: true,
         storageKey: "sb-skillsnap-auth-token",
-        detectSessionInUrl: false,
+        detectSessionInUrl:true,
         flowType: "implicit",
       },
     }
