@@ -132,7 +132,7 @@ export function useGlobalMessages() {
       console.log("[Notifications] subscribed for user:", userId);
 
       const channel = rtSb
-        .channel(`notifications:${userId}`)
+        .channel(`user-notifications-${userId}`)
         .on(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           "postgres_changes" as any,
@@ -140,11 +140,13 @@ export function useGlobalMessages() {
             event: "INSERT",
             schema: "public",
             table: "notifications",
-            filter: `user_id=eq.${userId}`,
           },
           async (payload: { new: Record<string, unknown> }) => {
+            console.log("[Notifications] received raw:", payload);
             const row = payload.new;
-            console.log("[Notifications] received:", payload);
+
+            // Filter in handler — avoids RLS issues with server-side filter
+            if (row.user_id !== userId) return;
 
             dispatch({ type: "INCREMENT_UNREAD_NOTIF_COUNT" });
 
