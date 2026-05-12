@@ -6,23 +6,14 @@ type SupabaseClient = ReturnType<typeof createClient<any>>;
 const REAL_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-function isOrchidsSandbox(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    window.location.hostname.includes("orchids.cloud")
-  );
-}
-
-// Primary client — may use proxy URL on Orchids sandbox for HTTP requests.
-let _client: SupabaseClient | null = null;
+// ── Primary singleton ────────────────────────────────────────────────────────
+// One instance for the entire app lifetime. Auth session, storage key, and
+// token refresh are shared across every caller.
+let instance: SupabaseClient | null = null;
 
 export function getSupabase(): SupabaseClient {
-  if (!_client) {
-    const url =
-      typeof window !== "undefined" && isOrchidsSandbox()
-        ? `${window.location.origin}/api/proxy`
-        : REAL_URL;
-    _client = createClient(url, ANON_KEY, {
+  if (!instance) {
+    instance = createClient(REAL_URL, ANON_KEY, {
       auth: {
         persistSession: true,
         storageKey: "sb-skillsnap-auth-token",
@@ -35,20 +26,19 @@ export function getSupabase(): SupabaseClient {
       },
     });
   }
-  return _client;
+  return instance;
 }
 
-export function getAuthSupabase(): SupabaseClient {
-  return getSupabase();
-}
+export const getAuthSupabase = getSupabase;
 
-// Realtime client — always uses the real Supabase URL so WebSocket connections
-// are not routed through the sandbox proxy (which breaks Realtime entirely).
-let _realtimeClient: SupabaseClient | null = null;
+// ── Realtime singleton ───────────────────────────────────────────────────────
+// Always uses the real Supabase URL — WebSocket connections must not go through
+// the sandbox HTTP proxy (which doesn't support the Upgrade header).
+let realtimeInstance: SupabaseClient | null = null;
 
 export function getRealtimeSupabase(): SupabaseClient {
-  if (!_realtimeClient) {
-    _realtimeClient = createClient(REAL_URL, ANON_KEY, {
+  if (!realtimeInstance) {
+    realtimeInstance = createClient(REAL_URL, ANON_KEY, {
       auth: {
         persistSession: false,
         storageKey: "sb-skillsnap-auth-token",
@@ -61,9 +51,9 @@ export function getRealtimeSupabase(): SupabaseClient {
       },
     });
   }
-  return _realtimeClient;
+  return realtimeInstance;
 }
 
 export function resetSupabaseClient() {
-  _client = null;
+  instance = null;
 }
