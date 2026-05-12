@@ -41,6 +41,7 @@ export default function ResetPasswordPage() {
     sbRef.current = sb;
 
     async function initSession() {
+      await new Promise(resolve => setTimeout(resolve, 500));
       // Implicit flow: Supabase puts tokens in the URL hash
       const hash = window.location.hash.substring(1);
       const hashParams = new URLSearchParams(hash);
