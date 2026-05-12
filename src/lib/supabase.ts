@@ -28,7 +28,7 @@ export function getSupabase(): SupabaseClient {
         storageKey: "sb-skillsnap-auth-token",
         storage: typeof window !== "undefined" ? window.localStorage : undefined,
         autoRefreshToken: true,
-        detectSessionInUrl: true,
+        detectSessionInUrl: false,
         flowType: "pkce",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         lock: (async (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => fn()) as any,

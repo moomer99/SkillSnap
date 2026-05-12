@@ -424,10 +424,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Handle PKCE code that lands on the root URL (?code=xxx).
     // Supabase uses the configured Site URL when /auth/callback is not in the
     // allowed-redirect-URLs list, delivering the code here instead.
+    // We do NOT return early — we still set up onAuthStateChange so PASSWORD_RECOVERY fires.
     const rootCode = queryParams.get("code");
     if (rootCode) {
       window.history.replaceState({}, "", window.location.pathname);
       clearTimeout(authTimeout);
+      // Exchange async; onAuthStateChange below will fire PASSWORD_RECOVERY or SIGNED_IN
       authSb.auth.exchangeCodeForSession(rootCode).then(({ data: codeData, error: codeError }) => {
         if (codeError) {
           console.error("[AppState] PKCE exchange failed:", codeError.message);
@@ -438,16 +440,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
           dispatch({ type: "SET_AUTH_LOADING", loading: false });
           return;
         }
-        // recovery_sent_at is set by Supabase when a password reset email was sent
+        // recovery_sent_at is set by Supabase when a password reset email was sent.
+        // Handle inline in case PASSWORD_RECOVERY event doesn't fire (e.g. some Supabase versions).
         const isRecovery = codeData.user?.recovery_sent_at != null;
         if (isRecovery) {
           dispatch({ type: "NAVIGATE", screen: "reset-password" });
           dispatch({ type: "SET_AUTH_LOADING", loading: false });
-        } else {
-          hydrateProfile(codeData.session.user.id, codeData.session.user);
         }
+        // If not recovery, SIGNED_IN event from onAuthStateChange will hydrate profile.
       });
-      return;
     }
 
     // Track whether getSession already hydrated so INITIAL_SESSION doesn't double-fire
@@ -502,22 +503,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Check for an existing session on every page load.
     // After a Google OAuth redirect, auth/callback/route.ts has already exchanged
     // the code server-side and set the session cookie, so getSession() finds it here.
-    authSb.auth.getSession().then(async ({ data: { session } }) => {
-      clearTimeout(authTimeout);
-      if (session?.user) {
-        console.log("[AppState] getSession found session for", session.user.id);
-        initializedByGetSession = true;
-        await hydrateProfile(session.user.id, session.user);
-        // SET_AUTH reducer handles screen transition (role-setup or home)
-      } else {
-        console.log("[AppState] getSession: no session, showing landing");
+    // Skip when rootCode is present — exchangeCodeForSession + onAuthStateChange handle it.
+    if (!rootCode) {
+      authSb.auth.getSession().then(async ({ data: { session } }) => {
+        clearTimeout(authTimeout);
+        if (session?.user) {
+          console.log("[AppState] getSession found session for", session.user.id);
+          initializedByGetSession = true;
+          await hydrateProfile(session.user.id, session.user);
+          // SET_AUTH reducer handles screen transition (role-setup or home)
+        } else {
+          console.log("[AppState] getSession: no session, showing landing");
+          dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        }
+      }).catch((e) => {
+        console.error("[AppState] getSession threw:", e);
+        clearTimeout(authTimeout);
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
-      }
-    }).catch((e) => {
-      console.error("[AppState] getSession threw:", e);
-      clearTimeout(authTimeout);
-      dispatch({ type: "SET_AUTH_LOADING", loading: false });
-    });
+      });
+    }
 
     return () => subscription.unsubscribe();
   }, []);
