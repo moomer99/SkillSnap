@@ -52,7 +52,21 @@ export default function BottomNav({ active, onNavigate }: BottomNavProps) {
         </span>
       </button>
 
-      <NavItem icon={<MessageCircle size={22} />} label="Messages" active={active === "messages"} onClick={() => guardedNavigate("messages")} />
+      <NavItem
+        icon={
+          <span className="relative inline-flex">
+            <MessageCircle size={22} />
+            {state.unreadNotifCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">
+                {state.unreadNotifCount > 9 ? "9+" : state.unreadNotifCount}
+              </span>
+            )}
+          </span>
+        }
+        label="Messages"
+        active={active === "messages"}
+        onClick={() => guardedNavigate("messages")}
+      />
       <NavItem icon={<User size={22} />} label="Profile" active={active === "own-profile"} onClick={() => guardedNavigate("own-profile")} />
     </nav>
   );

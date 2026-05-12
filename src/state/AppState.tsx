@@ -39,6 +39,7 @@ interface AppStateShape {
   followedUsers: Set<string>;
   modals: { jobsDoneInfo: boolean };
   pendingJobsRequest: { jobId: string; fromName: string; notificationId: string } | null;
+  unreadNotifCount: number;
 }
 
 // ── Actions ──────────────────────────────────
@@ -75,7 +76,10 @@ type Action =
   | { type: "UPDATE_POST"; postId: string; patch: Partial<Pick<Post, "caption" | "skill" | "location">> }
   | { type: "SHOW_AUTH_PROMPT" }
   | { type: "HIDE_AUTH_PROMPT" }
-  | { type: "SET_PENDING_JOBS_REQUEST"; request: { jobId: string; fromName: string; notificationId: string } | null };
+  | { type: "SET_PENDING_JOBS_REQUEST"; request: { jobId: string; fromName: string; notificationId: string } | null }
+  | { type: "SET_UNREAD_NOTIF_COUNT"; count: number }
+  | { type: "INCREMENT_UNREAD_NOTIF_COUNT" }
+  | { type: "CLEAR_UNREAD_NOTIF_COUNT" };
 
 // ── Initial State ────────────────────────────
 const initialState: AppStateShape = {
@@ -100,6 +104,7 @@ const initialState: AppStateShape = {
   followedUsers: new Set(),
   modals: { jobsDoneInfo: false },
   pendingJobsRequest: null,
+  unreadNotifCount: 0,
 };
 
 // ── Reducer ──────────────────────────────────
@@ -318,6 +323,12 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       return { ...state, showAuthPrompt: false };
     case "SET_PENDING_JOBS_REQUEST":
       return { ...state, pendingJobsRequest: action.request };
+    case "SET_UNREAD_NOTIF_COUNT":
+      return { ...state, unreadNotifCount: action.count };
+    case "INCREMENT_UNREAD_NOTIF_COUNT":
+      return { ...state, unreadNotifCount: state.unreadNotifCount + 1 };
+    case "CLEAR_UNREAD_NOTIF_COUNT":
+      return { ...state, unreadNotifCount: 0 };
     default:
       return state;
   }

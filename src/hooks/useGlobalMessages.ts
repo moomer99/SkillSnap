@@ -41,12 +41,21 @@ export function useGlobalMessages() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load threads on first auth — and again whenever auth state changes (e.g. sign-in)
+  // Load threads + unread notification count on auth
   useEffect(() => {
-    if (!SUPABASE_CONFIGURED || !state.isAuthenticated) return;
+    if (!SUPABASE_CONFIGURED || !state.isAuthenticated || !state.currentUser) return;
     loadThreads();
+    // Fetch initial unread notification count
+    const sb = getAuthSupabase();
+    sb.from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", state.currentUser.id)
+      .eq("read", false)
+      .then(({ count }) => {
+        dispatch({ type: "SET_UNREAD_NOTIF_COUNT", count: count ?? 0 });
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.isAuthenticated]);
+  }, [state.isAuthenticated, state.currentUser?.id]);
 
   // Persistent Realtime subscriptions — set up once per session, never torn down.
   // Re-run only when authentication status changes so subscriptions survive
@@ -134,6 +143,10 @@ export function useGlobalMessages() {
           async (payload: { new: Record<string, unknown> }) => {
             const row = payload.new;
             console.log("[useGlobalMessages] notification received:", row);
+
+            // Always increment badge for any new notification
+            dispatch({ type: "INCREMENT_UNREAD_NOTIF_COUNT" });
+
             if (row.type !== "jobs_done_request") return;
             const fromUserId = row.from_user_id as string;
             const fromName = (row.message as string) ?? "A pro";
