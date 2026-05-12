@@ -394,13 +394,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.log("[AppState] hydrateProfile fetch complete", !!data, fetchErr?.message);
 
         if (data) {
+          // Always dispatch full profile — overwrites fallback if timeout already fired
           const mappedUser = mapProfile(data as Record<string, unknown>);
           dispatch({ type: "SET_AUTH", user: mappedUser });
           return;
         }
 
         if (fetchErr && fetchErr.code !== "PGRST116") {
-          dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          // Don't overwrite SET_AUTH with a loading:false if fallback already fired
+          console.error("[AppState] profile fetch error:", fetchErr.message);
           return;
         }
 
