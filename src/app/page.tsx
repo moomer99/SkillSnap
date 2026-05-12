@@ -30,7 +30,7 @@ const ContactScreen     = lazy(() => import("@/components/skillsnap/ContactScree
 const HelpScreen        = lazy(() => import("@/components/skillsnap/HelpScreen"));
 const AboutScreen       = lazy(() => import("@/components/skillsnap/AboutScreen"));
 const TermsScreen            = lazy(() => import("@/components/skillsnap/TermsScreen"));
-const ResetPasswordScreen    = lazy(() => import("@/components/skillsnap/ResetPasswordScreen"));
+// ResetPasswordScreen removed — handled by the standalone /reset-password Next.js page
 const RoleSetupScreen        = lazy(() => import("@/components/skillsnap/RoleSetupScreen"));
 const BottomNav         = lazy(() => import("@/components/skillsnap/BottomNav"));
 const RightSidebar      = lazy(() => import("@/components/skillsnap/RightSidebar"));
@@ -310,7 +310,7 @@ function SkillSnapRouter() {
               {screen === "help"           && <HelpScreen        onNavigate={navigate} />}
               {screen === "about"          && <AboutScreen       onNavigate={navigate} />}
               {screen === "terms"          && <TermsScreen          onNavigate={navigate} />}
-              {screen === "reset-password" && <ResetPasswordScreen onNavigate={navigate} />}
+              {screen === "reset-password" && typeof window !== "undefined" && (window.location.replace("/reset-password"), null)}
               {screen === "role-setup"     && <RoleSetupScreen />}
               {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
             </Suspense>
@@ -364,7 +364,7 @@ function SkillSnapRouter() {
             {screen === "help"           && <HelpScreen        onNavigate={navigate} />}
             {screen === "about"          && <AboutScreen       onNavigate={navigate} />}
             {screen === "terms"          && <TermsScreen          onNavigate={navigate} />}
-            {screen === "reset-password" && <ResetPasswordScreen onNavigate={navigate} />}
+            {screen === "reset-password" && typeof window !== "undefined" && (window.location.replace("/reset-password"), null)}
             {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
           </Suspense>
         </div>

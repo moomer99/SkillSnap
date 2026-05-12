@@ -1,11 +1,32 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Eye, EyeOff, CheckCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import SkillSnapLogo from "@/components/skillsnap/shared/SkillSnapLogo";
+
+// Single client instance shared between session setup and updateUser.
+// Uses the same storageKey as the main app so any existing session is visible.
+function makeClient(): SupabaseClient {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        persistSession: true,
+        storageKey: "sb-skillsnap-auth-token",
+        detectSessionInUrl: false,
+        flowType: "implicit",
+      },
+    }
+  );
+}
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const sbRef = useRef<SupabaseClient | null>(null);
+
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -15,34 +36,19 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
   const [sessionReady, setSessionReady] = useState(false);
 
-  // Supabase delivers the recovery token via the URL hash (implicit flow)
-  // or as a ?code= query param (PKCE flow). The client SDK detects and
-  // exchanges it automatically when detectSessionInUrl is true, but we handle
-  // PKCE manually — so here we just wait for a valid session before allowing submit.
   useEffect(() => {
-    async function checkSession() {
-      const { createClient } = await import("@supabase/supabase-js");
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const sb = makeClient();
+    sbRef.current = sb;
 
-      // Hash fragment tokens (implicit flow fallback)
+    async function initSession() {
+      // Implicit flow: Supabase puts tokens in the URL hash
       const hash = window.location.hash.substring(1);
       const hashParams = new URLSearchParams(hash);
       const accessToken = hashParams.get("access_token");
       const refreshToken = hashParams.get("refresh_token");
       const type = hashParams.get("type");
 
-      const sb = createClient(url, key, {
-        auth: {
-          persistSession: true,
-          storageKey: "sb-skillsnap-auth-token",
-          detectSessionInUrl: false,
-          flowType: "implicit",
-        },
-      });
-
       if (accessToken && type === "recovery") {
-        // Implicit flow — set session directly from hash tokens
         window.history.replaceState({}, "", window.location.pathname);
         const { error: setErr } = await sb.auth.setSession({
           access_token: accessToken,
@@ -56,16 +62,15 @@ export default function ResetPasswordPage() {
         return;
       }
 
-      // PKCE flow — check if AppState already exchanged the code and a session exists
+      // Already have a session (e.g. PKCE exchanged by main app before redirect)
       const { data: { session } } = await sb.auth.getSession();
       if (session) {
         setSessionReady(true);
         return;
       }
 
-      // ?code= on this page directly (edge case)
-      const queryParams = new URLSearchParams(window.location.search);
-      const code = queryParams.get("code");
+      // ?code= landed directly on this page
+      const code = new URLSearchParams(window.location.search).get("code");
       if (code) {
         window.history.replaceState({}, "", window.location.pathname);
         const { error: exchErr } = await sb.auth.exchangeCodeForSession(code);
@@ -77,11 +82,10 @@ export default function ResetPasswordPage() {
         return;
       }
 
-      // No token found — still allow form (session may have been set by the main app)
-      setSessionReady(true);
+      setError("No reset token found. Please use the link from your email.");
     }
 
-    checkSession();
+    initSession();
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -91,10 +95,12 @@ export default function ResetPasswordPage() {
     if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
     if (password !== confirm) { setError("Passwords do not match."); return; }
 
+    const sb = sbRef.current;
+    if (!sb) { setError("Client not ready. Please refresh."); return; }
+
     setSaving(true);
     try {
-      const { getSupabase } = await import("@/lib/supabase");
-      const { error: err } = await getSupabase().auth.updateUser({ password });
+      const { error: err } = await sb.auth.updateUser({ password });
       if (err) { setError(err.message); return; }
       setDone(true);
       setTimeout(() => router.push("/"), 2000);
@@ -120,14 +126,13 @@ export default function ResetPasswordPage() {
       </div>
 
       <div className="relative z-10 w-full max-w-sm">
-        {/* Logo */}
         <div className="flex justify-center mb-10">
           <SkillSnapLogo variant="full" size="lg" dark />
         </div>
 
         {done ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
-            <div className="w-18 h-18 rounded-full flex items-center justify-center"
+            <div className="rounded-full flex items-center justify-center"
               style={{ background: "rgba(34,197,94,0.15)", width: 72, height: 72 }}>
               <CheckCircle size={36} className="text-green-400" />
             </div>
@@ -148,27 +153,21 @@ export default function ResetPasswordPage() {
             </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              {/* New Password */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider"
                   style={{ color: "rgba(255,255,255,0.50)" }}>
                   New Password
                 </label>
-                <div className="flex items-center h-14 px-4 rounded-2xl gap-2 transition-colors"
-                  style={{
-                    background: "rgba(255,255,255,0.07)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                  }}>
+                <div className="flex items-center h-14 px-4 rounded-2xl gap-2"
+                  style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}>
                   <input
                     type={showPw ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 8 characters"
-                    className="flex-1 bg-transparent text-sm text-white outline-none"
+                    className="flex-1 bg-transparent text-sm outline-none placeholder-white/30"
                     style={{ color: "white" }}
                     autoComplete="new-password"
-                    // eslint-disable-next-line jsx-a11y/no-autofocus
-                    autoFocus
                   />
                   <button type="button" onClick={() => setShowPw(s => !s)}
                     className="flex-shrink-0" style={{ color: "rgba(255,255,255,0.40)" }}>
@@ -177,23 +176,19 @@ export default function ResetPasswordPage() {
                 </div>
               </div>
 
-              {/* Confirm Password */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider"
                   style={{ color: "rgba(255,255,255,0.50)" }}>
                   Confirm Password
                 </label>
-                <div className="flex items-center h-14 px-4 rounded-2xl gap-2 transition-colors"
-                  style={{
-                    background: "rgba(255,255,255,0.07)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                  }}>
+                <div className="flex items-center h-14 px-4 rounded-2xl gap-2"
+                  style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}>
                   <input
                     type={showCf ? "text" : "password"}
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                     placeholder="Repeat new password"
-                    className="flex-1 bg-transparent text-sm text-white outline-none"
+                    className="flex-1 bg-transparent text-sm outline-none placeholder-white/30"
                     style={{ color: "white" }}
                     autoComplete="new-password"
                   />
@@ -204,7 +199,6 @@ export default function ResetPasswordPage() {
                 </div>
               </div>
 
-              {/* Error */}
               {error && (
                 <div className="rounded-xl px-4 py-3"
                   style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.30)" }}>
@@ -212,7 +206,6 @@ export default function ResetPasswordPage() {
                 </div>
               )}
 
-              {/* Submit */}
               <button
                 type="submit"
                 disabled={saving || !sessionReady}
