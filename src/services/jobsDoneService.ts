@@ -126,7 +126,7 @@ export const jobsDoneService = {
     console.log("[JobsDone] confirmJob", { jobId, userId });
     const { error } = await getAuthSupabase()
       .from("jobs_done")
-      .update({ client_confirmed: true })
+      .update({ client_confirmed: true, verified_at: new Date().toISOString() })
       .eq("id", jobId)
       .eq("client_id", userId);
     if (error) console.error("[JobsDone] confirmJob failed:", error.message, error.code);
