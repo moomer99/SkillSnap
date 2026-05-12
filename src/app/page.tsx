@@ -14,6 +14,12 @@ import type { Screen } from "@/types";
 import LandingPage from "@/components/skillsnap/LandingPage";
 import AuthScreen from "@/components/skillsnap/AuthScreen";
 
+// Redirect to the standalone /reset-password Next.js page
+function ResetPasswordRedirect() {
+  useEffect(() => { window.location.replace("/reset-password"); }, []);
+  return null;
+}
+
 // Everything else is lazy — only downloaded when the user actually navigates there
 const OnboardingScreen  = lazy(() => import("@/components/skillsnap/OnboardingScreen"));
 const SearchScreen      = lazy(() => import("@/components/skillsnap/SearchScreen"));
@@ -310,7 +316,7 @@ function SkillSnapRouter() {
               {screen === "help"           && <HelpScreen        onNavigate={navigate} />}
               {screen === "about"          && <AboutScreen       onNavigate={navigate} />}
               {screen === "terms"          && <TermsScreen          onNavigate={navigate} />}
-              {screen === "reset-password" && typeof window !== "undefined" && (window.location.replace("/reset-password"), null)}
+              {screen === "reset-password" && <ResetPasswordRedirect />}
               {screen === "role-setup"     && <RoleSetupScreen />}
               {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
             </Suspense>
