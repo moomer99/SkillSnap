@@ -1,31 +1,12 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, CheckCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { getSupabase } from "@/lib/supabase";
 import SkillSnapLogo from "@/components/skillsnap/shared/SkillSnapLogo";
-
-// Single client instance shared between session setup and updateUser.
-// Uses the same storageKey as the main app so any existing session is visible.
-function makeClient(): SupabaseClient {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        persistSession: true,
-        storageKey: "sb-skillsnap-auth-token",
-        detectSessionInUrl:true,
-        flowType: "implicit",
-      },
-    }
-  );
-}
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const sbRef = useRef<SupabaseClient | null>(null);
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -37,8 +18,7 @@ export default function ResetPasswordPage() {
   const [sessionReady, setSessionReady] = useState(false);
 
   useEffect(() => {
-    const sb = makeClient();
-    sbRef.current = sb;
+    const sb = getSupabase();
 
     async function initSession() {
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -96,12 +76,9 @@ export default function ResetPasswordPage() {
     if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
     if (password !== confirm) { setError("Passwords do not match."); return; }
 
-    const sb = sbRef.current;
-    if (!sb) { setError("Client not ready. Please refresh."); return; }
-
     setSaving(true);
     try {
-      const { error: err } = await sb.auth.updateUser({ password });
+      const { error: err } = await getSupabase().auth.updateUser({ password });
       if (err) { setError(err.message); return; }
       setDone(true);
       setTimeout(() => router.push("/"), 2000);
