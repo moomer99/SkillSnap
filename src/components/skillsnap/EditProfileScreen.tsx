@@ -284,10 +284,60 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                 value={bio}
                 onChange={(e) => setBio(e.target.value.slice(0, 200))}
                 rows={3}
-                placeholder="Describe your skills and experience…"
+                placeholder="Tell people what you do and what makes you great…"
                 className="w-full bg-white rounded-2xl border border-[#e8e4df] px-4 py-3 text-sm text-[#1a1a1a] placeholder-[#b0aaa5] resize-none outline-none focus:border-[#6c47ff] transition-colors leading-relaxed"
               />
               <p className="text-right text-xs text-[#b0aaa5] mt-1">{bio.length} / 200</p>
+            </Field>
+
+            {/* Skill Category — moved above Location */}
+            <Field label="Skill Category">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {(SKILL_CATEGORIES as readonly string[]).map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => handleChipPress(cat)}
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      padding: "6px 14px",
+                      borderRadius: 999,
+                      border: `1.5px solid ${skill === cat ? "#6c47ff" : "#e8e4df"}`,
+                      background: skill === cat ? "#6c47ff" : "#fff",
+                      color: skill === cat ? "#fff" : "#7a7570",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ display: skill === "Other" ? "block" : "none", marginTop: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#fff", border: "2px solid #6c47ff", borderRadius: 16, padding: "0 16px", height: 48 }}>
+                  <input
+                    ref={customInputRef}
+                    type="text"
+                    value={customSkill}
+                    onChange={(e) => setCustomSkill(e.target.value.slice(0, 40))}
+                    placeholder="e.g. Carpenter, Hairdresser, Chef…"
+                    style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontSize: 14, color: "#1a1a1a" }}
+                  />
+                  {customSkill ? (
+                    <button type="button" onClick={() => setCustomSkill("")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "#b0aaa5" }}>
+                      <X size={14} />
+                    </button>
+                  ) : null}
+                </div>
+                <p style={{ fontSize: 12, color: "#b0aaa5", marginTop: 6, paddingLeft: 4 }}>
+                  This is what clients will see on your profile.
+                </p>
+              </div>
+
+              <p className="text-xs text-[#7a7570] mt-2 leading-relaxed">
+                ✨ Select a skill to become a Pro — post your work and get discovered for free. Select Client if you&apos;re here to find and hire.
+              </p>
             </Field>
 
             {/* Location — enhanced with GPS + privacy toggle */}
@@ -370,68 +420,6 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                   ? "Privacy on — only your suburb name is shown on your profile."
                   : "Privacy off — your full location text is visible publicly."}
               </p>
-            </Field>
-
-            {/* Skill Category */}
-            <Field label="Skill Category">
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {(SKILL_CATEGORIES as readonly string[]).map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => handleChipPress(cat)}
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      padding: "6px 14px",
-                      borderRadius: 999,
-                      border: `1.5px solid ${skill === cat ? "#6c47ff" : "#e8e4df"}`,
-                      background: skill === cat ? "#6c47ff" : "#fff",
-                      color: skill === cat ? "#fff" : "#7a7570",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-
-              <div style={{ display: skill === "Other" ? "block" : "none", marginTop: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#fff", border: "2px solid #6c47ff", borderRadius: 16, padding: "0 16px", height: 48 }}>
-                  <input
-                    ref={customInputRef}
-                    type="text"
-                    value={customSkill}
-                    onChange={(e) => setCustomSkill(e.target.value.slice(0, 40))}
-                    placeholder="e.g. Carpenter, Hairdresser, Chef…"
-                    style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontSize: 14, color: "#1a1a1a" }}
-                  />
-                  {customSkill ? (
-                    <button type="button" onClick={() => setCustomSkill("")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "#b0aaa5" }}>
-                      <X size={14} />
-                    </button>
-                  ) : null}
-                </div>
-                <p style={{ fontSize: 12, color: "#b0aaa5", marginTop: 6, paddingLeft: 4 }}>
-                  This is what clients will see on your profile.
-                </p>
-              </div>
-
-              {resolvedSkill ? (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: "#b0aaa5", textTransform: "uppercase", letterSpacing: 1 }}>Role:</span>
-                  <span style={{
-                    fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 999,
-                    background: resolvedSkill === "Client" ? "#f0f0f0" : "#ede9fe",
-                    color: resolvedSkill === "Client" ? "#7a7570" : "#5b3dd8",
-                  }}>
-                    {resolvedSkill === "Client" ? "Client" : resolvedSkill}
-                  </span>
-                  {resolvedSkill !== "Client" && (
-                    <span style={{ fontSize: 11, color: "#b0aaa5" }}>→ Pro</span>
-                  )}
-                </div>
-              ) : null}
             </Field>
 
             <button

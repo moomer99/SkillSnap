@@ -115,15 +115,19 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           <div className="mb-1">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <h2 className="font-bold text-base text-[#1a1a1a]">{user.displayName}</h2>
-              {user.skill && (
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#ede9fe] text-[#5b3dd8]">{user.skill}</span>
-              )}
-              {user.role === "pro" && (
+              {user.skill && user.role !== "client" ? (
                 <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: "#6c47ff" }}>Pro</span>
-              )}
-              {user.role === "client" && (
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: "#7a7570" }}>Client</span>
-              )}
+              ) : user.role === "client" ? (
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "#f0f0f0", color: "#7a7570" }}>Client</span>
+              ) : isOwn ? (
+                <button
+                  onClick={() => onNavigate("edit-profile")}
+                  className="text-xs font-bold px-2.5 py-0.5 rounded-full transition-all active:scale-95"
+                  style={{ background: "#fff7ed", color: "#c2410c", border: "1px solid #fed7aa" }}
+                >
+                  Complete Profile
+                </button>
+              ) : null}
             </div>
             <div className="flex items-center gap-1 text-[#7a7570] text-xs mb-2">
               <MapPin size={11} /><span>{user.location}</span>
