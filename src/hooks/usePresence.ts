@@ -23,18 +23,10 @@ export function usePresence(userId: string | null) {
   useEffect(() => {
     if (!SUPABASE_CONFIGURED || !userId) return;
 
-    // Reuse existing channel if already subscribed for this user
-    if (presenceChannel && presenceUserId === userId) {
+    // Channel already exists — skip entirely, one per app session
+    if (presenceChannel) {
       channelRef.current = presenceChannel;
       return;
-    }
-
-    // Tear down any stale channel for a different user (e.g. after sign-out/sign-in)
-    if (presenceChannel && presenceUserId !== userId) {
-      presenceChannel.untrack().catch(() => {});
-      getRealtimeSupabase().removeChannel(presenceChannel);
-      presenceChannel = null;
-      presenceUserId = null;
     }
 
     const rt = getRealtimeSupabase();
