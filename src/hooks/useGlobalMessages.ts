@@ -9,7 +9,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { useAppState } from "@/state/AppState";
 import { messageService } from "@/services/messageService";
 import { showMessageNotification } from "@/hooks/useNotifications";
-import { getAuthSupabase, getRealtimeSupabase } from "@/lib/supabase";
+import { getAuthSupabase } from "@/lib/supabase";
 import { getPendingJobId } from "@/services/jobsDoneService";
 
 const SUPABASE_CONFIGURED =
@@ -21,7 +21,8 @@ export function useGlobalMessages() {
   const { state, dispatch } = useAppState();
   const threadIdsRef = useRef<string[]>([]);
   const subscribedRef = useRef(false);
-  const notifChannelRef = useRef<ReturnType<ReturnType<typeof getAuthSupabase>["channel"]> | null>(null);
+  const notifPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const seenNotifIdsRef = useRef<Set<string>>(new Set());
 
   // Keep threadIdsRef in sync whenever AppState threads change
   useEffect(() => {
@@ -113,71 +114,58 @@ export function useGlobalMessages() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isAuthenticated]);
 
-  // Realtime subscription for notifications (jobs_done_request, etc.).
-  // Uses getRealtimeSupabase() — a dedicated client that always connects to the real
-  // Supabase URL, bypassing the sandbox HTTP proxy which would break WebSockets.
-  // JWT is injected via realtime.setAuth() so the user_id RLS filter is honoured.
+  // Poll for unread notifications every 15 seconds.
+  // Replaces Realtime subscription which failed to fire due to RLS/proxy issues.
   useEffect(() => {
     if (!SUPABASE_CONFIGURED || !state.isAuthenticated || !state.currentUser) return;
     const userId = state.currentUser.id;
+    const sb = getAuthSupabase();
 
-    const authSb = getAuthSupabase();
-    const rtSb = getRealtimeSupabase();
+    async function pollNotifications() {
+      const { data, error } = await sb
+        .from("notifications")
+        .select("id, type, from_user_id, message, read")
+        .eq("user_id", userId)
+        .eq("read", false)
+        .order("created_at", { ascending: false });
 
-    authSb.auth.getSession().then(({ data: { session } }) => {
-      if (session?.access_token) {
-        rtSb.realtime.setAuth(session.access_token);
-      }
+      if (error) { console.error("[Notifications] poll error:", error.message); return; }
+      if (!data?.length) return;
 
-      console.log("[Notifications] subscribed for user:", userId);
+      // Update badge to exact unread count
+      dispatch({ type: "SET_UNREAD_NOTIF_COUNT", count: data.length });
 
-      const channel = rtSb
-        .channel(`user-notifications-${userId}`)
-        .on(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          "postgres_changes" as any,
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "notifications",
-          },
-          async (payload: { new: Record<string, unknown> }) => {
-            console.log("[Notifications] received raw:", payload);
-            const row = payload.new;
+      // Process only notifications we haven't handled yet this session
+      for (const row of data) {
+        if (seenNotifIdsRef.current.has(row.id)) continue;
+        seenNotifIdsRef.current.add(row.id);
 
-            // Filter in handler — avoids RLS issues with server-side filter
-            if (row.user_id !== userId) return;
+        console.log("[Notifications] received:", row);
 
-            dispatch({ type: "INCREMENT_UNREAD_NOTIF_COUNT" });
+        if (row.type !== "jobs_done_request") continue;
 
-            if (row.type !== "jobs_done_request") return;
-            const fromUserId = row.from_user_id as string;
-            const fromName = (row.message as string) ?? "A pro";
-            const notificationId = row.id as string;
+        const jobId = await getPendingJobId(row.from_user_id);
+        if (!jobId) continue;
 
-            const jobId = await getPendingJobId(fromUserId);
-            if (!jobId) return;
-
-            dispatch({
-              type: "SET_PENDING_JOBS_REQUEST",
-              request: { jobId, fromName, notificationId },
-            });
-          }
-        )
-        .subscribe((status, err) => {
-          console.log(`[Notifications] channel status: ${status}`, err ?? "");
+        dispatch({
+          type: "SET_PENDING_JOBS_REQUEST",
+          request: { jobId, fromName: row.message ?? "A pro", notificationId: row.id },
         });
+      }
+    }
 
-      notifChannelRef.current = channel;
-    });
+    // Run immediately on login, then every 15 seconds
+    pollNotifications();
+    notifPollRef.current = setInterval(pollNotifications, 15_000);
 
     return () => {
-      if (notifChannelRef.current) {
-        rtSb.removeChannel(notifChannelRef.current);
-        notifChannelRef.current = null;
+      if (notifPollRef.current) {
+        clearInterval(notifPollRef.current);
+        notifPollRef.current = null;
       }
+      seenNotifIdsRef.current.clear();
     };
-  // Re-subscribe when auth user changes
+  // Restart polling when auth user changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isAuthenticated, state.currentUser?.id]);
 }
