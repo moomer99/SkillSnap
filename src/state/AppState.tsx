@@ -72,6 +72,7 @@ type Action =
   | { type: "APPEND_THREAD_MESSAGE_IF_NEW"; threadId: string; message: Message }
   | { type: "PATCH_THREAD_MESSAGE"; threadId: string; optimisticId: string; message: Message }
   | { type: "INCREMENT_THREAD_UNREAD"; threadId: string }
+  | { type: "CLEAR_ALL_THREAD_UNREAD" }
   | { type: "PREPEND_POST"; post: Post }
   | { type: "DELETE_POST"; postId: string }
   | { type: "UPDATE_POST"; postId: string; patch: Partial<Pick<Post, "caption" | "skill" | "location">> }
@@ -287,6 +288,11 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         threads: state.threads.map((t) =>
           t.id === action.threadId ? { ...t, unreadCount: (t.unreadCount ?? 0) + 1 } : t
         ),
+      };
+    case "CLEAR_ALL_THREAD_UNREAD":
+      return {
+        ...state,
+        threads: state.threads.map((t) => ({ ...t, unreadCount: 0 })),
       };
     case "PATCH_THREAD_MESSAGE": {
       const msgs = state.threadMessages[action.threadId] ?? [];

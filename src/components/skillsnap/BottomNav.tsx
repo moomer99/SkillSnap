@@ -69,11 +69,11 @@ export default function BottomNav({ active, onNavigate }: BottomNavProps) {
         icon={
           <span className="relative inline-flex">
             <MessageCircle size={22} />
-            {state.unreadNotifCount > 0 && (
+{(() => { const n = state.threads.reduce((s, t) => s + (t.unreadCount ?? 0), 0); return n > 0 ? (
               <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">
-                {state.unreadNotifCount > 9 ? "9+" : state.unreadNotifCount}
+                {n > 9 ? "9+" : n}
               </span>
-            )}
+            ) : null; })()}
           </span>
         }
         label="Messages"

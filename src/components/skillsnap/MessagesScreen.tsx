@@ -32,6 +32,7 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
     setNotifPerm(getNotifPermission());
     try { setNotifDismissed(!!localStorage.getItem("skillsnap_notif_dismissed")); } catch {}
     dispatch({ type: "CLEAR_UNREAD_NOTIF_COUNT" });
+    dispatch({ type: "CLEAR_ALL_THREAD_UNREAD" });
     if (state.currentUser?.id) {
       getAuthSupabase()
         .from("notifications")
