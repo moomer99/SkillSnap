@@ -85,9 +85,10 @@ export interface Message {
   imageUrl?: string;
   time: string;
   senderName?: string;
-  failed?: boolean; // true when DB insert failed — shown with retry indicator
-  isSystem?: boolean; // true for system messages (e.g. Jobs Done request)
-  createdAt?: string; // ISO timestamp from DB — used for splitting messages around Jobs Done card
+  failed?: boolean;
+  uploading?: boolean; // true while image is being uploaded — shows spinner overlay
+  isSystem?: boolean;
+  createdAt?: string;
 }
 
 export interface MessageThread {
