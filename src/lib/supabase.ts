@@ -1,3 +1,4 @@
+// cache-bust: 2026-05-12-v2
 import { createClient } from "@supabase/supabase-js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
