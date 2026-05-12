@@ -277,6 +277,26 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       if (pendingRequest?.notificationId) {
         await jobsDoneService.markNotificationRead(pendingRequest.notificationId);
       }
+      // Re-fetch the skiller's profile so the jobs_done count reflects the DB trigger increment.
+      // The skiller is the other participant in this conversation (client is confirming).
+      const skillerId = displayParticipant?.id;
+      if (skillerId) {
+        const { getAuthSupabase } = await import("@/lib/supabase");
+        const { data } = await getAuthSupabase()
+          .from("profiles")
+          .select("jobs_done")
+          .eq("id", skillerId)
+          .single();
+        if (data) {
+          const newCount = Number(data.jobs_done ?? 0);
+          // Update participant display in the thread list
+          setParticipant((prev) => prev ? { ...prev, jobsDone: newCount } : prev);
+          // If the skiller is the current user (shouldn't be on client side, but guard anyway)
+          if (currentUser?.id === skillerId) {
+            dispatch({ type: "UPDATE_CURRENT_USER", patch: { jobsDone: newCount } });
+          }
+        }
+      }
     } catch (e) {
       console.warn("[ChatScreen] handleClientConfirm failed:", e);
     }

@@ -91,9 +91,20 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
       .update({ client_confirmed: true, verified_at: now })
       .eq("id", req.jobId);
     if (error) console.error("[JobsDone] confirm update failed:", error.message);
+
+    // Re-fetch skiller's updated jobs_done count and push it into app state
+    const { data: profile } = await sb
+      .from("profiles")
+      .select("jobs_done")
+      .eq("id", req.fromUserId)
+      .single();
+    if (profile) {
+      dispatch({ type: "UPDATE_CURRENT_USER", patch: { jobsDone: Number(profile.jobs_done ?? 0) } });
+    }
+
     setJobsRequests((prev) => prev.filter((r) => r.jobId !== req.jobId));
     setProcessingId(null);
-  }, []);
+  }, [dispatch]);
 
   const handleDecline = useCallback(async (req: JobsRequest) => {
     setProcessingId(req.jobId);
