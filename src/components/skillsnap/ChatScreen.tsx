@@ -232,9 +232,13 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         .select()
         .single();
 
-      console.log("[JobsDone] insert result:", jobData, jobError);
+      console.log("[JobsDone] insert result — data:", JSON.stringify(jobData), "error:", jobError ? JSON.stringify({ message: jobError.message, code: jobError.code, details: jobError.details, hint: jobError.hint }) : null);
       if (jobError) {
-        console.error("[JobsDone] insert failed:", jobError.message, jobError.code);
+        console.error("[JobsDone] insert failed:", jobError.message, "code:", jobError.code, "details:", jobError.details, "hint:", jobError.hint);
+        return;
+      }
+      if (!jobData) {
+        console.error("[JobsDone] insert returned null data with no error — likely blocked by RLS policy. Check that the authenticated user has INSERT permission on jobs_done.");
         return;
       }
 

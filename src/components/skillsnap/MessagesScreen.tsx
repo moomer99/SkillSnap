@@ -85,14 +85,12 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
     setProcessingId(req.jobId);
     const sb = getAuthSupabase();
     const now = new Date().toISOString();
-    await sb.from("jobs_done").update({ client_confirmed: true, verified_at: now }).eq("id", req.jobId);
-    // Increment skiller's jobs_done count
-    const { error: rpcErr } = await sb.rpc("increment_jobs_done", { skiller_id: req.fromUserId });
-    if (rpcErr) {
-      // Fallback: direct update if RPC not available
-      const { data: profileData } = await sb.from("profiles").select("jobs_done").eq("id", req.fromUserId).single();
-      if (profileData) await sb.from("profiles").update({ jobs_done: (profileData.jobs_done ?? 0) + 1 }).eq("id", req.fromUserId);
-    }
+    // DB trigger handle_job_confirmed fires on this update and increments jobs_done on the profile
+    const { error } = await sb
+      .from("jobs_done")
+      .update({ client_confirmed: true, verified_at: now })
+      .eq("id", req.jobId);
+    if (error) console.error("[JobsDone] confirm update failed:", error.message);
     setJobsRequests((prev) => prev.filter((r) => r.jobId !== req.jobId));
     setProcessingId(null);
   }, []);
