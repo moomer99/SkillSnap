@@ -421,6 +421,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Handle PKCE code that lands on the root URL (?code=xxx).
+    // Supabase uses the configured Site URL when /auth/callback is not in the
+    // allowed-redirect-URLs list, delivering the code here instead.
+    const rootCode = queryParams.get("code");
+    if (rootCode) {
+      window.history.replaceState({}, "", window.location.pathname);
+      clearTimeout(authTimeout);
+      authSb.auth.exchangeCodeForSession(rootCode).then(({ data: codeData, error: codeError }) => {
+        if (codeError) {
+          console.error("[AppState] PKCE exchange failed:", codeError.message);
+          dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          return;
+        }
+        if (!codeData.session) {
+          dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          return;
+        }
+        // recovery_sent_at is set by Supabase when a password reset email was sent
+        const isRecovery = codeData.user?.recovery_sent_at != null;
+        if (isRecovery) {
+          dispatch({ type: "NAVIGATE", screen: "reset-password" });
+          dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        } else {
+          hydrateProfile(codeData.session.user.id, codeData.session.user);
+        }
+      });
+      return;
+    }
+
     // Track whether getSession already hydrated so INITIAL_SESSION doesn't double-fire
     let initializedByGetSession = false;
 
