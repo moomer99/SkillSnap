@@ -17,7 +17,7 @@ export function getSupabase(): SupabaseClient {
         storage: typeof window !== "undefined" ? window.localStorage : undefined,
         autoRefreshToken: true,
         detectSessionInUrl: false,
-        flowType: "pkce",
+        flowType: "implicit",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         lock: (async (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => fn()) as any,
       },
