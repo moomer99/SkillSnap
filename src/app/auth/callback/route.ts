@@ -54,8 +54,8 @@ export async function GET(request: NextRequest) {
     if (data.session) {
       const isRecovery = data.user?.recovery_sent_at != null;
       if (isRecovery) {
-        console.log("[auth/callback] recovery session detected, redirecting to reset-password");
-        return NextResponse.redirect(`${origin}/?type=recovery`);
+        console.log("[auth/callback] recovery session detected, redirecting to /reset-password");
+        return NextResponse.redirect(`${origin}/reset-password`);
       }
     }
 

@@ -415,9 +415,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       queryParams.get("type") === "recovery";
     if (recoveryType) {
       window.history.replaceState({}, "", window.location.pathname);
-      dispatch({ type: "NAVIGATE", screen: "reset-password" });
       clearTimeout(authTimeout);
       dispatch({ type: "SET_AUTH_LOADING", loading: false });
+      window.location.replace("/reset-password");
       return;
     }
 
@@ -444,8 +444,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // Handle inline in case PASSWORD_RECOVERY event doesn't fire (e.g. some Supabase versions).
         const isRecovery = codeData.user?.recovery_sent_at != null;
         if (isRecovery) {
-          dispatch({ type: "NAVIGATE", screen: "reset-password" });
           dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          window.location.replace("/reset-password");
+          return;
         }
         // If not recovery, SIGNED_IN event from onAuthStateChange will hydrate profile.
       });
@@ -479,11 +480,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
 
       if (event === "PASSWORD_RECOVERY") {
-        // User arrived via a password reset email link — show the reset screen.
-        // Don't hydrate profile or change screen to home.
         clearTimeout(authTimeout);
-        dispatch({ type: "NAVIGATE", screen: "reset-password" });
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        window.location.replace("/reset-password");
         return;
       }
 
