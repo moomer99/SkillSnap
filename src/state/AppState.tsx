@@ -4,7 +4,7 @@
 // Auth: hydrated from Supabase session on mount.
 // onAuthStateChange keeps session in sync.
 // ─────────────────────────────────────────────
-import { createContext, useContext, useReducer, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useReducer, useEffect, useRef, type ReactNode } from "react";
 import type { User, Post, MessageThread, Message, Screen } from "@/types";
 import type { DiscoveryFilter } from "@/mock-data/discovery";
 import { getAuthSupabase } from "@/lib/supabase";
@@ -345,6 +345,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const hydratingRef = useRef<string | null>(null);
 
   // Hydrate auth state from Supabase session on mount
   useEffect(() => {
@@ -487,6 +488,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
 
       if (event === "SIGNED_IN") {
+        if (hydratingRef.current === session.user.id) {
+          console.log("[AppState] SIGNED_IN skipped — already hydrating for", session.user.id);
+          return;
+        }
+        hydratingRef.current = session.user.id;
         console.log("[AppState] SIGNED_IN — hydrating profile");
         clearTimeout(authTimeout);
         await hydrateProfile(session.user.id, session.user);

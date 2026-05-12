@@ -22,6 +22,7 @@ export function useChat() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(false);
   const unsubRef = useRef<(() => void) | null>(null);
+  const subscribedConvRef = useRef<string | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const threadId = state.activeThreadId ?? "";
@@ -71,16 +72,17 @@ export function useChat() {
 
     fetchMessages();
 
-    // Tear down any previous subscription before creating a new one.
-    // messageService.subscribeToMessages also cleans up the old channel synchronously,
-    // so calling unsub here is a belt-and-suspenders safety measure only.
-    unsubRef.current?.();
-    unsubRef.current = null;
+    // Tear down previous subscription only if the conversation changed.
+    if (subscribedConvRef.current !== threadId) {
+      unsubRef.current?.();
+      unsubRef.current = null;
+      subscribedConvRef.current = threadId;
 
-    // Subscribe to Realtime inserts — skip if message already in state (echo dedup)
-    unsubRef.current = messageService.subscribeToMessages(threadId, (msg) => {
-      dispatch({ type: "APPEND_THREAD_MESSAGE_IF_NEW", threadId, message: msg });
-    });
+      // Subscribe to Realtime inserts — skip if message already in state (echo dedup)
+      unsubRef.current = messageService.subscribeToMessages(threadId, (msg) => {
+        dispatch({ type: "APPEND_THREAD_MESSAGE_IF_NEW", threadId, message: msg });
+      });
+    }
 
     // Refetch when tab becomes visible again — catches messages sent while
     // the Realtime subscription was suspended (background tab)
@@ -95,6 +97,7 @@ export function useChat() {
     return () => {
       unsubRef.current?.();
       unsubRef.current = null;
+      subscribedConvRef.current = null;
       document.removeEventListener("visibilitychange", handleVisibility);
       clearInterval(pollInterval);
     };
