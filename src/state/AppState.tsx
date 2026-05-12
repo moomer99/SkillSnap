@@ -10,9 +10,6 @@ import type { DiscoveryFilter } from "@/mock-data/discovery";
 import { getAuthSupabase } from "@/lib/supabase";
 import { mapProfile, ensureProfile } from "@/services/authService";
 
-// Module-level guard — survives re-renders, reset on sign-out
-let globalHydrated = false;
-
 // ── State Shape ──────────────────────────────
 interface AppStateShape {
   currentUser: User | null;
@@ -370,8 +367,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Falls back to ensureProfile (upsert) if the row doesn't exist yet,
     // which is the normal path for first-time Google OAuth login.
     async function hydrateProfile(userId: string, authUser: import("@supabase/supabase-js").User) {
-      if (globalHydrated) return;
-      globalHydrated = true;
+      console.log("[AppState] hydrateProfile START", userId);
+      const timeout = setTimeout(() => {
+        console.error("[AppState] hydrateProfile timed out");
+        dispatch({ type: "SET_AUTH_LOADING", loading: false });
+      }, 10000);
       try {
         const { data, error: fetchErr } = await authSb
           .from("profiles")
@@ -379,6 +379,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           .eq("id", userId)
           .single();
 
+        console.log("[AppState] hydrateProfile fetch complete", !!data, fetchErr?.message);
         console.log("[AppState] hydrateProfile fetch — data:", !!data, "error:", fetchErr?.message, "code:", fetchErr?.code);
 
         if (data) {
@@ -409,6 +410,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         console.error("[AppState] hydrateProfile CRASHED:", e);
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
+      } finally {
+        clearTimeout(timeout);
       }
     }
 
@@ -468,7 +471,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.log("[AppState] onAuthStateChange", event, session?.user?.id ?? "no session");
 
       if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
-        globalHydrated = false;
         dispatch({ type: "CLEAR_AUTH" });
         return;
       }
