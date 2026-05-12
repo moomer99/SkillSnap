@@ -373,9 +373,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           id: authUser.id,
           email: authUser.email,
           display_name: authUser.user_metadata?.full_name ?? authUser.email,
-          username: authUser.email,
+          username: authUser.user_metadata?.username ?? authUser.email,
           avatar_url: authUser.user_metadata?.avatar_url ?? null,
-          role: null,
+          role: authUser.user_metadata?.role ?? "client",
           jobs_done: 0,
           happy_percent: 0,
         });
