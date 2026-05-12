@@ -31,6 +31,7 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
   useEffect(() => {
     setNotifPerm(getNotifPermission());
     try { setNotifDismissed(!!localStorage.getItem("skillsnap_notif_dismissed")); } catch {}
+    dispatch({ type: "CLEAR_UNREAD_NOTIF_COUNT" });
   }, []);
 
   // Fetch unread jobs_done_request notifications on mount, then mark all read

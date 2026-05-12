@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, useMemo } from "react";
-import { ArrowLeft, Phone, MoreVertical, Send, Paperclip, CheckCircle, Loader2, X, Clock, Flag, Bell, ChevronDown } from "lucide-react";
+import { ArrowLeft, MoreVertical, Send, Paperclip, CheckCircle, Loader2, X, Clock, Flag, Bell, ChevronDown } from "lucide-react";
 import type { Screen, User, JobDoneStatus, JobRating } from "@/types";
 import { MOCK_USERS } from "@/mock-data/users";
 import { useAppState } from "@/state/AppState";
@@ -401,18 +401,6 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           </div>
         </button>
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => {
-              if (navigator.userAgent.match(/iPhone|iPad|Android/i)) {
-                window.location.href = "tel:";
-              } else {
-                alert("Phone calling will be available in the mobile app.");
-              }
-            }}
-            className="w-9 h-9 flex items-center justify-center text-[#7a7570] active:text-[#6c47ff] transition-colors"
-          >
-            <Phone size={18} />
-          </button>
           <button
             onClick={() => setShowChatMenu(true)}
             className="w-9 h-9 flex items-center justify-center text-[#7a7570] active:text-[#6c47ff] transition-colors"
