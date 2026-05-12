@@ -406,9 +406,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Handle password reset callback — must check before subscribing
+    // Handle password reset callback — check both hash and query string.
+    // Supabase implicit flow puts tokens in the hash; PKCE flow uses query params.
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    if (hashParams.get("access_token") && hashParams.get("type") === "recovery") {
+    const queryParams = new URLSearchParams(window.location.search);
+    const recoveryType =
+      (hashParams.get("access_token") && hashParams.get("type") === "recovery") ||
+      queryParams.get("type") === "recovery";
+    if (recoveryType) {
       window.history.replaceState({}, "", window.location.pathname);
       dispatch({ type: "NAVIGATE", screen: "reset-password" });
       clearTimeout(authTimeout);
@@ -440,6 +445,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.log("[AppState] INITIAL_SESSION — hydrating profile");
         clearTimeout(authTimeout);
         await hydrateProfile(session.user.id, session.user);
+        return;
+      }
+
+      if (event === "PASSWORD_RECOVERY") {
+        // User arrived via a password reset email link — show the reset screen.
+        // Don't hydrate profile or change screen to home.
+        clearTimeout(authTimeout);
+        dispatch({ type: "NAVIGATE", screen: "reset-password" });
+        dispatch({ type: "SET_AUTH_LOADING", loading: false });
         return;
       }
 
