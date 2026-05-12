@@ -105,7 +105,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           <div className="flex items-start gap-4 mb-4">
             <UserAvatar user={user} size="lg" showVerified={isOwn} />
             <div className="flex-1 flex items-center justify-around pt-1 pb-1">
-              <Stat value={user.jobsDone >= 1000 ? `${(user.jobsDone / 1000).toFixed(0)}k` : String(user.jobsDone)} label="Jobs Done" highlight />
+              <Stat value={user.jobsDone >= 1000 ? `${(user.jobsDone / 1000).toFixed(0)}k` : String(user.jobsDone)} label={user.role === "client" ? "Hired" : "Jobs Done"} highlight />
               <div className="w-px h-8 bg-[#e8e4df]" />
               <Stat value={happyDisplay} label="😊 Happy" />
               <div className="w-px h-8 bg-[#e8e4df]" />
