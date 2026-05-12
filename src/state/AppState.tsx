@@ -368,8 +368,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // which is the normal path for first-time Google OAuth login.
     async function hydrateProfile(userId: string, authUser: import("@supabase/supabase-js").User) {
       const timeoutId = setTimeout(() => {
-        console.error("[AppState] hydrateProfile timed out");
-        dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        console.error("[AppState] hydrateProfile timed out — using session fallback");
+        const fallbackUser = mapProfile({
+          id: authUser.id,
+          email: authUser.email,
+          display_name: authUser.user_metadata?.full_name ?? authUser.email,
+          username: authUser.email,
+          avatar_url: authUser.user_metadata?.avatar_url ?? null,
+          role: null,
+          jobs_done: 0,
+          happy_percent: 0,
+        });
+        dispatch({ type: "SET_AUTH", user: fallbackUser });
       }, 5000);
 
       try {
