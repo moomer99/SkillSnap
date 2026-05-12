@@ -482,71 +482,71 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           })
         )}
 
-        {/* ── Job done status cards ── */}
-        {isSkiller && jobStatus === "requested" && (
-          <div className="mx-2 mt-2 bg-[#f5f0ff] rounded-2xl border border-[#6c47ff]/20 px-4 py-3 flex items-center gap-3">
-            <Loader2 size={18} className="text-[#6c47ff] flex-shrink-0 animate-spin" />
-            <div>
-              <p className="text-sm font-bold text-[#1a1a1a]">Job done request sent</p>
-              <p className="text-xs text-[#7a7570]">Waiting for {displayParticipant.displayName} to confirm…</p>
-            </div>
-          </div>
-        )}
-
-        {!isSkiller && jobStatus === "requested" && (
-          <div className="mx-2 mt-2 bg-white rounded-2xl border border-[#e8e4df] shadow-sm overflow-hidden">
-            <div className="px-4 pt-4 pb-3">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg">✅</span>
-                <p className="font-bold text-[#1a1a1a] text-sm">{displayParticipant.displayName} marked the job as done</p>
-              </div>
-              <p className="text-xs text-[#7a7570] leading-snug">Did they complete the work to your satisfaction? Confirm to leave feedback.</p>
-            </div>
-            <div className="flex border-t border-[#e8e4df]">
-              <button className="flex-1 py-3 text-sm font-semibold text-[#7a7570] active:bg-gray-50 transition-colors" onClick={handleClientDecline}>Decline</button>
-              <div className="w-px bg-[#e8e4df]" />
-              <button className="flex-1 py-3 text-sm font-bold text-[#6c47ff] active:bg-[#f5f0ff] transition-colors" onClick={handleClientConfirm}>Yes, Confirm ✓</button>
-            </div>
-          </div>
-        )}
-
-        {!isSkiller && jobStatus === "declined" && (
-          <div className="mx-2 mt-2 bg-[#fff7ed] rounded-2xl border border-orange-200 px-4 py-3 flex items-center gap-2">
-            <X size={16} className="text-orange-400 flex-shrink-0" />
-            <p className="text-sm font-semibold text-[#1a1a1a]">Job completion declined.</p>
-          </div>
-        )}
-
-        {isSkiller && jobStatus === "confirmed" && (
-          <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
-            <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
-            <div>
-              <p className="text-sm font-bold text-[#1a1a1a]">Job confirmed by client!</p>
-              <p className="text-xs text-[#7a7570]">Your happy % will update once they rate.</p>
-            </div>
-          </div>
-        )}
-
-        {!isSkiller && jobStatus === "confirmed" && !showFeedback && !feedbackDone && (
-          <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
-            <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-[#1a1a1a]">Job confirmed!</p>
-              <p className="text-xs text-[#7a7570]">Share your experience with the community.</p>
-            </div>
-            <button className="flex-shrink-0 text-xs font-bold text-white px-3 py-1.5 rounded-xl" style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)" }} onClick={() => setShowFeedback(true)}>Rate</button>
-          </div>
-        )}
-
-        {jobStatus === "feedback_done" && (
-          <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
-            <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
-            <p className="text-sm font-semibold text-[#1a1a1a]">Thanks for your feedback! 🎉</p>
-          </div>
-        )}
-
         <div ref={bottomRef} />
       </div>
+
+      {/* ── Job done status cards — always above input bar, after all messages ── */}
+      {isSkiller && jobStatus === "requested" && (
+        <div className="mx-2 mt-2 bg-[#f5f0ff] rounded-2xl border border-[#6c47ff]/20 px-4 py-3 flex items-center gap-3">
+          <Loader2 size={18} className="text-[#6c47ff] flex-shrink-0 animate-spin" />
+          <div>
+            <p className="text-sm font-bold text-[#1a1a1a]">Job done request sent</p>
+            <p className="text-xs text-[#7a7570]">Waiting for {displayParticipant.displayName} to confirm…</p>
+          </div>
+        </div>
+      )}
+
+      {!isSkiller && jobStatus === "requested" && (
+        <div className="mx-2 mt-2 bg-white rounded-2xl border border-[#e8e4df] shadow-sm overflow-hidden">
+          <div className="px-4 pt-4 pb-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">✅</span>
+              <p className="font-bold text-[#1a1a1a] text-sm">{displayParticipant.displayName} marked the job as done</p>
+            </div>
+            <p className="text-xs text-[#7a7570] leading-snug">Did they complete the work to your satisfaction? Confirm to leave feedback.</p>
+          </div>
+          <div className="flex border-t border-[#e8e4df]">
+            <button className="flex-1 py-3 text-sm font-semibold text-[#7a7570] active:bg-gray-50 transition-colors" onClick={handleClientDecline}>Decline</button>
+            <div className="w-px bg-[#e8e4df]" />
+            <button className="flex-1 py-3 text-sm font-bold text-[#6c47ff] active:bg-[#f5f0ff] transition-colors" onClick={handleClientConfirm}>Yes, Confirm ✓</button>
+          </div>
+        </div>
+      )}
+
+      {!isSkiller && jobStatus === "declined" && (
+        <div className="mx-2 mt-2 bg-[#fff7ed] rounded-2xl border border-orange-200 px-4 py-3 flex items-center gap-2">
+          <X size={16} className="text-orange-400 flex-shrink-0" />
+          <p className="text-sm font-semibold text-[#1a1a1a]">Job completion declined.</p>
+        </div>
+      )}
+
+      {isSkiller && jobStatus === "confirmed" && (
+        <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
+          <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-bold text-[#1a1a1a]">Job confirmed by client!</p>
+            <p className="text-xs text-[#7a7570]">Your happy % will update once they rate.</p>
+          </div>
+        </div>
+      )}
+
+      {!isSkiller && jobStatus === "confirmed" && !showFeedback && !feedbackDone && (
+        <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
+          <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-[#1a1a1a]">Job confirmed!</p>
+            <p className="text-xs text-[#7a7570]">Share your experience with the community.</p>
+          </div>
+          <button className="flex-shrink-0 text-xs font-bold text-white px-3 py-1.5 rounded-xl" style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)" }} onClick={() => setShowFeedback(true)}>Rate</button>
+        </div>
+      )}
+
+      {jobStatus === "feedback_done" && (
+        <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
+          <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
+          <p className="text-sm font-semibold text-[#1a1a1a]">Thanks for your feedback! 🎉</p>
+        </div>
+      )}
 
       {/* Scroll-to-bottom button */}
       {showScrollBtn && (
