@@ -20,6 +20,7 @@ export default function BottomNav({ active, onNavigate }: BottomNavProps) {
       dispatch({ type: "SHOW_AUTH_PROMPT" });
       return;
     }
+    if (screen === "messages") dispatch({ type: "CLEAR_UNREAD_NOTIF_COUNT" });
     onNavigate(screen);
   }
 

@@ -9,18 +9,40 @@ const SUPABASE_CONFIGURED =
 
 const IDLE_MS = 5 * 60 * 1000; // 5 minutes
 
+// Module-level singleton — presence channel must only be created once per session.
+// Re-creating it on every mount causes "cannot add postgres_changes callbacks after subscribe()" errors.
+type PresenceChannel = ReturnType<ReturnType<typeof getRealtimeSupabase>["channel"]>;
+let presenceChannel: PresenceChannel | null = null;
+let presenceUserId: string | null = null;
+
 export function usePresence(userId: string | null) {
   const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
-  const channelRef = useRef<ReturnType<ReturnType<typeof getRealtimeSupabase>["channel"]> | null>(null);
+  const channelRef = useRef<PresenceChannel | null>(null);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!SUPABASE_CONFIGURED || !userId) return;
 
+    // Reuse existing channel if already subscribed for this user
+    if (presenceChannel && presenceUserId === userId) {
+      channelRef.current = presenceChannel;
+      return;
+    }
+
+    // Tear down any stale channel for a different user (e.g. after sign-out/sign-in)
+    if (presenceChannel && presenceUserId !== userId) {
+      presenceChannel.untrack().catch(() => {});
+      getRealtimeSupabase().removeChannel(presenceChannel);
+      presenceChannel = null;
+      presenceUserId = null;
+    }
+
     const rt = getRealtimeSupabase();
     const channel = rt.channel("online-users", {
       config: { presence: { key: userId } },
     });
+    presenceChannel = channel;
+    presenceUserId = userId;
     channelRef.current = channel;
 
     channel
@@ -82,12 +104,11 @@ export function usePresence(userId: string | null) {
     document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
+      // Only remove event listeners — keep the channel alive (singleton).
+      // It will be torn down on sign-out when userId changes.
       events.forEach((ev) => window.removeEventListener(ev, resetIdle));
       document.removeEventListener("visibilitychange", handleVisibility);
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-      channel.untrack().catch(() => {});
-      rt.removeChannel(channel);
-      channelRef.current = null;
     };
   }, [userId]);
 
