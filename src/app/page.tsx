@@ -99,8 +99,9 @@ function SkillSnapRouter() {
       dispatch({ type: "SHOW_AUTH_PROMPT" });
       return;
     }
-    // Only Pro users can post — block clients and users with no role
-    if (s === "upload" && state.currentUser?.role !== "pro") {
+    // Only Pro (skiller) users can post — block clients and users with no role set
+    const role = state.currentUser?.role;
+    if (s === "upload" && (role === "client" || role === null || role === undefined)) {
       setShowPostRestriction(true);
       return;
     }
@@ -390,16 +391,16 @@ function SkillSnapRouter() {
             className="md:rounded-[16px] md:mb-0"
           >
             <div style={{ width: 36, height: 4, background: "#e8e4df", borderRadius: 99, margin: "0 auto 24px" }} className="md:hidden" />
-            <div style={{ fontSize: 28, marginBottom: 12, textAlign: "center" }}>🎬</div>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#1a1a1a", textAlign: "center", marginBottom: 10 }}>Share your work on SkillSnap</h2>
+            <div style={{ fontSize: 36, marginBottom: 12, textAlign: "center" }}>🚀</div>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#1a1a1a", textAlign: "center", marginBottom: 10 }}>Start getting clients — it&apos;s free!</h2>
             <p style={{ fontSize: 14, color: "#7a7570", textAlign: "center", lineHeight: 1.55, marginBottom: 28 }}>
-              Switch to Pro to post videos and showcase your skills to clients nearby.
+              Create your Pro profile to showcase your work and get discovered by clients near you.
             </p>
             <button
               onClick={() => { setShowPostRestriction(false); navigate("edit-profile"); }}
               style={{ width: "100%", padding: "14px 0", borderRadius: 14, background: "linear-gradient(135deg, #6c47ff, #8b6af5)", color: "white", fontWeight: 700, fontSize: 15, border: "none", cursor: "pointer", marginBottom: 10, boxShadow: "0 4px 16px rgba(108,71,255,0.28)" }}
             >
-              Update Profile
+              Set Up Pro Profile — Free
             </button>
             <button
               onClick={() => setShowPostRestriction(false)}

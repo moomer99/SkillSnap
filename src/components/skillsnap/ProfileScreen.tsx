@@ -158,10 +158,11 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           {isOwn ? (
             <div className="flex border-b border-[#e8e4df] bg-white">
               {(["work", "saved", "pro"] as const).map((tab) => (
-                <button key={tab} onClick={() => setActiveTab(tab)}
+                <button key={tab}
+                  onClick={() => tab === "pro" ? onNavigate("edit-profile") : setActiveTab(tab)}
                   className={`flex-1 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${activeTab === tab ? "text-[#6c47ff] border-b-2 border-[#6c47ff]" : "text-[#7a7570]"}`}>
-                  {tab === "pro" && <Zap size={13} className={activeTab === "pro" ? "text-[#6c47ff]" : "text-[#b0aaa5]"} />}
-                  {tab === "work" ? "My Works" : tab === "saved" ? "Saved" : "Go Pro"}
+                  {tab === "pro" && <Zap size={13} className="text-[#f59e0b]" />}
+                  {tab === "work" ? "My Works" : tab === "saved" ? "Saved" : "Go Pro — Free"}
                   {tab === "work" && (() => { const count = gridLoading ? null : (mergedPosts.length || (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)); return count ? <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">{count}</span> : null; })()}
                   {tab === "saved" && savedPostsList.length > 0 && <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">{savedPostsList.length}</span>}
                 </button>
@@ -205,15 +206,28 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                   <p className="text-sm font-bold text-[#1a1a1a]">No posts yet</p>
                   <p className="text-xs text-[#b0aaa5] leading-relaxed">
                     {isOwn
-                      ? "Upload your first job to showcase your skill and start getting clients"
+                      ? (state.currentUser?.role === "client" || !state.currentUser?.role)
+                        ? "Set up your Pro profile to showcase your work and start getting hired"
+                        : "Upload your first job to showcase your skill and start getting clients"
                       : `${user.displayName} hasn't uploaded any work yet. Connect with them directly.`}
                   </p>
                   <button
-                    onClick={() => isOwn ? onNavigate("upload") : requireAuth(() => connectTo(user.id))}
+                    onClick={() => {
+                      if (!isOwn) { requireAuth(() => connectTo(user.id)); return; }
+                      if (state.currentUser?.role === "client" || !state.currentUser?.role) {
+                        onNavigate("edit-profile");
+                      } else {
+                        onNavigate("upload");
+                      }
+                    }}
                     className="mt-1 px-5 py-2.5 rounded-xl font-bold text-sm text-white"
                     style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
                   >
-                    {isOwn ? "Upload First Post" : "Connect Anyway"}
+                    {isOwn
+                      ? (state.currentUser?.role === "client" || !state.currentUser?.role)
+                        ? "Set Up Pro Profile — Free"
+                        : "Upload First Post"
+                      : "Connect Anyway"}
                   </button>
                 </div>
               )}
