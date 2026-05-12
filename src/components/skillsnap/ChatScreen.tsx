@@ -5,6 +5,7 @@ import type { Screen, User, JobDoneStatus, JobRating } from "@/types";
 import { MOCK_USERS } from "@/mock-data/users";
 import { useAppState } from "@/state/AppState";
 import { useChat } from "@/hooks/useChat";
+import { JOBS_DONE_CONFIG } from "@/constants/config";
 import UserAvatar from "./shared/UserAvatar";
 
 interface ChatScreenProps {
@@ -144,9 +145,10 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const hasMessages = messages.length > 0;
   const threadStartedAt = activeThread?.startedAt;
   const hoursIn = threadStartedAt ? hoursElapsed(threadStartedAt) : 0;
+  const minHours = JOBS_DONE_CONFIG.MIN_CONVERSATION_HOURS;
   const hoursRemaining = Math.max(0, Math.ceil(24 - hoursIn));
 
-  const canRequestJobDone = hasMessages && hoursIn >= 24;
+  const canRequestJobDone = hasMessages && hoursIn >= minHours;
   const lockedLabel = `Available in ~${hoursRemaining}h · conversation must be 24h old`;
 
   useEffect(() => {

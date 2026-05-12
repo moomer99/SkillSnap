@@ -64,6 +64,8 @@ export const JOBS_DONE_CONFIG = {
   TOOLTIP_TEXT:
     "Jobs Done are confirmed after users complete work and verify it through chat. This reflects real work done, not ratings.",
   TRUST_NOTE: "Verified by both parties — no self-reporting",
+  // TODO: change back to 24 before launch
+  MIN_CONVERSATION_HOURS: 1 / 60, // 1 minute for testing
 } as const;
 
 // Brand colors (used in dynamic styles)
