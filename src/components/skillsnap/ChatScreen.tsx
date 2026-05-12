@@ -38,12 +38,6 @@ const QUICK_REPLIES_CLIENT = [
   "Thanks! 🙌",
 ];
 
-// ── FIX: Jobs Done unlock threshold ──────────────────────────────
-// TESTING MODE: unlocks after 2 messages (no 24h wait)
-// PRODUCTION:   set TESTING_MODE to false → reverts to 24h threshold
-const TESTING_MODE = true;
-const TESTING_MIN_MESSAGES = 2; // unlock after this many messages
-// ─────────────────────────────────────────────────────────────────
 
 function QuickReplies({ onSelect, hasMessages, isSkiller }: {
   onSelect: (text: string) => void;
@@ -152,18 +146,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const hoursIn = threadStartedAt ? hoursElapsed(threadStartedAt) : 0;
   const hoursRemaining = Math.max(0, Math.ceil(24 - hoursIn));
 
-  // ── FIX: Jobs Done unlock logic ──────────────────────────────────
-  // Testing mode: unlock after TESTING_MIN_MESSAGES messages
-  // Production mode: unlock after 24 hours (original behaviour)
-  const canRequestJobDone = TESTING_MODE
-    ? hasMessages && messages.length >= TESTING_MIN_MESSAGES
-    : hasMessages && hoursIn >= 24;
-
-  // Label shown on the locked state banner
-  const lockedLabel = TESTING_MODE
-    ? `Send ${Math.max(0, TESTING_MIN_MESSAGES - messages.length)} more message${messages.length < TESTING_MIN_MESSAGES - 1 ? "s" : ""} to unlock`
-    : `Available in ~${hoursRemaining}h · conversation must be 24h old`;
-  // ─────────────────────────────────────────────────────────────────
+  const canRequestJobDone = hasMessages && hoursIn >= 24;
+  const lockedLabel = `Available in ~${hoursRemaining}h · conversation must be 24h old`;
 
   useEffect(() => {
     const threadParticipant = state.threads.find((t) => t.id === state.activeThreadId)?.participant;
@@ -368,16 +352,6 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           </button>
         </div>
       </header>
-
-      {/* ── Testing mode banner ── */}
-      {TESTING_MODE && (
-        <div className="flex items-center justify-center gap-2 px-4 py-1.5 bg-amber-50 border-b border-amber-100">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
-          <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">
-            Testing Mode — Jobs Done unlocks after {TESTING_MIN_MESSAGES} messages
-          </span>
-        </div>
-      )}
 
       {/* ── Messages ── */}
       <div
