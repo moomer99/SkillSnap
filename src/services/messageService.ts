@@ -39,6 +39,7 @@ function mapMessage(row: Record<string, unknown>, currentUserId: string): Messag
     threadId: row.conversation_id as string,
     from: row.sender_id === currentUserId ? "me" : "them",
     text,
+    imageUrl: row.image_url as string | undefined,
     time: new Date(row.created_at as string).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     createdAt: row.created_at as string,
     senderName: profile?.display_name as string | undefined,
@@ -153,14 +154,17 @@ export const messageService = {
     return (data ?? []).map((row) => mapMessage(row as Record<string, unknown>, userId));
   },
 
-  async sendMessage(conversationId: string, text: string): Promise<Message> {
+  async sendMessage(conversationId: string, text: string, imageUrl?: string): Promise<Message> {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error("Not authenticated");
     const sb = getAuthSupabase();
 
+    const row: Record<string, unknown> = { conversation_id: conversationId, sender_id: userId, text };
+    if (imageUrl) row.image_url = imageUrl;
+
     const { data, error } = await sb
       .from("messages")
-      .insert({ conversation_id: conversationId, sender_id: userId, text })
+      .insert(row)
       .select()
       .single();
 
@@ -168,8 +172,9 @@ export const messageService = {
     if (!data) throw new Error("No data returned from insert");
 
     // Keep conversations row fresh (fire-and-forget, non-fatal)
+    const lastText = imageUrl && !text ? "📷 Image" : text;
     sb.from("conversations")
-      .update({ last_message_text: text, last_message_at: new Date().toISOString() })
+      .update({ last_message_text: lastText, last_message_at: new Date().toISOString() })
       .eq("id", conversationId)
       .then(() => {})
       .catch(() => {});
@@ -198,6 +203,16 @@ export const messageService = {
           .eq("user_id", m.user_id)
       )
     );
+  },
+
+  async uploadChatImage(file: File, userId: string): Promise<string> {
+    const sb = getAuthSupabase();
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await sb.storage.from("chat-images").upload(path, file, { upsert: false });
+    if (error) throw error;
+    const { data } = sb.storage.from("chat-images").getPublicUrl(path);
+    return data.publicUrl;
   },
 
   async markThreadRead(conversationId: string): Promise<void> {

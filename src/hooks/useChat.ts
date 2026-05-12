@@ -141,17 +141,47 @@ export function useChat() {
     }
   }, [inputText, threadId, dispatch]);
 
-  const sendImageMessage = useCallback((imageUrl: string, fileName: string) => {
-    if (!threadId) return;
-    const msg: Message = {
-      id: `img_${Date.now()}`,
-      threadId,
+  const sendImageMessage = useCallback(async (file: File) => {
+    const tid = threadId || "mock_thread_local";
+    const optimisticId = `img_optimistic_${Date.now()}`;
+    const previewUrl = URL.createObjectURL(file);
+
+    // Show preview immediately while uploading
+    const optimistic: Message = {
+      id: optimisticId,
+      threadId: tid,
       from: "me",
-      text: fileName,
-      imageUrl,
+      text: "",
+      imageUrl: previewUrl,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
-    dispatch({ type: "APPEND_THREAD_MESSAGE", threadId, message: msg });
+    dispatch({ type: "APPEND_THREAD_MESSAGE", threadId: tid, message: optimistic });
+
+    if (!SUPABASE_CONFIGURED || !threadId) return;
+
+    try {
+      const { getAuthSupabase } = await import("@/lib/supabase");
+      const { data: { session } } = await getAuthSupabase().auth.getSession();
+      const userId = session?.user?.id;
+      if (!userId) throw new Error("Not authenticated");
+
+      const publicUrl = await messageService.uploadChatImage(file, userId);
+      const confirmed = await messageService.sendMessage(tid, "", publicUrl);
+      URL.revokeObjectURL(previewUrl);
+      dispatch({ type: "PATCH_THREAD_MESSAGE", threadId: tid, optimisticId, message: confirmed });
+    } catch (err) {
+      console.error("sendImageMessage failed:", err);
+      URL.revokeObjectURL(previewUrl);
+      const failed: Message = {
+        id: optimisticId,
+        threadId: tid,
+        from: "me",
+        text: "Image failed to send",
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        failed: true,
+      };
+      dispatch({ type: "PATCH_THREAD_MESSAGE", threadId: tid, optimisticId, message: failed });
+    }
   }, [threadId, dispatch]);
 
   return {

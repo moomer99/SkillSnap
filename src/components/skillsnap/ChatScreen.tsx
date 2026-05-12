@@ -651,8 +651,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (!file) return;
-            const objectUrl = URL.createObjectURL(file);
-            sendImageMessage(objectUrl, file.name);
+            sendImageMessage(file);
             e.target.value = "";
           }}
         />
