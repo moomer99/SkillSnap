@@ -73,7 +73,7 @@ function recalcHappy(prev: number, prevJobs: number, isHappy: boolean): number {
 }
 
 export default function ChatScreen({ onNavigate }: ChatScreenProps) {
-  const { state, dispatch } = useAppState();
+  const { state, dispatch, onlineUserIds } = useAppState();
   const { messages, inputText, setInputText, sending, loading, sendMessage, sendImageMessage, bottomRef, threadId } = useChat();
   const [participant, setParticipant] = useState<User | null>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -387,7 +387,9 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         <button onClick={() => onNavigate("client-profile")} className="flex items-center gap-2.5 flex-1 min-w-0">
           <div className="relative flex-shrink-0">
             <UserAvatar user={displayParticipant} size="sm" />
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-white" />
+            {onlineUserIds.has(displayParticipant.id) && (
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-white" />
+            )}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-bold text-[#1a1a1a] leading-tight truncate">{displayParticipant.displayName}</p>

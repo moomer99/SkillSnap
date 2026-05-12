@@ -9,9 +9,10 @@ import UserAvatar from "./UserAvatar";
 interface MessageThreadItemProps {
   thread: MessageThread;
   onClick: () => void;
+  isOnline?: boolean;
 }
 
-export default function MessageThreadItem({ thread, onClick }: MessageThreadItemProps) {
+export default function MessageThreadItem({ thread, onClick, isOnline = false }: MessageThreadItemProps) {
   const { participant, lastMessage, lastMessageTime, unreadCount } = thread;
   const hasUnread = unreadCount > 0;
 
@@ -22,11 +23,13 @@ export default function MessageThreadItem({ thread, onClick }: MessageThreadItem
     >
       <div className="relative flex-shrink-0">
         <UserAvatar user={participant} size="md" />
-        {hasUnread && (
+        {hasUnread ? (
           <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-[#6c47ff] flex items-center justify-center">
             <span className="text-[9px] text-white font-bold">{unreadCount}</span>
           </div>
-        )}
+        ) : isOnline ? (
+          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-white" />
+        ) : null}
       </div>
 
       <div className="flex-1 min-w-0">

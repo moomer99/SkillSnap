@@ -21,7 +21,7 @@ interface MessagesScreenProps {
 
 export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScreenProps) {
   const { threads, threadsLoading, openThread } = useMessages();
-  const { state, dispatch } = useAppState();
+  const { state, dispatch, onlineUserIds } = useAppState();
   const [query, setQuery] = useState("");
   const [notifPerm, setNotifPerm] = useState<NotifPermission>("default");
   const [notifDismissed, setNotifDismissed] = useState(false);
@@ -268,6 +268,7 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
               key={thread.id}
               thread={thread}
               onClick={() => openThread(thread.id)}
+              isOnline={onlineUserIds.has(thread.participant?.id ?? "")}
             />
           ))
         )}

@@ -5,6 +5,7 @@
 // onAuthStateChange keeps session in sync.
 // ─────────────────────────────────────────────
 import { createContext, useContext, useReducer, useEffect, useRef, type ReactNode } from "react";
+import { usePresence } from "@/hooks/usePresence";
 import type { User, Post, MessageThread, Message, Screen } from "@/types";
 import type { DiscoveryFilter } from "@/mock-data/discovery";
 import { getAuthSupabase } from "@/lib/supabase";
@@ -339,6 +340,7 @@ interface AppContextValue {
   state: AppStateShape;
   dispatch: React.Dispatch<Action>;
   navigate: (screen: Screen) => void;
+  onlineUserIds: Set<string>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -346,6 +348,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const hydratingRef = useRef<string | null>(null);
+  const onlineUserIds = usePresence(state.currentUser?.id ?? null);
 
   // Hydrate auth state from Supabase session on mount
   useEffect(() => {
@@ -539,7 +542,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AppContext.Provider value={{ state, dispatch, navigate }}>
+    <AppContext.Provider value={{ state, dispatch, navigate, onlineUserIds }}>
       {children}
     </AppContext.Provider>
   );
