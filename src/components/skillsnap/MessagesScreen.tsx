@@ -7,6 +7,7 @@ import MessageThreadItem from "./shared/MessageThreadItem";
 import { getNotifPermission, requestNotifPermission, type NotifPermission } from "@/hooks/useNotifications";
 import { useAppState } from "@/state/AppState";
 import { getAuthSupabase } from "@/lib/supabase";
+import { messageService } from "@/services/messageService";
 
 interface JobsRequest {
   notificationId: string;
@@ -42,6 +43,15 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
         .then(() => {});
     }
   }, []);
+
+  // Mark all threads as read in DB so loadThreads can't restore the badge count
+  useEffect(() => {
+    if (!state.threads.length) return;
+    state.threads.forEach(thread => {
+      messageService.markThreadRead(thread.id).catch(() => {});
+    });
+    dispatch({ type: "CLEAR_ALL_THREAD_UNREAD" });
+  }, [state.threads.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch unread jobs_done_request notifications on mount, then mark all read
   useEffect(() => {
