@@ -502,7 +502,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       {/* ── Messages ── */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 pb-2 flex flex-col gap-2.5"
+        className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 py-4 pb-2 flex flex-col gap-2.5"
         onScroll={(e) => {
           const el = e.currentTarget;
           const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
