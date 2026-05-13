@@ -481,7 +481,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   }
 
   return (
-    <div className="flex flex-col bg-[#f8f7f5] relative" style={{ height: "100dvh" }}>
+    <div className="flex flex-col bg-[#f8f7f5] relative overflow-hidden" style={{ height: "100dvh" }}>
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center gap-3 px-4 h-14 flex-shrink-0">
