@@ -75,7 +75,8 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
     : user.followers >= 1000 ? `${(user.followers / 1000).toFixed(1)}k` : String(user.followers);
   const happyDisplay = user.happyPercent !== undefined &&
     user.happyPercent !== null &&
-    user.happyPercent > 0
+    user.happyPercent > 0 &&
+    (user.ratingCount ?? 0) >= 3
     ? `${user.happyPercent}%` : "—";
 
   return (

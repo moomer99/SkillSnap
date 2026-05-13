@@ -16,7 +16,7 @@ export const userService = {
   async getUser(id: string): Promise<User | null> {
     const { data, error } = await getSupabase()
       .from("profiles")
-      .select("*")
+      .select("*, ratings(count)")
       .eq("id", id)
       .single();
     if (error || !data) return null;
@@ -28,7 +28,7 @@ export const userService = {
     if (!userId) return null;
     const { data, error } = await getSupabase()
       .from("profiles")
-      .select("*")
+      .select("*, ratings(count)")
       .eq("id", userId)
       .single();
     if (error || !data) return null;
@@ -39,7 +39,7 @@ export const userService = {
     if (!query.trim()) return [];
     const { data } = await getSupabase()
       .from("profiles")
-      .select("*")
+      .select("*, ratings(count)")
       .or(`username.ilike.%${query}%,display_name.ilike.%${query}%,skill.ilike.%${query}%,location.ilike.%${query}%`)
       .limit(20);
     return (data ?? []).map((row) => mapProfile(row as Record<string, unknown>));

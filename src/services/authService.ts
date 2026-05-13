@@ -29,6 +29,7 @@ function mapProfile(profile: Record<string, unknown>): User {
       isVerified: Boolean(profile.is_verified ?? false),
       jobsDone: Number(profile.jobs_done ?? 0),
       happyPercent: Number(profile.happy_percent ?? 0),
+      ratingCount: Number((profile.ratings as { count: number }[] | null)?.[0]?.count ?? 0),
       followers: Number(profile.followers_count ?? 0),
       following: Number(profile.following_count ?? 0),
       postCount: Number(profile.post_count ?? 0),
@@ -53,6 +54,7 @@ function mapProfile(profile: Record<string, unknown>): User {
       isVerified: false,
       jobsDone: 0,
       happyPercent: 0,
+      ratingCount: 0,
       followers: 0,
       following: 0,
       postCount: 0,
@@ -66,7 +68,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
   const sb = getAuthSupabase();
   const { data, error } = await sb
     .from("profiles")
-    .select("*")
+    .select("*, ratings(count)")
     .eq("id", userId)
     .single();
   if (error || !data) return null;
@@ -127,7 +129,7 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
       avatar_initial: avatarInitial,
       avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
     })
-    .select("*")
+    .select("*, ratings(count)")
     .single();
 
   console.log("[ensureProfile] insert result — data:", !!data, "error:", error?.message, "code:", error?.code);

@@ -25,6 +25,7 @@ export interface User {
   isVerified: boolean;
   jobsDone: number;
   happyPercent: number;        // % of happy feedback from completed jobs
+  ratingCount?: number;        // number of ratings received (hide happy% below 3)
   followers: number;
   following: number;
   postCount: number;

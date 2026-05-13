@@ -79,7 +79,7 @@ export const discoveryService = {
 
   async searchBySkillAndLocation(skill: SkillCategory | "", location: string): Promise<DiscoveryPin[]> {
     const sb = getSupabase();
-    let query = sb.from("profiles").select("*").eq("is_client", false).limit(20);
+    let query = sb.from("profiles").select("*, ratings(count)").eq("is_client", false).limit(20);
     if (skill) query = query.eq("skill", skill);
     if (location) query = query.ilike("location", `%${location}%`);
     const { data } = await query;

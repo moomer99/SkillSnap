@@ -542,7 +542,8 @@ function FeedCard({
   }, [isOwnPost, viewerLat, viewerLng, author]);
   const happyPct = author.happyPercent !== undefined &&
     author.happyPercent !== null &&
-    author.happyPercent > 0
+    author.happyPercent > 0 &&
+    (author.ratingCount ?? 0) >= 3
     ? `${author.happyPercent}%` : "—";
   const showPlayOverlay = post.type === "video" && !playing;
 
