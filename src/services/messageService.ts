@@ -20,7 +20,7 @@ function mapThread(
   return {
     id: conv.id as string,
     participant: participant!,
-    lastMessage: (conv.last_message_text as string) ?? "",
+    lastMessage: (conv.last_message_text as string) || "New conversation",
     lastMessageTime: conv.last_message_at
       ? new Date(conv.last_message_at as string).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       : "",
