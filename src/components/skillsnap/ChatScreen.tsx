@@ -363,20 +363,41 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
 
   async function confirmDeleteConversation() {
     setShowDeleteConvConfirm(false);
-    if (!state.activeThreadId) return;
-    if (SUPABASE_CONFIGURED) {
+
+    const threadId = state.activeThreadId;
+    const userId = currentUser?.id;
+
+    console.log("[DeleteConv] attempting delete:", { threadId, userId });
+
+    if (!threadId) {
+      console.warn("[DeleteConv] no activeThreadId — cannot delete");
+      onNavigate("messages");
+      return;
+    }
+
+    if (SUPABASE_CONFIGURED && userId) {
       try {
         const { getAuthSupabase } = await import("@/lib/supabase");
-        await getAuthSupabase()
+        const { data, error } = await getAuthSupabase()
           .from("conversation_members")
           .update({ hidden: true })
-          .eq("conversation_id", state.activeThreadId)
-          .eq("user_id", currentUser?.id);
+          .eq("conversation_id", threadId)
+          .eq("user_id", userId)
+          .select();
+
+        console.log("[DeleteConv] result:", { data, error });
+
+        if (error) {
+          console.error("[DeleteConv] Supabase error:", error.message, error.code);
+        }
       } catch (e) {
         console.warn("[ChatScreen] delete conversation failed:", e);
       }
+    } else {
+      console.warn("[DeleteConv] skipping Supabase — configured:", SUPABASE_CONFIGURED, "userId:", userId);
     }
-    dispatch({ type: "REMOVE_THREAD", threadId: state.activeThreadId });
+
+    dispatch({ type: "REMOVE_THREAD", threadId });
     onNavigate("messages");
   }
 
