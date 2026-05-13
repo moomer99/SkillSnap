@@ -657,6 +657,9 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         <div className="fixed inset-0 z-10" onClick={() => setPressedMsgId(null)} />
       )}
 
+      {/* ── Fixed bottom section: job cards, after-card messages, input ── */}
+      <div className="flex-shrink-0 flex flex-col">
+
       {/* ── Job done status cards — always above input bar, after all messages ── */}
       <div ref={jobCardRef}>
       {isSkiller && jobStatus === "requested" && (
@@ -857,6 +860,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           <Send size={16} />
         </button>
       </div>
+
+      </div>{/* end flex-shrink-0 bottom section */}
 
       {/* ── Chat options menu ── */}
       {showChatMenu && (

@@ -80,7 +80,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
     ? `${user.happyPercent}%` : "—";
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
+    <div className="flex flex-col bg-[#f8f7f5] overflow-hidden" style={{ height: "100dvh" }}>
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center gap-3 px-4 h-14">
@@ -102,7 +102,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
         )}
       </header>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pb-10">
 
         {/* ── Profile card ── */}
         <div className="bg-white px-5 pt-6 pb-5 border-b border-[#e8e4df]">

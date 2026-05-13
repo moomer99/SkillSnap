@@ -46,7 +46,7 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
   const visibleFeatures = expanded ? FEATURES : FEATURES.slice(0, 2);
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: "#0d0a1a" }}>
+    <div className="flex flex-col overflow-hidden" style={{ background: "#0d0a1a", height: "100dvh" }}>
       {/* Header */}
       <header className="flex items-center gap-3 px-4 h-14 z-10 relative">
         <button onClick={() => onNavigate("home")} className="text-white/60 hover:text-white transition-colors">
@@ -58,7 +58,7 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
         </span>
       </header>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-10">
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pb-10">
 
         {/* Hero */}
         <div className="relative px-5 pt-4 pb-10 overflow-hidden">
