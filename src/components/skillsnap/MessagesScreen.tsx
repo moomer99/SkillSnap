@@ -164,9 +164,9 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-4 pb-3">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-xl font-bold text-[#1a1a1a]">Messages</h1>
-          {threads.length > 0 && (
+          {threads.reduce((n, t) => n + t.unreadCount, 0) > 0 && (
             <span className="text-xs font-bold bg-[#6c47ff] text-white px-2 py-0.5 rounded-full">
-              {threads.reduce((n, t) => n + t.unreadCount, 0) || threads.length}
+              {threads.reduce((n, t) => n + t.unreadCount, 0)}
             </span>
           )}
         </div>
