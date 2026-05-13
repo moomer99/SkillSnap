@@ -41,7 +41,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-xl font-bold text-[#1a1a1a]">Discover</h1>
           <span className="text-xs font-semibold text-[#7a7570] bg-[#f0eeea] px-2.5 py-1 rounded-full">
-            {pins.length} nearby
+            {pins.length} {state.currentUser?.location ? "nearby" : "pros"}
           </span>
         </div>
         <SearchBar className="mb-3" onFocus={() => onNavigate("search")} />
