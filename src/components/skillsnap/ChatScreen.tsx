@@ -445,6 +445,11 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                 displayParticipant.location,
               ].filter(Boolean).join(" · ")}
             </p>
+            {!isSkiller && (jobStatus === "confirmed" || jobStatus === "feedback_done") && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#f0fdf4] text-green-600 font-semibold border border-green-200 mt-0.5 inline-block">
+                Hired ✓
+              </span>
+            )}
           </div>
         </button>
         <div className="flex items-center gap-1">

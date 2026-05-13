@@ -88,6 +88,7 @@ export interface MessageThread {
   lastMessageTime: string;
   unreadCount: number;
   startedAt?: string; // ISO — when the first message was sent
+  jobConfirmed?: boolean; // true when a jobs_done row is fully confirmed in this conversation
 }
 
 // ── Job Done Flow ────────────────────────────

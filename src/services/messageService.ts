@@ -132,6 +132,22 @@ export const messageService = {
       })
       .filter(Boolean) as MessageThread[];
 
+    // Fetch confirmed jobs for these conversations and stamp jobConfirmed on each thread
+    if (result.length > 0) {
+      const { data: confirmedJobs } = await sb
+        .from("jobs_done")
+        .select("conversation_id")
+        .in("conversation_id", result.map((t) => t.id))
+        .eq("client_confirmed", true);
+
+      const confirmedSet = new Set(
+        (confirmedJobs ?? []).map((j: Record<string, unknown>) => j.conversation_id as string)
+      );
+      for (const thread of result) {
+        thread.jobConfirmed = confirmedSet.has(thread.id);
+      }
+    }
+
     console.log(`[messageService] getThreads: loaded ${result.length} threads`);
     return result;
   },

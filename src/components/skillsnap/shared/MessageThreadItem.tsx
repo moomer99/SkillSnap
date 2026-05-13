@@ -41,11 +41,18 @@ export default function MessageThreadItem({ thread, onClick, isOnline = false }:
             {lastMessageTime}
           </span>
         </div>
-        {participant.skill && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#f0eeea] text-[#7a7570] font-medium">
-            {participant.skill}
-          </span>
-        )}
+        <div className="flex items-center gap-1 mt-0.5">
+          {participant.skill && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#f0eeea] text-[#7a7570] font-medium">
+              {participant.skill}
+            </span>
+          )}
+          {thread.jobConfirmed && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#f0fdf4] text-green-600 font-semibold border border-green-200">
+              Hired ✓
+            </span>
+          )}
+        </div>
         <p className={`text-xs mt-0.5 truncate ${hasUnread ? "text-[#1a1a1a] font-medium" : "text-[#7a7570]"}`}>
           {lastMessage}
         </p>
