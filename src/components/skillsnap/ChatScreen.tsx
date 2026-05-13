@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, useMemo } from "react";
-import { ArrowLeft, MoreVertical, Send, Paperclip, CheckCircle, Loader2, X, Clock, Flag, Bell, ChevronDown, Trash2 } from "lucide-react";
+import { ArrowLeft, MoreVertical, Send, Paperclip, CheckCircle, Loader2, X, Clock, Flag, Bell, ChevronDown, Trash2, Copy } from "lucide-react";
 import type { Screen, User, JobDoneStatus, JobRating } from "@/types";
 import { MOCK_USERS } from "@/mock-data/users";
 import { useAppState } from "@/state/AppState";
@@ -79,6 +79,9 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const jobCardRef = useRef<HTMLDivElement>(null);
   const [showChatMenu, setShowChatMenu] = useState(false);
+  const [pressedMsgId, setPressedMsgId] = useState<string | null>(null);
+  const [msgMenuPos, setMsgMenuPos] = useState<"left" | "right">("left");
+  const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Job-done flow
   const [jobStatus, setJobStatus] = useState<JobDoneStatus>("idle");
@@ -376,6 +379,22 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
     onNavigate("messages");
   }
 
+  async function handleDeleteMessage(msgId: string) {
+    if (SUPABASE_CONFIGURED) {
+      try {
+        const { getAuthSupabase } = await import("@/lib/supabase");
+        await getAuthSupabase()
+          .from("messages")
+          .update({ deleted_for_sender: true })
+          .eq("id", msgId)
+          .eq("sender_id", currentUser?.id);
+      } catch (e) {
+        console.warn("[ChatScreen] delete message failed:", e);
+      }
+    }
+    dispatch({ type: "DELETE_MESSAGE", msgId });
+  }
+
   const displayParticipant = participant ?? MOCK_USERS[0];
   const inputRef = useRef<HTMLInputElement>(null);
   const attachRef = useRef<HTMLInputElement>(null);
@@ -524,8 +543,36 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
               );
             }
             return (
-            <div key={msg.id} className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"}`}>
-              <div className="max-w-[78%] flex flex-col gap-0.5">
+            <div key={msg.id} className={`flex flex-col ${msg.from === "me" ? "items-end" : "items-start"}`}>
+              {pressedMsgId === msg.id && (
+                <div
+                  className={`flex items-center gap-1 mb-1 ${msgMenuPos === "right" ? "justify-end pr-2" : "justify-start pl-2"}`}
+                  onClick={() => setPressedMsgId(null)}
+                >
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(msg.text ?? ""); setPressedMsgId(null); }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white shadow-md border border-[#e8e4df] text-xs font-semibold text-[#1a1a1a] z-20 relative"
+                  >
+                    <Copy size={13} /> Copy
+                  </button>
+                  {msg.from === "me" && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDeleteMessage(msg.id); setPressedMsgId(null); }}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white shadow-md border border-[#e8e4df] text-xs font-semibold text-red-500 z-20 relative"
+                    >
+                      <Trash2 size={13} /> Delete
+                    </button>
+                  )}
+                </div>
+              )}
+              <div className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"} w-full`}>
+              <div className="max-w-[78%] flex flex-col gap-0.5"
+                onMouseDown={() => { setMsgMenuPos(msg.from === "me" ? "right" : "left"); pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500); }}
+                onMouseUp={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
+                onMouseLeave={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
+                onTouchStart={() => { setMsgMenuPos(msg.from === "me" ? "right" : "left"); pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500); }}
+                onTouchEnd={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
+              >
                 {msg.imageUrl ? (
                   <a href={msg.uploading ? undefined : msg.imageUrl} target="_blank" rel="noopener noreferrer" className={`relative rounded-2xl overflow-hidden shadow-sm block ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
                     <img src={msg.imageUrl} alt={msg.text} className="w-full max-w-[220px] object-cover rounded-2xl" style={{ maxHeight: 260 }} />
@@ -562,6 +609,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                   )}
                 </span>
               </div>
+              </div>
             </div>
             );
           })
@@ -569,6 +617,11 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
 
         <div ref={bottomRef} />
       </div>
+
+      {/* Backdrop to dismiss message action menu */}
+      {pressedMsgId && (
+        <div className="fixed inset-0 z-10" onClick={() => setPressedMsgId(null)} />
+      )}
 
       {/* ── Job done status cards — always above input bar, after all messages ── */}
       <div ref={jobCardRef}>

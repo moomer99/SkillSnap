@@ -169,6 +169,7 @@ export const messageService = {
       .from("messages")
       .select("*")
       .eq("conversation_id", conversationId)
+      .or(`sender_id.neq.${userId},deleted_for_sender.eq.false`)
       .order("created_at", { ascending: true });
 
     if (error) {
