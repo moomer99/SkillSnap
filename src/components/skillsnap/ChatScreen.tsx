@@ -479,11 +479,13 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         </div>
 
         {loading ? (
-          <div className="flex flex-col gap-3 mt-2">
-            {[false, true, false, true, false].map((isMe, i) => (
+          <div className="flex flex-col gap-3 mt-2 px-2">
+            {[false, true, false, true, false, false, true].map((isMe, i) => (
               <div key={i} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                <div className={`h-9 rounded-2xl animate-pulse ${isMe ? "bg-[#d4c9ff]" : "bg-gray-200"}`}
-                  style={{ width: `${40 + (i * 13) % 35}%` }} />
+                <div
+                  className={`h-9 rounded-2xl animate-pulse ${isMe ? "bg-[#d4c9ff]" : "bg-[#ede9de]"}`}
+                  style={{ width: `${38 + (i * 17) % 40}%` }}
+                />
               </div>
             ))}
           </div>

@@ -20,7 +20,7 @@ export function useChat() {
   const { state, dispatch } = useAppState();
   const [inputText, setInputText] = useState("");
   const [sending, setSending] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const unsubRef = useRef<(() => void) | null>(null);
   const subscribedConvRef = useRef<string | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
