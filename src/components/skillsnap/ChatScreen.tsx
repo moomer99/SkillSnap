@@ -356,18 +356,54 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   async function handleSubmitFeedback() {
     if (!rating) return;
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 700));
     const ratingData = RATINGS.find((r) => r.key === rating)!;
-    const newHappy = recalcHappy(
-      displayParticipant.happyPercent,
-      displayParticipant.jobsDone,
-      ratingData.happy
-    );
-    dispatch({
-      type: "UPDATE_PARTICIPANT_HAPPY",
-      userId: displayParticipant.id,
-      happyPercent: newHappy,
-    });
+
+    // Persist rating to Supabase — triggers DB recalc of happy_percent
+    if (SUPABASE_CONFIGURED && activeJobId) {
+      try {
+        const { getAuthSupabase } = await import("@/lib/supabase");
+        await getAuthSupabase()
+          .from("ratings")
+          .insert({
+            job_id: activeJobId,
+            skiller_id: displayParticipant.id,
+            client_id: currentUser?.id,
+            rating: ratingData.key,
+            is_happy: ratingData.happy,
+            comment: comment.trim() || null,
+          });
+
+        // Re-fetch the DB-calculated happy_percent so local state reflects reality
+        const { data: profile } = await getAuthSupabase()
+          .from("profiles")
+          .select("happy_percent")
+          .eq("id", displayParticipant.id)
+          .single();
+        if (profile) {
+          dispatch({
+            type: "UPDATE_PARTICIPANT_HAPPY",
+            userId: displayParticipant.id,
+            happyPercent: Number(profile.happy_percent ?? 0),
+          });
+        }
+      } catch (e) {
+        console.warn("[ChatScreen] rating insert failed:", e);
+        // Fall back to local calculation if DB write fails
+        dispatch({
+          type: "UPDATE_PARTICIPANT_HAPPY",
+          userId: displayParticipant.id,
+          happyPercent: recalcHappy(displayParticipant.happyPercent, displayParticipant.jobsDone, ratingData.happy),
+        });
+      }
+    } else {
+      // Supabase not configured — local calculation only
+      dispatch({
+        type: "UPDATE_PARTICIPANT_HAPPY",
+        userId: displayParticipant.id,
+        happyPercent: recalcHappy(displayParticipant.happyPercent, displayParticipant.jobsDone, ratingData.happy),
+      });
+    }
+
     setSubmitting(false);
     setFeedbackDone(true);
     setTimeout(() => {
