@@ -591,7 +591,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
               )}
               <div className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"} w-full`}>
               <div className="max-w-[78%] flex flex-col gap-0.5"
-                onMouseDown={() => { setMsgMenuPos(msg.from === "me" ? "right" : "left"); pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500); }}
+                onMouseDown={(e) => { e.preventDefault(); setMsgMenuPos(msg.from === "me" ? "right" : "left"); pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500); }}
                 onMouseUp={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
                 onMouseLeave={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
                 onTouchStart={(e) => {
@@ -624,7 +624,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                           ? "text-white rounded-br-sm"
                           : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
                       } ${msg.failed ? "opacity-60" : ""}`}
-                      style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #6c47ff, #8b6af5)" } : {}}
+                      style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #6c47ff, #8b6af5)", userSelect: "none" } : { userSelect: "none" }}
                     >
                       {msg.text}
                     </div>
@@ -741,7 +741,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             return (
               <div key={msg.id} className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"}`}>
                 <div className="max-w-[78%] flex flex-col gap-0.5"
-                  onMouseDown={() => { setMsgMenuPos(msg.from === "me" ? "right" : "left"); pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500); }}
+                  onMouseDown={(e) => { e.preventDefault(); setMsgMenuPos(msg.from === "me" ? "right" : "left"); pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500); }}
                   onMouseUp={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
                   onMouseLeave={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
                   onTouchStart={(e) => {
@@ -769,7 +769,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                             ? "text-white rounded-br-sm"
                             : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
                         } ${msg.failed ? "opacity-60" : ""}`}
-                        style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #6c47ff, #8b6af5)" } : {}}
+                        style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #6c47ff, #8b6af5)", userSelect: "none" } : { userSelect: "none" }}
                       >
                         {msg.text}
                       </div>
