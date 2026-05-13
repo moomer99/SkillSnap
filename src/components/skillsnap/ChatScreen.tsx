@@ -79,6 +79,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const jobCardRef = useRef<HTMLDivElement>(null);
   const [showChatMenu, setShowChatMenu] = useState(false);
+  const [showDeleteConvConfirm, setShowDeleteConvConfirm] = useState(false);
   const [pressedMsgId, setPressedMsgId] = useState<string | null>(null);
   const [msgMenuPos, setMsgMenuPos] = useState<"left" | "right">("left");
   const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -360,8 +361,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
     sendMessage();
   }
 
-  async function handleDeleteConversation() {
-    setShowChatMenu(false);
+  async function confirmDeleteConversation() {
+    setShowDeleteConvConfirm(false);
     if (!state.activeThreadId) return;
     if (SUPABASE_CONFIGURED) {
       try {
@@ -837,7 +838,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             <div className="h-px bg-[#f0eeea] mx-5" />
             <button
               className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-[#f8f7f5] transition-colors"
-              onClick={handleDeleteConversation}
+              onClick={() => { setShowChatMenu(false); setShowDeleteConvConfirm(true); }}
             >
               <Trash2 size={16} className="text-red-500 flex-shrink-0" />
               <span className="text-sm font-semibold text-red-500">Delete conversation</span>
@@ -847,6 +848,37 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
               <div className="w-9 h-9 rounded-full bg-[#f0eeea] flex items-center justify-center flex-shrink-0"><X size={16} className="text-[#7a7570]" /></div>
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete conversation confirmation sheet ── */}
+      {showDeleteConvConfirm && (
+        <div className="fixed inset-0 z-[200] flex items-end" onClick={() => setShowDeleteConvConfirm(false)}>
+          <div className="w-full bg-white rounded-t-3xl px-5 pt-3 pb-8 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="w-10 h-1 rounded-full bg-[#e8e4df] mx-auto mb-5" />
+            <div className="flex flex-col items-center text-center px-2 pb-2">
+              <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                <Trash2 size={24} className="text-red-500" />
+              </div>
+              <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">Delete conversation?</h3>
+              <p className="text-sm text-[#7a7570] mb-6 leading-relaxed">
+                This removes the chat from your list only. The other person won't be notified.
+              </p>
+              <button
+                onClick={confirmDeleteConversation}
+                className="w-full rounded-2xl font-bold text-base text-white mb-3 bg-red-500 flex items-center justify-center"
+                style={{ height: 52 }}
+              >
+                Delete for me
+              </button>
+              <button
+                onClick={() => setShowDeleteConvConfirm(false)}
+                className="w-full h-12 rounded-2xl font-semibold text-sm text-[#7a7570] bg-[#f0eeea]"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
