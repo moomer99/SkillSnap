@@ -73,7 +73,10 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
 
   const connections = user.followers >= 1_000_000 ? `${(user.followers / 1_000_000).toFixed(1)}M`
     : user.followers >= 1000 ? `${(user.followers / 1000).toFixed(1)}k` : String(user.followers);
-  const happyDisplay = user.happyPercent !== undefined && user.happyPercent !== null ? `${user.happyPercent}%` : "—";
+  const happyDisplay = user.happyPercent !== undefined &&
+    user.happyPercent !== null &&
+    user.happyPercent > 0
+    ? `${user.happyPercent}%` : "—";
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
