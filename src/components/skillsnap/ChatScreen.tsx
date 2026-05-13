@@ -594,7 +594,17 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                 onMouseDown={() => { setMsgMenuPos(msg.from === "me" ? "right" : "left"); pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500); }}
                 onMouseUp={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
                 onMouseLeave={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
-                onTouchStart={() => { setMsgMenuPos(msg.from === "me" ? "right" : "left"); pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500); }}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  setMsgMenuPos(msg.from === "me" ? "right" : "left");
+                  pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500);
+                }}
+                onTouchMove={() => {
+                  if (pressTimerRef.current) {
+                    clearTimeout(pressTimerRef.current);
+                    pressTimerRef.current = null;
+                  }
+                }}
                 onTouchEnd={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
               >
                 {msg.imageUrl ? (
@@ -727,7 +737,23 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             }
             return (
               <div key={msg.id} className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"}`}>
-                <div className="max-w-[78%] flex flex-col gap-0.5">
+                <div className="max-w-[78%] flex flex-col gap-0.5"
+                  onMouseDown={() => { setMsgMenuPos(msg.from === "me" ? "right" : "left"); pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500); }}
+                  onMouseUp={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
+                  onMouseLeave={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    setMsgMenuPos(msg.from === "me" ? "right" : "left");
+                    pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500);
+                  }}
+                  onTouchMove={() => {
+                    if (pressTimerRef.current) {
+                      clearTimeout(pressTimerRef.current);
+                      pressTimerRef.current = null;
+                    }
+                  }}
+                  onTouchEnd={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
+                >
                   {msg.imageUrl ? (
                     <a href={msg.imageUrl} target="_blank" rel="noopener noreferrer" className={`rounded-2xl overflow-hidden shadow-sm block ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
                       <img src={msg.imageUrl} alt={msg.text} className="w-full max-w-[220px] object-cover rounded-2xl" style={{ maxHeight: 260 }} />
