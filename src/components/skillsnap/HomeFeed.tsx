@@ -540,7 +540,9 @@ function FeedCard({
     const d = distanceKm(viewerLat, viewerLng, aLat, aLng);
     return Math.round(d * 10) / 10;
   }, [isOwnPost, viewerLat, viewerLng, author]);
-  const happyPct = author.happyPercent !== undefined && author.happyPercent !== null
+  const happyPct = author.happyPercent !== undefined &&
+    author.happyPercent !== null &&
+    author.happyPercent > 0
     ? `${author.happyPercent}%` : "—";
   const showPlayOverlay = post.type === "video" && !playing;
 
