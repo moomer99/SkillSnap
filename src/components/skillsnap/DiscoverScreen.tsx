@@ -267,7 +267,7 @@ function ProCard({
       >
         {/* Avatar */}
         <div
-          className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-xl mb-2 shadow-sm"
+          className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl mb-2 shadow-sm"
           style={{ background: pin.color ?? "#6c47ff" }}
         >
           {initial}
