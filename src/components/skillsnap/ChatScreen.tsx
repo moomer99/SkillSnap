@@ -475,7 +475,14 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-[#1a1a1a] leading-tight truncate">{displayParticipant.displayName}</p>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <p className="text-sm font-bold text-[#1a1a1a] leading-tight truncate">{displayParticipant.displayName}</p>
+              {!isSkiller && (jobStatus === "confirmed" || jobStatus === "feedback_done") && (
+                <span className="flex-shrink-0 text-[9px] px-1.5 py-0.5 rounded-full bg-[#f0fdf4] text-green-600 font-semibold border border-green-200">
+                  Hired ✓
+                </span>
+              )}
+            </div>
             <p className="text-[11px] text-[#6c47ff] font-medium truncate">
               {[
                 displayParticipant.role === "client" ? "Client"
@@ -483,11 +490,6 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                 displayParticipant.location,
               ].filter(Boolean).join(" · ")}
             </p>
-            {!isSkiller && (jobStatus === "confirmed" || jobStatus === "feedback_done") && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#f0fdf4] text-green-600 font-semibold border border-green-200 mt-0.5 inline-block">
-                Hired ✓
-              </span>
-            )}
           </div>
         </button>
         <div className="flex items-center gap-1">
