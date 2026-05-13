@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, useMemo } from "react";
-import { ArrowLeft, MoreVertical, Send, Paperclip, CheckCircle, Loader2, X, Clock, Flag, Bell, ChevronDown } from "lucide-react";
+import { ArrowLeft, MoreVertical, Send, Paperclip, CheckCircle, Loader2, X, Clock, Flag, Bell, ChevronDown, Trash2 } from "lucide-react";
 import type { Screen, User, JobDoneStatus, JobRating } from "@/types";
 import { MOCK_USERS } from "@/mock-data/users";
 import { useAppState } from "@/state/AppState";
@@ -355,6 +355,25 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       });
     }
     sendMessage();
+  }
+
+  async function handleDeleteConversation() {
+    setShowChatMenu(false);
+    if (!state.activeThreadId) return;
+    if (SUPABASE_CONFIGURED) {
+      try {
+        const { getAuthSupabase } = await import("@/lib/supabase");
+        await getAuthSupabase()
+          .from("conversation_members")
+          .update({ hidden: true })
+          .eq("conversation_id", state.activeThreadId)
+          .eq("user_id", currentUser?.id);
+      } catch (e) {
+        console.warn("[ChatScreen] delete conversation failed:", e);
+      }
+    }
+    dispatch({ type: "REMOVE_THREAD", threadId: state.activeThreadId });
+    onNavigate("messages");
   }
 
   const displayParticipant = participant ?? MOCK_USERS[0];
@@ -761,6 +780,14 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
               <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0"><Flag size={16} className="text-red-400" /></div>
               Report Conversation
               <span className="ml-auto text-[10px] font-bold text-white bg-[#6c47ff] px-2 py-0.5 rounded-full">Soon</span>
+            </button>
+            <div className="h-px bg-[#f0eeea] mx-5" />
+            <button
+              className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-[#f8f7f5] transition-colors"
+              onClick={handleDeleteConversation}
+            >
+              <Trash2 size={16} className="text-red-500 flex-shrink-0" />
+              <span className="text-sm font-semibold text-red-500">Delete conversation</span>
             </button>
             <div className="h-px bg-[#f0eeea] mx-5" />
             <button className="w-full flex items-center gap-4 px-5 py-4 text-[#7a7570] text-sm font-medium active:bg-[#f8f7f5]" onClick={() => setShowChatMenu(false)}>
