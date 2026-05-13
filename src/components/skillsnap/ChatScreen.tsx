@@ -78,6 +78,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const [participant, setParticipant] = useState<User | null>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const jobCardRef = useRef<HTMLDivElement>(null);
   const [showChatMenu, setShowChatMenu] = useState(false);
 
   // Job-done flow
@@ -192,6 +193,14 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
 
   const canRequestJobDone = hasMessages && hoursIn >= minHours;
   const lockedLabel = `Available in ~${hoursRemaining}h · conversation must be 24h old`;
+
+  // Scroll job card into view whenever it appears
+  useEffect(() => {
+    if (jobStatus === "idle") return;
+    setTimeout(() => {
+      jobCardRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 100);
+  }, [jobStatus]);
 
   useEffect(() => {
     const threadParticipant = state.threads.find((t) => t.id === state.activeThreadId)?.participant;
@@ -537,6 +546,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       </div>
 
       {/* ── Job done status cards — always above input bar, after all messages ── */}
+      <div ref={jobCardRef}>
       {isSkiller && jobStatus === "requested" && (
         <div className="mx-2 mt-2 bg-[#f5f0ff] rounded-2xl border border-[#6c47ff]/20 px-4 py-3 flex items-center gap-3">
           <Loader2 size={18} className="text-[#6c47ff] flex-shrink-0 animate-spin" />
@@ -598,6 +608,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           <p className="text-sm font-semibold text-[#1a1a1a]">Thanks for your feedback! 🎉</p>
         </div>
       )}
+      </div>{/* end jobCardRef wrapper */}
 
       {/* Messages sent after the Jobs Done confirmation — always below the card */}
       {messagesAfterCard.length > 0 && (
@@ -656,7 +667,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       {showScrollBtn && (
         <button
           onClick={() => bottomRef.current?.scrollIntoView({ behavior: "smooth" })}
-          className="absolute bottom-[200px] right-4 z-30 w-9 h-9 rounded-full bg-white shadow-lg border border-[#e8e4df] flex items-center justify-center text-[#6c47ff] active:scale-95 transition-transform"
+          className="absolute bottom-[160px] right-4 z-30 w-9 h-9 rounded-full bg-white shadow-lg border border-[#e8e4df] flex items-center justify-center text-[#6c47ff] active:scale-95 transition-transform"
         >
           <ChevronDown size={18} />
         </button>
