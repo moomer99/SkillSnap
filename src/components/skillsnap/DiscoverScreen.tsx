@@ -205,7 +205,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
                     style={{ ...pos, background: pin.color, transform: "translate(-50%, -50%)" }}
                   >
                     <MapPin size={8} color="white" />
-                    {pin.skill}
+                    {pin.skill && pin.skill !== "Other" ? pin.skill : ""}
                   </div>
                 );
               })}
@@ -279,12 +279,14 @@ function ProCard({
         </p>
 
         {/* Skill chip */}
-        <span
-          className="mt-1.5 text-[10px] font-semibold px-2.5 py-0.5 rounded-full text-white"
-          style={{ background: pin.color ?? "#6c47ff" }}
-        >
-          {pin.skill}
-        </span>
+        {pin.skill && pin.skill !== "Other" && (
+          <span
+            className="mt-1.5 text-[10px] font-semibold px-2.5 py-0.5 rounded-full text-white"
+            style={{ background: pin.color ?? "#6c47ff" }}
+          >
+            {pin.skill}
+          </span>
+        )}
 
         {/* Distance pill — only if available */}
         {pin.distanceKm !== undefined && (
