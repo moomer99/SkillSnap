@@ -26,7 +26,6 @@ const RATINGS: { key: JobRating; emoji: string; label: string; happy: boolean }[
 const QUICK_REPLIES_PRO = [
   "Hi! I'm available 👋",
   "What date works for you?",
-  "My rate is $X/hr",
   "I can come to you",
   "Done! Let me know 😊",
 ];
