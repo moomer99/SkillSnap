@@ -2,6 +2,10 @@
 // SkillSnap — Message Service (Supabase + Realtime)
 // Connect flow: Connect button → getOrCreateConversation()
 // Realtime: subscribeToMessages() returns an unsubscribe fn.
+//
+// Supabase migration required:
+//   ALTER TABLE conversation_members
+//   ADD COLUMN IF NOT EXISTS hidden boolean DEFAULT false;
 // ─────────────────────────────────────────────
 import { getSupabase, getAuthSupabase, getRealtimeSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
@@ -90,7 +94,12 @@ export const messageService = {
       return [];
     }
 
-    const conversationIds = memberships.map((m: Record<string, unknown>) => m.conversation_id);
+    // Filter out threads hidden by the current user (soft delete for me only)
+    const visibleMemberships = (memberships as Record<string, unknown>[]).filter((m) => !m.hidden);
+
+    if (!visibleMemberships.length) return [];
+
+    const conversationIds = visibleMemberships.map((m: Record<string, unknown>) => m.conversation_id);
 
     // Get other members with their profiles
     const { data: otherMembers, error: membersErr } = await sb
@@ -100,10 +109,10 @@ export const messageService = {
       console.error("[messageService] getThreads otherMembers error:", membersErr.message);
     }
 
-    const result = (memberships as Record<string, unknown>[])
+    const result = visibleMemberships
       .map((membership) => {
         const otherMember = (otherMembers ?? []).find(
-          (m) => m.conversation_id === membership.conversation_id
+          (m: Record<string, unknown>) => m.conversation_id === membership.conversation_id
         );
         if (!otherMember) return null;
 

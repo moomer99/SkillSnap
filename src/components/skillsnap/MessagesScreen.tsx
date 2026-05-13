@@ -9,6 +9,9 @@ import { useAppState } from "@/state/AppState";
 import { getAuthSupabase } from "@/lib/supabase";
 import { messageService } from "@/services/messageService";
 
+const SUPABASE_CONFIGURED =
+  !!(process.env.NEXT_PUBLIC_SUPABASE_URL && !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref"));
+
 interface JobsRequest {
   notificationId: string;
   jobId: string;
@@ -142,6 +145,18 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
   function handleDismissNotifs() {
     setNotifDismissed(true);
     try { localStorage.setItem("skillsnap_notif_dismissed", "1"); } catch {}
+  }
+
+  async function handleDeleteThread(threadId: string) {
+    if (SUPABASE_CONFIGURED) {
+      const { getAuthSupabase } = await import("@/lib/supabase");
+      await getAuthSupabase()
+        .from("conversation_members")
+        .update({ hidden: true })
+        .eq("conversation_id", threadId)
+        .eq("user_id", state.currentUser?.id);
+    }
+    dispatch({ type: "REMOVE_THREAD", threadId });
   }
 
   const showNotifBanner = notifPerm === "default" && !notifDismissed;
@@ -288,6 +303,7 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
               thread={thread}
               onClick={() => openThread(thread.id)}
               isOnline={onlineUserIds.has(thread.participant?.id ?? "")}
+              onDelete={handleDeleteThread}
             />
           ))
         )}
