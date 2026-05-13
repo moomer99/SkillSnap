@@ -120,7 +120,7 @@ export const messageService = {
         return {
           id: membership.conversation_id as string,
           participant,
-          lastMessage: (membership.last_message_text as string) ?? "",
+          lastMessage: (membership.last_message_text as string) || "New conversation",
           lastMessageTime: membership.last_message_at
             ? new Date(membership.last_message_at as string).toLocaleTimeString([], {
                 hour: "2-digit",
