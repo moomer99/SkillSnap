@@ -8,35 +8,14 @@ interface ProScreenProps {
 }
 
 const FEATURES = [
-  {
-    icon: <Video size={20} />,
-    color: "#a78bfa",
-    bg: "rgba(167,139,250,0.12)",
-    title: "In-App Video Editing",
-    desc: "Smart filters, branding overlays, and pro-grade edits directly in the app — no third-party tools needed.",
-  },
-  {
-    icon: <TrendingUp size={20} />,
-    color: "#34d399",
-    bg: "rgba(52,211,153,0.12)",
-    title: "Local Discovery Boosts",
-    desc: "Get pinned to the top of local search results and map discovery so more clients find you first.",
-  },
-  {
-    icon: <Shield size={20} />,
-    color: "#60a5fa",
-    bg: "rgba(96,165,250,0.12)",
-    title: "Verified Pro Badge",
-    desc: "Stand out with a blue verified checkmark that builds instant trust with new clients.",
-  },
-  {
-    icon: <Star size={20} />,
-    color: "#fbbf24",
-    bg: "rgba(251,191,36,0.12)",
-    title: "Sponsored Content & Brand Partnerships",
-    desc: "Connect with brands looking for skilled creators. Earn from sponsored posts and collaborations. (Later Stage)",
-    later: true,
-  },
+  { icon: <Zap size={20} />, color: "#a78bfa", bg: "rgba(167,139,250,0.12)", title: "Priority in Feed", desc: "Your posts appear first in local search and discovery — more eyes on your work." },
+  { icon: <Video size={20} />, color: "#f472b6", bg: "rgba(244,114,182,0.12)", title: "Video Trimmer & Enhancer", desc: "Trim clips and auto-enhance colour quality directly in the app. No third-party tools needed." },
+  { icon: <Shield size={20} />, color: "#60a5fa", bg: "rgba(96,165,250,0.12)", title: "Verified Badge", desc: "A blue tick next to your name that builds instant trust with new clients." },
+  { icon: <TrendingUp size={20} />, color: "#34d399", bg: "rgba(52,211,153,0.12)", title: "Analytics Dashboard", desc: "See who viewed your profile and posts, track connections and job conversion rate." },
+  { icon: <Star size={20} />, color: "#fbbf24", bg: "rgba(251,191,36,0.12)", title: "Local Boost", desc: "Pay to appear at the top of your suburb feed and map discovery." },
+  { icon: <Gift size={20} />, color: "#fb923c", bg: "rgba(251,146,60,0.12)", title: "Branding Overlays", desc: "Add your logo and watermark to videos automatically.", later: true },
+  { icon: <Sparkles size={20} />, color: "#e879f9", bg: "rgba(232,121,249,0.12)", title: "Priority Notifications", desc: "Get notified first when clients connect or view your profile.", later: true },
+  { icon: <Star size={20} />, color: "#fbbf24", bg: "rgba(251,191,36,0.12)", title: "Brand Partnerships", desc: "Connect with brands and earn from sponsored collaborations.", later: true },
 ];
 
 export default function ProScreen({ onNavigate }: ProScreenProps) {
@@ -52,7 +31,7 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
         <button onClick={() => onNavigate("home")} className="text-white/60 hover:text-white transition-colors">
           <ArrowLeft size={20} />
         </button>
-        <span className="text-white/80 text-sm font-semibold flex-1">SkillSnap Pro</span>
+        <span className="text-white/80 text-sm font-semibold flex-1">SkillSnap Pro Plus</span>
         <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(108,71,255,0.25)", color: "#a78bfa", border: "1px solid rgba(167,139,250,0.3)" }}>
           Coming Soon
         </span>
@@ -79,10 +58,10 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
           </div>
 
           <h1 className="text-white text-center font-extrabold text-3xl mb-3 tracking-tight">
-            Go <span style={{ background: "linear-gradient(90deg, #a78bfa, #6c47ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Pro</span>
+            SkillSnap <span style={{ background: "linear-gradient(90deg, #a78bfa, #6c47ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Pro Plus</span>
           </h1>
           <p className="text-white/50 text-center text-sm leading-relaxed max-w-xs mx-auto">
-            Supercharge your profile, land more clients, and grow your trade business with professional tools built for skilled workers.
+            Get discovered and hired faster. Pro tools built for skilled workers who are serious about growing.
           </p>
 
           {/* Pulse dot */}
