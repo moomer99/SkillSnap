@@ -166,7 +166,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             <div className="flex border-b border-[#e8e4df] bg-white">
               {(["work", "saved", "pro"] as const).map((tab) => (
                 <button key={tab}
-                  onClick={() => tab === "pro" ? onNavigate("edit-profile") : setActiveTab(tab)}
+                  onClick={() => setActiveTab(tab)}
                   className={`flex-1 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${activeTab === tab ? "text-[#6c47ff] border-b-2 border-[#6c47ff]" : "text-[#7a7570]"}`}>
                   {tab === "pro" && <Zap size={13} className="text-[#f59e0b]" />}
                   {tab === "work" ? "My Works" : tab === "saved" ? "Saved" : "Go Pro — Free"}
