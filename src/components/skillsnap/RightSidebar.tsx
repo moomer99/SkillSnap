@@ -100,7 +100,7 @@ function skillColor(skill: string) {
 }
 
 export default function RightSidebar({ onNavigate }: RightSidebarProps) {
-  const { state } = useAppState();
+  const { state, dispatch } = useAppState();
   const { isAuthenticated, currentUser } = state;
   const trendingSkills = useTrendingSkills();
 
@@ -184,13 +184,17 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
             <h3 className="font-bold text-[#1a1a1a] text-sm mb-3">Trending Skills</h3>
             <div className="flex flex-wrap gap-2">
               {displaySkills.map((skill) => (
-                <span
+                <button
                   key={skill}
-                  className="text-xs font-semibold text-[#4a4540] rounded-full px-3 py-1.5"
+                  onClick={() => {
+                    dispatch({ type: "SET_SEARCH_QUERY", query: skill });
+                    onNavigate("search");
+                  }}
+                  className="text-xs font-semibold text-[#4a4540] rounded-full px-3 py-1.5 hover:opacity-80 active:scale-95 transition-all"
                   style={{ background: skillColor(skill) }}
                 >
                   {skill}
-                </span>
+                </button>
               ))}
             </div>
           </div>

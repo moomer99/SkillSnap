@@ -41,6 +41,7 @@ interface AppStateShape {
   modals: { jobsDoneInfo: boolean };
   pendingJobsRequest: { jobId: string; fromName: string; notificationId: string } | null;
   unreadNotifCount: number;
+  searchQuery: string;
 }
 
 // ── Actions ──────────────────────────────────
@@ -81,7 +82,8 @@ type Action =
   | { type: "SET_PENDING_JOBS_REQUEST"; request: { jobId: string; fromName: string; notificationId: string } | null }
   | { type: "SET_UNREAD_NOTIF_COUNT"; count: number }
   | { type: "INCREMENT_UNREAD_NOTIF_COUNT" }
-  | { type: "CLEAR_UNREAD_NOTIF_COUNT" };
+  | { type: "CLEAR_UNREAD_NOTIF_COUNT" }
+  | { type: "SET_SEARCH_QUERY"; query: string };
 
 // ── Initial State ────────────────────────────
 const initialState: AppStateShape = {
@@ -107,6 +109,7 @@ const initialState: AppStateShape = {
   modals: { jobsDoneInfo: false },
   pendingJobsRequest: null,
   unreadNotifCount: 0,
+  searchQuery: "",
 };
 
 // ── Reducer ──────────────────────────────────
@@ -336,6 +339,8 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       return { ...state, unreadNotifCount: state.unreadNotifCount + 1 };
     case "CLEAR_UNREAD_NOTIF_COUNT":
       return { ...state, unreadNotifCount: 0 };
+    case "SET_SEARCH_QUERY":
+      return { ...state, searchQuery: action.query };
     default:
       return state;
   }

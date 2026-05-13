@@ -59,10 +59,15 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
   const [activeSkill, setActiveSkill] = useState<SkillCategory | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus + load recents on mount
+  // Auto-focus + load recents on mount; pre-fill from app state if a query was pushed
   useEffect(() => {
+    if (state.searchQuery) {
+      setQuery(state.searchQuery);
+      dispatch({ type: "SET_SEARCH_QUERY", query: "" });
+    }
     setTimeout(() => inputRef.current?.focus(), 80);
     setRecentSearches(loadRecent());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Debounced search
