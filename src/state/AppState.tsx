@@ -84,7 +84,8 @@ type Action =
   | { type: "INCREMENT_UNREAD_NOTIF_COUNT" }
   | { type: "CLEAR_UNREAD_NOTIF_COUNT" }
   | { type: "SET_SEARCH_QUERY"; query: string }
-  | { type: "REMOVE_THREAD"; threadId: string };
+  | { type: "REMOVE_THREAD"; threadId: string }
+  | { type: "CLEAR_THREADS" };
 
 // ── Initial State ────────────────────────────
 const initialState: AppStateShape = {
@@ -344,6 +345,8 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       return { ...state, searchQuery: action.query };
     case "REMOVE_THREAD":
       return { ...state, threads: state.threads.filter(t => t.id !== action.threadId) };
+    case "CLEAR_THREADS":
+      return { ...state, threads: [] };
     default:
       return state;
   }

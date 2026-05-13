@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { ArrowLeft, ChevronRight, User, Lock, Bell, Shield, HelpCircle, FileText, LogOut, Trash2, Loader2, CheckCircle, Zap, Info, Mail } from "lucide-react";
+import { ArrowLeft, ChevronRight, User, Lock, Bell, Shield, HelpCircle, FileText, LogOut, Trash2, Loader2, CheckCircle, Zap, Info, Mail, MessageSquareX } from "lucide-react";
 import type { Screen } from "@/types";
 import { useAppState } from "@/state/AppState";
 import { getNotifPermission, requestNotifPermission } from "@/hooks/useNotifications";
@@ -19,13 +19,26 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
   const { state, dispatch } = useAppState();
   const user = state.currentUser;
 
-  const [showLogoutConfirm, setShowLogoutConfirm]     = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm]     = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm]         = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm]         = useState(false);
+  const [showDeleteChatsConfirm, setShowDeleteChatsConfirm] = useState(false);
   const [showChangePassword, setShowChangePassword]   = useState(false);
   const [loggingOut, setLoggingOut]                   = useState(false);
   const [notifPerm, setNotifPerm]                     = useState(() =>
     typeof window !== "undefined" ? getNotifPermission() : "default"
   );
+
+  async function handleDeleteAllChats() {
+    if (SUPABASE_CONFIGURED) {
+      const { getAuthSupabase } = await import("@/lib/supabase");
+      await getAuthSupabase()
+        .from("conversation_members")
+        .update({ hidden: true })
+        .eq("user_id", user?.id);
+    }
+    dispatch({ type: "CLEAR_THREADS" });
+    setShowDeleteChatsConfirm(false);
+  }
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -184,6 +197,14 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
           />
           <Divider />
           <SettingsRow
+            icon={<MessageSquareX size={16} className="text-red-500" />}
+            iconBg="#fee2e2"
+            label="Delete All Chats"
+            onPress={() => setShowDeleteChatsConfirm(true)}
+            labelColor="#ef4444"
+          />
+          <Divider />
+          <SettingsRow
             icon={<Trash2 size={16} className="text-red-500" />}
             iconBg="#fee2e2"
             label="Delete Account"
@@ -248,6 +269,40 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
             </button>
             <button
               onClick={() => setShowDeleteConfirm(false)}
+              className="w-full h-12 rounded-2xl font-semibold text-sm text-[#7a7570] bg-[#f0eeea]"
+            >
+              Cancel
+            </button>
+          </div>
+        </BottomSheet>
+      )}
+
+      {/* ── Delete all chats confirm sheet ── */}
+      {showDeleteChatsConfirm && (
+        <BottomSheet onClose={() => setShowDeleteChatsConfirm(false)}>
+          <div className="flex flex-col items-center text-center px-2 pb-2">
+            <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4">
+              <MessageSquareX size={24} className="text-red-500" />
+            </div>
+            <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">
+              Delete all chats?
+            </h3>
+            <p className="text-sm text-[#7a7570] mb-2 leading-relaxed">
+              This removes all conversations from your list only.
+              The other people won't be notified.
+            </p>
+            <p className="text-xs font-semibold text-red-500 mb-6">
+              This cannot be undone.
+            </p>
+            <button
+              onClick={handleDeleteAllChats}
+              className="w-full rounded-2xl font-bold text-base text-white mb-3 bg-red-500"
+              style={{ height: 52 }}
+            >
+              Delete All Chats
+            </button>
+            <button
+              onClick={() => setShowDeleteChatsConfirm(false)}
               className="w-full h-12 rounded-2xl font-semibold text-sm text-[#7a7570] bg-[#f0eeea]"
             >
               Cancel
