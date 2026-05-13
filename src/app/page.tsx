@@ -339,7 +339,7 @@ function SkillSnapRouter() {
       </div>
 
       {/* ── Mobile / tablet fallback (< lg) — single column ─────── */}
-      <div className="lg:hidden relative w-full bg-[#f8f7f5] overflow-hidden" style={{ minHeight: "100dvh" }}>
+      <div className="lg:hidden relative w-full bg-[#f8f7f5] overflow-hidden" style={{ height: "100dvh", overflow: "hidden" }}>
         {authLoading && (
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
             <div className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4" style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}>
