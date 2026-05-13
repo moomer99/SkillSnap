@@ -95,7 +95,19 @@ export const messageService = {
     }
 
     // Filter out threads hidden by the current user (soft delete for me only)
-    const visibleMemberships = (memberships as Record<string, unknown>[]).filter((m) => !m.hidden);
+    // The RPC doesn't return the hidden column, so query it separately.
+    const { data: hiddenRows } = await sb
+      .from("conversation_members")
+      .select("conversation_id")
+      .eq("user_id", userId)
+      .eq("hidden", true);
+
+    const hiddenSet = new Set(
+      (hiddenRows ?? []).map((r: Record<string, unknown>) => r.conversation_id as string)
+    );
+
+    const visibleMemberships = (memberships as Record<string, unknown>[])
+      .filter((m) => !hiddenSet.has(m.conversation_id as string));
 
     if (!visibleMemberships.length) return [];
 
@@ -169,7 +181,6 @@ export const messageService = {
       .from("messages")
       .select("*")
       .eq("conversation_id", conversationId)
-      .or(`sender_id.neq.${userId},deleted_for_sender.eq.false`)
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -177,7 +188,13 @@ export const messageService = {
       return [];
     }
 
-    return (data ?? []).map((row) => mapMessage(row as Record<string, unknown>, userId));
+    // Filter out messages deleted by the sender on the client side after fetch
+    const filtered = (data ?? []).filter((row: Record<string, unknown>) => {
+      if (row.sender_id === userId && row.deleted_for_sender === true) return false;
+      return true;
+    });
+
+    return filtered.map((row) => mapMessage(row as Record<string, unknown>, userId));
   },
 
   async sendMessage(conversationId: string, text: string, imageUrl?: string): Promise<Message> {
