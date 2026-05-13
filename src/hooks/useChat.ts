@@ -23,6 +23,7 @@ export function useChat() {
   const [loading, setLoading] = useState(true);
   const unsubRef = useRef<(() => void) | null>(null);
   const subscribedConvRef = useRef<string | null>(null);
+  const isSubscribingRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const threadId = state.activeThreadId ?? "";
@@ -82,10 +83,15 @@ export function useChat() {
       unsubRef.current = null;
       subscribedConvRef.current = threadId;
 
-      // Subscribe to Realtime inserts — skip if message already in state (echo dedup)
-      unsubRef.current = messageService.subscribeToMessages(threadId, (msg) => {
-        dispatch({ type: "APPEND_THREAD_MESSAGE_IF_NEW", threadId, message: msg });
-      });
+      // Guard against double-subscription from React strict mode / re-renders
+      if (!isSubscribingRef.current) {
+        isSubscribingRef.current = true;
+        // Subscribe to Realtime inserts — skip if message already in state (echo dedup)
+        unsubRef.current = messageService.subscribeToMessages(threadId, (msg) => {
+          dispatch({ type: "APPEND_THREAD_MESSAGE_IF_NEW", threadId, message: msg });
+        });
+        isSubscribingRef.current = false;
+      }
     }
 
     // Refetch when tab becomes visible again — catches messages sent while
@@ -101,6 +107,7 @@ export function useChat() {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
       clearInterval(pollInterval);
+      isSubscribingRef.current = false;
       // Do NOT unsubscribe or reset subscribedConvRef here —
       // subscription persists across re-renders for the same conversation
     };
