@@ -169,7 +169,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 <button key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`flex-1 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${activeTab === tab ? "text-[#6c47ff] border-b-2 border-[#6c47ff]" : "text-[#7a7570]"}`}>
-                  {tab === "work" ? "My Works" : "Saved"}
+                  {tab === "work" ? (state.currentUser?.role === "client" ? "Hired History" : "My Works") : "Saved"}
                   {tab === "work" && (() => { const count = gridLoading ? null : (mergedPosts.length || (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)); return count ? <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">{count}</span> : null; })()}
                   {tab === "saved" && savedPostsList.length > 0 && <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">{savedPostsList.length}</span>}
                 </button>
@@ -178,7 +178,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           )}
 
 
-          {(activeTab === "work" && isOwn) && (
+          {(activeTab === "work" && isOwn) && state.currentUser?.role !== "client" && (
             <div className="grid grid-cols-3 gap-0.5 pt-0.5">
               {gridLoading ? (
                 Array.from({ length: 6 }).map((_, i) => <div key={i} className="aspect-square bg-gray-200 animate-pulse" />)
@@ -233,6 +233,16 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             </div>
           )}
 
+
+          {activeTab === "work" && isOwn && state.currentUser?.role === "client" && (
+            <div className="py-14 flex flex-col items-center gap-3 text-center px-8">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1" style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)" }}>
+                <span className="text-2xl">✅</span>
+              </div>
+              <p className="text-sm font-bold text-[#1a1a1a]">No hired history yet</p>
+              <p className="text-xs text-[#b0aaa5] leading-relaxed">Jobs you confirm via SkillSnap will appear here</p>
+            </div>
+          )}
 
           {activeTab === "saved" && isOwn && (
             <div className="grid grid-cols-3 gap-0.5 px-0.5 pt-0.5">
