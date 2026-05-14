@@ -293,12 +293,7 @@ function SkillSnapRouter() {
           >
           {authLoading && (
             <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
-              <div
-                className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4"
-                style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
-              >
-                <img src="/skillsnap-icon.svg" alt="SkillSnap" width={36} height={36} />
-              </div>
+              <img src="/skillsnap-icon.svg" alt="SkillSnap" width={64} height={64} className="mb-4" />
               <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
             </div>
           )}
@@ -356,9 +351,7 @@ function SkillSnapRouter() {
       >
         {authLoading && (
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
-            <div className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4" style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}>
-              <img src="/skillsnap-icon.svg" alt="SkillSnap" width={36} height={36} />
-            </div>
+            <img src="/skillsnap-icon.svg" alt="SkillSnap" width={64} height={64} className="mb-4" />
             <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
           </div>
         )}
