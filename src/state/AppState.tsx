@@ -569,8 +569,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.log("[AppState] onAuthStateChange", event, session?.user?.id ?? "no session");
 
       if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
-        dispatch({ type: "CLEAR_AUTH" });
-        dispatch({ type: "HIDE_AUTH_PROMPT" });
+        // Delay clearing auth — Supabase sometimes fires SIGNED_OUT briefly
+        // during token refresh before firing SIGNED_IN again
+        setTimeout(() => {
+          // Only clear if still not authenticated after 2 seconds
+          const tokenKey = `sb-${(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace("https://", "").split(".")[0]}-auth-token`;
+          const stored = localStorage.getItem(tokenKey);
+          const parsed = stored ? JSON.parse(stored) : null;
+          if (!parsed?.access_token) {
+            dispatch({ type: "CLEAR_AUTH" });
+            dispatch({ type: "HIDE_AUTH_PROMPT" });
+          }
+        }, 2000);
         return;
       }
 
