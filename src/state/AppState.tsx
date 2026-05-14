@@ -414,17 +414,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // Also accept the token passed directly via setSession (implicit flow)
         const accessToken = tokenData?.access_token ?? tokenData?.session?.access_token;
         if (!accessToken) {
-          // Fall back to Supabase client getUser() instead of failing
           try {
             const { data: { user } } = await authSb.auth.getUser();
+            clearTimeout(timeoutId);
             if (user) {
-              const { ensureProfile } = await import("@/services/authService");
+              // Try fetching profile directly first
+              const response = await fetch(
+                `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=*`,
+                {
+                  headers: {
+                    "apikey": process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+                    "Authorization": `Bearer ${user.id}`,
+                    "Content-Type": "application/json",
+                  }
+                }
+              );
+              // Fall back to ensureProfile which uses the authenticated client
               const profile = await ensureProfile(user);
-              clearTimeout(timeoutId);
               if (profile) dispatch({ type: "SET_AUTH", user: profile });
               else dispatch({ type: "SET_AUTH_LOADING", loading: false });
             } else {
-              clearTimeout(timeoutId);
               dispatch({ type: "SET_AUTH_LOADING", loading: false });
             }
           } catch {
