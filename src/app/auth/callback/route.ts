@@ -63,5 +63,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}${next}`);
   }
 
-  return NextResponse.redirect(`${origin}/?auth_error=1&reason=no_code`);
+  // No PKCE code — may be implicit flow, let client handle the hash token
+  return NextResponse.redirect(`${origin}/`);
 }
