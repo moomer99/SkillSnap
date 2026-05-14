@@ -483,19 +483,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (hashAccessToken && hashParams.get("type") !== "recovery") {
       window.history.replaceState({}, "", window.location.pathname);
       clearTimeout(authTimeout);
-      try {
-        const { data, error } = await authSb.auth.setSession({
-          access_token: hashAccessToken,
-          refresh_token: hashRefreshToken ?? "",
-        });
-        if (data?.user && !error) {
-          await hydrateProfile(data.user.id, data.user);
-        } else {
+      (async () => {
+        try {
+          const { data, error } = await authSb.auth.setSession({
+            access_token: hashAccessToken,
+            refresh_token: hashRefreshToken ?? "",
+          });
+          if (data?.user && !error) {
+            await hydrateProfile(data.user.id, data.user);
+          } else {
+            dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          }
+        } catch {
           dispatch({ type: "SET_AUTH_LOADING", loading: false });
         }
-      } catch {
-        dispatch({ type: "SET_AUTH_LOADING", loading: false });
-      }
+      })();
       return;
     }
 
