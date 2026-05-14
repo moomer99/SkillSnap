@@ -5,8 +5,7 @@
 // ─────────────────────────────────────────────
 import { useState, useRef } from "react";
 import { Video, Image as ImageIcon, ChevronDown, ArrowLeft, Loader2, CheckCircle, Download } from "lucide-react";
-import type { Screen, SkillCategory } from "@/types";
-import { SKILL_CATEGORIES } from "@/constants/config";
+import type { Screen } from "@/types";
 import { uploadService } from "@/services/uploadService";
 import { useAppState } from "@/state/AppState";
 
@@ -22,7 +21,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
-  const [skill, setSkill] = useState<SkillCategory | "">("");
+  const [showFullscreen, setShowFullscreen] = useState(false);
   const profileLocation = state.currentUser?.location ?? "";
   const [location, setLocation] = useState(profileLocation);
   const [locationEditing, setLocationEditing] = useState(false);
@@ -132,7 +131,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         dataUrl,
         thumbnailDataUrl,
         caption: caption.trim(),
-        skill: skill,
+        skill: state.currentUser?.skill ?? "",
         location,
       });
 
@@ -221,7 +220,12 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
                 muted
               />
             ) : (
-              <img src={previewUrl} alt="Preview" className="w-full max-h-[280px] object-cover" />
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="w-full max-h-[280px] object-cover cursor-pointer"
+                onClick={() => setShowFullscreen(true)}
+              />
             )}
             <button
               onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
@@ -256,44 +260,6 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
             className="w-full bg-white rounded-2xl border border-[#e8e4df] p-4 text-sm text-[#1a1a1a] placeholder-[#b0aaa5] resize-none outline-none focus:border-[#6c47ff] transition-colors leading-relaxed"
           />
           <p className="text-right text-xs text-[#b0aaa5] mt-1">{caption.length} / 150</p>
-        </div>
-
-        {/* Skill category */}
-        <div>
-          <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider mb-2 block">
-            Skill Category
-          </label>
-          <div className="bg-white rounded-2xl border border-[#e8e4df] px-4 h-12 flex items-center justify-between relative">
-            <select
-              value={skill}
-              onChange={(e) => setSkill(e.target.value as SkillCategory | "")}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-            >
-              <option value="">Select your skill...</option>
-              {SKILL_CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-            <span className={`text-sm ${skill ? "text-[#1a1a1a]" : "text-[#b0aaa5]"}`}>
-              {skill || "Select your skill..."}
-            </span>
-            <ChevronDown size={16} className="text-[#b0aaa5]" />
-          </div>
-          <div className="flex flex-wrap gap-2 mt-2.5">
-            {SKILL_CATEGORIES.slice(0, 6).map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSkill(skill === cat ? "" : cat)}
-                className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
-                  skill === cat
-                    ? "bg-[#6c47ff] text-white border-[#6c47ff]"
-                    : "bg-white text-[#7a7570] border-[#e8e4df]"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Location */}
@@ -377,6 +343,24 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
           </p>
         </div>
       </div>
+      {showFullscreen && previewUrl && contentType === "photo" && (
+        <div
+          className="fixed inset-0 z-50 bg-black flex items-center justify-center"
+          onClick={() => setShowFullscreen(false)}
+        >
+          <img
+            src={previewUrl}
+            alt="Full preview"
+            className="w-full h-full object-contain"
+          />
+          <button
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 flex items-center justify-center text-white"
+            onClick={() => setShowFullscreen(false)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }
