@@ -66,10 +66,7 @@ export default function RoleSetupScreen() {
           className="w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-5"
           style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
         >
-          <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-            <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="2.5" fill="none" />
-            <circle cx="20" cy="20" r="5" fill="white" />
-          </svg>
+          <img src="/skillsnap-icon.svg" alt="SkillSnap" width={36} height={36} />
         </div>
         <h1 className="text-2xl font-black text-[#1a1a1a] mb-2">What brings you to SkillSnap?</h1>
         <p className="text-[#7a7570] text-sm">Choose your role to get started</p>

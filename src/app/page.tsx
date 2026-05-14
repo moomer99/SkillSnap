@@ -297,10 +297,7 @@ function SkillSnapRouter() {
                 className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4"
                 style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
               >
-                <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-                  <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="2.5" fill="none" />
-                  <circle cx="20" cy="20" r="5" fill="white" />
-                </svg>
+                <img src="/skillsnap-icon.svg" alt="SkillSnap" width={36} height={36} />
               </div>
               <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
             </div>
@@ -360,10 +357,7 @@ function SkillSnapRouter() {
         {authLoading && (
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
             <div className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4" style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}>
-              <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-                <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="2.5" fill="none" />
-                <circle cx="20" cy="20" r="5" fill="white" />
-              </svg>
+              <img src="/skillsnap-icon.svg" alt="SkillSnap" width={36} height={36} />
             </div>
             <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
           </div>

@@ -28,10 +28,7 @@ export default function AuthPromptModal() {
       className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1"
       style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
     >
-      <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
-        <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="2.5" fill="none" />
-        <circle cx="20" cy="20" r="5" fill="white" />
-      </svg>
+      <img src="/skillsnap-icon.svg" alt="SkillSnap" width={36} height={36} />
     </div>
   );
 
