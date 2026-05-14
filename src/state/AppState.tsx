@@ -412,8 +412,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const parsed = stored ? JSON.parse(stored) : null;
         const accessToken = parsed?.access_token;
         if (!accessToken) {
+          const profile = await ensureProfile(authUser);
           clearTimeout(timeoutId);
-          dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          if (profile) dispatch({ type: "SET_AUTH", user: profile });
+          else dispatch({ type: "SET_AUTH_LOADING", loading: false });
           return;
         }
         const res = await fetch(
