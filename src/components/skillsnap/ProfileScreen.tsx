@@ -177,7 +177,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             </div>
           ) : (
             <div className="flex items-center gap-2 px-4 py-3 border-b border-[#e8e4df] bg-white">
-              <h3 className="text-sm font-bold text-[#1a1a1a]">Works</h3>
+              <h3 className="text-sm font-bold text-[#1a1a1a]">✅ Hired</h3>
               {(() => { const count = gridLoading ? null : (mergedPosts.length || (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)); return count ? <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">{count}</span> : null; })()}
             </div>
           )}
