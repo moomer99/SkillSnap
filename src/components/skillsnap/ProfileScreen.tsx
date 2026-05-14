@@ -178,7 +178,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           )}
 
 
-          {(activeTab === "work" && isOwn) && state.currentUser?.role !== "client" && (
+          {(isOwn ? (activeTab === "work" && state.currentUser?.role !== "client") : user?.role !== "client") && (
             <div className="grid grid-cols-3 gap-0.5 pt-0.5">
               {gridLoading ? (
                 Array.from({ length: 6 }).map((_, i) => <div key={i} className="aspect-square bg-gray-200 animate-pulse" />)
@@ -195,12 +195,19 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 /* FIX UX4 — Empty grid state for BOTH own and client profiles */
                 <div className="col-span-3 py-14 flex flex-col items-center gap-3 text-center px-8">
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1" style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)" }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <rect x="3" y="3" width="8" height="8" rx="2" fill="#6c47ff" opacity="0.7"/>
-                      <rect x="13" y="3" width="8" height="8" rx="2" fill="#6c47ff" opacity="0.4"/>
-                      <rect x="3" y="13" width="8" height="8" rx="2" fill="#6c47ff" opacity="0.4"/>
-                      <rect x="13" y="13" width="8" height="8" rx="2" fill="#6c47ff" opacity="0.2"/>
-                    </svg>
+                    {!isOwn ? (
+                      <svg width="26" height="22" viewBox="0 0 24 20" fill="none" stroke="#6c47ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    ) : (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="8" height="8" rx="2" fill="#6c47ff" opacity="0.7"/>
+                        <rect x="13" y="3" width="8" height="8" rx="2" fill="#6c47ff" opacity="0.4"/>
+                        <rect x="3" y="13" width="8" height="8" rx="2" fill="#6c47ff" opacity="0.4"/>
+                        <rect x="13" y="13" width="8" height="8" rx="2" fill="#6c47ff" opacity="0.2"/>
+                      </svg>
+                    )}
                   </div>
                   <p className="text-sm font-bold text-[#1a1a1a]">No posts yet</p>
                   <p className="text-xs text-[#b0aaa5] leading-relaxed">
@@ -208,7 +215,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                       ? (state.currentUser?.role === "client" || !state.currentUser?.role)
                         ? "Set up your Pro profile to showcase your work and start getting hired"
                         : "Upload your first job to showcase your skill and start getting clients"
-                      : `${user.displayName} hasn't uploaded any work yet. Connect with them directly.`}
+                      : `${user.displayName} is new to SkillSnap and hasn't posted yet. Check their Jobs Done count or connect directly to ask about their work.`}
                   </p>
                   <button
                     onClick={() => {
@@ -226,7 +233,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                       ? (state.currentUser?.role === "client" || !state.currentUser?.role)
                         ? "Set Up Pro Profile — Free"
                         : "Upload First Post"
-                      : "Connect Anyway"}
+                      : `Connect with ${user.displayName.split(" ")[0]}`}
                   </button>
                 </div>
               )}
