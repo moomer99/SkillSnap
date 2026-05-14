@@ -172,7 +172,27 @@ export const uploadService = {
     }
 
     const { mapPost } = await import("./postService");
-    return mapPost(postRow, new Set(), new Set());
+    const post = mapPost(postRow, new Set(), new Set());
+
+    // Claim early bird if this is the user's first post
+    try {
+      const { getAuthSupabase } = await import('@/lib/supabase');
+      const authSb = getAuthSupabase();
+      const { data: { user } } = await authSb.auth.getUser();
+      if (user) {
+        const { count } = await authSb
+          .from('posts')
+          .select('*', { count: 'exact', head: true })
+          .eq('author_id', user.id);
+        if (count === 1) {
+          await authSb.rpc('claim_early_bird', { user_id: user.id });
+        }
+      }
+    } catch (e) {
+      console.warn('[UploadService] early bird claim failed:', e);
+    }
+
+    return post;
   },
 
   async importFromSocial(_platform: "instagram" | "tiktok" | "facebook"): Promise<void> {
