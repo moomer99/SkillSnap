@@ -38,6 +38,7 @@ const AboutScreen       = lazy(() => import("@/components/skillsnap/AboutScreen"
 const TermsScreen            = lazy(() => import("@/components/skillsnap/TermsScreen"));
 // ResetPasswordScreen removed — handled by the standalone /reset-password Next.js page
 const RoleSetupScreen        = lazy(() => import("@/components/skillsnap/RoleSetupScreen"));
+const UsernameSetupScreen    = lazy(() => import("@/components/skillsnap/UsernameSetupScreen"));
 const BottomNav         = lazy(() => import("@/components/skillsnap/BottomNav"));
 const RightSidebar      = lazy(() => import("@/components/skillsnap/RightSidebar"));
 
@@ -326,6 +327,7 @@ function SkillSnapRouter() {
               {screen === "terms"          && <TermsScreen          onNavigate={navigate} />}
               {screen === "reset-password" && <ResetPasswordRedirect />}
               {screen === "role-setup"     && <RoleSetupScreen />}
+              {screen === "username-setup" && <UsernameSetupScreen onDone={() => navigate("role-setup")} />}
               {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
             </Suspense>
           </div>
@@ -387,6 +389,8 @@ function SkillSnapRouter() {
             {screen === "about"          && <AboutScreen       onNavigate={navigate} />}
             {screen === "terms"          && <TermsScreen          onNavigate={navigate} />}
             {screen === "reset-password" && typeof window !== "undefined" && (window.location.replace("/reset-password"), null)}
+            {screen === "role-setup"     && <RoleSetupScreen />}
+            {screen === "username-setup" && <UsernameSetupScreen onDone={() => navigate("role-setup")} />}
             {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
           </Suspense>
         </div>
