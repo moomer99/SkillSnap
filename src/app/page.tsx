@@ -280,8 +280,15 @@ function SkillSnapRouter() {
         {/* CENTRE — app shell, max 480px */}
         <div style={{ flex: "0 0 auto" }}>
           <div
-            className="relative bg-[#f8f7f5] overflow-hidden"
-            style={{ width: "600px", height: "100dvh", overflowY: screen === "landing" ? "auto" : "hidden", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
+            className="relative bg-[#f8f7f5]"
+            style={{
+              width: "600px",
+              height: screen === "landing" || screen === "auth" ? "auto" : "100dvh",
+              minHeight: "100dvh",
+              overflowY: screen === "landing" || screen === "auth" ? "auto" : "hidden",
+              overflowX: "hidden",
+              boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)"
+            }}
           >
           {authLoading && (
             <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
@@ -339,7 +346,15 @@ function SkillSnapRouter() {
       </div>
 
       {/* ── Mobile / tablet fallback (< lg) — single column ─────── */}
-      <div className="lg:hidden relative w-full bg-[#f8f7f5]" style={{ height: "100dvh", overflow: screen === "landing" ? "auto" : "hidden" }}>
+      <div
+        className="lg:hidden relative w-full bg-[#f8f7f5]"
+        style={{
+          height: screen === "landing" || screen === "auth" ? "auto" : "100dvh",
+          minHeight: "100dvh",
+          overflowY: screen === "landing" || screen === "auth" ? "auto" : "hidden",
+          overflowX: "hidden",
+        }}
+      >
         {authLoading && (
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
             <div className="flex items-center justify-center w-16 h-16 rounded-3xl mb-4" style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}>
