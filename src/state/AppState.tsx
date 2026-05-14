@@ -120,9 +120,10 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
   switch (action.type) {
     case "SET_AUTH": {
       const needsRoleSetup = !action.user.role;
-      const comingFromAuthFlow = ["auth", "onboarding", "landing", "role-setup"].includes(state.screen);
+      const needsUsernameSetup = /@@?[a-z0-9_]+_[a-z0-9]{4}$/.test((action.user.username ?? "").toLowerCase());
+      const comingFromAuthFlow = ["auth", "onboarding", "landing", "role-setup", "username-setup"].includes(state.screen);
       const nextScreen = comingFromAuthFlow
-        ? (needsRoleSetup ? "role-setup" : "home")
+        ? (needsUsernameSetup ? "username-setup" : needsRoleSetup ? "role-setup" : "home")
         : state.screen;
       return {
         ...state,
