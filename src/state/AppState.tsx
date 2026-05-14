@@ -405,10 +405,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }, 15000);
       try {
-        const profile = await ensureProfile(authUser);
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+        const projectRef = supabaseUrl.replace("https://", "").split(".")[0];
+        const tokenKey = `sb-${projectRef}-auth-token`;
+        const stored = localStorage.getItem(tokenKey);
+        const parsed = stored ? JSON.parse(stored) : null;
+        const accessToken = parsed?.access_token;
+        if (!accessToken) {
+          clearTimeout(timeoutId);
+          dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          return;
+        }
+        const res = await fetch(
+          `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=*`,
+          {
+            headers: {
+              "apikey": process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+              "Authorization": `Bearer ${accessToken}`,
+            }
+          }
+        );
+        const rows = await res.json();
         clearTimeout(timeoutId);
-        if (profile) dispatch({ type: "SET_AUTH", user: profile });
-        else dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        if (rows?.[0]) {
+          dispatch({ type: "SET_AUTH", user: mapProfile(rows[0] as Record<string, unknown>) });
+        } else {
+          const profile = await ensureProfile(authUser);
+          if (profile) dispatch({ type: "SET_AUTH", user: profile });
+          else dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        }
       } catch (e) {
         clearTimeout(timeoutId);
         console.error("[AppState] hydrateProfile CRASHED:", e);
