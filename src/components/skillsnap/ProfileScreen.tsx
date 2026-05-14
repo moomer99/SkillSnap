@@ -183,7 +183,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           )}
 
 
-          {(activeTab === "work" || !isOwn) && (
+          {(activeTab === "work" && isOwn) && (
             <div className="grid grid-cols-3 gap-0.5 pt-0.5">
               {gridLoading ? (
                 Array.from({ length: 6 }).map((_, i) => <div key={i} className="aspect-square bg-gray-200 animate-pulse" />)
@@ -235,6 +235,16 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                   </button>
                 </div>
               )}
+            </div>
+          )}
+
+          {!isOwn && (
+            <div className="py-14 flex flex-col items-center gap-3 text-center px-8">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1" style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)" }}>
+                <span className="text-2xl">✅</span>
+              </div>
+              <p className="text-sm font-bold text-[#1a1a1a]">No hired history yet</p>
+              <p className="text-xs text-[#b0aaa5] leading-relaxed">Jobs confirmed via SkillSnap will appear here</p>
             </div>
           )}
 
