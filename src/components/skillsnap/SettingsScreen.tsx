@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { ArrowLeft, ChevronRight, User, Lock, Bell, Shield, HelpCircle, FileText, LogOut, Trash2, Loader2, CheckCircle, Zap, Info, Mail, MessageSquareX } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, ChevronRight, User, Lock, Bell, Shield, HelpCircle, FileText, LogOut, Trash2, Loader2, CheckCircle, Zap, Info, Mail } from "lucide-react";
 import type { Screen } from "@/types";
 import { useAppState } from "@/state/AppState";
 import { getNotifPermission, requestNotifPermission } from "@/hooks/useNotifications";
@@ -21,24 +21,23 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
 
   const [showLogoutConfirm, setShowLogoutConfirm]         = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm]         = useState(false);
-  const [showDeleteChatsConfirm, setShowDeleteChatsConfirm] = useState(false);
   const [showChangePassword, setShowChangePassword]   = useState(false);
   const [loggingOut, setLoggingOut]                   = useState(false);
+  const [isOAuthUser, setIsOAuthUser]                 = useState(false);
   const [notifPerm, setNotifPerm]                     = useState(() =>
     typeof window !== "undefined" ? getNotifPermission() : "default"
   );
 
-  async function handleDeleteAllChats() {
-    if (SUPABASE_CONFIGURED) {
-      const { getAuthSupabase } = await import("@/lib/supabase");
-      await getAuthSupabase()
-        .from("conversation_members")
-        .update({ hidden: true })
-        .eq("user_id", user?.id);
-    }
-    dispatch({ type: "CLEAR_THREADS" });
-    setShowDeleteChatsConfirm(false);
-  }
+  useEffect(() => {
+    if (!SUPABASE_CONFIGURED) return;
+    import("@/lib/supabase").then(({ getAuthSupabase }) => {
+      getAuthSupabase().auth.getSession().then(({ data }) => {
+        const provider = data.session?.user?.app_metadata?.provider;
+        setIsOAuthUser(provider === "google");
+      });
+    });
+  }, []);
+
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -67,21 +66,6 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
       </header>
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-10">
-
-        {/* Profile summary card */}
-        <div
-          className="mx-4 mt-5 bg-white rounded-2xl border border-[#e8e4df] p-4 flex items-center gap-3 active:bg-[#f8f7f5] transition-colors cursor-pointer"
-          onClick={() => onNavigate("edit-profile")}
-        >
-          <UserAvatar user={user} size="md" showVerified={user.isVerified} />
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-[#1a1a1a] text-sm truncate">{user.displayName}</p>
-            <p className="text-xs text-[#7a7570] truncate">{user.username}</p>
-          </div>
-          <div className="flex items-center gap-1 text-xs font-semibold text-[#6c47ff]">
-            Edit <ChevronRight size={14} />
-          </div>
-        </div>
 
         {/* Pro upgrade banner */}
         <button
@@ -131,16 +115,35 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
           }} />
         </button>
 
+        {/* Profile summary card */}
+        <div
+          className="mx-4 mb-2 bg-white rounded-2xl border border-[#e8e4df] p-4 flex items-center gap-3 active:bg-[#f8f7f5] transition-colors cursor-pointer"
+          onClick={() => onNavigate("edit-profile")}
+        >
+          <UserAvatar user={user} size="md" showVerified={user.isVerified} />
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-[#1a1a1a] text-sm truncate">{user.displayName}</p>
+            <p className="text-xs text-[#7a7570] truncate">{user.username}</p>
+          </div>
+          <div className="flex items-center gap-1 text-xs font-semibold text-[#6c47ff]">
+            Edit <ChevronRight size={14} />
+          </div>
+        </div>
+
         {/* Account */}
-        <SectionHeader title="Account" />
-        <SettingsGroup>
-          <SettingsRow
-            icon={<Lock size={16} className="text-[#0284c7]" />}
-            iconBg="#e0f2fe"
-            label="Change Password"
-            onPress={() => setShowChangePassword(true)}
-          />
-        </SettingsGroup>
+        {!isOAuthUser && (
+          <>
+            <SectionHeader title="Account" />
+            <SettingsGroup>
+              <SettingsRow
+                icon={<Lock size={16} className="text-[#0284c7]" />}
+                iconBg="#e0f2fe"
+                label="Change Password"
+                onPress={() => setShowChangePassword(true)}
+              />
+            </SettingsGroup>
+          </>
+        )}
 
         {/* Notifications */}
         <SectionHeader title="Notifications" />
@@ -217,14 +220,6 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
           />
           <Divider />
           <SettingsRow
-            icon={<MessageSquareX size={16} className="text-red-500" />}
-            iconBg="#fee2e2"
-            label="Delete All Chats"
-            onPress={() => setShowDeleteChatsConfirm(true)}
-            labelColor="#ef4444"
-          />
-          <Divider />
-          <SettingsRow
             icon={<Trash2 size={16} className="text-red-500" />}
             iconBg="#fee2e2"
             label="Delete Account"
@@ -297,39 +292,6 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
         </BottomSheet>
       )}
 
-      {/* ── Delete all chats confirm sheet ── */}
-      {showDeleteChatsConfirm && (
-        <BottomSheet onClose={() => setShowDeleteChatsConfirm(false)}>
-          <div className="flex flex-col items-center text-center px-2 pb-2">
-            <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4">
-              <MessageSquareX size={24} className="text-red-500" />
-            </div>
-            <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">
-              Delete all chats?
-            </h3>
-            <p className="text-sm text-[#7a7570] mb-2 leading-relaxed">
-              This removes all conversations from your list only.
-              The other people won't be notified.
-            </p>
-            <p className="text-xs font-semibold text-red-500 mb-6">
-              This cannot be undone.
-            </p>
-            <button
-              onClick={handleDeleteAllChats}
-              className="w-full rounded-2xl font-bold text-base text-white mb-3 bg-red-500"
-              style={{ height: 52 }}
-            >
-              Delete All Chats
-            </button>
-            <button
-              onClick={() => setShowDeleteChatsConfirm(false)}
-              className="w-full h-12 rounded-2xl font-semibold text-sm text-[#7a7570] bg-[#f0eeea]"
-            >
-              Cancel
-            </button>
-          </div>
-        </BottomSheet>
-      )}
 
       {/* ── Change password sheet ── */}
       {showChangePassword && (
