@@ -649,6 +649,75 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           })
         )}
 
+        {/* Messages sent after the Jobs Done confirmation — scroll with the rest */}
+        {messagesAfterCard.length > 0 && (
+          <div className="flex flex-col gap-2.5">
+            {messagesAfterCard.map((msg) => {
+              if (msg.isSystem) {
+                return (
+                  <div key={msg.id} className="flex justify-center my-1">
+                    <span className="text-[11px] font-semibold text-[#6c47ff] bg-[#f0ecff] px-3 py-1.5 rounded-full border border-[#ddd5ff]">
+                      {msg.text}
+                    </span>
+                  </div>
+                );
+              }
+              return (
+                <div key={msg.id} className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"}`}>
+                  <div className="max-w-[78%] flex flex-col gap-0.5"
+                    onMouseDown={(e) => { e.preventDefault(); setMsgMenuPos(msg.from === "me" ? "right" : "left"); pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500); }}
+                    onMouseUp={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
+                    onMouseLeave={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
+                    onTouchStart={(e) => {
+                      e.preventDefault();
+                      setMsgMenuPos(msg.from === "me" ? "right" : "left");
+                      pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500);
+                    }}
+                    onTouchMove={() => {
+                      if (pressTimerRef.current) {
+                        clearTimeout(pressTimerRef.current);
+                        pressTimerRef.current = null;
+                      }
+                    }}
+                    onTouchEnd={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
+                  >
+                    {msg.imageUrl ? (
+                      <a href={msg.imageUrl} target="_blank" rel="noopener noreferrer" className={`rounded-2xl overflow-hidden shadow-sm block ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
+                        <img src={msg.imageUrl} alt={msg.text} className="w-full max-w-[220px] object-cover rounded-2xl" style={{ maxHeight: 260 }} />
+                      </a>
+                    ) : (
+                      <>
+                        <div
+                          className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                            msg.from === "me"
+                              ? "text-white rounded-br-sm"
+                              : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
+                          } ${msg.failed ? "opacity-60" : ""}`}
+                          style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #6c47ff, #8b6af5)", userSelect: "none" } : { userSelect: "none" }}
+                        >
+                          {msg.text}
+                        </div>
+                        {msg.failed && (
+                          <span className="text-[10px] text-red-400 font-medium px-1">Not delivered · check connection</span>
+                        )}
+                      </>
+                    )}
+                    <span className={`text-[10px] text-[#b0aaa5] flex items-center gap-0.5 ${msg.from === "me" ? "justify-end" : "justify-start"} px-1`}>
+                      {msg.time}
+                      {msg.from === "me" && !msg.failed && (
+                        <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="ml-0.5 flex-shrink-0">
+                          <path d="M1 4l2.5 2.5L8 1" stroke="#6c47ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M5.5 4l2.5 2.5L13 1" stroke="#6c47ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </div>
 
@@ -724,75 +793,6 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         </div>
       )}
       </div>{/* end jobCardRef wrapper */}
-
-      {/* Messages sent after the Jobs Done confirmation — always below the card */}
-      {messagesAfterCard.length > 0 && (
-        <div className="px-4 flex flex-col gap-2.5 pt-2">
-          {messagesAfterCard.map((msg) => {
-            if (msg.isSystem) {
-              return (
-                <div key={msg.id} className="flex justify-center my-1">
-                  <span className="text-[11px] font-semibold text-[#6c47ff] bg-[#f0ecff] px-3 py-1.5 rounded-full border border-[#ddd5ff]">
-                    {msg.text}
-                  </span>
-                </div>
-              );
-            }
-            return (
-              <div key={msg.id} className={`flex ${msg.from === "me" ? "justify-end" : "justify-start"}`}>
-                <div className="max-w-[78%] flex flex-col gap-0.5"
-                  onMouseDown={(e) => { e.preventDefault(); setMsgMenuPos(msg.from === "me" ? "right" : "left"); pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500); }}
-                  onMouseUp={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
-                  onMouseLeave={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    setMsgMenuPos(msg.from === "me" ? "right" : "left");
-                    pressTimerRef.current = setTimeout(() => setPressedMsgId(msg.id), 500);
-                  }}
-                  onTouchMove={() => {
-                    if (pressTimerRef.current) {
-                      clearTimeout(pressTimerRef.current);
-                      pressTimerRef.current = null;
-                    }
-                  }}
-                  onTouchEnd={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
-                >
-                  {msg.imageUrl ? (
-                    <a href={msg.imageUrl} target="_blank" rel="noopener noreferrer" className={`rounded-2xl overflow-hidden shadow-sm block ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
-                      <img src={msg.imageUrl} alt={msg.text} className="w-full max-w-[220px] object-cover rounded-2xl" style={{ maxHeight: 260 }} />
-                    </a>
-                  ) : (
-                    <>
-                      <div
-                        className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                          msg.from === "me"
-                            ? "text-white rounded-br-sm"
-                            : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
-                        } ${msg.failed ? "opacity-60" : ""}`}
-                        style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #6c47ff, #8b6af5)", userSelect: "none" } : { userSelect: "none" }}
-                      >
-                        {msg.text}
-                      </div>
-                      {msg.failed && (
-                        <span className="text-[10px] text-red-400 font-medium px-1">Not delivered · check connection</span>
-                      )}
-                    </>
-                  )}
-                  <span className={`text-[10px] text-[#b0aaa5] flex items-center gap-0.5 ${msg.from === "me" ? "justify-end" : "justify-start"} px-1`}>
-                    {msg.time}
-                    {msg.from === "me" && !msg.failed && (
-                      <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="ml-0.5 flex-shrink-0">
-                        <path d="M1 4l2.5 2.5L8 1" stroke="#6c47ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M5.5 4l2.5 2.5L13 1" stroke="#6c47ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    )}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
 
       {/* Scroll-to-bottom button */}
       {showScrollBtn && (
