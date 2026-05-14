@@ -521,12 +521,12 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.25)" }}>
           © 2026 SkillSnap · Sydney
         </p>
-        <a
-          href="mailto:md.official70@gmail.com?subject=SkillSnap%20Help%20Request&body=Hi%20SkillSnap%20team%2C%20I%20need%20help%20with..."
+        <button
+          onClick={() => onNavigate("contact")}
           className="text-[11px] text-[#a78bfa] font-semibold"
         >
           Need help? Contact us
-        </a>
+        </button>
       </footer>
     </div>
   );

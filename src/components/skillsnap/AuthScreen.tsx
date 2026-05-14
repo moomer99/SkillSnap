@@ -497,12 +497,12 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         <p className="text-center text-[11px] text-[#b0aaa5]">
           By continuing, you agree to our Terms &amp; Privacy Policy
         </p>
-        <a
-          href="mailto:md.official70@gmail.com?subject=SkillSnap%20Help%20Request&body=Hi%20SkillSnap%20team%2C%20I%20need%20help%20with..."
+        <button
+          onClick={() => onNavigate("contact")}
           className="text-center text-[11px] text-[#6c47ff] font-semibold"
         >
           Need help? Contact us
-        </a>
+        </button>
       </div>
     </div>
   );
