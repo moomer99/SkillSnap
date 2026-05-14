@@ -45,7 +45,16 @@ export function useProfile(variant: ProfileVariant) {
     } else {
       const id = state.viewingUserId;
       if (!id) return;
-      userService.getUser(id).then((u) => { if (u) setUser(u); });
+      userService.getUser(id).then((u) => {
+        if (u) {
+          setUser(u);
+        } else {
+          // User not found in DB — use post author data if available
+          const authorFromFeed = [...state.posts, ...state.localPosts]
+            .find(p => p.authorId === id)?.author ?? null;
+          setUser(authorFromFeed);
+        }
+      });
     }
   // feedVersion triggers a re-fetch after uploads and job verifications
   }, [variant, state.viewingUserId, state.feedVersion]);
