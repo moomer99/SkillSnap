@@ -39,7 +39,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
   const [posts, setPosts] = useState<Post[]>([]);
   const [gridLoading, setGridLoading] = useState(true);
   const [viewingPost, setViewingPost] = useState<Post | null>(null);
-  const [activeTab, setActiveTab] = useState<"work" | "saved" | "pro">("work");
+  const [activeTab, setActiveTab] = useState<"work" | "saved">("work");
   const [proExpanded, setProExpanded] = useState(false);
   const [proNotified, setProNotified] = useState(false);
 
@@ -165,12 +165,11 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
         <div className="pt-0">
           {isOwn ? (
             <div className="flex border-b border-[#e8e4df] bg-white">
-              {(["work", "saved", "pro"] as const).map((tab) => (
+              {(["work", "saved"] as const).map((tab) => (
                 <button key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`flex-1 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${activeTab === tab ? "text-[#6c47ff] border-b-2 border-[#6c47ff]" : "text-[#7a7570]"}`}>
-                  {tab === "pro" && <Zap size={13} className="text-[#f59e0b]" />}
-                  {tab === "work" ? "My Works" : tab === "saved" ? "Saved" : "Go Pro — Free"}
+                  {tab === "work" ? "My Works" : "Saved"}
                   {tab === "work" && (() => { const count = gridLoading ? null : (mergedPosts.length || (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)); return count ? <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">{count}</span> : null; })()}
                   {tab === "saved" && savedPostsList.length > 0 && <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">{savedPostsList.length}</span>}
                 </button>
@@ -183,9 +182,6 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             </div>
           )}
 
-          {activeTab === "pro" && isOwn && (
-            <ProTab notified={proNotified} onNotify={() => setProNotified(true)} expanded={proExpanded} onToggleExpand={() => setProExpanded(v => !v)} />
-          )}
 
           {(activeTab === "work" || !isOwn) && (
             <div className="grid grid-cols-3 gap-0.5 pt-0.5">

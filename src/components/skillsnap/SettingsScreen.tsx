@@ -84,25 +84,52 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
         </div>
 
         {/* Pro upgrade banner */}
-        <div
-          className="mx-4 mt-5 rounded-2xl overflow-hidden cursor-pointer active:opacity-90 transition-opacity"
-          style={{ background: "linear-gradient(135deg, #1a0f3c 0%, #2d1b69 100%)", border: "1px solid rgba(167,139,250,0.3)" }}
+        <button
           onClick={() => onNavigate("pro")}
+          className="w-full mx-4 mt-5 mb-4 rounded-2xl overflow-hidden active:scale-[0.98] transition-transform"
+          style={{
+            background: "linear-gradient(135deg, #0d0a1a, #1a0f3c, #2d1b69)",
+            border: "1px solid rgba(167,139,250,0.25)",
+            width: "calc(100% - 2rem)"
+          }}
         >
-          <div className="px-4 py-3.5 flex items-center gap-3">
-            <div style={{ width: 38, height: 38, borderRadius: 12, background: "linear-gradient(135deg, #6c47ff, #a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Zap size={18} fill="white" color="white" />
+          <div className="px-4 py-4 flex items-center gap-3">
+            <div style={{
+              width: 44, height: 44, borderRadius: 13,
+              background: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0,
+              boxShadow: "0 0 20px rgba(108,71,255,0.5)"
+            }}>
+              <Zap size={22} fill="white" color="white" />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-white font-bold text-sm">SkillSnap Pro</span>
-                <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 6px", borderRadius: 99, background: "rgba(167,139,250,0.2)", color: "#a78bfa", border: "1px solid rgba(167,139,250,0.3)" }}>COMING SOON</span>
+            <div className="flex-1 text-left">
+              <div className="flex items-center gap-2 mb-0.5">
+                <p className="text-white font-bold text-base leading-tight">
+                  SkillSnap Pro Plus
+                </p>
+                <span style={{
+                  fontSize: 9, fontWeight: 700,
+                  padding: "2px 7px", borderRadius: 99,
+                  background: "rgba(251,191,36,0.2)",
+                  color: "#fbbf24",
+                  border: "1px solid rgba(251,191,36,0.3)"
+                }}>
+                  COMING SOON
+                </span>
               </div>
-              <p className="text-white/50 text-xs mt-0.5">Boost your profile — first 100 get 3 months free</p>
+              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>
+                Get discovered and hired faster ⚡
+              </p>
             </div>
-            <ChevronRight size={16} color="rgba(255,255,255,0.4)" />
+            <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 18 }}>›</div>
           </div>
-        </div>
+          <div style={{
+            height: 3,
+            background: "linear-gradient(90deg, #6c47ff, #a78bfa, #f472b6, #6c47ff)",
+            backgroundSize: "200% 100%",
+          }} />
+        </button>
 
         {/* Account */}
         <SectionHeader title="Account" />
