@@ -60,7 +60,9 @@ export async function GET(request: NextRequest) {
     }
 
     console.log("[auth/callback] PKCE exchange succeeded, redirecting to", next);
-    return NextResponse.redirect(`${origin}${next}`);
+    const redirectUrl = new URL(`${origin}${next}`);
+    redirectUrl.searchParams.set("session_user", data.session.user.id);
+    return NextResponse.redirect(redirectUrl.toString());
   }
 
   // No PKCE code — may be implicit flow, let client handle the hash token

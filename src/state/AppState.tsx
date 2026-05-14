@@ -505,6 +505,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Supabase uses the configured Site URL when /auth/callback is not in the
     // allowed-redirect-URLs list, delivering the code here instead.
     // We do NOT return early — we still set up onAuthStateChange so PASSWORD_RECOVERY fires.
+    const sessionUser = queryParams.get("session_user");
+    if (sessionUser) {
+      window.history.replaceState({}, "", window.location.pathname);
+      clearTimeout(authTimeout);
+      authSb.auth.getSession().then(async ({ data: { session } }) => {
+        if (session?.user) {
+          await hydrateProfile(session.user.id, session.user);
+        } else {
+          const { data: { user } } = await authSb.auth.getUser();
+          if (user) await hydrateProfile(user.id, user);
+          else dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        }
+      }).catch(() => dispatch({ type: "SET_AUTH_LOADING", loading: false }));
+      return;
+    }
+
     const rootCode = queryParams.get("code");
     if (rootCode) {
       window.history.replaceState({}, "", window.location.pathname);
