@@ -460,6 +460,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Handle implicit flow — access_token arrives in the URL hash
+    const hashAccessToken = hashParams.get("access_token");
+    const hashRefreshToken = hashParams.get("refresh_token");
+    if (hashAccessToken && hashParams.get("type") !== "recovery") {
+      window.history.replaceState({}, "", window.location.pathname);
+      clearTimeout(authTimeout);
+      try {
+        const { data, error } = await authSb.auth.setSession({
+          access_token: hashAccessToken,
+          refresh_token: hashRefreshToken ?? "",
+        });
+        if (data?.user && !error) {
+          await hydrateProfile(data.user.id, data.user);
+        } else {
+          dispatch({ type: "SET_AUTH_LOADING", loading: false });
+        }
+      } catch {
+        dispatch({ type: "SET_AUTH_LOADING", loading: false });
+      }
+      return;
+    }
+
     // Handle PKCE code that lands on the root URL (?code=xxx).
     // Supabase uses the configured Site URL when /auth/callback is not in the
     // allowed-redirect-URLs list, delivering the code here instead.
