@@ -418,18 +418,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
             const { data: { user } } = await authSb.auth.getUser();
             clearTimeout(timeoutId);
             if (user) {
-              // Try fetching profile directly first
-              const response = await fetch(
-                `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=*`,
-                {
-                  headers: {
-                    "apikey": process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-                    "Authorization": `Bearer ${user.id}`,
-                    "Content-Type": "application/json",
-                  }
-                }
-              );
-              // Fall back to ensureProfile which uses the authenticated client
               const profile = await ensureProfile(user);
               if (profile) dispatch({ type: "SET_AUTH", user: profile });
               else dispatch({ type: "SET_AUTH_LOADING", loading: false });
