@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Screen } from "@/types";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
 import { getAuthSupabase } from "@/lib/supabase";
+import { useEarlyBirdCount } from '@/hooks/useEarlyBirdCount';
 
 interface LandingPageProps {
   onNavigate: (s: Screen) => void;
@@ -235,6 +236,7 @@ function VideoCard({ card, delay }: { card: FeaturedCard; delay?: number }) {
 export default function LandingPage({ onNavigate }: LandingPageProps) {
 
   const proCards = useRealUsers();
+  const { count, remaining, loading, isFull } = useEarlyBirdCount();
   function goToAuth() { onNavigate("auth"); }
 
   return (
@@ -398,6 +400,55 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           ))}
         </div>
       </section>
+
+      {/* ── EARLY BIRD ── */}
+      {!isFull && (
+        <section className="px-5 py-10" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <FadeIn>
+            <div className="rounded-3xl overflow-hidden p-5 relative"
+              style={{ background: 'linear-gradient(135deg, #1a0f3c, #2d1b69)', border: '1px solid rgba(251,191,36,0.3)' }}>
+              <div className="absolute top-0 right-0 w-40 h-40 pointer-events-none"
+                style={{ background: 'radial-gradient(circle at 100% 0%, rgba(251,191,36,0.15) 0%, transparent 65%)' }} />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl">🔥</span>
+                  <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: '#fbbf24' }}>Early Bird Offer</span>
+                </div>
+                <h3 className="text-[20px] font-extrabold text-white mb-2 leading-tight">
+                  First 100 pros get<br />
+                  <span style={{ background: 'linear-gradient(90deg, #fbbf24, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    3 months Pro Plus free
+                  </span>
+                </h3>
+                <p className="text-[13px] mb-4 leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                  Sign up, set your skill, and upload your first video to claim your spot. No credit card needed.
+                </p>
+                <div className="mb-4">
+                  <div className="flex justify-between mb-1.5">
+                    <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.5)' }}>Spots claimed</span>
+                    <span className="text-[11px] font-bold" style={{ color: '#fbbf24' }}>
+                      {loading ? '...' : `${count} / 100`}
+                    </span>
+                  </div>
+                  <div style={{ height: 6, borderRadius: 99, background: 'rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${loading ? 0 : count}%`, borderRadius: 99, background: 'linear-gradient(90deg, #f59e0b, #fbbf24)', transition: 'width 0.6s ease' }} />
+                  </div>
+                  <p className="text-[11px] mt-1.5 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    {loading ? 'Checking...' : `${remaining} spots remaining`}
+                  </p>
+                </div>
+                <button
+                  onClick={goToAuth}
+                  className="w-full h-12 rounded-2xl font-extrabold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.97]"
+                  style={{ background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', boxShadow: '0 4px 20px rgba(251,191,36,0.35)', color: '#1a1a1a' }}
+                >
+                  🔥 Claim Your Spot — Join Free
+                </button>
+              </div>
+            </div>
+          </FadeIn>
+        </section>
+      )}
 
       {/* ── WHO IT'S FOR ────────────────────── */}
       <section className="px-5 py-14" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
