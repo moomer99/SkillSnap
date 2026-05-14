@@ -163,7 +163,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
 
         {/* ── Tabs ── */}
         <div className="pt-0">
-          {isOwn ? (
+          {isOwn && (
             <div className="flex border-b border-[#e8e4df] bg-white">
               {(["work", "saved"] as const).map((tab) => (
                 <button key={tab}
