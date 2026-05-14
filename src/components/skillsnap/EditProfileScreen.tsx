@@ -212,7 +212,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
   const initials = displayName.trim() ? displayName.trim()[0].toUpperCase() : "?";
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
+    <div className="flex flex-col bg-[#f8f7f5] overflow-hidden" style={{ height: "100dvh" }}>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center gap-3 px-4 h-14">
         <button onClick={() => onNavigate("own-profile")} className="text-[#7a7570]">
           <ArrowLeft size={20} />
@@ -235,7 +235,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
           <p className="font-bold text-[#1a1a1a] text-lg">Profile updated!</p>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto no-scrollbar pb-8">
+        <div className="flex-1 overflow-y-auto no-scrollbar pb-28">
           {/* Avatar */}
           <div className="flex flex-col items-center py-8 bg-white border-b border-[#e8e4df]">
             <div className="relative">
