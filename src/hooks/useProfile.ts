@@ -48,12 +48,34 @@ export function useProfile(variant: ProfileVariant) {
       userService.getUser(id).then((u) => {
         if (u) {
           setUser(u);
-        } else {
-          // User not found in DB — use post author data if available
-          const authorFromFeed = [...state.posts, ...state.localPosts]
-            .find(p => p.authorId === id)?.author ?? null;
-          setUser(authorFromFeed);
+          return;
         }
+        // Not in DB — try post author data as fallback
+        const authorFromFeed = [...state.posts, ...state.localPosts]
+          .find(p => p.authorId === id)?.author ?? null;
+        if (authorFromFeed) {
+          setUser(authorFromFeed);
+          return;
+        }
+        // Nothing found anywhere — set a minimal placeholder so screen doesn't spin forever
+        setUser({
+          id,
+          username: "@user",
+          displayName: "SkillSnap User",
+          avatarGradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+          avatarInitial: "S",
+          location: "",
+          bio: "",
+          skill: null,
+          isVerified: false,
+          jobsDone: 0,
+          happyPercent: 0,
+          followers: 0,
+          following: 0,
+          postCount: 0,
+          isClient: false,
+          distanceKm: undefined,
+        });
       });
     }
   // feedVersion triggers a re-fetch after uploads and job verifications
