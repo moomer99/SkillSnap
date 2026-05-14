@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { ArrowLeft, Zap, Star, TrendingUp, Video, Shield, Gift, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import type { Screen } from "@/types";
+import { useEarlyBirdCount } from '@/hooks/useEarlyBirdCount';
 
 interface ProScreenProps {
   onNavigate: (s: Screen) => void;
@@ -21,6 +22,7 @@ const FEATURES = [
 export default function ProScreen({ onNavigate }: ProScreenProps) {
   const [expanded, setExpanded] = useState(false);
   const [notified, setNotified] = useState(false);
+  const { count, remaining, loading } = useEarlyBirdCount();
 
   const visibleFeatures = expanded ? FEATURES : FEATURES.slice(0, 2);
 
@@ -84,7 +86,7 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
                   <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 99, background: "rgba(251,191,36,0.2)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>EXCLUSIVE</span>
                 </div>
                 <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>
-                  Be one of the <span style={{ color: "#fbbf24", fontWeight: 700 }}>first 100 users</span> to sign up and upload a video — get <span style={{ color: "#fbbf24", fontWeight: 700 }}>3 months of Pro free</span>, no credit card needed.
+                  Be one of the <span style={{ color: "#fbbf24", fontWeight: 700 }}>first 100 users</span> to sign up and upload a video — get <span style={{ color: "#fbbf24", fontWeight: 700 }}>3 months of Pro Plus free</span>, no credit card needed.
                 </p>
               </div>
             </div>
@@ -93,13 +95,13 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
             <div className="mt-3">
               <div className="flex justify-between mb-1.5">
                 <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>Early spots claimed</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#fbbf24" }}>47 / 100</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#fbbf24" }}>{loading ? '...' : `${count} / 100`}</span>
               </div>
               <div style={{ height: 6, borderRadius: 99, background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
-                <div style={{ height: "100%", width: "47%", borderRadius: 99, background: "linear-gradient(90deg, #f59e0b, #fbbf24)" }} />
+                <div style={{ height: "100%", width: `${loading ? 0 : count}%`, borderRadius: 99, background: "linear-gradient(90deg, #f59e0b, #fbbf24)", transition: "width 0.6s ease" }} />
               </div>
               <p style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", marginTop: 5, textAlign: "center" }}>
-                53 spots remaining — sign up and upload your first video to claim yours
+                {loading ? 'Checking spots...' : `${remaining} spots remaining — sign up and upload your first video to claim yours`}
               </p>
             </div>
           </div>
