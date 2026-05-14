@@ -297,7 +297,7 @@ function SkillSnapRouter() {
               <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
             </div>
           )}
-          <div style={{ opacity, transition: "opacity 150ms ease" }}>
+          <div style={{ opacity, transition: "opacity 150ms ease", height: "100%", display: "flex", flexDirection: "column" }}>
             {screen === "landing" && <LandingPage onNavigate={navigate} />}
             {screen === "auth"    && <AuthScreen  onNavigate={navigate} />}
             <Suspense fallback={<div className="flex-1 bg-[#f8f7f5]" />}>
@@ -351,7 +351,7 @@ function SkillSnapRouter() {
             <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
           </div>
         )}
-        <div style={{ opacity, transition: "opacity 150ms ease" }}>
+        <div style={{ opacity, transition: "opacity 150ms ease", height: "100%", display: "flex", flexDirection: "column" }}>
           {screen === "landing" && <LandingPage onNavigate={navigate} />}
           {screen === "auth"    && <AuthScreen  onNavigate={navigate} />}
           <Suspense fallback={<div className="flex-1 bg-[#f8f7f5]" />}>
