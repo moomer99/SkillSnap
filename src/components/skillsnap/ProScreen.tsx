@@ -24,6 +24,29 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
   const [notified, setNotified] = useState(false);
   const { count, remaining, loading } = useEarlyBirdCount();
 
+  async function handleNotify() {
+    setNotified(true);
+    try {
+      const { getAuthSupabase } = await import('@/lib/supabase');
+      const sb = getAuthSupabase();
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) {
+        const { data: profile } = await sb
+          .from('profiles')
+          .select('display_name, email')
+          .eq('id', user.id)
+          .single();
+        await sb.from('pro_waitlist').upsert({
+          user_id: user.id,
+          email: profile?.email ?? user.email,
+          display_name: profile?.display_name ?? 'SkillSnap User',
+        }, { onConflict: 'user_id' });
+      }
+    } catch (e) {
+      console.warn('[ProScreen] waitlist join failed:', e);
+    }
+  }
+
   const visibleFeatures = expanded ? FEATURES : FEATURES.slice(0, 2);
 
   return (
@@ -203,7 +226,7 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
           ) : (
             <>
               <button
-                onClick={() => setNotified(true)}
+                onClick={handleNotify}
                 style={{ width: "100%", height: 54, borderRadius: 16, background: "linear-gradient(135deg, #6c47ff, #8b6af5)", color: "#fff", fontWeight: 800, fontSize: 16, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 4px 24px rgba(108,71,255,0.4)" }}
               >
                 <Zap size={18} fill="white" color="white" />
