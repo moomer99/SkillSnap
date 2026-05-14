@@ -406,14 +406,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }, 8000);
 
       try {
-        // Read token directly from localStorage — bypasses Supabase client lock entirely
-        const tokenData = JSON.parse(
-          localStorage.getItem("sb-skillsnap-auth-token") ?? "{}"
-        );
-        const accessToken = tokenData?.access_token;
+        // Find the Supabase auth token regardless of the project-specific key name
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+        const projectRef = supabaseUrl.replace("https://", "").split(".")[0];
+        const tokenKey = `sb-${projectRef}-auth-token`;
+        const tokenData = JSON.parse(localStorage.getItem(tokenKey) ?? "{}");
+        // Also accept the token passed directly via setSession (implicit flow)
+        const accessToken = tokenData?.access_token ?? tokenData?.session?.access_token;
         if (!accessToken) {
-          clearTimeout(timeoutId);
-          dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          // Fall back to Supabase client getUser() instead of failing
+          try {
+            const { data: { user } } = await authSb.auth.getUser();
+            if (user) {
+              const { ensureProfile } = await import("@/services/authService");
+              const profile = await ensureProfile(user);
+              clearTimeout(timeoutId);
+              if (profile) dispatch({ type: "SET_AUTH", user: profile });
+              else dispatch({ type: "SET_AUTH_LOADING", loading: false });
+            } else {
+              clearTimeout(timeoutId);
+              dispatch({ type: "SET_AUTH_LOADING", loading: false });
+            }
+          } catch {
+            clearTimeout(timeoutId);
+            dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          }
           return;
         }
 
