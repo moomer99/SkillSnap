@@ -175,11 +175,6 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 </button>
               ))}
             </div>
-          ) : (
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-[#e8e4df] bg-white">
-              <h3 className="text-sm font-bold text-[#1a1a1a]">✅ Hired</h3>
-              {(() => { const count = gridLoading ? null : (mergedPosts.length || (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)); return count ? <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">{count}</span> : null; })()}
-            </div>
           )}
 
 
@@ -238,15 +233,6 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             </div>
           )}
 
-          {!isOwn && (
-            <div className="py-14 flex flex-col items-center gap-3 text-center px-8">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1" style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)" }}>
-                <span className="text-2xl">✅</span>
-              </div>
-              <p className="text-sm font-bold text-[#1a1a1a]">No hired history yet</p>
-              <p className="text-xs text-[#b0aaa5] leading-relaxed">Jobs confirmed via SkillSnap will appear here</p>
-            </div>
-          )}
 
           {activeTab === "saved" && isOwn && (
             <div className="grid grid-cols-3 gap-0.5 px-0.5 pt-0.5">
