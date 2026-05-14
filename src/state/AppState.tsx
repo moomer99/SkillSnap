@@ -513,6 +513,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
         dispatch({ type: "CLEAR_AUTH" });
+        dispatch({ type: "HIDE_AUTH_PROMPT" });
         return;
       }
 

@@ -15,7 +15,7 @@ export default function AuthPromptModal() {
     return () => document.removeEventListener("keydown", onKey);
   }, [state.showAuthPrompt, dispatch]);
 
-  if (!state.showAuthPrompt) return null;
+  if (!state.showAuthPrompt || state.isAuthenticated) return null;
 
   function goAuth(mode: "signup" | "login") {
     dispatch({ type: "HIDE_AUTH_PROMPT" });
