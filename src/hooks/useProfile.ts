@@ -43,8 +43,9 @@ export function useProfile(variant: ProfileVariant) {
         dispatch({ type: "UPDATE_CURRENT_USER", patch: u });
       });
     } else {
-      const id = state.viewingUserId ?? "user_priya";
-      userService.getUser(id).then((u) => setUser(u ?? MOCK_USERS[1]));
+      const id = state.viewingUserId;
+      if (!id) return;
+      userService.getUser(id).then((u) => { if (u) setUser(u); });
     }
   // feedVersion triggers a re-fetch after uploads and job verifications
   }, [variant, state.viewingUserId, state.feedVersion]);
