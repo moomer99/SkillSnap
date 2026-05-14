@@ -406,34 +406,64 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }, 15000);
       try {
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+        const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
         const projectRef = supabaseUrl.replace("https://", "").split(".")[0];
         const tokenKey = `sb-${projectRef}-auth-token`;
         const stored = localStorage.getItem(tokenKey);
         const parsed = stored ? JSON.parse(stored) : null;
-        const accessToken = parsed?.access_token;
-        if (!accessToken) {
-          const profile = await ensureProfile(authUser);
-          clearTimeout(timeoutId);
-          if (profile) dispatch({ type: "SET_AUTH", user: profile });
-          else dispatch({ type: "SET_AUTH_LOADING", loading: false });
-          return;
-        }
+        const accessToken = parsed?.access_token ?? parsed?.session?.access_token;
+        const authHeader = accessToken ? `Bearer ${accessToken}` : `Bearer ${anonKey}`;
+        // Fetch profile directly
         const res = await fetch(
           `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=*`,
-          {
-            headers: {
-              "apikey": process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-              "Authorization": `Bearer ${accessToken}`,
-            }
-          }
+          { headers: { "apikey": anonKey, "Authorization": authHeader } }
         );
         const rows = await res.json();
         clearTimeout(timeoutId);
         if (rows?.[0]) {
           dispatch({ type: "SET_AUTH", user: mapProfile(rows[0] as Record<string, unknown>) });
+          return;
+        }
+        // Profile doesn't exist — create it directly without using Supabase client
+        const meta = authUser.user_metadata ?? {};
+        const displayName = (meta.full_name as string) || (meta.name as string) || (authUser.email?.split("@")[0] ?? "User");
+        const rawUsername = displayName.toLowerCase().replace(/[^a-z0-9_]/g, "_");
+        const username = rawUsername.slice(0, 26) + "_" + authUser.id.replace(/-/g, "").slice(0, 4);
+        const avatarUrl = (meta.avatar_url as string) || (meta.picture as string) || null;
+        const insertRes = await fetch(
+          `${supabaseUrl}/rest/v1/profiles`,
+          {
+            method: "POST",
+            headers: {
+              "apikey": anonKey,
+              "Authorization": authHeader,
+              "Content-Type": "application/json",
+              "Prefer": "return=representation",
+            },
+            body: JSON.stringify({
+              id: userId,
+              username,
+              email: authUser.email ?? null,
+              display_name: displayName,
+              avatar_url: avatarUrl,
+              avatar_initial: displayName.charAt(0).toUpperCase(),
+              avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+            }),
+          }
+        );
+        const inserted = await insertRes.json();
+        clearTimeout(timeoutId);
+        const newProfile = Array.isArray(inserted) ? inserted[0] : inserted;
+        if (newProfile?.id) {
+          dispatch({ type: "SET_AUTH", user: mapProfile(newProfile as Record<string, unknown>) });
         } else {
-          const profile = await ensureProfile(authUser);
-          if (profile) dispatch({ type: "SET_AUTH", user: profile });
+          // Insert may have failed due to existing row — fetch again
+          const retryRes = await fetch(
+            `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=*`,
+            { headers: { "apikey": anonKey, "Authorization": authHeader } }
+          );
+          const retryRows = await retryRes.json();
+          if (retryRows?.[0]) dispatch({ type: "SET_AUTH", user: mapProfile(retryRows[0] as Record<string, unknown>) });
           else dispatch({ type: "SET_AUTH_LOADING", loading: false });
         }
       } catch (e) {
