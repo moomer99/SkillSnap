@@ -151,8 +151,8 @@ export const authService = {
   async signInWithGoogle(): Promise<{ error?: string }> {
     const redirectTo =
       typeof window !== "undefined"
-        ? `${window.location.origin}/auth/callback`
-        : `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/auth/callback`;
+        ? `${window.location.origin}`
+        : `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://skillsnap.com.au"}`;
 
     const { error } = await getAuthSupabase().auth.signInWithOAuth({
       provider: "google",
