@@ -135,13 +135,6 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
         <SectionHeader title="Account" />
         <SettingsGroup>
           <SettingsRow
-            icon={<User size={16} className="text-[#6c47ff]" />}
-            iconBg="#ede9fe"
-            label="Edit Profile"
-            onPress={() => onNavigate("edit-profile")}
-          />
-          <Divider />
-          <SettingsRow
             icon={<Lock size={16} className="text-[#0284c7]" />}
             iconBg="#e0f2fe"
             label="Change Password"
