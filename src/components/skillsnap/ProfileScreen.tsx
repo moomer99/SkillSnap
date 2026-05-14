@@ -120,7 +120,12 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <h2 className="font-bold text-base text-[#1a1a1a]">{user.displayName}</h2>
               {user.skill && user.role !== "client" ? (
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: "#6c47ff" }}>Pro</span>
+                <>
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: "#6c47ff" }}>Pro</span>
+                  {(user as any).isEarlyBird && (
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "linear-gradient(135deg, #f59e0b, #fbbf24)", color: "#1a1a1a" }}>🔥 Early Bird</span>
+                  )}
+                </>
               ) : user.role === "client" ? (
                 <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "#f0f0f0", color: "#7a7570" }}>Client</span>
               ) : isOwn ? (
