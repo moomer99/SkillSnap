@@ -281,7 +281,7 @@ function SkillSnapRouter() {
         <div style={{ flex: "0 0 auto" }}>
           <div
             className="relative bg-[#f8f7f5] overflow-hidden"
-            style={{ width: "600px", minHeight: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
+            style={{ width: "600px", height: "100dvh", boxShadow: "0 4px 40px rgba(0,0,0,0.10), 0 1px 8px rgba(0,0,0,0.06)" }}
           >
           {authLoading && (
             <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
