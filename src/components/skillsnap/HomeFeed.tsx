@@ -20,6 +20,7 @@ import { SKILL_CATEGORIES } from "@/constants/config";
 
 interface HomeFeedProps {
   onNavigate: (s: Screen) => void;
+  registerScrollToTop?: (fn: () => void) => void;
 }
 
 const HEADER_H_NO_LOC = 88;
@@ -72,7 +73,7 @@ function SkeletonCard({ headerH }: { headerH: number }) {
   );
 }
 
-export default function HomeFeed({ onNavigate }: HomeFeedProps) {
+export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedProps) {
   const { posts, loading, loadingMore, hasMore, loadMore, likedPosts, savedPosts, toggleLike, toggleSave } = useFeed();
   const { connectTo, connecting } = useMessages();
   const { state, dispatch } = useAppState();
@@ -81,6 +82,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
   const [fullscreenPost, setFullscreenPost] = useState<Post | null>(null);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const feedScrollRef = useRef<HTMLDivElement>(null);
   const [locationPromptDismissed, setLocationPromptDismissed] = useState(() => {
     try { return localStorage.getItem("skillsnap_loc_prompt") === "1"; } catch { return false; }
   });
@@ -123,6 +125,15 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
     }
     lastScrollY.current = currentY;
   }
+
+  // Register scroll-to-top with parent so BottomNav home-tap can trigger it
+  useEffect(() => {
+    registerScrollToTop?.(() => {
+      feedScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      setHeaderVisible(true);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function dismissPrompt() {
     setLocationPromptDismissed(true);
@@ -206,7 +217,7 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
       </header>
 
       {/* Feed scroll container */}
-      <div className="overflow-y-auto no-scrollbar" style={{ height: `calc(100dvh - ${headerH}px)` }} onScroll={handleFeedScroll}>
+      <div ref={feedScrollRef} className="overflow-y-auto no-scrollbar" style={{ height: `calc(100dvh - ${headerH}px)` }} onScroll={handleFeedScroll}>
         {/* Role setup banner */}
         {showRoleBanner && (
           <div
