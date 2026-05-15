@@ -79,6 +79,8 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
   const { location, status, error, radiusKm, requestGPS, setManualLocation, setRadiusKm } = useLocation();
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [fullscreenPost, setFullscreenPost] = useState<Post | null>(null);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const [locationPromptDismissed, setLocationPromptDismissed] = useState(() => {
     try { return localStorage.getItem("skillsnap_loc_prompt") === "1"; } catch { return false; }
   });
@@ -108,6 +110,18 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
       dispatch({ type: "SET_VIEWING_USER", userId });
       onNavigate("client-profile");
     }
+  }
+
+  function handleFeedScroll(e: React.UIEvent<HTMLDivElement>) {
+    const currentY = e.currentTarget.scrollTop;
+    if (currentY > lastScrollY.current && currentY > 60) {
+      // Scrolling down — hide full header
+      setHeaderVisible(false);
+    } else {
+      // Scrolling up — show full header
+      setHeaderVisible(true);
+    }
+    lastScrollY.current = currentY;
   }
 
   function dismissPrompt() {
@@ -159,35 +173,40 @@ export default function HomeFeed({ onNavigate }: HomeFeedProps) {
             </button>
           )}
         </div>
-        <SearchBar onFocus={() => onNavigate("search")} />
+        <div
+          className="overflow-hidden transition-all duration-300 ease-in-out"
+          style={{ maxHeight: headerVisible ? '120px' : '0px', opacity: headerVisible ? 1 : 0 }}
+        >
+          <SearchBar onFocus={() => onNavigate("search")} />
 
-        {location && (
-          <div className="flex items-center gap-2 pb-2.5 pt-2 overflow-x-auto no-scrollbar">
-            <span className="text-[10px] font-bold text-[#b0aaa5] uppercase tracking-wider flex-shrink-0">Radius</span>
-            <div className="flex items-center gap-1.5">
-              {RADIUS_OPTIONS.map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRadiusKm(r)}
-                  className={`flex-shrink-0 px-3 py-1 rounded-full text-[11px] font-bold transition-all ${
-                    radiusKm === r
-                      ? "bg-[#6c47ff] text-white shadow-sm"
-                      : "bg-[#f0eeea] text-[#7a7570] active:bg-[#e8e4df]"
-                  }`}
-                >
-                  {r} km
-                </button>
-              ))}
+          {location && (
+            <div className="flex items-center gap-2 pb-2.5 pt-2 overflow-x-auto no-scrollbar">
+              <span className="text-[10px] font-bold text-[#b0aaa5] uppercase tracking-wider flex-shrink-0">Radius</span>
+              <div className="flex items-center gap-1.5">
+                {RADIUS_OPTIONS.map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setRadiusKm(r)}
+                    className={`flex-shrink-0 px-3 py-1 rounded-full text-[11px] font-bold transition-all ${
+                      radiusKm === r
+                        ? "bg-[#6c47ff] text-white shadow-sm"
+                        : "bg-[#f0eeea] text-[#7a7570] active:bg-[#e8e4df]"
+                    }`}
+                  >
+                    {r} km
+                  </button>
+                ))}
+              </div>
+              <span className="ml-auto text-[10px] text-[#b0aaa5] font-medium flex-shrink-0">
+                {filteredPosts.length} result{filteredPosts.length !== 1 ? "s" : ""}
+              </span>
             </div>
-            <span className="ml-auto text-[10px] text-[#b0aaa5] font-medium flex-shrink-0">
-              {filteredPosts.length} result{filteredPosts.length !== 1 ? "s" : ""}
-            </span>
-          </div>
-        )}
+          )}
+        </div>
       </header>
 
       {/* Feed scroll container */}
-      <div className="overflow-y-auto no-scrollbar" style={{ height: `calc(100dvh - ${headerH}px)` }}>
+      <div className="overflow-y-auto no-scrollbar" style={{ height: `calc(100dvh - ${headerH}px)` }} onScroll={handleFeedScroll}>
         {/* Role setup banner */}
         {showRoleBanner && (
           <div
