@@ -69,6 +69,11 @@ function SkillSnapRouter() {
 
   const showBottomNav = NAV_SCREENS.includes(screen);
 
+  // Feed scroll-to-top — HomeFeed registers its scroll fn on mount
+  const scrollToTopRef = useRef<(() => void) | null>(null);
+  function registerScrollToTop(fn: () => void) { scrollToTopRef.current = fn; }
+  function handleScrollToTop() { scrollToTopRef.current?.(); }
+
   // Opacity fade between screen changes
   const [opacity, setOpacity] = useState(1);
   const prevScreen = useRef(screen);
@@ -303,7 +308,7 @@ function SkillSnapRouter() {
             <Suspense fallback={<div className="flex-1 bg-[#f8f7f5]" />}>
               {screen === "onboarding"     && <OnboardingScreen onNavigate={navigate} />}
               {screen === "search"         && <SearchScreen      onNavigate={navigate} />}
-              {screen === "home"           && <HomeFeed          onNavigate={navigate} />}
+              {screen === "home"           && <HomeFeed          onNavigate={navigate} registerScrollToTop={registerScrollToTop} />}
               {screen === "discover"       && <DiscoverScreen    onNavigate={navigate} />}
               {screen === "own-profile"    && <ProfileScreen     variant="own"    onNavigate={navigate} />}
               {screen === "client-profile" && <ProfileScreen     variant="client" onNavigate={navigate} />}
