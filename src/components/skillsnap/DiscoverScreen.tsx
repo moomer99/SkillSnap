@@ -266,12 +266,20 @@ function ProCard({
         className="relative flex flex-col items-center pt-5 pb-3 px-3 active:opacity-80 transition-opacity"
       >
         {/* Avatar */}
-        <div
-          className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl mb-2 shadow-sm"
-          style={{ background: pin.color ?? "#6c47ff" }}
-        >
-          {initial}
-        </div>
+        {pin.avatarUrl ? (
+          <img
+            src={pin.avatarUrl}
+            alt={pin.name}
+            className="w-14 h-14 rounded-full object-cover mb-2 shadow-sm"
+          />
+        ) : (
+          <div
+            className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl mb-2 shadow-sm"
+            style={{ background: pin.avatarGradient ?? pin.color ?? "#6c47ff" }}
+          >
+            {pin.avatarInitial ?? initial}
+          </div>
+        )}
 
         {/* Name */}
         <p className="text-[13px] font-bold text-[#1a1a1a] leading-tight text-center truncate w-full">

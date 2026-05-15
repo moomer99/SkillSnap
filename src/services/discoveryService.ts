@@ -40,6 +40,9 @@ function profileToPin(row: Record<string, unknown>, index: number): DiscoveryPin
     color: pinColor(row.skill as string ?? ""),
     rating: 5,
     jobsDone: Number(row.jobs_done ?? 0),
+    avatarUrl: row.avatar_url as string ?? null,
+    avatarInitial: row.avatar_initial as string ?? (row.display_name as string)?.charAt(0) ?? '?',
+    avatarGradient: row.avatar_gradient as string ?? null,
     x: mockPin.x,
     y: mockPin.y,
   };
@@ -49,7 +52,7 @@ async function queryProfiles(filter: DiscoveryFilter, limit = 12): Promise<Disco
   const sb = getSupabase();
   let query = sb
     .from("profiles")
-    .select("id, display_name, skill, jobs_done, is_client, location")
+    .select("id, display_name, skill, jobs_done, is_client, location, avatar_url, avatar_initial, avatar_gradient")
     .eq("is_client", false)
     .limit(limit);
 
