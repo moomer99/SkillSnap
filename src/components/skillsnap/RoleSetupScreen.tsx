@@ -62,12 +62,7 @@ export default function RoleSetupScreen() {
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
       {/* Header */}
       <div className="pt-12 pb-6 px-6 text-center">
-        <div
-          className="w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-5"
-          style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
-        >
-          <img src="/skillsnap-icon.svg" alt="SkillSnap" width={36} height={36} />
-        </div>
+        <img src="/skillsnap-icon.svg" alt="SkillSnap" width={64} height={64} className="mx-auto mb-5" />
         <h1 className="text-2xl font-black text-[#1a1a1a] mb-2">What brings you to SkillSnap?</h1>
         <p className="text-[#7a7570] text-sm">Choose your role to get started</p>
       </div>

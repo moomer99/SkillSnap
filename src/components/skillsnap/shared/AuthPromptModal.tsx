@@ -24,12 +24,7 @@ export default function AuthPromptModal() {
   }
 
   const logo = (
-    <div
-      className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1"
-      style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
-    >
-      <img src="/skillsnap-icon.svg" alt="SkillSnap" width={36} height={36} />
-    </div>
+    <img src="/skillsnap-icon.svg" alt="SkillSnap" width={64} height={64} className="mb-1" />
   );
 
   const content = (isMobile: boolean) => (
