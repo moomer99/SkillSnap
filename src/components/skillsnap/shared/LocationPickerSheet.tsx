@@ -53,6 +53,7 @@ export default function LocationPickerSheet({
         style={{ background: "#fff", boxShadow: "0 -4px 40px rgba(0,0,0,0.12)", overflowY: "auto", maxHeight: "80vh", touchAction: "pan-y", WebkitOverflowScrolling: "touch" }}
         onClick={(e) => e.stopPropagation()}
         onScroll={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
       >
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">

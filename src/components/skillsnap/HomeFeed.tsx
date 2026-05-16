@@ -217,7 +217,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
       </header>
 
       {/* Feed scroll container */}
-      <div ref={feedScrollRef} className="overflow-y-auto no-scrollbar" style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px)`, transition: 'height 0.3s ease' }} onScroll={handleFeedScroll}>
+      <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px)`, transition: 'height 0.3s ease' }} onScroll={handleFeedScroll}>
         {/* Role setup banner */}
         {showRoleBanner && (
           <div
