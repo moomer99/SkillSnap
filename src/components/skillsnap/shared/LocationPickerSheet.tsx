@@ -47,9 +47,9 @@ export default function LocationPickerSheet({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end" onClick={onClose} style={{ overflow: "hidden" }} onTouchMove={(e) => e.preventDefault()}>
+    <div className="fixed inset-0 z-50 flex items-end" onClick={onClose} style={{ overflow: "hidden", overscrollBehavior: "none" }} onTouchMove={(e) => { if ((e.target as HTMLElement).closest('.location-sheet')) return; e.preventDefault(); }}>
       <div
-        className="w-full rounded-t-3xl"
+        className="w-full rounded-t-3xl location-sheet"
         style={{ background: "#fff", boxShadow: "0 -4px 40px rgba(0,0,0,0.12)", overflowY: "auto", maxHeight: "80vh", touchAction: "pan-y", WebkitOverflowScrolling: "touch" }}
         onClick={(e) => e.stopPropagation()}
         onScroll={(e) => e.stopPropagation()}
