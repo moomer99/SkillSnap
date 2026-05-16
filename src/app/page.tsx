@@ -383,7 +383,7 @@ function SkillSnapRouter() {
             {screen === "reset-password" && typeof window !== "undefined" && (window.location.replace("/reset-password"), null)}
             {screen === "role-setup"     && <RoleSetupScreen />}
             {screen === "username-setup" && <UsernameSetupScreen onDone={() => navigate("role-setup")} />}
-            {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
+            {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} onScrollToTop={handleScrollToTop} />}
           </Suspense>
         </div>
         <AuthPromptModal />
