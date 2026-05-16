@@ -325,7 +325,7 @@ function SkillSnapRouter() {
               {screen === "reset-password" && <ResetPasswordRedirect />}
               {screen === "role-setup"     && <RoleSetupScreen />}
               {screen === "username-setup" && <UsernameSetupScreen onDone={() => navigate("role-setup")} />}
-              {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} />}
+              {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} onScrollToTop={handleScrollToTop} />}
             </Suspense>
           </div>
           <AuthPromptModal />
@@ -366,7 +366,7 @@ function SkillSnapRouter() {
           <Suspense fallback={<div className="flex-1 bg-[#f8f7f5]" />}>
             {screen === "onboarding"     && <OnboardingScreen onNavigate={navigate} />}
             {screen === "search"         && <SearchScreen      onNavigate={navigate} />}
-            {screen === "home"           && <HomeFeed          onNavigate={navigate} />}
+            {screen === "home"           && <HomeFeed          onNavigate={navigate} registerScrollToTop={registerScrollToTop} />}
             {screen === "discover"       && <DiscoverScreen    onNavigate={navigate} />}
             {screen === "own-profile"    && <ProfileScreen     variant="own"    onNavigate={navigate} />}
             {screen === "client-profile" && <ProfileScreen     variant="client" onNavigate={navigate} />}
