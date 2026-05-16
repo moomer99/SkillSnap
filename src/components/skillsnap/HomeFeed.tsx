@@ -51,11 +51,11 @@ function computeDistance(
 }
 
 // ── Skeleton card shown while first page loads ─────────────────────────────
-function SkeletonCard({ headerH }: { headerH: number }) {
+function SkeletonCard({ headerH, headerVisible }: { headerH: number; headerVisible: boolean }) {
   return (
     <div
       className="w-full bg-[#1a1a2e] flex-shrink-0 mb-2 animate-pulse"
-      style={{ height: `calc(100dvh - ${headerH}px - 8px)` }}
+      style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px - ${headerVisible ? 8 : 0}px)`, transition: 'height 0.3s ease' }}
     >
       {/* Bottom info skeleton */}
       <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-3">
@@ -163,7 +163,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
       {/* Sticky header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-0 w-full">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-0 w-full overflow-hidden transition-all duration-300 ease-in-out" style={{ maxHeight: headerVisible ? '200px' : '0px', opacity: headerVisible ? 1 : 0, borderBottomWidth: headerVisible ? '1px' : '0px' }}>
         <div className="flex items-center justify-between mb-2.5">
           <SkillSnapLogo size="sm" />
           {location ? (
@@ -217,7 +217,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
       </header>
 
       {/* Feed scroll container */}
-      <div ref={feedScrollRef} className="overflow-y-auto no-scrollbar" style={{ height: `calc(100dvh - ${headerH}px)` }} onScroll={handleFeedScroll}>
+      <div ref={feedScrollRef} className="overflow-y-auto no-scrollbar" style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px)`, transition: 'height 0.3s ease' }} onScroll={handleFeedScroll}>
         {/* Role setup banner */}
         {showRoleBanner && (
           <div
@@ -268,7 +268,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
         {/* Skeleton — shown immediately on first load before posts arrive */}
         {loading && filteredPosts.length === 0 ? (
           <div className="relative" style={{ height: `calc(100dvh - ${headerH}px - 8px)` }}>
-            <SkeletonCard headerH={headerH} />
+            <SkeletonCard headerH={headerH} headerVisible={headerVisible} />
           </div>
 
         ) : filteredPosts.length === 0 && location ? (
@@ -348,6 +348,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
                 connecting={connecting === post.authorId}
                 isOwnPost={post.authorId === state.currentUser?.id}
                 headerH={headerH}
+                headerVisible={headerVisible}
                 viewerLat={location?.lat}
                 viewerLng={location?.lng}
                 dispatch={dispatch}
@@ -508,12 +509,12 @@ function FullscreenViewer({
 
 // ── Feed card ──────────────────────────────────────────────────────
 function FeedCard({
-  post, isLiked, isSaved, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, connecting, isOwnPost, headerH, viewerLat, viewerLng, dispatch,
+  post, isLiked, isSaved, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, connecting, isOwnPost, headerH, headerVisible, viewerLat, viewerLng, dispatch,
 }: {
   post: Post; isLiked: boolean; isSaved: boolean;
   onLike: () => void; onSave: () => void; onProfileClick: () => void;
   onConnectClick: () => void; onShare: () => void; onFullscreen: () => void;
-  connecting: boolean; isOwnPost: boolean; headerH: number;
+  connecting: boolean; isOwnPost: boolean; headerH: number; headerVisible: boolean;
   viewerLat?: number; viewerLng?: number;
   dispatch: (a: unknown) => void;
 }) {
@@ -594,7 +595,7 @@ function FeedCard({
     <div
       ref={cardRef}
       className="relative w-full overflow-hidden bg-gray-900 flex-shrink-0 mb-2"
-      style={{ height: `calc(100dvh - ${headerH}px - 8px)` }}
+      style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px - ${headerVisible ? 8 : 0}px)`, transition: 'height 0.3s ease' }}
     >
       {/* Media */}
       <div className="absolute inset-0 cursor-pointer" onClick={handleMediaTap}>
