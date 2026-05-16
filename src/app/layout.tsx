@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     siteName: "SkillSnap",
     images: [
       {
-        url: "https://skillsnap.com.au/og-image.png",
+        url: "https://skillsnap.com.au/og-image.svg",
         width: 1200,
         height: 630,
       },
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SkillSnap — Watch. Trust. Connect.",
     description: "Show your work and get discovered. SkillSnap lets creators, tradies, artists and business owners showcase real video proof of their talent — no reviews, just results.",
-    images: ["https://skillsnap.com.au/og-image.png"],
+    images: ["https://skillsnap.com.au/og-image.svg"],
   },
 };
 
