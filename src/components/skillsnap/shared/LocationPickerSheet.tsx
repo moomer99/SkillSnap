@@ -49,7 +49,7 @@ export default function LocationPickerSheet({
   return (
     <div className="fixed inset-0 z-50 flex items-end" onClick={onClose} style={{ overflow: "hidden", touchAction: "none" }}>
       <div
-        className="w-full rounded-t-3xl overflow-hidden"
+        className="w-full rounded-t-3xl"
         style={{ background: "#fff", boxShadow: "0 -4px 40px rgba(0,0,0,0.12)", overflowY: "auto", maxHeight: "80vh", touchAction: "pan-y", WebkitOverflowScrolling: "touch" }}
         onClick={(e) => e.stopPropagation()}
         onScroll={(e) => e.stopPropagation()}
