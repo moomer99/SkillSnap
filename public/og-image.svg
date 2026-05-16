@@ -2,7 +2,7 @@
   <defs>
     <style>
       .lk0 { fill: none; stroke: #6c47fe; stroke-miterlimit: 10; stroke-width: 33px; }
-      .lk1 { fill: #1a1a1a; }
+      .lk1 { fill: #6c47fe; }
       .lk2 { fill: #6c47fe; }
     </style>
   </defs>
