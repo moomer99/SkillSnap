@@ -240,6 +240,26 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
   );
 }
 
+function skillColor(skill: string): string {
+  const colors: Record<string, string> = {
+    Barber: "#6c47ff",
+    Driver: "#0ea5e9",
+    Tiler: "#f59e0b",
+    Cleaner: "#10b981",
+    Plumber: "#3b82f6",
+    Electrician: "#f97316",
+    Carpenter: "#84cc16",
+    "Makeup Artist": "#ec4899",
+    "Nail Tech": "#f43f5e",
+    Chef: "#ef4444",
+    Mover: "#8b5cf6",
+    Mechanic: "#64748b",
+    "Fitness / PT": "#06b6d4",
+    "Homemade Kooking & Baking": "#d97706",
+  };
+  return colors[skill] ?? "#6c47ff";
+}
+
 // ── Pro card — 2-column grid tile ─────────────────────────────────
 // Pin shape (from useDiscovery / mock-data/discovery):
 //   id, userId, name, skill, color, x, y — confirmed from original DiscoverScreen
@@ -290,10 +310,18 @@ function ProCard({
         {pin.skill && pin.skill !== "Other" && (
           <span
             className="mt-1.5 text-[10px] font-semibold px-2.5 py-0.5 rounded-full text-white"
-            style={{ background: pin.color ?? "#6c47ff" }}
+            style={{ background: skillColor(pin.skill) }}
           >
             {pin.skill}
           </span>
+        )}
+
+        {/* Location */}
+        {pin.location && (
+          <p className="text-[11px] text-[#b0aaa5] mt-1 flex items-center gap-1 justify-center">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            {pin.location}
+          </p>
         )}
 
         {/* Distance pill — only if available */}

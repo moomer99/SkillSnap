@@ -43,6 +43,7 @@ function profileToPin(row: Record<string, unknown>, index: number): DiscoveryPin
     avatarUrl: row.avatar_url as string ?? null,
     avatarInitial: row.avatar_initial as string ?? (row.display_name as string)?.charAt(0) ?? '?',
     avatarGradient: row.avatar_gradient as string ?? null,
+    location: (row.location as string) ?? null,
     x: mockPin.x,
     y: mockPin.y,
   };
