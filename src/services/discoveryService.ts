@@ -53,7 +53,9 @@ async function queryProfiles(filter: DiscoveryFilter, limit = 12): Promise<Disco
   let query = sb
     .from("profiles")
     .select("id, display_name, skill, jobs_done, is_client, location, avatar_url, avatar_initial, avatar_gradient")
-    .eq("is_client", false)
+    .eq("role", "pro")
+    .not("skill", "is", null)
+    .not("skill", "eq", "")
     .limit(limit);
 
   if (filter !== "All" && filter !== "Nearby" && filter !== "Top Rated") {
@@ -82,7 +84,7 @@ export const discoveryService = {
 
   async searchBySkillAndLocation(skill: SkillCategory | "", location: string): Promise<DiscoveryPin[]> {
     const sb = getSupabase();
-    let query = sb.from("profiles").select("*, ratings(count)").eq("is_client", false).limit(20);
+    let query = sb.from("profiles").select("*, ratings(count)").eq("role", "pro").not("skill", "is", null).not("skill", "eq", "").limit(20);
     if (skill) query = query.eq("skill", skill);
     if (location) query = query.ilike("location", `%${location}%`);
     const { data } = await query;
