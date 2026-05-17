@@ -261,7 +261,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value.slice(0, 50))}
-                placeholder="Your full name"
+                placeholder="Name, business or nickname"
                 className="w-full bg-white rounded-2xl border border-[#e8e4df] px-4 h-12 text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none focus:border-[#6c47ff] transition-colors"
               />
             </Field>

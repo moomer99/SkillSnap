@@ -208,7 +208,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Your full name"
+                  placeholder="Name, business name or nickname"
                   autoComplete="name"
                   required
                   className="h-12 rounded-xl border border-[#e8e4df] px-4 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
