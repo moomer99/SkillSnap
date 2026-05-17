@@ -86,13 +86,11 @@ const SKILL_COLORS: Record<string, string> = {
 };
 
 const FALLBACK_SKILLS = [
-  "Barber", "Cleaner", "Plumber", "Electrician", "Carpenter", "Mechanic",
-  "Nail Tech", "Makeup Artist", "Mover", "Painter", "Photographer", "Videographer",
-  "Singer", "Musician", "DJ", "Personal Trainer", "Chef", "Restaurant", "Café",
-  "Tattoo Artist", "Florist", "Event Planner", "Wedding Stylist", "Interior Designer",
-  "Graphic Designer", "Web Developer", "Tutor", "Life Coach", "Yoga Instructor",
-  "Personal Shopper", "Pet Groomer", "Landscaper", "Plasterer", "Concreter",
-  "Tiler", "Roofer", "Welder", "Automotive", "Driving Instructor",
+  "Barber", "Cleaner", "Tiler", "Plumber", "Electrician",
+  "Carpenter", "Mechanic", "Painter", "Mover", "Chef",
+  "Makeup Artist", "Nail Tech", "Photographer", "Videographer",
+  "Personal Trainer", "Driving Instructor", "Landscaper",
+  "Welder", "Plasterer", "Roofer",
 ];
 
 function skillColor(skill: string) {
@@ -178,11 +176,11 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
       {(() => {
         const liveSkillNames = trendingSkills.map(s => s.skill);
         const extra = FALLBACK_SKILLS.filter(s => !liveSkillNames.includes(s));
-        const displaySkills = [...liveSkillNames, ...extra].slice(0, 20);
+        const displaySkills = [...liveSkillNames, ...extra].slice(0, 16);
         return (
           <div className="rounded-2xl bg-white shadow-sm p-4">
             <h3 className="font-bold text-[#1a1a1a] text-sm mb-3">Trending Skills</h3>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {displaySkills.map((skill) => (
                 <button
                   key={skill}
