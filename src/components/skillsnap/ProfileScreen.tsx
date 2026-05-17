@@ -138,9 +138,17 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 </button>
               ) : null}
             </div>
-            <div className="flex items-center gap-1 text-[#7a7570] text-xs mb-2">
-              <MapPin size={11} /><span>{user.location}</span>
-            </div>
+            {user.location ? (
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(user.location)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-[#6c47ff] flex items-center gap-1 hover:underline active:opacity-70 mb-2"
+              >
+                <MapPin size={13} />
+                {user.location}
+              </a>
+            ) : null}
             <p className="text-sm text-[#4a4a4a] leading-relaxed">{user.bio}</p>
           </div>
           <div className="flex gap-2.5 mt-4">
