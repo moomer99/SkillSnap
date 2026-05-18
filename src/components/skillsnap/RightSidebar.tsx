@@ -17,8 +17,9 @@ function useTrendingSkills() {
       try {
         const sb = getSupabase();
         const { data: rows } = await sb
-          .from("posts")
+          .from("profiles")
           .select("skill")
+          .eq("role", "pro")
           .not("skill", "is", null);
         if (!rows) return;
         const counts: Record<string, number> = {};
@@ -27,7 +28,7 @@ function useTrendingSkills() {
         });
         const sorted = Object.entries(counts)
           .sort((a, b) => b[1] - a[1])
-          .slice(0, 8)
+          .slice(0, 16)
           .map(([skill, count]) => ({ skill, count }));
         setSkills(sorted);
       } catch {
@@ -174,9 +175,7 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
 
       {/* Trending Skills card — always shown, padded with fallbacks */}
       {(() => {
-        const liveSkillNames = trendingSkills.map(s => s.skill);
-        const extra = FALLBACK_SKILLS.filter(s => !liveSkillNames.includes(s));
-        const displaySkills = [...liveSkillNames, ...extra].slice(0, 16);
+        const displaySkills = trendingSkills.map(s => s.skill);
         return (
           <div className="rounded-2xl bg-white shadow-sm p-4">
             <h3 className="font-bold text-[#1a1a1a] text-sm mb-3">Trending Skills</h3>
