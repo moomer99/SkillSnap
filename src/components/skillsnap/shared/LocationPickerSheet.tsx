@@ -74,7 +74,7 @@ export default function LocationPickerSheet({
           </button>
         </div>
 
-        <div className="px-5 pb-5">
+        <div className="px-5 pb-8">
           {/* GPS Button */}
           <button
             onClick={handleGPS}
@@ -155,6 +155,7 @@ export default function LocationPickerSheet({
           </div>
 
           {/* Search button */}
+          <div style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)' }}>
           <button
             onClick={handleSearch}
             disabled={!query.trim() || isLoading}
@@ -167,6 +168,7 @@ export default function LocationPickerSheet({
               <><MapPin size={15} /> Confirm Location</>
             )}
           </button>
+          </div>
 
           {/* Error */}
           {error && (
