@@ -284,7 +284,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
 
         <FadeIn delay={160}>
           <p className="text-[15px] leading-relaxed max-w-[280px] mb-8" style={{ color: "rgba(255,255,255,0.55)" }}>
-            Discover talented people near you — through real video portfolios. No reviews, no guessing. Just real work.
+            Discover talented people in your local community — through real video portfolios. No reviews, no guessing. Just real work.
           </p>
         </FadeIn>
 
@@ -473,7 +473,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                 </div>
                 <h3 className="text-[18px] font-extrabold text-white mb-2">I'm a Creator or Pro</h3>
                 <p className="text-[13px] leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  Show your work, build your reputation, and get discovered by people near you — without paying for ads.
+                  Show your work, build your reputation, and get discovered by your local community — without paying for ads.
                 </p>
                 <ul className="flex flex-col gap-2">
                   {["Upload video portfolios", "Appear in local discovery", "Get direct client messages", "Track jobs done & happy %"].map((f) => (
