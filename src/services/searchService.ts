@@ -2,7 +2,7 @@
 // SkillSnap — Search Service (Supabase)
 // Uses pg_trgm ILIKE for people, skills, locations.
 // ─────────────────────────────────────────────
-import { getAuthSupabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
 import { mapPost } from "./postService";
 import type { User, Post } from "@/types";
@@ -17,7 +17,7 @@ export const searchService = {
     const q = query.trim();
     if (!q) return { users: [], posts: [] };
 
-    const sb = getAuthSupabase();
+    const sb = getSupabase();
 
     const [usersRes, postsRes] = await Promise.all([
       sb
