@@ -368,14 +368,16 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
             </div>
 
             {/* Suggested pros */}
-            <div className="px-4 pt-6">
-              <h3 className="text-sm font-bold text-[#1a1a1a] mb-3">Nearby Pros</h3>
-              <div className="space-y-2">
-                {suggestedPros.map(user => (
-                  <UserCard key={user.id} user={user} onPress={() => openUserProfile(user)} />
-                ))}
+            {suggestedPros.length > 0 && (
+              <div className="px-4 pt-6">
+                <h3 className="text-sm font-bold text-[#1a1a1a] mb-3">Nearby Pros</h3>
+                <div className="space-y-2">
+                  {suggestedPros.map(user => (
+                    <UserCard key={user.id} user={user} onPress={() => openUserProfile(user)} />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
 
