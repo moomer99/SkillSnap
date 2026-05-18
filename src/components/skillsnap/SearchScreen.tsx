@@ -98,31 +98,41 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
   }, [query, filter, activeSkill]);
 
   async function runSearch(q: string, currentFilter: FilterTab = filter) {
-    const ql = q.toLowerCase();
-    const mockResults = MOCK_USERS.filter(u =>
-      u.displayName.toLowerCase().includes(ql) ||
-      u.username.toLowerCase().includes(ql) ||
-      (u.skill?.toLowerCase().includes(ql) ?? false) ||
-      u.location.toLowerCase().includes(ql)
-    );
-
     try {
-      let users: User[] = [];
-      if (SUPABASE_CONFIGURED) {
-        try {
-          const { searchService } = await import("@/services/searchService");
-          const res = await searchService.search(q);
-          users = res.users ?? [];
-        } catch (e) {
-          console.error('[Search] failed:', e);
-          users = [];
-        }
-      } else {
-        users = mockResults;
-      }
-      if (currentFilter === "pros") users = users.filter(u => u.role === "pro" && !!u.skill);
-      if (currentFilter === "with_posts") users = users.filter(u => (u.postCount ?? 0) > 0);
-      setResults(users);
+      const { getSupabase } = await import("@/lib/supabase");
+      const sb = getSupabase();
+      const { data, error } = await sb
+        .from("profiles")
+        .select("id, display_name, username, skill, role, avatar_url, avatar_initial, avatar_gradient, location, jobs_done, happy_percent, post_count, followers_count, is_verified, bio")
+        .or(`display_name.ilike.%${q}%,username.ilike.%${q}%,skill.ilike.%${q}%,location.ilike.%${q}%`)
+        .limit(20);
+      if (error) { console.error('[Search] error:', error.message); setResults([]); setLoading(false); return; }
+      let users = (data ?? []).map((row: Record<string, unknown>) => ({
+        id: row.id as string,
+        username: (row.username as string) ?? "",
+        displayName: (row.display_name as string) ?? "User",
+        avatarUrl: (row.avatar_url as string) ?? undefined,
+        avatarGradient: (row.avatar_gradient as string) ?? "linear-gradient(135deg, #6c47ff, #a78bfa)",
+        avatarInitial: (row.avatar_initial as string) ?? ((row.display_name as string)?.[0] ?? "U"),
+        location: (row.location as string) ?? "",
+        bio: (row.bio as string) ?? "",
+        skill: (row.skill as string) ?? null,
+        isVerified: Boolean(row.is_verified ?? false),
+        jobsDone: Number(row.jobs_done ?? 0),
+        happyPercent: Number(row.happy_percent ?? 0),
+        ratingCount: 0,
+        followers: Number(row.followers_count ?? 0),
+        following: 0,
+        postCount: Number(row.post_count ?? 0),
+        isClient: false,
+        role: (row.role as 'pro' | 'client' | null) ?? null,
+      }));
+      if (currentFilter === "pros") users = users.filter((u: any) => u.role === "pro" && !!u.skill);
+      if (currentFilter === "with_posts") users = users.filter((u: any) => (u.postCount ?? 0) > 0);
+      setResults(users as any);
+    } catch (e) {
+      console.error('[Search] failed:', e);
+      setResults([]);
     } finally {
       setLoading(false);
     }
@@ -187,15 +197,33 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
     import("@/lib/supabase").then(({ getSupabase }) => {
       getSupabase()
         .from("profiles")
-        .select("*, ratings(count)")
+        .select("id, display_name, username, skill, role, avatar_url, avatar_initial, avatar_gradient, location, jobs_done, happy_percent, post_count, followers_count, is_verified, bio")
         .eq("role", "pro")
         .not("skill", "is", null)
         .limit(6)
         .then(({ data }) => {
           if (data && data.length > 0) {
-            import("@/services/authService").then(({ mapProfile }) => {
-              setSuggestedPros(data.map(row => mapProfile(row as Record<string, unknown>)));
-            });
+            const mapped = data.map((row: Record<string, unknown>) => ({
+              id: row.id as string,
+              username: (row.username as string) ?? "",
+              displayName: (row.display_name as string) ?? "User",
+              avatarUrl: (row.avatar_url as string) ?? undefined,
+              avatarGradient: (row.avatar_gradient as string) ?? "linear-gradient(135deg, #6c47ff, #a78bfa)",
+              avatarInitial: (row.avatar_initial as string) ?? ((row.display_name as string)?.[0] ?? "U"),
+              location: (row.location as string) ?? "",
+              bio: (row.bio as string) ?? "",
+              skill: (row.skill as string) ?? null,
+              isVerified: Boolean(row.is_verified ?? false),
+              jobsDone: Number(row.jobs_done ?? 0),
+              happyPercent: Number(row.happy_percent ?? 0),
+              ratingCount: 0,
+              followers: Number(row.followers_count ?? 0),
+              following: 0,
+              postCount: Number(row.post_count ?? 0),
+              isClient: false,
+              role: (row.role as 'pro' | 'client' | null) ?? null,
+            }));
+            setSuggestedPros(mapped as any);
           }
         });
     });
