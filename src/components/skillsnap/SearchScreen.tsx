@@ -109,16 +109,14 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
     try {
       let users: User[] = [];
       if (SUPABASE_CONFIGURED) {
-        // Race Supabase against a 4s timeout — fall back to mock if slow/empty
-        const timeoutPromise = new Promise<User[]>((_, reject) =>
-          setTimeout(() => reject(new Error("timeout")), 4000)
-        );
-        const supabasePromise = import("@/services/searchService").then(({ searchService }) =>
-          searchService.search(q).then((res) => res.users)
-        );
-        const sbUsers = await Promise.race([supabasePromise, timeoutPromise]).catch(() => [] as User[]);
-        // Use Supabase results if non-empty, otherwise show mock data
-        users = sbUsers;
+        try {
+          const { searchService } = await import("@/services/searchService");
+          const res = await searchService.search(q);
+          users = res.users ?? [];
+        } catch (e) {
+          console.error('[Search] failed:', e);
+          users = [];
+        }
       } else {
         users = mockResults;
       }
