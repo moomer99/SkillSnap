@@ -25,7 +25,7 @@ const SKILL_META: Record<string, { emoji: string; color: string; bg: string }> =
   "Other":         { emoji: "⭐",  color: "#6b7280", bg: "#f3f4f6" },
 };
 
-type FilterTab = "all" | "pros" | "clients";
+type FilterTab = "all" | "pros" | "with_posts";
 
 interface SearchScreenProps {
   onNavigate: (s: Screen) => void;
@@ -105,7 +105,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
         users = mockResults;
       }
       if (filter === "pros")    users = users.filter(u => !u.isClient && u.skill);
-      if (filter === "clients") users = users.filter(u => u.isClient);
+      if (filter === "with_posts") users = users.filter(u => (u.postCount ?? 0) > 0);
       setResults(users);
     } finally {
       setLoading(false);
@@ -142,12 +142,50 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
     navigate(user.id === state.currentUser?.id ? "own-profile" : "client-profile");
   }
 
+  const [liveSkills, setLiveSkills] = useState<string[]>([]);
+  useEffect(() => {
+    if (!SUPABASE_CONFIGURED) { setLiveSkills(SKILL_CATEGORIES.filter(s => s !== "Other")); return; }
+    import("@/lib/supabase").then(({ getSupabase }) => {
+      getSupabase()
+        .from("profiles")
+        .select("skill")
+        .eq("role", "pro")
+        .not("skill", "is", null)
+        .then(({ data }) => {
+          if (data) {
+            const unique = [...new Set(data.map(r => r.skill).filter(Boolean))] as string[];
+            setLiveSkills(unique.length > 0 ? unique : SKILL_CATEGORIES.filter(s => s !== "Other"));
+          }
+        });
+    });
+  }, []);
+
   const hasQuery = query.trim() !== "" || activeSkill !== null;
   const showEmpty = !hasQuery;
   const showResults = hasQuery && !loading;
 
   // Suggested pros for empty state
-  const suggestedPros = MOCK_USERS.filter(u => !u.isClient).slice(0, 4);
+  const [suggestedPros, setSuggestedPros] = useState<User[]>([]);
+  useEffect(() => {
+    if (!SUPABASE_CONFIGURED) { setSuggestedPros(MOCK_USERS.filter(u => !u.isClient).slice(0, 4)); return; }
+    import("@/lib/supabase").then(({ getSupabase }) => {
+      getSupabase()
+        .from("profiles")
+        .select("*, ratings(count)")
+        .eq("role", "pro")
+        .not("skill", "is", null)
+        .limit(4)
+        .then(({ data }) => {
+          if (data && data.length > 0) {
+            import("@/services/authService").then(({ mapProfile }) => {
+              setSuggestedPros(data.map(row => mapProfile(row as Record<string, unknown>)));
+            });
+          } else {
+            setSuggestedPros(MOCK_USERS.filter(u => !u.isClient).slice(0, 4));
+          }
+        });
+    });
+  }, []);
 
   return (
     <div className="flex flex-col bg-[#f8f7f5] min-h-screen">
@@ -182,7 +220,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
 
         {/* Filter tabs */}
         <div className="flex gap-2 mt-3">
-          {(["all", "pros", "clients"] as FilterTab[]).map(tab => (
+          {(["all", "pros", "with_posts"] as FilterTab[]).map(tab => (
             <button
               key={tab}
               onClick={() => setFilter(tab)}
@@ -195,8 +233,8 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
             >
               {tab === "all"     && <Users size={11} />}
               {tab === "pros"    && <Briefcase size={11} />}
-              {tab === "clients" && <Users size={11} />}
-              {tab === "all" ? "Everyone" : tab === "pros" ? "Pros" : "Clients"}
+              {tab === "with_posts" && <Briefcase size={11} />}
+              {tab === "all" ? "Everyone" : tab === "pros" ? "Pros" : "With Posts"}
             </button>
           ))}
         </div>
@@ -254,7 +292,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
             <div className="px-4 pt-5">
               <h3 className="text-sm font-bold text-[#1a1a1a] mb-3">Browse by Skill</h3>
               <div className="grid grid-cols-2 gap-2">
-                {SKILL_CATEGORIES.filter(s => s !== "Other").map(skill => {
+                {liveSkills.map(skill => {
                   const meta = SKILL_META[skill] ?? SKILL_META["Other"];
                   const isActive = activeSkill === skill;
                   return (
