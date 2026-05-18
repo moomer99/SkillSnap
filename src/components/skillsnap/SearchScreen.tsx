@@ -97,7 +97,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
     return () => clearTimeout(timer);
   }, [query, filter, activeSkill]);
 
-  async function runSearch(q: string) {
+  async function runSearch(q: string, currentFilter: FilterTab = filter) {
     const ql = q.toLowerCase();
     const mockResults = MOCK_USERS.filter(u =>
       u.displayName.toLowerCase().includes(ql) ||
@@ -122,8 +122,8 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
       } else {
         users = mockResults;
       }
-      if (filter === "pros")    users = users.filter(u => !u.isClient && u.skill);
-      if (filter === "with_posts") users = users.filter(u => (u.postCount ?? 0) > 0);
+      if (currentFilter === "pros") users = users.filter(u => u.role === "pro" && !!u.skill);
+      if (currentFilter === "with_posts") users = users.filter(u => (u.postCount ?? 0) > 0);
       setResults(users);
     } finally {
       setLoading(false);
@@ -244,7 +244,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
                 const q = activeSkill ?? query.trim();
                 if (q) {
                   setLoading(true);
-                  setTimeout(() => runSearch(q), 100);
+                  setTimeout(() => runSearch(q, tab), 100);
                 }
               }}
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"

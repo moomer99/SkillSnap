@@ -112,9 +112,9 @@ export default function LocationPickerSheet({
           </div>
 
           {/* Quick picks */}
-          <div className="mb-5">
+          <div className="mb-6">
             <p className="text-[11px] font-bold text-[#b0aaa5] uppercase tracking-wider mb-3">Quick picks</p>
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-3">
               {QUICK_SUBURBS.map((suburb) => (
                 <button
                   key={suburb}
@@ -123,7 +123,7 @@ export default function LocationPickerSheet({
                     const ok = await onManualEntry(suburb);
                     if (ok) setTimeout(onClose, 800);
                   }}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-full border border-[#e8e4df] bg-white text-[#7a7570] active:border-[#6c47ff] active:text-[#6c47ff] transition-colors"
+                  className="text-sm font-semibold px-4 py-2 rounded-full border border-[#e8e4df] bg-white text-[#7a7570] active:border-[#6c47ff] active:text-[#6c47ff] transition-colors"
                 >
                   {suburb}
                 </button>
