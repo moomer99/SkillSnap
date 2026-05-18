@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { MapPin, Compass, ChevronRight, SlidersHorizontal, X } from "lucide-react";
+
+import { ChevronRight, SlidersHorizontal, X } from "lucide-react";
 import type { Screen } from "@/types";
 import { DISCOVERY_FILTER_CHIPS } from "@/mock-data/discovery";
 import { useDiscovery } from "@/hooks/useDiscovery";
