@@ -86,7 +86,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
         <button onClick={() => navigate(state.previousScreen ?? "home")} className="text-[#7a7570]">
           <ArrowLeft size={20} />
         </button>
-        <span className="font-semibold text-[#1a1a1a] text-sm flex-1">{user.username}</span>
+        <span className="font-semibold text-[#1a1a1a] text-sm flex-1">{user.username?.startsWith('@') ? user.username : `@${user.username}`}</span>
         {isOwn ? (
           <button onClick={() => onNavigate("settings")} className="text-[#7a7570]">
             <Menu size={22} />

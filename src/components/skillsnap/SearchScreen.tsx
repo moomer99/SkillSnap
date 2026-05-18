@@ -442,7 +442,7 @@ function UserCard({ user, onPress }: { user: User; onPress: () => void }) {
           )}
         </div>
 
-        <p className="text-xs text-[#b0aaa5] mb-1">{user.username}</p>
+        <p className="text-xs text-[#b0aaa5] mb-1">{user.username?.startsWith('@') ? user.username : `@${user.username}`}</p>
 
         <div className="flex items-center gap-3 text-[11px] text-[#7a7570]">
           <span className="flex items-center gap-0.5">
