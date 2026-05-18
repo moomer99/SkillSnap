@@ -111,6 +111,26 @@ export default function LocationPickerSheet({
             <div className="flex-1 h-px bg-[#e8e4df]" />
           </div>
 
+          {/* Quick picks */}
+          <div>
+            <p className="text-[10px] font-bold text-[#b0aaa5] uppercase tracking-wider mb-2.5">Quick picks</p>
+            <div className="flex flex-wrap gap-2">
+              {QUICK_SUBURBS.map((suburb) => (
+                <button
+                  key={suburb}
+                  onClick={async () => {
+                    setQuery(suburb);
+                    const ok = await onManualEntry(suburb);
+                    if (ok) setTimeout(onClose, 800);
+                  }}
+                  className="text-xs font-semibold px-3 py-1.5 rounded-full border border-[#e8e4df] bg-white text-[#7a7570] active:border-[#6c47ff] active:text-[#6c47ff] transition-colors"
+                >
+                  {suburb}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Manual search */}
           <div
             className="flex items-center gap-2 rounded-2xl border px-4 h-12 mb-3 transition-colors"
@@ -163,26 +183,6 @@ export default function LocationPickerSheet({
               <p className="text-xs text-green-700 font-semibold">Location set! Feed updating…</p>
             </div>
           )}
-
-          {/* Quick picks */}
-          <div>
-            <p className="text-[10px] font-bold text-[#b0aaa5] uppercase tracking-wider mb-2.5">Quick picks</p>
-            <div className="flex flex-wrap gap-2">
-              {QUICK_SUBURBS.map((suburb) => (
-                <button
-                  key={suburb}
-                  onClick={async () => {
-                    setQuery(suburb);
-                    const ok = await onManualEntry(suburb);
-                    if (ok) setTimeout(onClose, 800);
-                  }}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-full border border-[#e8e4df] bg-white text-[#7a7570] active:border-[#6c47ff] active:text-[#6c47ff] transition-colors"
-                >
-                  {suburb}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
