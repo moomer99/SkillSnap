@@ -105,16 +105,16 @@ export default function LocationPickerSheet({
           </button>
 
           {/* Divider */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-5">
             <div className="flex-1 h-px bg-[#e8e4df]" />
             <span className="text-[11px] font-semibold text-[#b0aaa5] uppercase tracking-wider">or enter manually</span>
             <div className="flex-1 h-px bg-[#e8e4df]" />
           </div>
 
           {/* Quick picks */}
-          <div>
-            <p className="text-[10px] font-bold text-[#b0aaa5] uppercase tracking-wider mb-2.5">Quick picks</p>
-            <div className="flex flex-wrap gap-2">
+          <div className="mb-5">
+            <p className="text-[11px] font-bold text-[#b0aaa5] uppercase tracking-wider mb-3">Quick picks</p>
+            <div className="flex flex-wrap gap-2.5">
               {QUICK_SUBURBS.map((suburb) => (
                 <button
                   key={suburb}
@@ -133,7 +133,7 @@ export default function LocationPickerSheet({
 
           {/* Manual search */}
           <div
-            className="flex items-center gap-2 rounded-2xl border px-4 h-12 mb-3 transition-colors"
+            className="flex items-center gap-2 rounded-2xl border px-4 h-12 mb-4 transition-colors"
             style={{ borderColor: "#e8e4df", background: "#fafaf9" }}
             onClick={() => inputRef.current?.focus()}
           >
