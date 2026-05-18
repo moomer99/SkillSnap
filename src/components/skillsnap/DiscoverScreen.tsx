@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, SlidersHorizontal, X } from "lucide-react";
+import { MapPin, ChevronRight, SlidersHorizontal, X } from "lucide-react";
 import type { Screen } from "@/types";
 import { DISCOVERY_FILTER_CHIPS } from "@/mock-data/discovery";
 import { useDiscovery } from "@/hooks/useDiscovery";
@@ -19,7 +19,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
   const { state, dispatch } = useAppState();
   const { connectTo, connecting } = useMessages();
 
-  function requireAuth(action: () => void) {
+  function requireFullAuth(action: () => void) {
     if (!state.isAuthenticated) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
     action();
   }
@@ -93,7 +93,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
                   pin={pin}
                   connecting={connecting === pin.userId}
                   onProfile={() => handleProfileClick(pin.userId)}
-                  onConnect={() => requireAuth(() => connectTo(pin.userId))}
+                  onConnect={() => requireFullAuth(() => connectTo(pin.userId))}
                 />
               ))}
             </div>
