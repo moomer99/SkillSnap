@@ -189,9 +189,20 @@ export const authService = {
     return { success: true, user: user ?? undefined };
   },
 
-  async logIn(email: string, password: string): Promise<AuthResult> {
+  async logIn(emailOrUsername: string, password: string): Promise<AuthResult> {
     const sb = getSupabase();
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    let loginEmail = emailOrUsername.trim();
+    // If input doesn't contain @ or contains @ at start, treat as username
+    if (!loginEmail.includes("@") || loginEmail.startsWith("@")) {
+      const username = loginEmail.replace(/^@/, "");
+      const { data: emailData, error: emailError } = await sb
+        .rpc("get_email_by_username", { p_username: username });
+      if (emailError || !emailData) {
+        return { success: false, error: "Incorrect email or password. Please try again." };
+      }
+      loginEmail = emailData as string;
+    }
+    const { data, error } = await sb.auth.signInWithPassword({ email: loginEmail, password });
     if (error) return { success: false, error: error.message };
     if (!data.user) return { success: false, error: "No user returned" };
     // Fetch existing profile only — never overwrite user-edited fields on login

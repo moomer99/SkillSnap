@@ -150,8 +150,12 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         // Detect invalid credentials on login — may be a Google-only account
         if (mode === "login" && msg.toLowerCase().includes("invalid login credentials")) {
           setShowGoogleHint(true);
+          setError("Incorrect email or password. Please try again.");
+        } else if (msg.toLowerCase().includes("invalid login credentials")) {
+          setError("Incorrect email or password. Please try again.");
+        } else {
+          setError(msg);
         }
-        setError(msg);
       } else {
         if (rememberMe) {
           localStorage.setItem(SAVED_EMAIL_KEY, email);
@@ -218,12 +222,14 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
             {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Email</label>
+              <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">
+                {mode === "login" ? "Email or Username" : "Email"}
+              </label>
               <input
-                type="email"
+                type={mode === "login" ? "text" : "email"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@email.com"
+                placeholder={mode === "login" ? "you@email.com or @username" : "you@email.com"}
                 autoComplete={mode === "signup" ? "email" : "username"}
                 required
                 className="h-12 rounded-xl border border-[#e8e4df] px-4 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
