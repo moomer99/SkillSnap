@@ -50,7 +50,7 @@ export default function LocationPickerSheet({
     <div className="fixed inset-0 z-50 flex items-end" onClick={onClose} style={{ overflow: "hidden", overscrollBehavior: "none" }} onTouchMove={(e) => { if ((e.target as HTMLElement).closest('.location-sheet')) return; e.preventDefault(); }}>
       <div
         className="w-full rounded-t-3xl location-sheet"
-        style={{ background: "#fff", boxShadow: "0 -4px 40px rgba(0,0,0,0.12)", overflowY: "auto", height: "92dvh", maxHeight: "92dvh", touchAction: "pan-y", WebkitOverflowScrolling: "touch" }}
+        style={{ background: "#fff", boxShadow: "0 -4px 40px rgba(0,0,0,0.12)", overflowY: "auto", height: "auto", maxHeight: "75dvh", touchAction: "pan-y", WebkitOverflowScrolling: "touch" }}
         onClick={(e) => e.stopPropagation()}
         onScroll={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
@@ -76,7 +76,7 @@ export default function LocationPickerSheet({
           </button>
         </div>
 
-        <div className="px-5 pb-8">
+        <div className="px-5 pb-5">
           {/* GPS Button */}
           <button
             onClick={handleGPS}
