@@ -163,8 +163,8 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
   const [liveSkills, setLiveSkills] = useState<string[]>([]);
   useEffect(() => {
     if (!SUPABASE_CONFIGURED) { setLiveSkills(SKILL_CATEGORIES.filter(s => s !== "Other")); return; }
-    import("@/lib/supabase").then(({ getAuthSupabase }) => {
-      getAuthSupabase()
+    import("@/lib/supabase").then(({ getSupabase }) => {
+      getSupabase()
         .from("profiles")
         .select("skill")
         .eq("role", "pro")
@@ -186,8 +186,8 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
   const [suggestedPros, setSuggestedPros] = useState<User[]>([]);
   useEffect(() => {
     if (!SUPABASE_CONFIGURED) return;
-    import("@/lib/supabase").then(({ getAuthSupabase }) => {
-      getAuthSupabase()
+    import("@/lib/supabase").then(({ getSupabase }) => {
+      getSupabase()
         .from("profiles")
         .select("*, ratings(count)")
         .eq("role", "pro")
