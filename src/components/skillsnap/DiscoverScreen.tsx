@@ -18,7 +18,6 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
   const { pins, activeFilter, setFilter } = useDiscovery();
   const { state, dispatch } = useAppState();
   const { connectTo, connecting } = useMessages();
-  const [showMapTeaser, setShowMapTeaser] = useState(true);
 
   function requireAuth(action: () => void) {
     if (!state.isAuthenticated) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
@@ -55,39 +54,6 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
       {/* ── Main scrollable content ── */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-28">
 
-        {/* ── Map coming soon banner (dismissable) ── */}
-        {showMapTeaser && (
-          <div
-            className="mx-4 mt-4 rounded-2xl px-4 py-3 flex items-center gap-3"
-            style={{
-              background: "linear-gradient(135deg, #1a0f3c, #2d1b69)",
-              border: "1px solid rgba(167,139,250,0.25)",
-            }}
-          >
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
-            >
-              <Compass size={18} color="white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-[13px] font-bold leading-tight">Map Discovery</p>
-              <p className="text-white/50 text-[11px] leading-snug">Live map view coming soon</p>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="flex items-center gap-1 bg-white/10 rounded-full px-2.5 py-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse" />
-                <span className="text-[10px] font-bold text-[#a78bfa]">Soon</span>
-              </span>
-              <button
-                onClick={() => setShowMapTeaser(false)}
-                className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-white/50 active:bg-white/20"
-              >
-                <X size={12} />
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* ── Section label ── */}
         <div className="flex items-center justify-between px-4 mt-5 mb-3">
