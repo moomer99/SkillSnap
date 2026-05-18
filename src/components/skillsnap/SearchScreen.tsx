@@ -118,7 +118,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
         );
         const sbUsers = await Promise.race([supabasePromise, timeoutPromise]).catch(() => [] as User[]);
         // Use Supabase results if non-empty, otherwise show mock data
-        users = sbUsers.length > 0 ? sbUsers : mockResults;
+        users = sbUsers;
       } else {
         users = mockResults;
       }
@@ -163,8 +163,8 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
   const [liveSkills, setLiveSkills] = useState<string[]>([]);
   useEffect(() => {
     if (!SUPABASE_CONFIGURED) { setLiveSkills(SKILL_CATEGORIES.filter(s => s !== "Other")); return; }
-    import("@/lib/supabase").then(({ getSupabase }) => {
-      getSupabase()
+    import("@/lib/supabase").then(({ getAuthSupabase }) => {
+      getAuthSupabase()
         .from("profiles")
         .select("skill")
         .eq("role", "pro")
@@ -186,8 +186,8 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
   const [suggestedPros, setSuggestedPros] = useState<User[]>([]);
   useEffect(() => {
     if (!SUPABASE_CONFIGURED) return;
-    import("@/lib/supabase").then(({ getSupabase }) => {
-      getSupabase()
+    import("@/lib/supabase").then(({ getAuthSupabase }) => {
+      getAuthSupabase()
         .from("profiles")
         .select("*, ratings(count)")
         .eq("role", "pro")
