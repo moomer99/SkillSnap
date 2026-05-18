@@ -13,16 +13,34 @@ const SUPABASE_CONFIGURED =
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref");
 
 const SKILL_META: Record<string, { emoji: string; color: string; bg: string }> = {
-  "Barber":        { emoji: "✂️",  color: "#6c47ff", bg: "#ede9fe" },
-  "Makeup Artist": { emoji: "💄",  color: "#db2777", bg: "#fce7f3" },
-  "Tiler":         { emoji: "🧱",  color: "#0284c7", bg: "#e0f2fe" },
-  "Cleaning":      { emoji: "🧹",  color: "#d97706", bg: "#fef3c7" },
-  "Fitness / PT":  { emoji: "💪",  color: "#059669", bg: "#d1fae5" },
-  "Plumber":       { emoji: "🔧",  color: "#0369a1", bg: "#dbeafe" },
-  "Electrician":   { emoji: "⚡",  color: "#b45309", bg: "#fef9c3" },
-  "Landscaping":   { emoji: "🌿",  color: "#15803d", bg: "#dcfce7" },
-  "Nails":         { emoji: "💅",  color: "#be185d", bg: "#fce7f3" },
-  "Other":         { emoji: "⭐",  color: "#6b7280", bg: "#f3f4f6" },
+  "Barber":           { emoji: "✂️",  color: "#6c47ff", bg: "#ede9fe" },
+  "Makeup Artist":    { emoji: "💄",  color: "#db2777", bg: "#fce7f3" },
+  "Tiler":            { emoji: "🧱",  color: "#0284c7", bg: "#e0f2fe" },
+  "Cleaning":         { emoji: "🧹",  color: "#d97706", bg: "#fef3c7" },
+  "Cleaner":          { emoji: "🧹",  color: "#d97706", bg: "#fef3c7" },
+  "Fitness / PT":     { emoji: "💪",  color: "#059669", bg: "#d1fae5" },
+  "Plumber":          { emoji: "🔧",  color: "#0369a1", bg: "#dbeafe" },
+  "Electrician":      { emoji: "⚡",  color: "#b45309", bg: "#fef9c3" },
+  "Landscaping":      { emoji: "🌿",  color: "#15803d", bg: "#dcfce7" },
+  "Landscaper":       { emoji: "🌿",  color: "#15803d", bg: "#dcfce7" },
+  "Nails":            { emoji: "💅",  color: "#be185d", bg: "#fce7f3" },
+  "Driver":           { emoji: "🚗",  color: "#0ea5e9", bg: "#e0f2fe" },
+  "Cook":             { emoji: "👨‍🍳", color: "#ef4444", bg: "#fee2e2" },
+  "Chef":             { emoji: "👨‍🍳", color: "#ef4444", bg: "#fee2e2" },
+  "Carpenter":        { emoji: "🪚",  color: "#92400e", bg: "#fef3c7" },
+  "Mechanic":         { emoji: "🔩",  color: "#374151", bg: "#f3f4f6" },
+  "Painter":          { emoji: "🖌️",  color: "#7c3aed", bg: "#ede9fe" },
+  "Mover":            { emoji: "📦",  color: "#d97706", bg: "#fef3c7" },
+  "Photographer":     { emoji: "📷",  color: "#0f766e", bg: "#ccfbf1" },
+  "Videographer":     { emoji: "🎥",  color: "#1d4ed8", bg: "#dbeafe" },
+  "Personal Trainer": { emoji: "🏋️",  color: "#059669", bg: "#d1fae5" },
+  "Nail Tech":        { emoji: "💅",  color: "#be185d", bg: "#fce7f3" },
+  "Singer":           { emoji: "🎤",  color: "#7c3aed", bg: "#ede9fe" },
+  "Musician":         { emoji: "🎸",  color: "#1d4ed8", bg: "#dbeafe" },
+  "DJ":               { emoji: "🎧",  color: "#6c47ff", bg: "#ede9fe" },
+  "Restaurant":       { emoji: "🍽️",  color: "#dc2626", bg: "#fee2e2" },
+  "Tattoo Artist":    { emoji: "🖊️",  color: "#374151", bg: "#f3f4f6" },
+  "Other":            { emoji: "⭐",  color: "#6b7280", bg: "#f3f4f6" },
 };
 
 type FilterTab = "all" | "pros" | "with_posts";
@@ -167,21 +185,19 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
   // Suggested pros for empty state
   const [suggestedPros, setSuggestedPros] = useState<User[]>([]);
   useEffect(() => {
-    if (!SUPABASE_CONFIGURED) { setSuggestedPros(MOCK_USERS.filter(u => !u.isClient).slice(0, 4)); return; }
+    if (!SUPABASE_CONFIGURED) return;
     import("@/lib/supabase").then(({ getSupabase }) => {
       getSupabase()
         .from("profiles")
         .select("*, ratings(count)")
         .eq("role", "pro")
         .not("skill", "is", null)
-        .limit(4)
+        .limit(6)
         .then(({ data }) => {
           if (data && data.length > 0) {
             import("@/services/authService").then(({ mapProfile }) => {
               setSuggestedPros(data.map(row => mapProfile(row as Record<string, unknown>)));
             });
-          } else {
-            setSuggestedPros(MOCK_USERS.filter(u => !u.isClient).slice(0, 4));
           }
         });
     });
@@ -223,7 +239,14 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
           {(["all", "pros", "with_posts"] as FilterTab[]).map(tab => (
             <button
               key={tab}
-              onClick={() => setFilter(tab)}
+              onClick={() => {
+                setFilter(tab);
+                const q = activeSkill ?? query.trim();
+                if (q) {
+                  setLoading(true);
+                  setTimeout(() => runSearch(q), 100);
+                }
+              }}
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
               style={
                 filter === tab
