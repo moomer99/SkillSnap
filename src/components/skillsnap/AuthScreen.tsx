@@ -494,6 +494,15 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         >
           Need help? Contact us
         </button>
+        <button
+          onClick={() => {
+            dispatch({ type: "CONTINUE_AS_GUEST" });
+            onNavigate("home");
+          }}
+          className="text-sm text-[#7a7570] underline-offset-2 hover:underline py-2"
+        >
+          Continue as guest
+        </button>
       </div>
     </div>
   );

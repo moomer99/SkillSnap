@@ -4,6 +4,7 @@ import type { Screen } from "@/types";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
 import { getAuthSupabase } from "@/lib/supabase";
 import { useEarlyBirdCount } from '@/hooks/useEarlyBirdCount';
+import { useAppState } from "@/state/AppState";
 
 interface LandingPageProps {
   onNavigate: (s: Screen) => void;
@@ -234,6 +235,7 @@ function VideoCard({ card, delay }: { card: FeaturedCard; delay?: number }) {
 }
 
 export default function LandingPage({ onNavigate }: LandingPageProps) {
+  const { dispatch } = useAppState();
 
   const proCards = useRealUsers();
   const { count, remaining, loading, isFull } = useEarlyBirdCount();
@@ -306,6 +308,15 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
               style={{ color: "rgba(255,255,255,0.55)", border: "1px solid rgba(255,255,255,0.1)" }}
             >
               Already have an account? Log in
+            </button>
+            <button
+              onClick={() => {
+                dispatch({ type: "CONTINUE_AS_GUEST" });
+                onNavigate("home");
+              }}
+              className="text-sm text-[#7a7570] underline-offset-2 hover:underline mt-1 py-2"
+            >
+              Continue as guest
             </button>
           </div>
         </FadeIn>

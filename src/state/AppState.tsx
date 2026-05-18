@@ -15,6 +15,7 @@ import { mapProfile, ensureProfile } from "@/services/authService";
 interface AppStateShape {
   currentUser: User | null;
   isAuthenticated: boolean;
+  isGuest: boolean;
   authLoading: boolean; // true while session is being resolved on mount
   showAuthPrompt: boolean;
 
@@ -79,6 +80,7 @@ type Action =
   | { type: "UPDATE_POST"; postId: string; patch: Partial<Pick<Post, "caption" | "skill" | "location">> }
   | { type: "SHOW_AUTH_PROMPT" }
   | { type: "HIDE_AUTH_PROMPT" }
+  | { type: "CONTINUE_AS_GUEST" }
   | { type: "SET_PENDING_JOBS_REQUEST"; request: { jobId: string; fromName: string; notificationId: string } | null }
   | { type: "SET_UNREAD_NOTIF_COUNT"; count: number }
   | { type: "INCREMENT_UNREAD_NOTIF_COUNT" }
@@ -92,6 +94,7 @@ type Action =
 const initialState: AppStateShape = {
   currentUser: null,
   isAuthenticated: false,
+  isGuest: false,
   authLoading: true, // start true — resolve on mount
   showAuthPrompt: false,
   screen: "landing", // always start here; useEffect corrects immediately
@@ -118,6 +121,8 @@ const initialState: AppStateShape = {
 // ── Reducer ──────────────────────────────────
 function appReducer(state: AppStateShape, action: Action): AppStateShape {
   switch (action.type) {
+    case "CONTINUE_AS_GUEST":
+      return { ...state, isGuest: true, showAuthPrompt: false };
     case "SET_AUTH": {
       const needsRoleSetup = !action.user.role;
       const needsUsernameSetup = /@@?[a-z0-9_]+_[a-z0-9]{4}$/.test((action.user.username ?? "").toLowerCase());
@@ -129,6 +134,7 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         ...state,
         currentUser: action.user,
         isAuthenticated: true,
+        isGuest: false,
         showAuthPrompt: false,
         authLoading: false,
         screen: nextScreen,

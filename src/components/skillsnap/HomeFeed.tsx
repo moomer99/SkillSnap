@@ -101,6 +101,11 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   }, [loadMore]);
 
   function requireAuth(action: () => void) {
+    if (!state.isAuthenticated && !state.isGuest) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
+    action();
+  }
+
+  function requireFullAuth(action: () => void) {
     if (!state.isAuthenticated) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
     action();
   }
@@ -336,7 +341,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
                 onLike={() => requireAuth(() => toggleLike(post.id))}
                 onSave={() => requireAuth(() => toggleSave(post.id))}
                 onProfileClick={() => handleProfileClick(post.authorId)}
-                onConnectClick={() => requireAuth(() => connectTo(post.authorId))}
+                onConnectClick={() => requireFullAuth(() => connectTo(post.authorId))}
                 onShare={() => {
                   if (navigator.share) {
                     navigator.share({ title: "SkillSnap", text: "Check out this work on SkillSnap!", url: "https://skillsnap.com.au" }).catch(() => {});
