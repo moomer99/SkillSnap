@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     images: ["https://skillsnap.com.au/og-image.png"],
   },
   verification: {
-    google: "PASTE_YOUR_CODE_HERE",
+    google: "BD_TD-VwqfAkBX15m3yxppU4UXGHRXNa7uxXlk6odTA",
   },
 };
 
