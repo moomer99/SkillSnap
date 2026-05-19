@@ -46,6 +46,9 @@ export const metadata: Metadata = {
     description: "Show your work and get discovered. SkillSnap lets creators, tradies, artists and business owners showcase real video proof of their talent — no reviews, just results.",
     images: ["https://skillsnap.com.au/og-image.png"],
   },
+  verification: {
+    google: "PASTE_YOUR_CODE_HERE",
+  },
 };
 
 export const viewport: Viewport = {
