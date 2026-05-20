@@ -309,15 +309,6 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
             >
               Already have an account? Log in
             </button>
-            <button
-              onClick={() => {
-                dispatch({ type: "CONTINUE_AS_GUEST" });
-                onNavigate("home");
-              }}
-              className="text-sm text-[#7a7570] underline-offset-2 hover:underline mt-1 py-2"
-            >
-              Continue as guest
-            </button>
           </div>
         </FadeIn>
 
