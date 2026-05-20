@@ -478,6 +478,15 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         >
           Log in with email
         </button>
+        <button
+          onClick={() => {
+            dispatch({ type: "CONTINUE_AS_GUEST" });
+            onNavigate("home");
+          }}
+          className="text-center text-xs text-[#b0aaa5] py-1"
+        >
+          Browse without signing up
+        </button>
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
@@ -493,15 +502,6 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
           className="text-center text-[11px] text-[#6c47ff] font-semibold"
         >
           Need help? Contact us
-        </button>
-        <button
-          onClick={() => {
-            dispatch({ type: "CONTINUE_AS_GUEST" });
-            onNavigate("home");
-          }}
-          className="text-center text-xs text-[#b0aaa5] py-1"
-        >
-          Browse without signing up
         </button>
       </div>
     </div>
