@@ -207,7 +207,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
             {/* Full Name — sign up only, required */}
             {mode === "signup" && (
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Full Name</label>
+                <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Name</label>
                 <input
                   type="text"
                   value={displayName}
@@ -342,16 +342,6 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                 {mode === "signup" ? "Log in" : "Sign up"}
               </button>
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                dispatch({ type: "CONTINUE_AS_GUEST" });
-                onNavigate("home");
-              }}
-              className="text-center text-xs text-[#b0aaa5] py-1"
-            >
-              Browse without signing up
-            </button>
 
           </form>
         </div>
@@ -503,6 +493,15 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
           className="text-center text-[11px] text-[#6c47ff] font-semibold"
         >
           Need help? Contact us
+        </button>
+        <button
+          onClick={() => {
+            dispatch({ type: "CONTINUE_AS_GUEST" });
+            onNavigate("home");
+          }}
+          className="text-center text-xs text-[#b0aaa5] py-1"
+        >
+          Browse without signing up
         </button>
       </div>
     </div>
