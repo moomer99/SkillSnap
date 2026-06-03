@@ -494,77 +494,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Handle implicit flow — access_token arrives in the URL hash
-    const hashAccessToken = hashParams.get("access_token");
-    const hashRefreshToken = hashParams.get("refresh_token");
-    if (hashAccessToken && hashParams.get("type") !== "recovery") {
-      window.history.replaceState({}, "", window.location.pathname);
-      clearTimeout(authTimeout);
-      (async () => {
-        try {
-          const { data, error } = await authSb.auth.setSession({
-            access_token: hashAccessToken,
-            refresh_token: hashRefreshToken ?? "",
-          });
-          if (data?.user && !error) {
-            await hydrateProfile(data.user.id, data.user);
-          } else {
-            dispatch({ type: "SET_AUTH_LOADING", loading: false });
-          }
-        } catch {
-          dispatch({ type: "SET_AUTH_LOADING", loading: false });
-        }
-      })();
-      return;
-    }
-
     // Handle PKCE code that lands on the root URL (?code=xxx).
     // Supabase uses the configured Site URL when /auth/callback is not in the
     // allowed-redirect-URLs list, delivering the code here instead.
     // We do NOT return early — we still set up onAuthStateChange so PASSWORD_RECOVERY fires.
-    const sessionUser = queryParams.get("session_user");
-    if (sessionUser) {
-      window.history.replaceState({}, "", window.location.pathname);
-      clearTimeout(authTimeout);
-      authSb.auth.getSession().then(async ({ data: { session } }) => {
-        if (session?.user) {
-          await hydrateProfile(session.user.id, session.user);
-        } else {
-          const { data: { user } } = await authSb.auth.getUser();
-          if (user) await hydrateProfile(user.id, user);
-          else dispatch({ type: "SET_AUTH_LOADING", loading: false });
-        }
-      }).catch(() => dispatch({ type: "SET_AUTH_LOADING", loading: false }));
-      return;
-    }
-
-    const rootCode = queryParams.get("code");
-    if (rootCode) {
-      window.history.replaceState({}, "", window.location.pathname);
-      clearTimeout(authTimeout);
-      // Exchange async; onAuthStateChange below will fire PASSWORD_RECOVERY or SIGNED_IN
-      authSb.auth.exchangeCodeForSession(rootCode).then(({ data: codeData, error: codeError }) => {
-        if (codeError) {
-          console.error("[AppState] PKCE exchange failed:", codeError.message);
-          dispatch({ type: "SET_AUTH_LOADING", loading: false });
-          return;
-        }
-        if (!codeData.session) {
-          dispatch({ type: "SET_AUTH_LOADING", loading: false });
-          return;
-        }
-        // recovery_sent_at is set by Supabase when a password reset email was sent.
-        // Handle inline in case PASSWORD_RECOVERY event doesn't fire (e.g. some Supabase versions).
-        const isRecovery = codeData.user?.recovery_sent_at != null;
-        if (isRecovery) {
-          dispatch({ type: "SET_AUTH_LOADING", loading: false });
-          window.location.replace("/reset-password");
-          return;
-        }
-        // If not recovery, SIGNED_IN event from onAuthStateChange will hydrate profile.
-      });
-    }
-
     // Track whether getSession already hydrated so INITIAL_SESSION doesn't double-fire
     let initializedByGetSession = false;
 
@@ -629,25 +562,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Check for an existing session on every page load.
     // After a Google OAuth redirect, auth/callback/route.ts has already exchanged
     // the code server-side and set the session cookie, so getSession() finds it here.
-    // Skip when rootCode is present — exchangeCodeForSession + onAuthStateChange handle it.
-    if (!rootCode) {
-      authSb.auth.getSession().then(async ({ data: { session } }) => {
-        clearTimeout(authTimeout);
-        if (session?.user) {
-          console.log("[AppState] getSession found session for", session.user.id);
-          initializedByGetSession = true;
-          await hydrateProfile(session.user.id, session.user);
-          // SET_AUTH reducer handles screen transition (role-setup or home)
-        } else {
-          console.log("[AppState] getSession: no session, showing landing");
-          dispatch({ type: "SET_AUTH_LOADING", loading: false });
-        }
-      }).catch((e) => {
-        console.error("[AppState] getSession threw:", e);
-        clearTimeout(authTimeout);
+    authSb.auth.getSession().then(async ({ data: { session } }) => {
+      clearTimeout(authTimeout);
+      if (session?.user) {
+        console.log("[AppState] getSession found session for", session.user.id);
+        initializedByGetSession = true;
+        await hydrateProfile(session.user.id, session.user);
+        // SET_AUTH reducer handles screen transition (role-setup or home)
+      } else {
+        console.log("[AppState] getSession: no session, showing landing");
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
-      });
-    }
+      }
+    }).catch((e) => {
+      console.error("[AppState] getSession threw:", e);
+      clearTimeout(authTimeout);
+      dispatch({ type: "SET_AUTH_LOADING", loading: false });
+    });
 
     return () => subscription.unsubscribe();
   }, []);
