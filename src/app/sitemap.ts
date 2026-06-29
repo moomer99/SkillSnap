@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 
+// v2: expanded to include discover, sign-up, login
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://skillsnap.com.au";
 
