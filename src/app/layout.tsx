@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { VisualEditsMessenger } from "orchids-visual-edits";
 import { Analytics } from "@vercel/analytics/next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import ErrorReporter from "@/components/ErrorReporter";
 import Script from "next/script";
 
@@ -12,8 +13,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "SkillSnap — Watch. Trust. Connect.",
-  description: "Show your work and get discovered. SkillSnap lets creators, tradies, artists and business owners showcase real video proof of their talent — no reviews, just results.",
+  title: "SkillSnap — Watch. Trust. Connect. | Find Skilled Pros in Western Sydney",
+  description: "SkillSnap lets barbers, tradies and cleaners in Western Sydney show real work on video. Watch. Trust. Connect. Free to join.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -26,8 +27,8 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "SkillSnap — Watch. Trust. Connect.",
-    description: "Show your work and get discovered. SkillSnap lets creators, tradies, artists and business owners showcase real video proof of their talent — no reviews, just results.",
+    title: "SkillSnap — Watch. Trust. Connect. | Find Skilled Pros in Western Sydney",
+    description: "SkillSnap lets barbers, tradies and cleaners in Western Sydney show real work on video. Watch. Trust. Connect. Free to join.",
     url: "https://skillsnap.com.au",
     siteName: "SkillSnap",
     images: [
@@ -42,8 +43,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "SkillSnap — Watch. Trust. Connect.",
-    description: "Show your work and get discovered. SkillSnap lets creators, tradies, artists and business owners showcase real video proof of their talent — no reviews, just results.",
+    title: "SkillSnap — Watch. Trust. Connect. | Find Skilled Pros in Western Sydney",
+    description: "SkillSnap lets barbers, tradies and cleaners in Western Sydney show real work on video. Watch. Trust. Connect. Free to join.",
     images: ["https://skillsnap.com.au/og-image.png"],
   },
   verification: {
@@ -93,6 +94,9 @@ export default function RootLayout({
           }
         `}</Script>
         <Analytics />
+        {process.env.NODE_ENV === "production" && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? ""} />
+        )}
       </body>
     </html>
   );

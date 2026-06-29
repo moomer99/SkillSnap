@@ -61,6 +61,12 @@ function OrDivider() {
 export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>("landing");
   const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    if (mode === "signup") {
+      document.title = "Join SkillSnap Free | Show Your Work, Get Hired Locally";
+    }
+  }, [mode]);
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [showPassword, setShowPassword] = useState(false);

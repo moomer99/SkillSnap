@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { MapPin, ChevronRight, SlidersHorizontal, X } from "lucide-react";
 import type { Screen } from "@/types";
 import { DISCOVERY_FILTER_CHIPS } from "@/mock-data/discovery";
@@ -18,6 +19,10 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
   const { pins, activeFilter, setFilter } = useDiscovery();
   const { state, dispatch } = useAppState();
   const { connectTo, connecting } = useMessages();
+
+  useEffect(() => {
+    document.title = "Discover Local Skilled Pros | SkillSnap";
+  }, []);
 
   function requireFullAuth(action: () => void) {
     if (!state.isAuthenticated) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
