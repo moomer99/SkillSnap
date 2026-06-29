@@ -1,6 +1,5 @@
 import { MetadataRoute } from "next";
 
-// v2: expanded to include discover, sign-up, login
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://skillsnap.com.au";
 
@@ -12,22 +11,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/discover`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/sign-up`,
+      url: `${baseUrl}/reset-password`,
       lastModified: new Date(),
       changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/login`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
+      priority: 0.3,
     },
   ];
 }
