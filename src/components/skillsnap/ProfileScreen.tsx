@@ -31,6 +31,8 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
   const { connectTo, connecting } = useMessages();
   const { state, navigate, dispatch } = useAppState();
 
+  console.log("[ProfileScreen] mounted, variant:", variant, "viewingUserId:", state.viewingUserId, "user:", user);
+
   function requireAuth(action: () => void) {
     if (!state.isAuthenticated) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
     action();

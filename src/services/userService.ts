@@ -17,7 +17,7 @@ export const userService = {
     console.log("[userService.getUser] fetching profile for id:", id);
     const { data, error } = await getSupabase()
       .from("profiles")
-      .select("*, ratings(count)")
+      .select("*")
       .eq("id", id)
       .single();
     console.log("[userService.getUser] result:", { data, error });
@@ -33,7 +33,7 @@ export const userService = {
     if (!userId) return null;
     const { data, error } = await getSupabase()
       .from("profiles")
-      .select("*, ratings(count)")
+      .select("*")
       .eq("id", userId)
       .single();
     if (error || !data) return null;
@@ -44,7 +44,7 @@ export const userService = {
     if (!query.trim()) return [];
     const { data } = await getSupabase()
       .from("profiles")
-      .select("*, ratings(count)")
+      .select("*")
       .or(`username.ilike.%${query}%,display_name.ilike.%${query}%,skill.ilike.%${query}%,location.ilike.%${query}%`)
       .limit(20);
     return (data ?? []).map((row) => mapProfile(row as Record<string, unknown>));

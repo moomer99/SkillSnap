@@ -68,7 +68,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
   const sb = getAuthSupabase();
   const { data, error } = await sb
     .from("profiles")
-    .select("*, ratings(count)")
+    .select("*")
     .eq("id", userId)
     .single();
   if (error || !data) return null;
@@ -129,7 +129,7 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
       avatar_initial: avatarInitial,
       avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
     })
-    .select("*, ratings(count)")
+    .select("*")
     .single();
 
   console.log("[ensureProfile] insert result — data:", !!data, "error:", error?.message, "code:", error?.code);

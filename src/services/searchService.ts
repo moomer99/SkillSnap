@@ -22,7 +22,7 @@ export const searchService = {
     const [usersRes, postsRes] = await Promise.all([
       sb
         .from("profiles")
-        .select("*, ratings(count)")
+        .select("*")
         .or(`username.ilike.%${q}%,display_name.ilike.%${q}%,skill.ilike.%${q}%,location.ilike.%${q}%`)
         .limit(10),
       sb
