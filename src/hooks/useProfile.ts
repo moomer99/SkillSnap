@@ -50,14 +50,16 @@ export function useProfile(variant: ProfileVariant) {
           setUser(u);
           return;
         }
+        console.warn("[useProfile] userService.getUser returned null for id:", id, "— trying fallbacks");
         // Not in DB — try post author data as fallback
         const authorFromFeed = [...state.posts, ...state.localPosts]
           .find(p => p.authorId === id)?.author ?? null;
         if (authorFromFeed) {
+          console.log("[useProfile] using post author fallback for id:", id);
           setUser(authorFromFeed);
           return;
         }
-        // Nothing found anywhere — set a minimal placeholder so screen doesn't spin forever
+        console.warn("[useProfile] no post author fallback either — using hardcoded placeholder for id:", id);
         setUser({
           id,
           username: "@user",

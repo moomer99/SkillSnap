@@ -14,12 +14,17 @@ async function getAuthUserId(): Promise<string | null> {
 
 export const userService = {
   async getUser(id: string): Promise<User | null> {
+    console.log("[userService.getUser] fetching profile for id:", id);
     const { data, error } = await getSupabase()
       .from("profiles")
       .select("*, ratings(count)")
       .eq("id", id)
       .single();
-    if (error || !data) return null;
+    console.log("[userService.getUser] result:", { data, error });
+    if (error || !data) {
+      console.warn("[userService.getUser] query failed or returned null:", error?.message ?? "no data");
+      return null;
+    }
     return mapProfile(data as Record<string, unknown>);
   },
 
