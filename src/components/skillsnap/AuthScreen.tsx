@@ -250,10 +250,10 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={mode === "signup" ? "Min 6 characters" : "Your password"}
+                  placeholder={mode === "signup" ? "Min 8 characters" : "Your password"}
                   autoComplete={mode === "signup" ? "new-password" : "current-password"}
                   required
-                  minLength={6}
+                  minLength={8}
                   className="w-full h-12 rounded-xl border border-[#e8e4df] px-4 pr-12 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
                 />
                 <button
