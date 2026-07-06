@@ -4,7 +4,7 @@
 // Wired to uploadService.createPost() + Supabase Storage
 // ─────────────────────────────────────────────
 import { useState, useRef } from "react";
-import { Video, Image as ImageIcon, ChevronDown, ArrowLeft, Loader2, CheckCircle, Download } from "lucide-react";
+import { ChevronDown, ArrowLeft, Loader2, CheckCircle, Download } from "lucide-react";
 import type { Screen } from "@/types";
 import { uploadService } from "@/services/uploadService";
 import { useAppState } from "@/state/AppState";
@@ -17,10 +17,10 @@ type ContentType = "video" | "photo" | "social";
 
 export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   const { state, dispatch } = useAppState();
-  const [contentType, setContentType] = useState<ContentType>("video");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [activePreviewIndex, setActivePreviewIndex] = useState(0);
+  const [mainFileIndex, setMainFileIndex] = useState(0); // index of cover/main media
   const [caption, setCaption] = useState("");
   const profileLocation = state.currentUser?.location ?? "";
   const [location, setLocation] = useState(profileLocation);
@@ -61,30 +61,6 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     e.target.value = "";
   }
 
-  function handleTypeSelect(type: ContentType) {
-    setContentType(type);
-    setSelectedFiles([]);
-    setPreviewUrls([]);
-    setActivePreviewIndex(0);
-    // Always reset the input value so re-selecting the same type re-opens the picker
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  }
-
-  function openPicker(type: ContentType) {
-    // Set the correct accept attribute synchronously by writing it directly on the element
-    // before calling click(), because React state updates are async
-    if (fileInputRef.current) {
-      fileInputRef.current.accept =
-        type === "video" ? "video/mp4,video/quicktime" : "image/jpeg,image/png,image/webp";
-      fileInputRef.current.value = "";
-    }
-    handleTypeSelect(type);
-    // Defer the click so the input is reset first
-    setTimeout(() => fileInputRef.current?.click(), 0);
-  }
-
   // Convert file to a data URL so it works in any sandbox/iframe context
   function fileToDataUrl(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -122,16 +98,26 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     try {
       // Capture thumbnail from the preview video BEFORE createPost so it can be uploaded
       let thumbnailDataUrl: string | undefined;
-      if (selectedFiles[0]?.type.startsWith("video/")) {
+      if (selectedFiles[mainFileIndex]?.type.startsWith("video/")) {
         thumbnailDataUrl = capturePreviewThumbnail() ?? undefined;
       }
 
       // Convert files to data URLs before passing to service so it's sandbox-safe
       const dataUrls = await Promise.all(selectedFiles.map(fileToDataUrl));
 
+      // Reorder files so main/cover file is always first
+      const reorderedFiles = [
+        selectedFiles[mainFileIndex],
+        ...selectedFiles.filter((_, i) => i !== mainFileIndex),
+      ];
+      const reorderedDataUrls = [
+        dataUrls[mainFileIndex],
+        ...dataUrls.filter((_, i) => i !== mainFileIndex),
+      ];
+
       const newPost = await uploadService.createPost({
-        files: selectedFiles.length > 0 ? selectedFiles : undefined,
-        dataUrls,
+        files: reorderedFiles.length > 0 ? reorderedFiles : undefined,
+        dataUrls: reorderedDataUrls,
         thumbnailDataUrl,
         caption: caption.trim(),
         skill: state.currentUser?.skill ?? "",
@@ -178,29 +164,167 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
       </header>
 
       <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 pt-5 pb-10 flex flex-col gap-5">
-        {/* Upload type */}
-        <div>
-          <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider mb-3 block">
-            Choose content
-          </label>
-          <div className="flex flex-col gap-3">
-            <UploadButton
-              icon={<Video size={22} className="text-[#6c47ff]" />}
-              title="Upload Video"
-              subtitle="MP4 or MOV, up to 60MB"
-              active={contentType === "video"}
-              onClick={() => openPicker("video")}
-            />
-            <UploadButton
-              icon={<ImageIcon size={22} className="text-[#6c47ff]" />}
-              title="Upload Photo"
-              subtitle="JPG, PNG or WebP, up to 10MB"
-              active={contentType === "photo"}
-              onClick={() => openPicker("photo")}
-            />
-            <SocialImportTip />
-          </div>
-          {/* Hidden file input — accept attribute set dynamically in openPicker() */}
+        {/* ── Media Section ── */}
+        <div className="flex flex-col gap-3">
+
+          {selectedFiles.length === 0 ? (
+            /* Empty state — single big tap zone */
+            <button
+              onClick={() => {
+                if (fileInputRef.current) {
+                  fileInputRef.current.accept = "video/mp4,video/quicktime,image/jpeg,image/png,image/webp";
+                  fileInputRef.current.value = "";
+                }
+                setTimeout(() => fileInputRef.current?.click(), 0);
+              }}
+              className="w-full rounded-3xl border-2 border-dashed border-[#c4b5fd] bg-white flex flex-col items-center justify-center gap-4 active:bg-[#faf8ff] transition-colors"
+              style={{ minHeight: 220 }}
+            >
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)" }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="4"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
+              </div>
+              <div className="text-center px-4">
+                <p className="text-sm font-bold text-[#1a1a1a] mb-1">Tap to add photos or videos</p>
+                <p className="text-xs text-[#b0aaa5]">Up to 5 files · MP4, MOV, JPG, PNG</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ede9fe] text-xs font-semibold text-[#6c47ff]">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                  Video
+                </span>
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ede9fe] text-xs font-semibold text-[#6c47ff]">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                  Photo
+                </span>
+              </div>
+            </button>
+
+          ) : (
+            /* Files selected — show large preview + thumbnail strip */
+            <div className="flex flex-col gap-2">
+
+              {/* Large main preview */}
+              <div className="relative w-full rounded-2xl overflow-hidden bg-black"
+                style={{ minHeight: 260, maxHeight: 340 }}>
+                {selectedFiles[activePreviewIndex]?.type.startsWith("video/") ? (
+                  <video
+                    ref={videoPreviewRef}
+                    src={previewUrls[activePreviewIndex]}
+                    className="w-full h-full object-cover"
+                    style={{ maxHeight: 340 }}
+                    controls
+                    playsInline
+                    muted
+                  />
+                ) : (
+                  <img
+                    src={previewUrls[activePreviewIndex]}
+                    alt="Preview"
+                    className="w-full object-cover"
+                    style={{ maxHeight: 340 }}
+                  />
+                )}
+
+                {/* Top bar — counter + remove */}
+                <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                  <span className="bg-black/50 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                    {activePreviewIndex + 1} / {selectedFiles.length}
+                  </span>
+                  <button
+                    onClick={() => {
+                      const updated = selectedFiles.filter((_, i) => i !== activePreviewIndex);
+                      const newIndex = Math.max(0, activePreviewIndex - 1);
+                      setSelectedFiles(updated);
+                      setPreviewUrls(updated.map((f) => URL.createObjectURL(f)));
+                      setActivePreviewIndex(newIndex);
+                      setMainFileIndex((prev) => {
+                        if (prev === activePreviewIndex) return 0;
+                        if (prev > activePreviewIndex) return prev - 1;
+                        return prev;
+                      });
+                    }}
+                    className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:bg-black/70"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+
+                {/* Cover badge on main preview */}
+                {mainFileIndex === activePreviewIndex && (
+                  <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-[#6c47ff] text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                    ⭐ Cover
+                  </div>
+                )}
+              </div>
+
+              {/* Thumbnail strip */}
+              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                {previewUrls.map((url, i) => (
+                  <div key={i} className="relative flex-shrink-0">
+                    <button
+                      onClick={() => setActivePreviewIndex(i)}
+                      className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
+                        i === activePreviewIndex ? "border-[#6c47ff]" : "border-transparent"
+                      }`}
+                    >
+                      {selectedFiles[i]?.type.startsWith("video/") ? (
+                        <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M5 3l14 9-14 9V3z"/></svg>
+                        </div>
+                      ) : (
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                      )}
+                    </button>
+                    {/* Set as cover star */}
+                    <button
+                      onClick={() => setMainFileIndex(i)}
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center shadow-sm transition-all"
+                      style={{
+                        background: mainFileIndex === i ? "#6c47ff" : "white",
+                        border: mainFileIndex === i ? "none" : "1.5px solid #e8e4df",
+                      }}
+                      title="Set as cover"
+                    >
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill={mainFileIndex === i ? "white" : "#b0aaa5"}>
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+
+                {/* Add more button */}
+                {selectedFiles.length < 5 && (
+                  <button
+                    onClick={() => {
+                      if (fileInputRef.current) {
+                        fileInputRef.current.accept = "video/mp4,video/quicktime,image/jpeg,image/png,image/webp";
+                        fileInputRef.current.value = "";
+                      }
+                      setTimeout(() => fileInputRef.current?.click(), 0);
+                    }}
+                    className="flex-shrink-0 w-16 h-16 rounded-xl border-2 border-dashed border-[#c4b5fd] flex flex-col items-center justify-center gap-0.5 active:bg-[#faf8ff] transition-colors"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span className="text-[9px] font-bold text-[#6c47ff]">Add</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Cover hint — only shown when multiple files */}
+              {selectedFiles.length > 1 && (
+                <p className="text-[11px] text-[#b0aaa5] px-1">
+                  ⭐ Tap the star on any thumbnail to set it as the cover
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Hidden file input */}
           <input
             ref={fileInputRef}
             type="file"
@@ -210,83 +334,6 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
             onChange={handleFileSelect}
           />
         </div>
-
-        {/* Preview */}
-        {previewUrls.length > 0 ? (
-          <div className="rounded-2xl overflow-hidden border border-[#e8e4df] bg-white relative">
-            {/* Main preview */}
-            {selectedFiles[activePreviewIndex]?.type.startsWith("video/") ? (
-              <video
-                ref={videoPreviewRef}
-                src={previewUrls[activePreviewIndex]}
-                className="w-full max-h-[280px] object-cover"
-                controls
-                playsInline
-                muted
-              />
-            ) : (
-              <img
-                src={previewUrls[activePreviewIndex]}
-                alt="Preview"
-                className="w-full max-h-[280px] object-cover"
-              />
-            )}
-            {/* Remove current file */}
-            <button
-              onClick={() => {
-                const updated = selectedFiles.filter((_, i) => i !== activePreviewIndex);
-                setSelectedFiles(updated);
-                setPreviewUrls(updated.map((f) => URL.createObjectURL(f)));
-                setActivePreviewIndex(Math.max(0, activePreviewIndex - 1));
-              }}
-              className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 flex items-center justify-center text-white text-xs font-bold"
-            >✕</button>
-            {/* File count badge */}
-            <div className="absolute top-2 left-2 bg-black/50 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-              {activePreviewIndex + 1} / {previewUrls.length}
-            </div>
-            {/* Thumbnail strip */}
-            {previewUrls.length > 1 && (
-              <div className="flex gap-1.5 p-2 overflow-x-auto no-scrollbar">
-                {previewUrls.map((url, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActivePreviewIndex(i)}
-                    className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${i === activePreviewIndex ? "border-[#6c47ff]" : "border-transparent"}`}
-                  >
-                    {selectedFiles[i]?.type.startsWith("video/") ? (
-                      <div className="w-full h-full bg-black flex items-center justify-center">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M5 3l14 9-14 9V3z"/></svg>
-                      </div>
-                    ) : (
-                      <img src={url} alt="" className="w-full h-full object-cover" />
-                    )}
-                  </button>
-                ))}
-                {/* Add more button — only if under 5 */}
-                {previewUrls.length < 5 && (
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex-shrink-0 w-14 h-14 rounded-lg border-2 border-dashed border-[#c4b5fd] flex items-center justify-center text-[#6c47ff] text-xl font-bold"
-                  >+</button>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          <button
-            onClick={() => contentType !== "social" && openPicker(contentType as "video" | "photo")}
-            className="bg-white rounded-2xl border border-dashed border-[#c4b5fd] p-6 flex flex-col items-center gap-3 w-full"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-[#ede9fe] flex items-center justify-center">
-              <Video size={26} className="text-[#6c47ff]" />
-            </div>
-            <div className="text-center">
-              <p className="text-sm font-semibold text-[#1a1a1a] mb-0.5">No content selected</p>
-              <p className="text-xs text-[#7a7570]">Tap to choose up to 5 videos or photos</p>
-            </div>
-          </button>
-        )}
 
         {/* Caption */}
         <div>
@@ -349,6 +396,8 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
           )}
           <p className="text-xs text-[#b0aaa5] mt-1.5 px-1">Auto-filled from your profile · tap to edit</p>
         </div>
+
+        <SocialImportTip />
 
         {/* Error */}
         {error && (
@@ -478,40 +527,5 @@ function SocialImportTip() {
         </div>
       )}
     </div>
-  );
-}
-
-function UploadButton({
-  icon, title, subtitle, active, onClick,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  active?: boolean;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left ${active ? "border-[#c4b5fd] bg-[#faf8ff]" : "border-[#e8e4df] bg-white"}`}
-    >
-      <div
-        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: active ? "#ede9fe" : "#f0eeea" }}
-      >
-        {icon}
-      </div>
-      <div>
-        <p className={`text-sm font-semibold ${active ? "text-[#6c47ff]" : "text-[#1a1a1a]"}`}>{title}</p>
-        <p className="text-xs text-[#7a7570] mt-0.5">{subtitle}</p>
-      </div>
-      {active && (
-        <div className="ml-auto w-5 h-5 rounded-full bg-[#6c47ff] flex items-center justify-center flex-shrink-0">
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="white">
-            <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-      )}
-    </button>
   );
 }
