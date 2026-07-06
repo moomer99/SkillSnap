@@ -55,6 +55,9 @@ export function useMessages() {
       const thread = state.threads.find((t) => t.id === threadId);
       const participantId = thread?.participant?.id;
       dispatch({ type: "SET_ACTIVE_THREAD", threadId, participantId });
+      if (participantId) {
+        dispatch({ type: "SET_VIEWING_USER", userId: participantId });
+      }
       messageService.markThreadRead(threadId).catch(() => {});
       navigate("chat");
     },
