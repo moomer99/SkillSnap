@@ -17,7 +17,7 @@ export function useEarlyBirdCount() {
         .select('*', { count: 'exact', head: true })
         .eq('is_early_bird', true)
         .then(({ count: c }) => {
-          setCount(Math.max(c ?? 0, 35));
+          setCount(Math.max(c ?? 0, 17));
           setLoading(false);
         })
         .catch(() => setLoading(false));
