@@ -528,6 +528,13 @@ function FeedCard({
   const [muted, setMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Multi-media carousel
+  const mediaItems = post.mediaItems && post.mediaItems.length > 1 ? post.mediaItems : null;
+  const [activeMediaIndex, setActiveMediaIndex] = useState(0);
+  const activeMedia = mediaItems ? mediaItems[activeMediaIndex] : null;
+  const activeMediaUrl = activeMedia ? activeMedia.url : post.mediaUrl;
+  const activeMediaType = activeMedia ? activeMedia.type : post.type;
   const [menuOpen, setMenuOpen] = useState(false);
   const [editMode, setEditMode] = useState<"caption" | "skill" | "location" | "delete" | null>(null);
   const [editCaption, setEditCaption] = useState(post.caption ?? "");
@@ -603,11 +610,11 @@ function FeedCard({
     >
       {/* Media */}
       <div className="absolute inset-0 cursor-pointer" onClick={handleMediaTap}>
-        {post.type === "video" && post.mediaUrl ? (
+        {activeMediaType === "video" && activeMediaUrl ? (
           <video
             ref={videoRef}
-            src={post.mediaUrl}
-            data-src={post.mediaUrl}
+            src={activeMediaUrl}
+            data-src={activeMediaUrl}
             className="w-full h-full object-cover"
             loop playsInline
             preload="auto"
@@ -616,10 +623,10 @@ function FeedCard({
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
           />
-        ) : post.thumbnailUrl ? (
+        ) : activeMediaUrl ? (
           <div className="relative w-full h-full">
             <Image
-              src={post.thumbnailUrl}
+              src={activeMediaUrl}
               alt={post.caption}
               fill
               className="object-cover"
@@ -633,6 +640,45 @@ function FeedCard({
         <div className="absolute inset-0" style={{
           background: "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 22%, transparent 50%, rgba(0,0,0,0.6) 75%, rgba(0,0,0,0.88) 100%)",
         }} />
+
+        {/* Carousel dots — only shown for multi-media posts */}
+        {mediaItems && mediaItems.length > 1 && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
+            {mediaItems.map((_, i) => (
+              <button
+                key={i}
+                onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i); }}
+                className="transition-all"
+                style={{
+                  width: i === activeMediaIndex ? 18 : 6,
+                  height: 6,
+                  borderRadius: 99,
+                  background: i === activeMediaIndex ? "white" : "rgba(255,255,255,0.45)",
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Swipe left/right arrows for multi-media */}
+        {mediaItems && activeMediaIndex > 0 && (
+          <button
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}
+            onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i => i - 1); }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+        )}
+        {mediaItems && activeMediaIndex < mediaItems.length - 1 && (
+          <button
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}
+            onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i => i + 1); }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        )}
       </div>
 
       {/* Top bar */}

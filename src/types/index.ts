@@ -48,6 +48,12 @@ export interface JobFeedback {
 // ── Post / Feed ──────────────────────────────
 export type PostType = "video" | "photo";
 
+export interface PostMediaItem {
+  url: string;
+  type: "video" | "photo";
+  orderIndex: number;
+}
+
 export interface Post {
   id: string;
   authorId: string;
@@ -56,6 +62,7 @@ export interface Post {
   mediaUrl?: string;          // real media URL from Supabase Storage
   thumbnailUrl?: string;      // thumbnail image URL
   thumbnailGradient: string;  // gradient fallback when no media
+  mediaItems?: PostMediaItem[]; // multi-media support
   caption: string;
   skill?: SkillCategory | null;  // post-level skill tag
   location?: string | null;      // post-level location (overrides author location in UI)

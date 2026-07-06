@@ -36,6 +36,19 @@ const FALLBACK_PROFILE: Record<string, unknown> = {
 
 function mapPost(row: Record<string, unknown>, likedIds: Set<string>, savedIds: Set<string>): Post {
   const author = mapProfile((row.profiles as Record<string, unknown>) ?? FALLBACK_PROFILE);
+
+  // Map post_media rows if present
+  const rawMedia = row.post_media as Array<Record<string, unknown>> | null;
+  const mediaItems = rawMedia && rawMedia.length > 0
+    ? rawMedia
+        .sort((a, b) => Number(a.order_index ?? 0) - Number(b.order_index ?? 0))
+        .map((m) => ({
+          url: proxyMediaUrl(m.url as string) ?? "",
+          type: (m.type as "video" | "photo") ?? "photo",
+          orderIndex: Number(m.order_index ?? 0),
+        }))
+    : undefined;
+
   return {
     id: row.id as string,
     authorId: row.author_id as string,
@@ -44,6 +57,7 @@ function mapPost(row: Record<string, unknown>, likedIds: Set<string>, savedIds: 
     mediaUrl: proxyMediaUrl(row.media_url as string | null),
     thumbnailUrl: proxyMediaUrl(row.thumbnail_url as string | null),
     thumbnailGradient: (row.thumbnail_gradient as string) || "linear-gradient(135deg, #6c47ff, #a78bfa)",
+    mediaItems,
     caption: (row.caption as string) ?? "",
     skill: (row.skill as Post["skill"]) ?? null,
     location: (row.location as string | null) ?? null,
@@ -74,7 +88,7 @@ export const postService = {
   async getFeed(limit = 10, offset = 0): Promise<{ posts: Post[]; likedIds: Set<string>; savedIds: Set<string> }> {
     const { data, error } = await getSupabase()
       .from("posts")
-      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*)")
+      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*), post_media(url, type, order_index)")
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -90,7 +104,7 @@ export const postService = {
   async getUserPosts(userId: string): Promise<Post[]> {
     const { data } = await getSupabase()
       .from("posts")
-      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*)")
+      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*), post_media(url, type, order_index)")
       .eq("author_id", userId)
       .order("created_at", { ascending: false });
 
