@@ -18,10 +18,10 @@ type ContentType = "video" | "photo" | "social";
 export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   const { state, dispatch } = useAppState();
   const [contentType, setContentType] = useState<ContentType>("video");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [activePreviewIndex, setActivePreviewIndex] = useState(0);
   const [caption, setCaption] = useState("");
-  const [showFullscreen, setShowFullscreen] = useState(false);
   const profileLocation = state.currentUser?.location ?? "";
   const [location, setLocation] = useState(profileLocation);
   const [locationEditing, setLocationEditing] = useState(false);
@@ -32,34 +32,40 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
 
-    // Validate file type
     const allowed = ["video/mp4", "video/quicktime", "image/jpeg", "image/png", "image/webp"];
-    if (!allowed.includes(file.type)) {
-      setError("Unsupported file type. Use MP4 or MOV for video, JPG/PNG/WebP for photos.");
-      e.target.value = "";
-      return;
+    const filtered: File[] = [];
+    let errorMsg: string | null = null;
+
+    for (const file of files) {
+      if (!allowed.includes(file.type)) {
+        errorMsg = "Unsupported file type. Use MP4 or MOV for video, JPG/PNG/WebP for photos.";
+        continue;
+      }
+      const maxMB = file.type.startsWith("video/") ? 60 : 10;
+      if (file.size > maxMB * 1024 * 1024) {
+        errorMsg = `File too large. Maximum ${maxMB}MB per file.`;
+        continue;
+      }
+      filtered.push(file);
     }
 
-    // Validate file size
-    const maxMB = file.type.startsWith("video/") ? 60 : 10;
-    if (file.size > maxMB * 1024 * 1024) {
-      setError(`File too large. Maximum size is ${maxMB}MB.`);
-      e.target.value = "";
-      return;
-    }
-
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
-    setError(null);
+    const combined = [...selectedFiles, ...filtered].slice(0, 5);
+    setSelectedFiles(combined);
+    setPreviewUrls(combined.map((f) => URL.createObjectURL(f)));
+    setActivePreviewIndex(combined.length - 1);
+    if (errorMsg) setError(errorMsg);
+    else setError(null);
+    e.target.value = "";
   }
 
   function handleTypeSelect(type: ContentType) {
     setContentType(type);
-    setSelectedFile(null);
-    setPreviewUrl(null);
+    setSelectedFiles([]);
+    setPreviewUrls([]);
+    setActivePreviewIndex(0);
     // Always reset the input value so re-selecting the same type re-opens the picker
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -107,7 +113,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   }
 
   async function handlePublish() {
-    if (!caption.trim() && !selectedFile) {
+    if (!caption.trim() && selectedFiles.length === 0) {
       setError("Add a caption or select a file before publishing.");
       return;
     }
@@ -116,19 +122,16 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     try {
       // Capture thumbnail from the preview video BEFORE createPost so it can be uploaded
       let thumbnailDataUrl: string | undefined;
-      if (selectedFile?.type.startsWith("video/")) {
+      if (selectedFiles[0]?.type.startsWith("video/")) {
         thumbnailDataUrl = capturePreviewThumbnail() ?? undefined;
       }
 
-      // Convert file to data URL before passing to service so it's sandbox-safe
-      let dataUrl: string | undefined;
-      if (selectedFile) {
-        dataUrl = await fileToDataUrl(selectedFile);
-      }
+      // Convert files to data URLs before passing to service so it's sandbox-safe
+      const dataUrls = await Promise.all(selectedFiles.map(fileToDataUrl));
 
       const newPost = await uploadService.createPost({
-        file: selectedFile ?? undefined,
-        dataUrl,
+        files: selectedFiles.length > 0 ? selectedFiles : undefined,
+        dataUrls,
         thumbnailDataUrl,
         caption: caption.trim(),
         skill: state.currentUser?.skill ?? "",
@@ -201,6 +204,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
           <input
             ref={fileInputRef}
             type="file"
+            multiple
             accept="video/mp4,video/quicktime,image/jpeg,image/png,image/webp"
             className="hidden"
             onChange={handleFileSelect}
@@ -208,12 +212,13 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         </div>
 
         {/* Preview */}
-        {previewUrl ? (
+        {previewUrls.length > 0 ? (
           <div className="rounded-2xl overflow-hidden border border-[#e8e4df] bg-white relative">
-            {contentType === "video" ? (
+            {/* Main preview */}
+            {selectedFiles[activePreviewIndex]?.type.startsWith("video/") ? (
               <video
                 ref={videoPreviewRef}
-                src={previewUrl}
+                src={previewUrls[activePreviewIndex]}
                 className="w-full max-h-[280px] object-cover"
                 controls
                 playsInline
@@ -221,18 +226,52 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
               />
             ) : (
               <img
-                src={previewUrl}
+                src={previewUrls[activePreviewIndex]}
                 alt="Preview"
-                className="w-full max-h-[280px] object-cover cursor-pointer"
-                onClick={() => setShowFullscreen(true)}
+                className="w-full max-h-[280px] object-cover"
               />
             )}
+            {/* Remove current file */}
             <button
-              onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
+              onClick={() => {
+                const updated = selectedFiles.filter((_, i) => i !== activePreviewIndex);
+                setSelectedFiles(updated);
+                setPreviewUrls(updated.map((f) => URL.createObjectURL(f)));
+                setActivePreviewIndex(Math.max(0, activePreviewIndex - 1));
+              }}
               className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 flex items-center justify-center text-white text-xs font-bold"
-            >
-              ✕
-            </button>
+            >✕</button>
+            {/* File count badge */}
+            <div className="absolute top-2 left-2 bg-black/50 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              {activePreviewIndex + 1} / {previewUrls.length}
+            </div>
+            {/* Thumbnail strip */}
+            {previewUrls.length > 1 && (
+              <div className="flex gap-1.5 p-2 overflow-x-auto no-scrollbar">
+                {previewUrls.map((url, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActivePreviewIndex(i)}
+                    className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${i === activePreviewIndex ? "border-[#6c47ff]" : "border-transparent"}`}
+                  >
+                    {selectedFiles[i]?.type.startsWith("video/") ? (
+                      <div className="w-full h-full bg-black flex items-center justify-center">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M5 3l14 9-14 9V3z"/></svg>
+                      </div>
+                    ) : (
+                      <img src={url} alt="" className="w-full h-full object-cover" />
+                    )}
+                  </button>
+                ))}
+                {/* Add more button — only if under 5 */}
+                {previewUrls.length < 5 && (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex-shrink-0 w-14 h-14 rounded-lg border-2 border-dashed border-[#c4b5fd] flex items-center justify-center text-[#6c47ff] text-xl font-bold"
+                  >+</button>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <button
@@ -244,7 +283,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-[#1a1a1a] mb-0.5">No content selected</p>
-              <p className="text-xs text-[#7a7570]">Tap to choose a video or photo</p>
+              <p className="text-xs text-[#7a7570]">Tap to choose up to 5 videos or photos</p>
             </div>
           </button>
         )}
@@ -323,7 +362,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         <div className="mt-2">
           <button
             onClick={handlePublish}
-            disabled={loading || (!caption.trim() && !selectedFile)}
+            disabled={loading || (!caption.trim() && selectedFiles.length === 0)}
             className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2.5"
             style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 20px rgba(108,71,255,0.35)" }}
           >
@@ -343,25 +382,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
           </p>
         </div>
       </div>
-      {showFullscreen && previewUrl && contentType === "photo" && (
-        <div
-          className="fixed inset-0 z-50 bg-black flex items-center justify-center"
-          onClick={() => setShowFullscreen(false)}
-        >
-          <img
-            src={previewUrl}
-            alt="Full preview"
-            className="w-full h-full object-contain"
-          />
-          <button
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 flex items-center justify-center text-white"
-            onClick={() => setShowFullscreen(false)}
-          >
-            ✕
-          </button>
-        </div>
-      )}
-    </div>
+      </div>
   );
 }
 

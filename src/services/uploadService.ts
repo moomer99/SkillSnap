@@ -14,8 +14,10 @@ function getPublicUrl(bucket: string, path: string): string {
 }
 
 export interface UploadPayload {
-  file?: File;
-  dataUrl?: string;        // pre-converted data URL for sandbox-safe demo mode
+  files?: File[];           // replaces single file
+  file?: File;              // keep for backward compat
+  dataUrls?: string[];      // replaces single dataUrl
+  dataUrl?: string;         // keep for backward compat
   thumbnailDataUrl?: string; // JPEG thumbnail captured from video preview
   caption: string;
   skill: SkillCategory | "";
@@ -75,9 +77,10 @@ export const uploadService = {
 
     if (!userId) {
       // Demo / unauthenticated — create a local mock post
-      // Use pre-converted data URL (sandbox-safe) or fall back to object URL
-      const isVideo = payload.file ? payload.file.type.startsWith("video/") : false;
-      const mediaUrl = payload.dataUrl ?? (payload.file ? URL.createObjectURL(payload.file) : undefined);
+      // Use pre-converted data URLs (sandbox-safe) or fall back to object URL
+      const firstFile = (payload.files ?? (payload.file ? [payload.file] : []))[0];
+      const isVideo = firstFile ? firstFile.type.startsWith("video/") : false;
+      const mediaUrl = payload.dataUrls?.[0] ?? payload.dataUrl ?? (firstFile ? URL.createObjectURL(firstFile) : undefined);
       await new Promise((r) => setTimeout(r, 600));
 
       const { MOCK_CURRENT_USER } = await import("@/mock-data/users");
@@ -105,26 +108,29 @@ export const uploadService = {
 
     // ── Authenticated Supabase path ───────────────────────────────────
 
-    let mediaUrl: string | undefined;
+    const allFiles = payload.files ?? (payload.file ? [payload.file] : []);
+    const mediaUrls: string[] = [];
     let thumbnailUrl: string | undefined;
 
-    if (payload.file) {
-      mediaUrl = await uploadService.uploadMedia(payload.file);
-      if (payload.file.type.startsWith("image/")) {
-        thumbnailUrl = mediaUrl;
-      } else if (payload.thumbnailDataUrl) {
-        // Upload the captured video thumbnail to Storage
-        try {
-          const blob = await fetch(payload.thumbnailDataUrl).then((r) => r.blob());
-          const thumbFile = new File([blob], "thumbnail.jpg", { type: "image/jpeg" });
-          thumbnailUrl = await uploadService.uploadMedia(thumbFile);
-        } catch {
-          // non-fatal — post saves without thumbnail, grid shows gradient
+    for (let i = 0; i < allFiles.length; i++) {
+      const file = allFiles[i];
+      const url = await uploadService.uploadMedia(file);
+      mediaUrls.push(url);
+      if (i === 0) {
+        if (file.type.startsWith("image/")) {
+          thumbnailUrl = url;
+        } else if (payload.thumbnailDataUrl) {
+          try {
+            const blob = await fetch(payload.thumbnailDataUrl).then((r) => r.blob());
+            const thumbFile = new File([blob], "thumbnail.jpg", { type: "image/jpeg" });
+            thumbnailUrl = await uploadService.uploadMedia(thumbFile);
+          } catch { /* non-fatal */ }
         }
       }
     }
 
-    const isVideo = payload.file ? payload.file.type.startsWith("video/") : false;
+    const mediaUrl = mediaUrls[0];
+    const isVideo = allFiles[0]?.type.startsWith("video/") ?? false;
     const postType: "video" | "photo" = isVideo ? "video" : "photo";
 
     const { data: inserted, error: insertError } = await sb
@@ -144,16 +150,17 @@ export const uploadService = {
 
     if (insertError || !inserted) throw insertError ?? new Error("Insert failed");
 
-    if (mediaUrl) {
-      try {
-        await sb.from("post_media").insert({
-          post_id: inserted.id,
-          url: mediaUrl,
-          type: postType,
-          order_index: 0,
-        });
-      } catch {
-        // non-fatal
+    if (mediaUrls.length > 0) {
+      for (let i = 0; i < mediaUrls.length; i++) {
+        const file = allFiles[i];
+        try {
+          await sb.from("post_media").insert({
+            post_id: inserted.id,
+            url: mediaUrls[i],
+            type: file?.type.startsWith("video/") ? "video" : "photo",
+            order_index: i,
+          });
+        } catch { /* non-fatal */ }
       }
     }
 
