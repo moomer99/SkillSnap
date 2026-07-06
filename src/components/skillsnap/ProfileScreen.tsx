@@ -229,7 +229,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                       ? (state.currentUser?.role === "client" || !state.currentUser?.role)
                         ? "Set up your Pro profile to showcase your work and start getting hired"
                         : "Upload your first job to showcase your skill and start getting clients"
-                      : `${user.displayName} is new to SkillSnap and hasn't posted yet. Check their Jobs Done count or connect directly to ask about their work.`}
+                      : "This person is new to SkillSnap and hasn't posted yet. Connect directly to ask about their work."}
                   </p>
                   <button
                     onClick={() => {
@@ -247,7 +247,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                       ? (state.currentUser?.role === "client" || !state.currentUser?.role)
                         ? "Set Up Pro Profile — Free"
                         : "Upload First Post"
-                      : `Connect with ${user.displayName.split(" ")[0]}`}
+                      : "Connect with them"}
                   </button>
                 </div>
               )}
