@@ -191,16 +191,10 @@ export const authService = {
 
   async logIn(emailOrUsername: string, password: string): Promise<AuthResult> {
     const sb = getSupabase();
-    let loginEmail = emailOrUsername.trim();
-    // If input doesn't contain @ or contains @ at start, treat as username
+    const loginEmail = emailOrUsername.trim();
+    // Require email — username-based login removed for security (exposes emails)
     if (!loginEmail.includes("@") || loginEmail.startsWith("@")) {
-      const username = loginEmail.replace(/^@/, "");
-      const { data: emailData, error: emailError } = await sb
-        .rpc("get_email_by_username", { p_username: username });
-      if (emailError || !emailData) {
-        return { success: false, error: "Incorrect email or password. Please try again." };
-      }
-      loginEmail = emailData as string;
+      return { success: false, error: "Please use your email address to log in." };
     }
     const { data, error } = await sb.auth.signInWithPassword({ email: loginEmail, password });
     if (error) return { success: false, error: error.message };
