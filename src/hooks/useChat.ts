@@ -173,8 +173,8 @@ export function useChat() {
       const userId = session?.user?.id;
       if (!userId) throw new Error("Not authenticated");
 
-      const publicUrl = await messageService.uploadChatImage(file, userId);
-      const confirmed = await messageService.sendMessage(tid, "", publicUrl);
+      const imagePath = await messageService.uploadChatImage(file, userId);
+      const confirmed = await messageService.sendMessage(tid, "", imagePath);
       URL.revokeObjectURL(previewUrl);
       dispatch({ type: "PATCH_THREAD_MESSAGE", threadId: tid, optimisticId, message: confirmed });
     } catch (err) {

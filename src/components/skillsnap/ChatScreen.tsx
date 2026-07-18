@@ -5,6 +5,7 @@ import type { Screen, User, JobDoneStatus, JobRating } from "@/types";
 import { MOCK_USERS } from "@/mock-data/users";
 import { useAppState } from "@/state/AppState";
 import { useChat } from "@/hooks/useChat";
+import { messageService } from "@/services/messageService";
 import { JOBS_DONE_CONFIG } from "@/constants/config";
 import UserAvatar from "./shared/UserAvatar";
 
@@ -608,8 +609,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                 onTouchEnd={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
               >
                 {msg.imageUrl ? (
-                  <a href={msg.uploading ? undefined : msg.imageUrl} target="_blank" rel="noopener noreferrer" className={`relative rounded-2xl overflow-hidden shadow-sm block ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
-                    <img src={msg.imageUrl} alt={msg.text} className="w-full max-w-[220px] object-cover rounded-2xl" style={{ maxHeight: 260 }} />
+                  <a href={msg.uploading ? undefined : undefined} target="_blank" rel="noopener noreferrer" className={`relative rounded-2xl overflow-hidden shadow-sm block ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
+                    <ChatImage path={msg.imageUrl} alt={msg.text} className="w-full max-w-[220px] object-cover rounded-2xl" style={{ maxHeight: 260 }} />
                     {msg.uploading && (
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-2xl">
                         <Loader2 size={24} className="text-white animate-spin" />
@@ -747,8 +748,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                     onTouchEnd={() => { if (pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
                   >
                     {msg.imageUrl ? (
-                      <a href={msg.imageUrl} target="_blank" rel="noopener noreferrer" className={`rounded-2xl overflow-hidden shadow-sm block ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
-                        <img src={msg.imageUrl} alt={msg.text} className="w-full max-w-[220px] object-cover rounded-2xl" style={{ maxHeight: 260 }} />
+                      <a href={undefined} target="_blank" rel="noopener noreferrer" className={`rounded-2xl overflow-hidden shadow-sm block ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"}`}>
+                        <ChatImage path={msg.imageUrl} alt={msg.text} className="w-full max-w-[220px] object-cover rounded-2xl" style={{ maxHeight: 260 }} />
                       </a>
                     ) : (
                       <>
@@ -1006,4 +1007,69 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       )}
     </div>
   );
+}
+
+// ── ChatImage — resolves storage paths to signed URLs with auto-refresh ──
+function ChatImage({ path, alt, className, style }: {
+  path: string;
+  alt: string;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    // If the stored value is already a full URL (legacy data), use it directly
+    if (path.startsWith("http")) {
+      setSignedUrl(path);
+      return;
+    }
+
+    let cancelled = false;
+    let interval: ReturnType<typeof setInterval>;
+
+    async function fetchSignedUrl() {
+      try {
+        const url = await messageService.getChatImageSignedUrl(path, 3600);
+        if (!cancelled) {
+          if (url) {
+            setSignedUrl(url);
+            setError(false);
+          } else {
+            setError(true);
+          }
+        }
+      } catch {
+        if (!cancelled) setError(true);
+      }
+    }
+
+    fetchSignedUrl();
+    // Refresh every 50 minutes (URL expires in 1 hour)
+    interval = setInterval(fetchSignedUrl, 50 * 60 * 1000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [path]);
+
+  if (error) {
+    return (
+      <div className={`${className} bg-[#f0eeea] flex items-center justify-center`} style={style}>
+        <span className="text-xs text-[#b0aaa5]">Image unavailable</span>
+      </div>
+    );
+  }
+
+  if (!signedUrl) {
+    return (
+      <div className={`${className} bg-[#f0eeea] flex items-center justify-center`} style={style}>
+        <Loader2 size={18} className="text-[#b0aaa5] animate-spin" />
+      </div>
+    );
+  }
+
+  return <img src={signedUrl} alt={alt} className={className} style={style} />;
 }

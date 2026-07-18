@@ -254,8 +254,18 @@ export const messageService = {
     const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error } = await sb.storage.from("chat-images").upload(path, file, { upsert: false });
     if (error) throw error;
-    const { data } = sb.storage.from("chat-images").getPublicUrl(path);
-    return data.publicUrl;
+    return path; // return storage path — signed URL generated at render time
+  },
+
+  async getChatImageSignedUrl(path: string, expiresIn = 3600): Promise<string | null> {
+    try {
+      const sb = getAuthSupabase();
+      const { data, error } = await sb.storage.from("chat-images").createSignedUrl(path, expiresIn);
+      if (error || !data) return null;
+      return data.signedUrl;
+    } catch {
+      return null;
+    }
   },
 
   async markThreadRead(conversationId: string): Promise<void> {
