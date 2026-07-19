@@ -66,14 +66,21 @@ function mapProfile(profile: Record<string, unknown>): User {
 
 async function fetchProfile(userId: string): Promise<User | null> {
   const sb = getAuthSupabase();
+  console.log("[fetchProfile] BEFORE query for", userId);
   const { data, error } = await sb
     .from("profiles")
     .select("*")
     .eq("id", userId)
     .single();
-  console.log("[fetchProfile] result:", data ? "found" : "null", "error:", error?.message ?? "none");
-  if (error || !data) return null;
-  return mapProfile(data as Record<string, unknown>);
+  console.log("[fetchProfile] AFTER query — data:", !!data, "error:", error?.message ?? "none", "code:", error?.code ?? "none");
+  if (error || !data) {
+    console.log("[fetchProfile] returning null");
+    return null;
+  }
+  console.log("[fetchProfile] BEFORE mapProfile");
+  const result = mapProfile(data as Record<string, unknown>);
+  console.log("[fetchProfile] AFTER mapProfile, returning user");
+  return result;
 }
 
 // Upserts a profile row from Supabase auth user data.
@@ -102,49 +109,64 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
   console.log("[ensureProfile] checking for existing profile:", authUser.id);
 
   // Check if a profile row already exists.
-  const { data: existing, error: existingError } = await sb
-    .from("profiles")
-    .select("id")
-    .eq("id", authUser.id)
-    .maybeSingle();
-
-  console.log("[ensureProfile] existing profile query:", existing ? "found" : "not found", "error:", existingError?.message ?? "none");
-
-  if (existing) {
-    // Profile exists — only update non-user-editable fields (email, username slug).
-    // Never touch display_name or avatar_url after first creation.
-    await sb
+  try {
+    console.log("[ensureProfile] BEFORE profiles query");
+    const { data: existing, error: existingError } = await sb
       .from("profiles")
-      .update({ email: authUser.email ?? null })
-      .eq("id", authUser.id);
-    return fetchProfile(authUser.id);
+      .select("id")
+      .eq("id", authUser.id)
+      .maybeSingle();
+    console.log("[ensureProfile] AFTER profiles query");
+
+    console.log("[ensureProfile] existing profile query:", existing ? "found" : "not found", "error:", existingError?.message ?? "none");
+
+    if (existing) {
+      console.log("[ensureProfile] profile exists, updating email");
+      await sb
+        .from("profiles")
+        .update({ email: authUser.email ?? null })
+        .eq("id", authUser.id);
+      console.log("[ensureProfile] email updated, fetching full profile");
+      const result = await fetchProfile(authUser.id);
+      console.log("[ensureProfile] fetchProfile returned:", result ? "user" : "null");
+      return result;
+    }
+
+    console.log("[ensureProfile] profile not found, inserting new profile");
+    const { data, error } = await sb
+      .from("profiles")
+      .insert({
+        id: authUser.id,
+        username,
+        email: authUser.email ?? null,
+        display_name: displayName,
+        avatar_url: avatarUrl,
+        avatar_initial: avatarInitial,
+        avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+      })
+      .select("*")
+      .single();
+    console.log("[ensureProfile] AFTER insert");
+
+    console.log("[ensureProfile] insert result — data:", !!data, "error:", error?.message, "code:", error?.code);
+
+    if (error || !data) {
+      console.error("[ensureProfile] insert failed:", error?.message, error?.code);
+      console.log("[ensureProfile] falling back to fetchProfile");
+      const result = await fetchProfile(authUser.id);
+      console.log("[ensureProfile] fallback fetchProfile returned:", result ? "user" : "null");
+      return result;
+    }
+
+    console.log("[ensureProfile] new profile created for", authUser.id);
+    console.log("[ensureProfile] BEFORE mapProfile");
+    const mapped = mapProfile(data as Record<string, unknown>);
+    console.log("[ensureProfile] AFTER mapProfile, returning user");
+    return mapped;
+  } catch (e) {
+    console.error("[ensureProfile] CRASHED at line:", (e as Error).stack);
+    throw e;
   }
-
-  // First-ever login — create the profile with display_name and avatar_url.
-  const { data, error } = await sb
-    .from("profiles")
-    .insert({
-      id: authUser.id,
-      username,
-      email: authUser.email ?? null,
-      display_name: displayName,
-      avatar_url: avatarUrl,
-      avatar_initial: avatarInitial,
-      avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
-    })
-    .select("*")
-    .single();
-
-  console.log("[ensureProfile] insert result — data:", !!data, "error:", error?.message, "code:", error?.code);
-
-  if (error || !data) {
-    console.error("[ensureProfile] insert failed:", error?.message, error?.code);
-    // Row may have been created by a DB trigger in the meantime — just fetch it.
-    return fetchProfile(authUser.id);
-  }
-
-  console.log("[ensureProfile] new profile created for", authUser.id);
-  return mapProfile(data as Record<string, unknown>);
 }
 
 export const authService = {
