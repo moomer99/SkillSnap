@@ -355,8 +355,6 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
                 onFullscreen={() => setFullscreenPost(post)}
                 connecting={connecting === post.authorId}
                 isOwnPost={post.authorId === state.currentUser?.id}
-                isFollowed={state.followedUsers.has(post.authorId)}
-                onFollow={() => requireFullAuth(() => dispatch({ type: "TOGGLE_FOLLOW", userId: post.authorId }))}
                 headerH={headerH}
                 headerVisible={headerVisible}
                 viewerLat={location?.lat}
@@ -519,12 +517,11 @@ function FullscreenViewer({
 
 // ── Feed card ──────────────────────────────────────────────────────
 function FeedCard({
-  post, isLiked, isSaved, isFollowed, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, onFollow, connecting, isOwnPost, headerH, headerVisible, viewerLat, viewerLng, dispatch,
+  post, isLiked, isSaved, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, connecting, isOwnPost, headerH, headerVisible, viewerLat, viewerLng, dispatch,
 }: {
-  post: Post; isLiked: boolean; isSaved: boolean; isFollowed: boolean;
+  post: Post; isLiked: boolean; isSaved: boolean;
   onLike: () => void; onSave: () => void; onProfileClick: () => void;
   onConnectClick: () => void; onShare: () => void; onFullscreen: () => void;
-  onFollow: () => void;
   connecting: boolean; isOwnPost: boolean; headerH: number; headerVisible: boolean;
   viewerLat?: number; viewerLng?: number;
   dispatch: (a: unknown) => void;
@@ -763,32 +760,17 @@ function FeedCard({
               )}
             </div>
             {/* Badges on their own line */}
-            <div className="flex items-center gap-1.5 mt-0.5">
-              {author.happyPercent >= 90 && (author.jobsDone ?? 0) >= 5 && (
-                <span className="text-[9px] font-bold text-emerald-300 bg-emerald-900/50 px-1.5 py-0.5 rounded-full border border-emerald-400/40">
-                  Top Rated
-                </span>
-              )}
-              {author.isVerified && (author.jobsDone ?? 0) >= 10 && (
-                <span className="text-[9px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded-full border border-blue-400/40">
-                  Verified Business
-                </span>
-              )}
-            </div>
+            {(author.isVerified && (author.jobsDone ?? 0) >= 10) ? (
+              <div className="flex items-center gap-1.5 mt-0.5">
+                {author.isVerified && (author.jobsDone ?? 0) >= 10 && (
+                  <span className="text-[9px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded-full border border-blue-400/40">
+                    Verified Business
+                  </span>
+                )}
+              </div>
+            ) : null}
             <p className="text-white/60 text-[12px] mt-0.5">{author.skill}</p>
           </div>
-          {!isOwnPost && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onFollow(); }}
-              className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-all active:scale-95 ${
-                isFollowed
-                  ? "text-white/70 bg-white/15 border border-white/25"
-                  : "text-white bg-[#6c47ff] border border-[#6c47ff]"
-              }`}
-            >
-              {isFollowed ? "Following" : "Follow"}
-            </button>
-          )}
         </div>
 
         {post.caption ? <p className="text-white/90 text-[14px] leading-snug mb-3 line-clamp-2">{post.caption}</p> : null}
