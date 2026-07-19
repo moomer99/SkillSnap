@@ -56,6 +56,7 @@ create or replace function public.is_conversation_member(conv_id uuid)
 returns boolean
 language sql
 security definer
+set search_path = public
 stable
 as $$
   select exists (

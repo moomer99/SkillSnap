@@ -168,7 +168,7 @@ create index if not exists profiles_display_name_trgm_idx on public.profiles usi
 
 -- Auto-create profile on sign-up (handles Google OAuth + email)
 create or replace function public.handle_new_user()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 declare
   _display_name text;
   _username     text;
@@ -228,7 +228,7 @@ create trigger set_conversations_updated_at before update on public.conversation
 
 -- Follow counts
 create or replace function public.sync_follow_counts()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if tg_op = 'INSERT' then
     update public.profiles set followers_count = followers_count + 1 where id = new.following_id;
@@ -247,7 +247,7 @@ create trigger sync_follows after insert or delete on public.follows
 
 -- Likes count
 create or replace function public.sync_likes_count()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if tg_op = 'INSERT' then
     update public.posts set likes_count = likes_count + 1 where id = new.post_id;
@@ -264,7 +264,7 @@ create trigger sync_likes after insert or delete on public.likes
 
 -- Post count on profile
 create or replace function public.sync_post_count()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if tg_op = 'INSERT' then
     update public.profiles set post_count = post_count + 1 where id = new.author_id;
@@ -281,7 +281,7 @@ create trigger sync_posts after insert or delete on public.posts
 
 -- Jobs Done confirmation
 create or replace function public.handle_job_confirmed()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if new.skiller_confirmed and new.client_confirmed and old.verified_at is null then
     new.verified_at = now();
@@ -297,7 +297,7 @@ create trigger on_job_confirmed before update on public.jobs_done
 
 -- Update conversation last_message + unread counts on new message
 create or replace function public.update_conversation_last_message()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   update public.conversations
   set last_message_text = new.text, last_message_at = new.created_at

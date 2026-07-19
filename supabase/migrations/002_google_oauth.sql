@@ -4,7 +4,7 @@
 -- Run after 001_initial_schema.sql
 
 create or replace function public.handle_new_user()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 declare
   _display_name text;
   _username     text;

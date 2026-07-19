@@ -169,7 +169,7 @@ create index on public.profiles using gin (location gin_trgm_ops);
 
 -- Auto-create profile on sign-up
 create or replace function public.handle_new_user()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   insert into public.profiles (id, username, display_name, avatar_initial)
   values (
@@ -204,7 +204,7 @@ create trigger set_conversations_updated_at before update on public.conversation
 
 -- Sync follower/following counts
 create or replace function public.sync_follow_counts()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if tg_op = 'INSERT' then
     update public.profiles set followers_count = followers_count + 1 where id = new.following_id;
@@ -222,7 +222,7 @@ create trigger sync_follows after insert or delete on public.follows
 
 -- Sync likes count
 create or replace function public.sync_likes_count()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if tg_op = 'INSERT' then
     update public.posts set likes_count = likes_count + 1 where id = new.post_id;
@@ -238,7 +238,7 @@ create trigger sync_likes after insert or delete on public.likes
 
 -- Sync post count on profile
 create or replace function public.sync_post_count()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if tg_op = 'INSERT' then
     update public.profiles set post_count = post_count + 1 where id = new.author_id;
@@ -254,7 +254,7 @@ create trigger sync_posts after insert or delete on public.posts
 
 -- Increment jobs_done on skiller when both parties confirm
 create or replace function public.handle_job_confirmed()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   -- If just became fully confirmed, stamp verified_at and increment jobs_done
   if new.skiller_confirmed and new.client_confirmed and old.verified_at is null then
@@ -270,7 +270,7 @@ create trigger on_job_confirmed before update on public.jobs_done
 
 -- Update conversation last_message on new message
 create or replace function public.update_conversation_last_message()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   update public.conversations
   set last_message_text = new.text, last_message_at = new.created_at
