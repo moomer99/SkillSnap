@@ -82,6 +82,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   const [fullscreenPost, setFullscreenPost] = useState<Post | null>(null);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const rafRef = useRef<number | null>(null);
   const feedScrollRef = useRef<HTMLDivElement>(null);
   const [locationPromptDismissed, setLocationPromptDismissed] = useState(() => {
     try { return localStorage.getItem("skillsnap_loc_prompt") === "1"; } catch { return false; }
@@ -140,15 +141,17 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   }
 
   function handleFeedScroll(e: React.UIEvent<HTMLDivElement>) {
-    const currentY = e.currentTarget.scrollTop;
-    if (currentY > lastScrollY.current && currentY > 60) {
-      // Scrolling down — hide full header
-      setHeaderVisible(false);
-    } else {
-      // Scrolling up — show full header
-      setHeaderVisible(true);
-    }
-    lastScrollY.current = currentY;
+    const scrollTop = e.currentTarget.scrollTop;
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      if (scrollTop > lastScrollY.current && scrollTop > 60) {
+        setHeaderVisible(false);
+      } else {
+        setHeaderVisible(true);
+      }
+      lastScrollY.current = scrollTop;
+      rafRef.current = null;
+    });
   }
 
   // Register scroll-to-top with parent so BottomNav home-tap can trigger it
@@ -242,7 +245,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
       </header>
 
       {/* Feed scroll container */}
-      <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px)`, transition: 'height 0.3s ease' }} onScroll={handleFeedScroll}>
+      <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px)`, WebkitOverflowScrolling: 'touch' }} onScroll={handleFeedScroll}>
         {/* Welcome card — shown once after onboarding */}
         {welcomeType && (
           <div
@@ -637,7 +640,7 @@ function FeedCard({
         video!.pause();
         setPlaying(false);
       }
-    }, { threshold: 0.6 });
+    }, { threshold: 0.7, rootMargin: '0px 0px -10% 0px' });
 
     observer.observe(card);
     return () => {
@@ -682,7 +685,7 @@ function FeedCard({
     <div
       ref={cardRef}
       className="relative w-full overflow-hidden bg-gray-900 flex-shrink-0 mb-2"
-      style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px - ${headerVisible ? 8 : 0}px)`, transition: 'height 0.3s ease' }}
+      style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px - ${headerVisible ? 8 : 0}px)`, transition: 'height 0.3s ease', willChange: 'transform', transform: 'translateZ(0)' }}
     >
       {/* Media */}
       <div className="absolute inset-0 cursor-pointer" onClick={handleMediaTap}>
