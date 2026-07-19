@@ -30,6 +30,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   const [loading, setLoading] = useState(false);
   const [posted, setPosted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previewPlaying, setPreviewPlaying] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
 
@@ -216,15 +217,33 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
               <div className="relative w-full rounded-2xl overflow-hidden bg-black"
                 style={{ minHeight: 260, maxHeight: 340 }}>
                 {selectedFiles[activePreviewIndex]?.type.startsWith("video/") ? (
-                  <video
-                    ref={videoPreviewRef}
-                    src={previewUrls[activePreviewIndex]}
-                    className="w-full h-full object-cover"
+                  <div
+                    className="relative w-full"
                     style={{ maxHeight: 340 }}
-                    controls
-                    playsInline
-                    muted
-                  />
+                    onClick={() => {
+                      const vid = videoPreviewRef.current;
+                      if (!vid) return;
+                      if (previewPlaying) { vid.pause(); setPreviewPlaying(false); }
+                      else { vid.play().catch(() => {}); setPreviewPlaying(true); }
+                    }}
+                  >
+                    <video
+                      ref={videoPreviewRef}
+                      src={previewUrls[activePreviewIndex]}
+                      className="w-full h-full object-cover"
+                      style={{ maxHeight: 340 }}
+                      playsInline
+                      muted
+                      onEnded={() => setPreviewPlaying(false)}
+                    />
+                    {!previewPlaying && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.3)" }}>
+                          <svg width="18" height="22" viewBox="0 0 18 22" fill="white"><path d="M1 1l16 10L1 21V1z" /></svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <img
                     src={previewUrls[activePreviewIndex]}
@@ -446,7 +465,7 @@ function SocialImportTip() {
     <div className="rounded-2xl border border-[#e8e4df] bg-white overflow-hidden">
       {/* Header row */}
       <button
-        onClick={() => setExpanded((v) => !v)}
+        onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
         className="w-full flex items-center gap-4 p-4 text-left active:bg-[#f8f7f5] transition-colors"
       >
         <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-[#f0eeea]">
