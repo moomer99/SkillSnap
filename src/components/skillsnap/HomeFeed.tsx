@@ -355,6 +355,8 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
                 onFullscreen={() => setFullscreenPost(post)}
                 connecting={connecting === post.authorId}
                 isOwnPost={post.authorId === state.currentUser?.id}
+                isFollowed={state.followedUsers.has(post.authorId)}
+                onFollow={() => requireFullAuth(() => dispatch({ type: "TOGGLE_FOLLOW", userId: post.authorId }))}
                 headerH={headerH}
                 headerVisible={headerVisible}
                 viewerLat={location?.lat}
@@ -517,11 +519,12 @@ function FullscreenViewer({
 
 // ── Feed card ──────────────────────────────────────────────────────
 function FeedCard({
-  post, isLiked, isSaved, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, connecting, isOwnPost, headerH, headerVisible, viewerLat, viewerLng, dispatch,
+  post, isLiked, isSaved, isFollowed, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, onFollow, connecting, isOwnPost, headerH, headerVisible, viewerLat, viewerLng, dispatch,
 }: {
-  post: Post; isLiked: boolean; isSaved: boolean;
+  post: Post; isLiked: boolean; isSaved: boolean; isFollowed: boolean;
   onLike: () => void; onSave: () => void; onProfileClick: () => void;
   onConnectClick: () => void; onShare: () => void; onFullscreen: () => void;
+  onFollow: () => void;
   connecting: boolean; isOwnPost: boolean; headerH: number; headerVisible: boolean;
   viewerLat?: number; viewerLng?: number;
   dispatch: (a: unknown) => void;
@@ -686,7 +689,18 @@ function FeedCard({
 
       {/* Top bar */}
       <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-4 z-10">
-        <span className="text-white/70 text-[12px] font-medium">{timeAgo(post.createdAt)}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-white/70 text-[12px] font-medium">{timeAgo(post.createdAt)}</span>
+          {post.viewCount !== undefined && post.viewCount > 0 && (
+            <span className="text-white/60 text-[11px] font-medium flex items-center gap-1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              {formatLikes(post.viewCount)}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           {post.type === "video" && post.mediaUrl && (
             <button
@@ -738,7 +752,7 @@ function FeedCard({
             <UserAvatar user={author} size="sm" showVerified ring />
           </div>
           <div className="flex-1 min-w-0 cursor-pointer" onClick={(e) => { e.stopPropagation(); onProfileClick(); }}>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-white font-bold text-[15px] leading-tight">{author.displayName}</span>
               {author.isVerified && (
                 <span className="w-[17px] h-[17px] rounded-full bg-[#6c47ff] flex items-center justify-center flex-shrink-0">
@@ -747,12 +761,34 @@ function FeedCard({
                   </svg>
                 </span>
               )}
+              {author.happyPercent >= 90 && (author.jobsDone ?? 0) >= 5 && (
+                <span className="text-[9px] font-bold text-emerald-300 bg-emerald-900/50 px-1.5 py-0.5 rounded-full border border-emerald-400/40 flex-shrink-0">
+                  Top Rated
+                </span>
+              )}
+              {author.isVerified && (author.jobsDone ?? 0) >= 10 && (
+                <span className="text-[9px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded-full border border-blue-400/40 flex-shrink-0">
+                  Verified Business
+                </span>
+              )}
             </div>
             <p className="text-white/60 text-[12px] mt-0.5">{author.skill}</p>
           </div>
+          {!isOwnPost && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onFollow(); }}
+              className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-all active:scale-95 ${
+                isFollowed
+                  ? "text-white/70 bg-white/15 border border-white/25"
+                  : "text-white bg-[#6c47ff] border border-[#6c47ff]"
+              }`}
+            >
+              {isFollowed ? "Following" : "Follow"}
+            </button>
+          )}
         </div>
 
-        {post.caption ? <p className="text-white/90 text-[13px] leading-snug mb-3 line-clamp-2">{post.caption}</p> : null}
+        {post.caption ? <p className="text-white/90 text-[14px] leading-snug mb-3 line-clamp-2">{post.caption}</p> : null}
 
         <div className="flex items-stretch mb-3 rounded-2xl overflow-hidden"
           style={{ background: "rgba(0,0,0,0.42)", backdropFilter: "blur(10px)" }}>

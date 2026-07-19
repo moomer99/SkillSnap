@@ -211,8 +211,8 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
         <div className="flex-1 flex flex-col px-6 pt-4 gap-4">
           {/* Google button — top of form */}
-          {/* <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} /> */}
-          {/* <OrDivider /> */}
+          <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} />
+          <OrDivider />
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {/* Full Name — sign up only, required */}
@@ -473,15 +473,15 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
       {/* CTA section */}
       <div className="px-5 pt-5 pb-10 flex flex-col gap-3 bg-white">
         {/* Google — primary */}
-        {/* <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} /> */}
-        {/* <OrDivider /> */}
+        <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} />
+        <OrDivider />
 
         <button
           onClick={() => setMode("signup")}
           className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] shadow-sm"
           style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 16px rgba(108,71,255,0.30)" }}
         >
-          Sign up with email
+          Create Free Account
         </button>
         <button
           onClick={() => setMode("login")}
@@ -489,6 +489,11 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         >
           Log in with email
         </button>
+
+        <p className="text-center text-[12px] text-[#7a7570] leading-relaxed -mt-1">
+          Join 1,000+ local pros and clients. Free to browse, connect, and grow your business.
+        </p>
+
         <button
           onClick={() => {
             dispatch({ type: "CONTINUE_AS_GUEST" });

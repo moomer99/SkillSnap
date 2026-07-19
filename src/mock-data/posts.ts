@@ -40,6 +40,7 @@ export const MOCK_POSTS: Post[] = [
     likes: 2400,
     likedByMe: false,
     savedByMe: false,
+    viewCount: 15200,
     createdAt: "2026-04-20T10:30:00Z",
   },
   {
@@ -54,6 +55,7 @@ export const MOCK_POSTS: Post[] = [
     likes: 5100,
     likedByMe: true,
     savedByMe: false,
+    viewCount: 28400,
     createdAt: "2026-04-21T08:00:00Z",
   },
 ];

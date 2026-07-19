@@ -70,6 +70,7 @@ export interface Post {
   likedByMe: boolean;
   savedByMe: boolean;
   createdAt: string; // ISO date string
+  viewCount?: number; // showcase view count
 }
 
 // ── Message / Chat ───────────────────────────

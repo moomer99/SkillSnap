@@ -64,6 +64,7 @@ function mapPost(row: Record<string, unknown>, likedIds: Set<string>, savedIds: 
     likes: Number(row.likes_count ?? 0),
     likedByMe: likedIds.has(row.id as string),
     savedByMe: savedIds.has(row.id as string),
+    viewCount: Number(row.view_count ?? 0) || undefined,
     createdAt: row.created_at as string,
   };
 }
