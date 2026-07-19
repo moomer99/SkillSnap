@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
@@ -16,26 +16,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (code) {
-    // Create redirect response FIRST
-    const response = NextResponse.redirect(new URL(next, origin));
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options);
-            });
-          },
-        },
-      }
-    );
-
+    const supabase = await createClient();
     const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
     if (exchangeError) {
@@ -47,15 +28,11 @@ export async function GET(request: NextRequest) {
 
     // Handle password recovery redirect
     if (data.session && data.user?.recovery_sent_at != null) {
-      const recoveryResponse = NextResponse.redirect(new URL("/reset-password", origin));
-      response.cookies.getAll().forEach(({ name, value, ...options }) => {
-        recoveryResponse.cookies.set(name, value, options);
-      });
-      return recoveryResponse;
+      return NextResponse.redirect(new URL("/reset-password", origin));
     }
 
     console.log("[auth/callback] PKCE exchange succeeded, redirecting to", next);
-    return response; // cookies are on THIS response
+    return NextResponse.redirect(new URL(next, origin));
   }
 
   return NextResponse.redirect(new URL("/", origin));

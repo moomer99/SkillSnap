@@ -462,84 +462,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }, 8000);
 
     // hydrateProfile — fetches the profile row and dispatches SET_AUTH.
-    // Falls back to ensureProfile (upsert) if the row doesn't exist yet,
-    // which is the normal path for first-time Google OAuth login.
+    // Uses the Supabase client (via ensureProfile) instead of direct REST API calls.
     async function hydrateProfile(userId: string, authUser: import("@supabase/supabase-js").User) {
       const timeoutId = setTimeout(() => {
         console.error("[AppState] hydrateProfile timed out");
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }, 15000);
       try {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-        const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-        const projectRef = supabaseUrl.replace("https://", "").split(".")[0];
-        const tokenKey = `sb-${projectRef}-auth-token`;
-        const stored = localStorage.getItem(tokenKey);
-        const parsed = stored ? JSON.parse(stored) : null;
-        const accessToken = parsed?.access_token ?? parsed?.session?.access_token;
-        const authHeader = accessToken ? `Bearer ${accessToken}` : `Bearer ${anonKey}`;
-        // Fetch profile directly
-        const res = await fetch(
-          `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=*`,
-          { headers: { "apikey": anonKey, "Authorization": authHeader } }
-        );
-        const rows = await res.json();
+        const user = await ensureProfile(authUser);
         clearTimeout(timeoutId);
-        if (rows?.[0]) {
-          dispatch({ type: "SET_AUTH", user: mapProfile(rows[0] as Record<string, unknown>) });
-          return;
-        }
-        // Profile doesn't exist — create it directly without using Supabase client
-        const meta = authUser.user_metadata ?? {};
-        const displayName = (meta.full_name as string) || (meta.name as string) || "SkillSnap User";
-        const emailPrefix = authUser.email?.split("@")[0] ?? "";
-        const baseForUsername = displayName !== "SkillSnap User"
-          ? displayName
-          : emailPrefix;
-        const rawUsername = baseForUsername
-          .toLowerCase()
-          .trim()
-          .replace(/[^a-z0-9]/g, "_")
-          .replace(/_+/g, "_")
-          .replace(/^_|_$/g, "");
-        const safeBase = rawUsername.slice(0, 20) || "user";
-        const username = safeBase + "_" + authUser.id.replace(/-/g, "").slice(0, 4);
-        const avatarUrl = (meta.avatar_url as string) || (meta.picture as string) || null;
-        const insertRes = await fetch(
-          `${supabaseUrl}/rest/v1/profiles`,
-          {
-            method: "POST",
-            headers: {
-              "apikey": anonKey,
-              "Authorization": authHeader,
-              "Content-Type": "application/json",
-              "Prefer": "return=representation",
-            },
-            body: JSON.stringify({
-              id: userId,
-              username,
-              email: authUser.email ?? null,
-              display_name: displayName,
-              avatar_url: avatarUrl,
-              avatar_initial: displayName.charAt(0).toUpperCase(),
-              avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
-            }),
-          }
-        );
-        const inserted = await insertRes.json();
-        clearTimeout(timeoutId);
-        const newProfile = Array.isArray(inserted) ? inserted[0] : inserted;
-        if (newProfile?.id) {
-          dispatch({ type: "SET_AUTH", user: mapProfile(newProfile as Record<string, unknown>) });
+        if (user) {
+          dispatch({ type: "SET_AUTH", user });
         } else {
-          // Insert may have failed due to existing row — fetch again
-          const retryRes = await fetch(
-            `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=*`,
-            { headers: { "apikey": anonKey, "Authorization": authHeader } }
-          );
-          const retryRows = await retryRes.json();
-          if (retryRows?.[0]) dispatch({ type: "SET_AUTH", user: mapProfile(retryRows[0] as Record<string, unknown>) });
-          else dispatch({ type: "SET_AUTH_LOADING", loading: false });
+          dispatch({ type: "SET_AUTH_LOADING", loading: false });
         }
       } catch (e) {
         clearTimeout(timeoutId);
@@ -580,14 +515,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // Delay clearing auth — Supabase sometimes fires SIGNED_OUT briefly
         // during token refresh before firing SIGNED_IN again
         setTimeout(() => {
-          // Only clear if still not authenticated after 2 seconds
-          const tokenKey = `sb-${(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace("https://", "").split(".")[0]}-auth-token`;
-          const stored = localStorage.getItem(tokenKey);
-          const parsed = stored ? JSON.parse(stored) : null;
-          if (!parsed?.access_token) {
-            dispatch({ type: "CLEAR_AUTH" });
-            dispatch({ type: "HIDE_AUTH_PROMPT" });
-          }
+          dispatch({ type: "CLEAR_AUTH" });
+          dispatch({ type: "HIDE_AUTH_PROMPT" });
         }, 2000);
         return;
       }
