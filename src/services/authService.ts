@@ -111,12 +111,19 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
   // Check if a profile row already exists.
   try {
     console.log("[ensureProfile] BEFORE profiles query");
+
+    // Check session state before the query
+    const { data: sessionCheck } = await sb.auth.getSession();
+    console.log("[ensureProfile] session before query:", sessionCheck?.session ? "has session" : "NO SESSION");
+
+    console.time("[ensureProfile] profiles query");
     const { data: existing, error: existingError } = await sb
       .from("profiles")
       .select("id")
       .eq("id", authUser.id)
       .maybeSingle();
-    console.log("[ensureProfile] AFTER profiles query");
+    console.timeEnd("[ensureProfile] profiles query");
+    console.log("[ensureProfile] profiles query returned. data:", !!existing, "error:", existingError?.message ?? "none");
 
     console.log("[ensureProfile] existing profile query:", existing ? "found" : "not found", "error:", existingError?.message ?? "none");
 
