@@ -463,26 +463,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }, 8000);
 
     // hydrateProfile — fetches the profile row and dispatches SET_AUTH.
-    // Uses the Supabase client (via ensureProfile) instead of direct REST API calls.
     async function hydrateProfile(userId: string, authUser: import("@supabase/supabase-js").User) {
-      const timeoutId = setTimeout(() => {
-        console.error("[AppState] hydrateProfile timed out");
-        dispatch({ type: "SET_AUTH_LOADING", loading: false });
-      }, 15000);
-      console.log("[hydrateProfile] 1: entered, userId:", userId, "authUser.id:", authUser.id);
       try {
-        console.log("[hydrateProfile] 2: calling ensureProfile...");
         const user = await ensureProfile(authUser);
-        console.log("[hydrateProfile] 3: ensureProfile returned, user:", !!user);
-        clearTimeout(timeoutId);
-        console.log("[AppState] hydrateProfile result:", user ? "got user" : "null");
         if (user) {
           dispatch({ type: "SET_AUTH", user });
         } else {
           dispatch({ type: "SET_AUTH_LOADING", loading: false });
         }
       } catch (e) {
-        clearTimeout(timeoutId);
         console.error("[AppState] hydrateProfile CRASHED:", e);
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }
@@ -513,9 +502,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Subscribe to auth state changes — covers SIGNED_IN from PKCE exchange
     // (handled server-side by auth/callback/route.ts via @supabase/ssr),
     // INITIAL_SESSION on regular page loads, token refresh, and sign-out.
-    const { data: { subscription } } = authSb.auth.onAuthStateChange(async (event, session) => {
-      console.log("[AppState] onAuthStateChange", event, session?.user?.id ?? "no session");
-
+    // IMPORTANT: Callback must be synchronous — awaiting Supabase API calls
+    // inside onAuthStateChange causes a deadlock. Profile hydration is deferred
+    // via setTimeout to run outside the callback.
+    const { data: { subscription } } = authSb.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
         // Delay clearing auth — Supabase sometimes fires SIGNED_OUT briefly
         // during token refresh before firing SIGNED_IN again
@@ -529,13 +519,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!session) return;
 
       if (event === "INITIAL_SESSION") {
-        if (initializedByGetSession) {
-          console.log("[AppState] INITIAL_SESSION skipped — already handled by getSession");
-          return;
-        }
-        console.log("[AppState] INITIAL_SESSION — hydrating profile");
+        if (initializedByGetSession) return;
         clearTimeout(authTimeout);
-        await hydrateProfile(session.user.id, session.user);
+        setTimeout(() => {
+          void hydrateProfile(session.user.id, session.user);
+        }, 0);
         return;
       }
 
@@ -547,15 +535,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
 
       if (event === "SIGNED_IN") {
-        if (hydratingRef.current === session.user.id) {
-          console.log("[AppState] SIGNED_IN skipped — already hydrating for", session.user.id);
-          return;
-        }
+        if (hydratingRef.current === session.user.id) return;
         hydratingRef.current = session.user.id;
-        console.log("[AppState] SIGNED_IN — hydrating profile, email:", session.user.email, "meta keys:", Object.keys(session.user.user_metadata ?? {}));
         clearTimeout(authTimeout);
-        await hydrateProfile(session.user.id, session.user);
-        // SET_AUTH reducer handles screen transition (role-setup or home)
+        setTimeout(() => {
+          void hydrateProfile(session.user.id, session.user);
+        }, 0);
         return;
       }
 
@@ -565,17 +550,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Check for an existing session on every page load.
     // After a Google OAuth redirect, auth/callback/route.ts has already exchanged
     // the code server-side and set the cookie, so getSession() finds it here.
-    console.log("[AppState] calling getSession...");
     authSb.auth.getSession().then(async ({ data: { session } }) => {
-      console.log("[AppState] getSession resolved, session:", session ? "found" : "null");
       clearTimeout(authTimeout);
       if (session?.user) {
-        console.log("[AppState] getSession found session for", session.user.id);
         initializedByGetSession = true;
         await hydrateProfile(session.user.id, session.user);
         // SET_AUTH reducer handles screen transition (role-setup or home)
       } else {
-        console.log("[AppState] getSession: no session, showing landing");
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }
     }).catch((e) => {
