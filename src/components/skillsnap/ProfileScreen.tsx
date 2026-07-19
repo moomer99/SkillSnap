@@ -4,7 +4,7 @@
 // FIX 3: Show user's actual skill tag instead of hardcoded "Client" badge
 // FIX UX4: Proper empty state on both own and client profile grids
 // ─────────────────────────────────────────────
-import { ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, Loader2, Bookmark, Menu, Zap, Star, TrendingUp, Video, Shield, Gift, Sparkles, ChevronUp } from "lucide-react";
+import { ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, ChevronRight, Loader2, Bookmark, Menu, Zap, Star, TrendingUp, Video, Shield, Gift, Sparkles, ChevronUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import type { Screen, ProfileVariant, Post, SkillCategory } from "@/types";
 import { MOCK_WORK_GRID } from "@/mock-data/posts";
@@ -203,6 +203,48 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             )}
           </div>
         </div>
+
+        {/* ── Profile Strength ── */}
+        {isOwn && (() => {
+          const completionSteps = [
+            { done: !!user.avatarUrl, label: "Add a profile photo", action: () => onNavigate("edit-profile") },
+            { done: !!user.bio?.trim(), label: "Add a bio", action: () => onNavigate("edit-profile") },
+            { done: !!user.skill || !!user.role, label: "Set your skill or role", action: () => onNavigate("edit-profile") },
+            { done: !!user.location?.trim(), label: "Add your location", action: () => onNavigate("edit-profile") },
+            { done: (user.postCount ?? 0) > 0, label: "Upload your first showcase", action: () => onNavigate("upload") },
+          ];
+          const completedCount = completionSteps.filter(s => s.done).length;
+          const completionPct = Math.round((completedCount / completionSteps.length) * 100);
+          const incompleteSteps = completionSteps.filter(s => !s.done);
+          if (completionPct === 100) return null;
+          return (
+            <div className="bg-white px-4 py-3 border-b border-[#e8e4df]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[13px] font-bold text-[#1a1a1a]">Profile Strength</span>
+                <span className="text-[12px] font-bold text-[#6c47ff]">{completionPct}% Complete</span>
+              </div>
+              <div className="w-full h-1.5 rounded-full bg-[#f0eeea] mb-3 overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{ width: `${completionPct}%`, background: "linear-gradient(90deg, #6c47ff, #a78bfa)" }}
+                />
+              </div>
+              <div className="flex flex-col">
+                {incompleteSteps.slice(0, 3).map((step, i) => (
+                  <button
+                    key={i}
+                    onClick={step.action}
+                    className="flex items-center gap-2.5 py-1.5 text-left active:opacity-70 transition-opacity"
+                  >
+                    <div className="w-4 h-4 rounded-full border-2 border-[#d1cec9] flex-shrink-0" />
+                    <span className="flex-1 text-[12px] text-[#7a7570]">{step.label}</span>
+                    <ChevronRight size={14} className="text-[#b0aaa5] flex-shrink-0" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ── Tabs ── */}
         <div className="pt-0">
