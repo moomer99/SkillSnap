@@ -491,7 +491,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         </button>
 
         <p className="text-center text-[12px] text-[#7a7570] leading-relaxed -mt-1">
-          Join 1,000+ local pros and clients. Free to browse, connect, and grow your business.
+          Be among the first 1,000 local professionals and clients.
         </p>
 
         <button

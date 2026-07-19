@@ -733,7 +733,7 @@ function FeedCard({
       )}
 
       {/* Right actions */}
-      <div className="absolute right-3 z-10 flex flex-col items-center gap-5" style={{ bottom: 220 }}>
+      <div className="absolute right-3 z-10 flex flex-col items-center gap-5" style={{ bottom: 234 }}>
         <RightAction
           icon={<Heart size={26} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "white"} strokeWidth={1.8} />}
           label={formatLikes(post.likes)} onClick={onLike}
@@ -747,7 +747,7 @@ function FeedCard({
 
       {/* Bottom panel */}
       <div className="absolute bottom-0 left-0 right-0 z-10 px-4 pb-5">
-        <div className="flex items-center gap-3 mb-2.5">
+        <div className="flex items-start gap-3 mb-2.5">
           <div className="cursor-pointer flex-shrink-0" onClick={(e) => { e.stopPropagation(); onProfileClick(); }}>
             <UserAvatar user={author} size="sm" showVerified ring />
           </div>
@@ -761,13 +761,16 @@ function FeedCard({
                   </svg>
                 </span>
               )}
+            </div>
+            {/* Badges on their own line */}
+            <div className="flex items-center gap-1.5 mt-0.5">
               {author.happyPercent >= 90 && (author.jobsDone ?? 0) >= 5 && (
-                <span className="text-[9px] font-bold text-emerald-300 bg-emerald-900/50 px-1.5 py-0.5 rounded-full border border-emerald-400/40 flex-shrink-0">
+                <span className="text-[9px] font-bold text-emerald-300 bg-emerald-900/50 px-1.5 py-0.5 rounded-full border border-emerald-400/40">
                   Top Rated
                 </span>
               )}
               {author.isVerified && (author.jobsDone ?? 0) >= 10 && (
-                <span className="text-[9px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded-full border border-blue-400/40 flex-shrink-0">
+                <span className="text-[9px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded-full border border-blue-400/40">
                   Verified Business
                 </span>
               )}
