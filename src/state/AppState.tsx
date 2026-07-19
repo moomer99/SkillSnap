@@ -125,7 +125,7 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       return { ...state, isGuest: true, showAuthPrompt: false };
     case "SET_AUTH": {
       const needsRoleSetup = !action.user.role;
-      const needsUsernameSetup = /@@?[a-z0-9_]+_[a-z0-9]{4}$/.test((action.user.username ?? "").toLowerCase());
+      const needsUsernameSetup = /^[a-z0-9_]+_[a-z0-9]{4}$/.test((action.user.username ?? "").toLowerCase());
       const comingFromAuthFlow = ["auth", "onboarding", "landing", "role-setup", "username-setup"].includes(state.screen);
       const nextScreen = comingFromAuthFlow
         ? (needsUsernameSetup ? "username-setup" : needsRoleSetup ? "role-setup" : "home")
