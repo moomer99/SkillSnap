@@ -539,6 +539,17 @@ function FeedCard({
   const activeMediaUrl = activeMedia ? activeMedia.url : post.mediaUrl;
   const activeMediaType = activeMedia ? activeMedia.type : post.type;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [descOverflows, setDescOverflows] = useState(false);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const hiddenDescRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (descRef.current && hiddenDescRef.current && post.caption) {
+      setDescOverflows(hiddenDescRef.current.scrollHeight > descRef.current.clientHeight + 2);
+    } else {
+      setDescOverflows(false);
+    }
+  }, [post.caption]);
   const [editMode, setEditMode] = useState<"caption" | "skill" | "location" | "delete" | null>(null);
   const [editCaption, setEditCaption] = useState(post.caption ?? "");
   const [editSkill, setEditSkill] = useState<string>(post.skill ?? "");
@@ -769,28 +780,39 @@ function FeedCard({
                 )}
               </div>
             ) : null}
-            <p className="text-white/60 text-[12px] mt-0.5">{author.skill}</p>
+            <p className="text-white/60 text-[12px] mt-0.5">{author.skill || "—"}</p>
           </div>
         </div>
 
-        {post.caption ? <p className="text-white/90 text-[14px] leading-snug mb-3 line-clamp-2">{post.caption}</p> : null}
+        {post.caption ? (
+          <div className="mb-3">
+            <p ref={descRef} className="text-white/90 text-[14px] leading-snug line-clamp-2">{post.caption}</p>
+            <p ref={hiddenDescRef} className="absolute invisible pointer-events-none text-white/90 text-[14px] leading-snug max-w-[calc(100%-32px)]">{post.caption}</p>
+            {descOverflows && (
+              <button onClick={(e) => { e.stopPropagation(); onFullscreen(); }}
+                className="text-[#a78bfa] text-[12px] font-semibold mt-0.5 hover:underline">
+                See more
+              </button>
+            )}
+          </div>
+        ) : null}
 
-        <div className="flex items-stretch mb-3 rounded-2xl overflow-hidden"
+        <div className="flex items-stretch gap-x-1 mb-3 rounded-2xl overflow-hidden"
           style={{ background: "rgba(0,0,0,0.42)", backdropFilter: "blur(10px)" }}>
           <StatCell value={fmtNum(author.jobsDone)} label="Jobs Done" icon={
-            <svg width="14" height="13" viewBox="0 0 16 14" fill="white">
+            <svg width="16" height="15" viewBox="0 0 16 14" fill="white">
               <path d="M6 0h4a1 1 0 011 1v1h3a1 1 0 011 1v9a1 1 0 01-1 1H2a1 1 0 01-1-1V3a1 1 0 011-1h3V1a1 1 0 011-1zm0 2h4V1H6v1zM1 6v1h14V6H1zm0 2v4h14V8H1z"/>
             </svg>
           } />
           <VSep />
           <StatCell value={fmtNum(author.followers)} label="Connections" icon={
-            <svg width="14" height="13" viewBox="0 0 16 14" fill="white">
+            <svg width="16" height="15" viewBox="0 0 16 14" fill="white">
               <path d="M6 7a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H1zm10-6a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm1.5 1.5c1.8.4 3 1.8 3 3.5h-3"/>
             </svg>
           } />
           <VSep />
           <StatCell value={happyPct} label="Happy" green={happyPct !== "—" && happyPct !== "0%"} icon={
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
               <circle cx="12" cy="12" r="10"/>
               <circle cx="9" cy="9.5" r="1.2" fill="#000" opacity="0.45"/>
               <circle cx="15" cy="9.5" r="1.2" fill="#000" opacity="0.45"/>
@@ -801,7 +823,7 @@ function FeedCard({
           <LocationCell distanceKm={displayDistance} location={displayLocation} isOwn={isOwnPost} onPress={onProfileClick} />
         </div>
 
-        {!isOwnPost && <ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />}
+        {<ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />}
       </div>
 
       {/* Three-dot menu bottom sheet */}
@@ -896,7 +918,7 @@ function LocationCell({ distanceKm: d, location, isOwn, onPress }: { distanceKm?
     <button className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 px-1 active:opacity-70 transition-opacity"
       onClick={(e) => { e.stopPropagation(); onPress(); }}>
       <span className="leading-none mb-0.5">
-        <svg width="14" height="14" viewBox="0 0 11 14" fill="white">
+        <svg width="16" height="16" viewBox="0 0 11 14" fill="white">
           <path d="M5.5 0A5.5 5.5 0 000 5.5C0 9.625 5.5 14 5.5 14S11 9.625 11 5.5A5.5 5.5 0 005.5 0zm0 7.5a2 2 0 110-4 2 2 0 010 4z"/>
         </svg>
       </span>

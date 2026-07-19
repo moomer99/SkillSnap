@@ -22,7 +22,7 @@ export default function ConnectButton({
   loading = false,
   className = "",
 }: ConnectButtonProps) {
-  const height = size === "sm" ? "h-9 text-xs" : "h-11 text-sm";
+  const height = size === "sm" ? "h-8 text-xs" : "h-9 text-sm";
   const iconSize = size === "sm" ? 13 : 16;
 
   return (
