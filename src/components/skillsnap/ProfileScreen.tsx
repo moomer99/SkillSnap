@@ -4,7 +4,7 @@
 // FIX 3: Show user's actual skill tag instead of hardcoded "Client" badge
 // FIX UX4: Proper empty state on both own and client profile grids
 // ─────────────────────────────────────────────
-import { MapPin, ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, Loader2, Bookmark, Menu, Zap, Star, TrendingUp, Video, Shield, Gift, Sparkles, ChevronUp } from "lucide-react";
+import { ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, ChevronDown, Loader2, Bookmark, Menu, Zap, Star, TrendingUp, Video, Shield, Gift, Sparkles, ChevronUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import type { Screen, ProfileVariant, Post, SkillCategory } from "@/types";
 import { MOCK_WORK_GRID } from "@/mock-data/posts";
@@ -47,6 +47,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
   const [activeTab, setActiveTab] = useState<"work" | "saved">("work");
   const [proExpanded, setProExpanded] = useState(false);
   const [proNotified, setProNotified] = useState(false);
+  const [bioExpanded, setBioExpanded] = useState(false);
 
   const localOwn = isOwn ? state.localPosts.filter((p) => p.authorId === user?.id) : [];
   const mergedPosts = [
@@ -78,10 +79,11 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
 
   const connections = user.followers >= 1_000_000 ? `${(user.followers / 1_000_000).toFixed(1)}M`
     : user.followers >= 1000 ? `${(user.followers / 1000).toFixed(1)}k` : String(user.followers);
-  const happyDisplay = user.happyPercent !== undefined &&
-    user.happyPercent !== null &&
-    user.happyPercent > 0
-    ? `${user.happyPercent}%` : "—";
+  const happyDisplay = user.happyPercent == null
+    ? "—"
+    : user.happyPercent === 0
+    ? "New"
+    : `${user.happyPercent}%`;
 
   return (
     <div className="flex flex-col bg-[#f8f7f5] overflow-hidden" style={{ height: "100dvh" }}>
@@ -110,29 +112,21 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
 
         {/* ── Profile card ── */}
         <div className="bg-white px-5 pt-6 pb-5 border-b border-[#e8e4df]">
-          <div className="flex items-start gap-4 mb-4">
+          {/* 1. Avatar */}
+          <div className="flex justify-center mb-3">
             <UserAvatar user={user} size="lg" showVerified={isOwn} />
-            <div className="flex-1 flex items-center justify-around pt-1 pb-1">
-              <Stat value={user.jobsDone >= 1000 ? `${(user.jobsDone / 1000).toFixed(0)}k` : String(user.jobsDone)} label={user.role === "client" ? "Hired" : "Jobs Done"} highlight />
-              <div className="w-px h-8 bg-[#e8e4df]" />
-              <Stat value={happyDisplay} label="😊 Happy" />
-              <div className="w-px h-8 bg-[#e8e4df]" />
-              <Stat value={connections} label="Connections" />
-            </div>
           </div>
-          <div className="mb-1">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <h2 className="font-bold text-base text-[#1a1a1a]">{user.displayName}</h2>
-              {user.skill && user.role !== "client" ? (
-                <>
-                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: "#6c47ff" }}>Pro</span>
-                  {(user as any).isEarlyBird && (
-                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "linear-gradient(135deg, #f59e0b, #fbbf24)", color: "#1a1a1a" }}>🔥 Early Bird</span>
-                  )}
-                </>
-              ) : user.role === "client" ? (
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "#f0f0f0", color: "#7a7570" }}>Client</span>
-              ) : isOwn ? (
+
+          {/* 2. Display name */}
+          <h2 className="font-bold text-xl text-[#1a1a1a] text-center mb-2">{user.displayName}</h2>
+
+          {/* Badges */}
+          {((user as any).isEarlyBird || (isOwn && !user.skill && user.role !== "client")) && (
+            <div className="flex justify-center gap-2 mb-2 flex-wrap">
+              {(user as any).isEarlyBird && (
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "linear-gradient(135deg, #f59e0b, #fbbf24)", color: "#1a1a1a" }}>🔥 Early Bird</span>
+              )}
+              {isOwn && !user.skill && user.role !== "client" && (
                 <button
                   onClick={() => onNavigate("edit-profile")}
                   className="text-xs font-bold px-2.5 py-0.5 rounded-full transition-all active:scale-95"
@@ -140,28 +134,46 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 >
                   Complete Profile
                 </button>
-              ) : null}
+              )}
             </div>
-            {user.location ? (
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(user.location)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-[#6c47ff] flex items-center gap-1 hover:underline active:opacity-70 mb-2"
-              >
-                <MapPin size={13} />
-                {user.location}
-              </a>
-            ) : null}
-            <p className="text-sm text-[#4a4a4a] leading-relaxed">{user.bio}</p>
+          )}
+
+          {/* 3. Skill + Location */}
+          <p className="text-xs text-[#7a7570] text-center mb-3">
+            {user.skill || "—"} · {user.location || "Location not specified"}
+          </p>
+
+          {/* 4. Bio */}
+          <div className="mb-4">
+            <p className={`text-sm text-[#4a4a4a] leading-relaxed text-center ${!bioExpanded ? "line-clamp-3" : ""}`}>
+              {user.bio || "No bio added yet."}
+            </p>
+            {user.bio && user.bio.length > 100 && (
+              <button onClick={() => setBioExpanded(!bioExpanded)} className="text-xs text-[#6c47ff] font-semibold mt-1 w-full text-center">
+                {bioExpanded ? "See less" : "See more"}
+              </button>
+            )}
           </div>
-          <div className="flex gap-2.5 mt-4">
+
+          {/* 5. Stats */}
+          <div className="flex justify-around mb-4 border border-[#e8e4df] rounded-2xl py-3">
+            <Stat value={user.jobsDone >= 1000 ? `${(user.jobsDone / 1000).toFixed(0)}k` : String(user.jobsDone)} label="Jobs" highlight />
+            <div className="w-px bg-[#e8e4df]" />
+            <Stat value={happyDisplay} label="Happy" />
+            <div className="w-px bg-[#e8e4df]" />
+            <Stat value={connections} label="Connections" />
+            <div className="w-px bg-[#e8e4df]" />
+            <Stat value="—" label="Away" />
+          </div>
+
+          {/* 6. Action buttons */}
+          <div className="flex gap-2.5">
             {isOwn ? (
               <>
-                <button onClick={() => onNavigate("edit-profile")} className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
+                <button onClick={() => onNavigate("edit-profile")} className="flex-1 h-9 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
                   <Edit3 size={14} /> Edit Profile
                 </button>
-                <button onClick={() => { const url = "https://skillsnap.com.au"; if (navigator.share) navigator.share({ title: "SkillSnap", text: `Check out ${user.displayName} on SkillSnap — Sydney's skills platform!`, url }).catch(() => {}); else navigator.clipboard?.writeText(url).catch(() => {}); }} className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
+                <button onClick={() => { const url = "https://skillsnap.com.au"; if (navigator.share) navigator.share({ title: "SkillSnap", text: `Check out ${user.displayName} on SkillSnap — Sydney's skills platform!`, url }).catch(() => {}); else navigator.clipboard?.writeText(url).catch(() => {}); }} className="flex-1 h-9 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
                   <Share2 size={14} /> Share
                 </button>
               </>
@@ -170,7 +182,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 <div className="flex-1">
                   <ConnectButton onClick={() => requireAuth(() => connectTo(user.id))} fullWidth loading={connecting === user.id} />
                 </div>
-                <button onClick={() => requireAuth(() => toggleFollow(user.id))} className={`flex-1 h-11 rounded-2xl font-semibold text-sm border-2 transition-all active:scale-[0.98] ${isFollowing ? "text-white bg-[#6c47ff] border-[#6c47ff]" : "text-[#6c47ff] bg-white border-[#6c47ff]"}`}>
+                <button onClick={() => requireAuth(() => toggleFollow(user.id))} className={`flex-1 h-9 rounded-xl font-semibold text-sm border transition-all active:scale-[0.98] ${isFollowing ? "text-white bg-[#6c47ff] border-[#6c47ff]" : "text-[#6c47ff] bg-white border-[#6c47ff]"}`}>
                   {isFollowing ? "Following" : "Follow"}
                 </button>
               </>
