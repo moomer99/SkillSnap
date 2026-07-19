@@ -71,6 +71,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
     .select("*")
     .eq("id", userId)
     .single();
+  console.log("[fetchProfile] result:", data ? "found" : "null", "error:", error?.message ?? "none");
   if (error || !data) return null;
   return mapProfile(data as Record<string, unknown>);
 }
@@ -101,11 +102,13 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
   console.log("[ensureProfile] checking for existing profile:", authUser.id);
 
   // Check if a profile row already exists.
-  const { data: existing } = await sb
+  const { data: existing, error: existingError } = await sb
     .from("profiles")
     .select("id")
     .eq("id", authUser.id)
     .maybeSingle();
+
+  console.log("[ensureProfile] existing profile query:", existing ? "found" : "not found", "error:", existingError?.message ?? "none");
 
   if (existing) {
     // Profile exists — only update non-user-editable fields (email, username slug).

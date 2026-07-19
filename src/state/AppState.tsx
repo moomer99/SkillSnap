@@ -177,6 +177,7 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
       const nextScreen = comingFromAuthFlow
         ? (needsUsernameSetup ? "username-setup" : needsRoleSetup ? "role-setup" : "home")
         : state.screen;
+      console.log("[AppState] SET_AUTH screen:", state.screen, "->", nextScreen, "role:", action.user.role, "username:", action.user.username);
       return {
         ...state,
         currentUser: action.user,
@@ -471,6 +472,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         const user = await ensureProfile(authUser);
         clearTimeout(timeoutId);
+        console.log("[AppState] hydrateProfile result:", user ? "got user" : "null");
         if (user) {
           dispatch({ type: "SET_AUTH", user });
         } else {
