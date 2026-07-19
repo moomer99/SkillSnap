@@ -192,7 +192,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           )}
 
 
-          {(isOwn ? (activeTab === "work" && state.currentUser?.role !== "client") : user?.role !== "client") && (
+          {(isOwn ? activeTab === "work" : true) && (
             <div className="grid grid-cols-3 gap-0.5 pt-0.5">
               {gridLoading ? (
                 Array.from({ length: 6 }).map((_, i) => <div key={i} className="aspect-square bg-gray-200 animate-pulse" />)
