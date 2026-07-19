@@ -1,8 +1,9 @@
 "use client";
 // ─────────────────────────────────────────────
 // SkillSnap — Review Mode Banner
-// Fixed amber banner at the top of the screen
-// indicating read-only mode.
+// Sticky amber banner at the top of the screen
+// indicating read-only mode. Stays in document flow
+// so no content is hidden behind it.
 // ─────────────────────────────────────────────
 import { useAppState } from "@/state/AppState";
 import { Eye } from "lucide-react";
@@ -14,7 +15,7 @@ export default function ReviewBanner() {
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 z-[9999] flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+      className="sticky top-0 z-[9999] flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
       style={{
         background: "linear-gradient(135deg, #f59e0b, #d97706)",
         color: "white",
