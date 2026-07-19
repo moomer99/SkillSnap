@@ -192,7 +192,8 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
                 </svg>
               </div>
               <div className="text-center px-4">
-                <p className="text-sm font-bold text-[#1a1a1a] mb-1">Tap to add photos or videos</p>
+                <p className="text-sm font-bold text-[#1a1a1a] mb-1">Show your work</p>
+                <p className="text-xs text-[#7a7570] mb-0.5">Upload your best photo or video — clients are watching.</p>
                 <p className="text-xs text-[#b0aaa5]">Up to 5 files · MP4, MOV, JPG, PNG</p>
               </div>
               <div className="flex items-center gap-3">
@@ -414,7 +415,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         <div className="mt-2">
           <button
             onClick={handlePublish}
-            disabled={loading || (!caption.trim() && selectedFiles.length === 0)}
+            disabled={loading || selectedFiles.length === 0}
             className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2.5"
             style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 20px rgba(108,71,255,0.35)" }}
           >

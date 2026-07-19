@@ -501,7 +501,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
           }}
           className="text-center text-xs text-[#b0aaa5] py-1"
         >
-          Browse without signing up
+          Continue as Guest
         </button>
 
         {error && (

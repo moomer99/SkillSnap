@@ -86,7 +86,24 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   const [locationPromptDismissed, setLocationPromptDismissed] = useState(() => {
     try { return localStorage.getItem("skillsnap_loc_prompt") === "1"; } catch { return false; }
   });
+  const [welcomeType, setWelcomeType] = useState<"pro" | "client" | null>(() => {
+    try {
+      if (localStorage.getItem("skillsnap_show_pro_welcome") === "1") return "pro";
+      if (localStorage.getItem("skillsnap_show_client_welcome") === "1") return "client";
+      return null;
+    } catch { return null; }
+  });
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (welcomeType) {
+      try {
+        localStorage.removeItem("skillsnap_show_pro_welcome");
+        localStorage.removeItem("skillsnap_show_client_welcome");
+      } catch {}
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Infinite scroll sentinel
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -226,6 +243,51 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
 
       {/* Feed scroll container */}
       <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px)`, transition: 'height 0.3s ease' }} onScroll={handleFeedScroll}>
+        {/* Welcome card — shown once after onboarding */}
+        {welcomeType && (
+          <div
+            className="mx-3 mt-3 mb-1 rounded-2xl overflow-hidden px-4 py-4 relative"
+            style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 20px rgba(108,71,255,0.25)" }}
+          >
+            <button
+              onClick={() => setWelcomeType(null)}
+              className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(255,255,255,0.15)" }}
+            >
+              <X size={14} color="white" />
+            </button>
+            <p className="text-white font-extrabold text-base mb-1">Welcome to SkillSnap 🎉</p>
+            <p className="text-white/80 text-xs leading-relaxed mb-4">
+              {welcomeType === "pro"
+                ? "Show your work and get discovered locally."
+                : "Discover real work from skilled people near you."}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setWelcomeType(null);
+                  if (welcomeType === "pro") {
+                    onNavigate("upload");
+                  } else {
+                    setShowLocationPicker(true);
+                  }
+                }}
+                className="flex-1 h-9 rounded-xl font-bold text-sm text-[#6c47ff] bg-white flex items-center justify-center transition-all active:scale-[0.97]"
+              >
+                {welcomeType === "pro" ? "Upload Your First Showcase" : "Explore Local Professionals"}
+              </button>
+              {welcomeType === "pro" && (
+                <button
+                  onClick={() => setWelcomeType(null)}
+                  className="text-xs font-semibold text-white/70 px-2"
+                >
+                  Explore Feed
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Role setup banner */}
         {showRoleBanner && (
           <div
