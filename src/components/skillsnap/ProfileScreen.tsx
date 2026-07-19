@@ -145,7 +145,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
 
           {/* 4. Bio */}
           <div className="mb-4">
-            <p className={`text-sm text-[#4a4a4a] leading-relaxed text-center ${!bioExpanded ? "line-clamp-3" : ""}`}>
+            <p className={`text-sm text-[#4a4a4a] leading-relaxed text-center ${!bioExpanded ? "line-clamp-3" : ""}`} style={{ color: "#4a4a4a" }}>
               {user.bio || "No bio added yet."}
             </p>
             {user.bio && user.bio.length > 100 && (
