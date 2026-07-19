@@ -111,70 +111,82 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
       <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pb-10">
 
         {/* ── Profile card ── */}
-        <div className="bg-white px-5 pt-6 pb-5 border-b border-[#e8e4df]">
-          {/* 1. Avatar */}
-          <div className="flex justify-center mb-3">
+        <div className="bg-white px-4 pt-4 pb-3 border-b border-[#e8e4df]">
+
+          {/* Row 1: Avatar + Name + Role + Location */}
+          <div className="flex items-center gap-3 mb-2">
             <UserAvatar user={user} size="lg" showVerified={isOwn} />
-          </div>
-
-          {/* 2. Display name */}
-          <h2 className="font-bold text-xl text-[#1a1a1a] text-center mb-2">{user.displayName}</h2>
-
-          {/* Badges */}
-          {((user as any).isEarlyBird || (isOwn && !user.skill && user.role !== "client")) && (
-            <div className="flex justify-center gap-2 mb-2 flex-wrap">
+            <div className="flex-1 min-w-0">
+              <h2 className="font-extrabold text-[17px] text-[#1a1a1a] leading-tight truncate">
+                {user.displayName}
+              </h2>
+              <p className="text-[13px] text-[#7a7570] mt-0.5 truncate">
+                {user.skill || "—"}{user.location ? ` • ${user.location.split(",")[0]}` : ""}
+              </p>
               {(user as any).isEarlyBird && (
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "linear-gradient(135deg, #f59e0b, #fbbf24)", color: "#1a1a1a" }}>🔥 Early Bird</span>
+                <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  style={{ background: "linear-gradient(135deg, #f59e0b, #fbbf24)", color: "#1a1a1a" }}>
+                  🔥 Early Bird
+                </span>
               )}
-              {isOwn && !user.skill && user.role !== "client" && (
+              {isOwn && !state.currentUser?.role && (
                 <button
                   onClick={() => onNavigate("edit-profile")}
-                  className="text-xs font-bold px-2.5 py-0.5 rounded-full transition-all active:scale-95"
+                  className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full transition-all active:scale-95"
                   style={{ background: "#fff7ed", color: "#c2410c", border: "1px solid #fed7aa" }}
                 >
                   Complete Profile
                 </button>
               )}
             </div>
+          </div>
+
+          {/* Row 2: Bio — 1 line preview with See more */}
+          {(user.bio || !isOwn) && (
+            <div className="mb-2">
+              <p
+                className="text-[13px] text-[#4a4a4a] leading-snug"
+                style={{ color: "#4a4a4a", display: "-webkit-box", WebkitLineClamp: bioExpanded ? undefined : 1, WebkitBoxOrient: "vertical", overflow: bioExpanded ? "visible" : "hidden" }}
+              >
+                {user.bio || "No bio added yet."}
+              </p>
+              {user.bio && user.bio.length > 60 && (
+                <button
+                  onClick={() => setBioExpanded(v => !v)}
+                  className="text-[12px] font-semibold text-[#6c47ff] mt-0.5"
+                >
+                  {bioExpanded ? "Show less" : "See more"}
+                </button>
+              )}
+            </div>
           )}
 
-          {/* 3. Skill + Location */}
-          <p className="text-sm text-[#4a4a4a] text-center mb-3">
-            {user.skill || "—"} · {user.location || "Location not specified"}
-          </p>
-
-          {/* 4. Bio */}
-          <div className="mb-4">
-            <p className={`text-sm text-[#4a4a4a] leading-relaxed text-center ${!bioExpanded ? "line-clamp-3" : ""}`} style={{ color: "#4a4a4a" }}>
-              {user.bio || "No bio added yet."}
-            </p>
-            {user.bio && user.bio.length > 100 && (
-              <button onClick={() => setBioExpanded(!bioExpanded)} className="text-xs text-[#6c47ff] font-semibold mt-1 w-full text-center">
-                {bioExpanded ? "See less" : "See more"}
-              </button>
-            )}
+          {/* Row 3: Stats horizontal */}
+          <div className="flex items-center gap-0 mb-2.5 rounded-xl overflow-hidden border border-[#f0eeea]">
+            <StatCell value={user.jobsDone >= 1000 ? `${(user.jobsDone / 1000).toFixed(0)}k` : String(user.jobsDone)} label={user.role === "client" ? "Hired" : "Jobs"} highlight />
+            <div className="w-px self-stretch bg-[#f0eeea]" />
+            <StatCell value={happyDisplay} label="Happy" />
+            <div className="w-px self-stretch bg-[#f0eeea]" />
+            <StatCell value={connections} label="Connections" />
+            <div className="w-px self-stretch bg-[#f0eeea]" />
+            <StatCell value={user.location ? user.location.split(",")[0].trim() : "—"} label="📍 Based" />
           </div>
 
-          {/* 5. Stats */}
-          <div className="flex justify-around mb-4 border border-[#f0eeea] rounded-2xl py-3">
-            <Stat value={user.jobsDone >= 1000 ? `${(user.jobsDone / 1000).toFixed(0)}k` : String(user.jobsDone)} label="Jobs" highlight />
-            <div className="w-px bg-[#e8e4df]" />
-            <Stat value={happyDisplay} label="Happy" />
-            <div className="w-px bg-[#e8e4df]" />
-            <Stat value={connections} label="Connections" />
-            <div className="w-px bg-[#e8e4df]" />
-            <Stat value="—" label="Away" />
-          </div>
-
-          {/* 6. Action buttons */}
-          <div className="flex gap-2.5">
+          {/* Row 4: Action buttons */}
+          <div className="flex gap-2">
             {isOwn ? (
               <>
-                <button onClick={() => onNavigate("edit-profile")} className="flex-1 h-9 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
-                  <Edit3 size={14} /> Edit Profile
+                <button onClick={() => onNavigate("edit-profile")}
+                  className="flex-1 h-9 rounded-xl font-semibold text-[13px] text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
+                  <Edit3 size={13} /> Edit Profile
                 </button>
-                <button onClick={() => { const url = "https://skillsnap.com.au"; if (navigator.share) navigator.share({ title: "SkillSnap", text: `Check out ${user.displayName} on SkillSnap — Sydney's skills platform!`, url }).catch(() => {}); else navigator.clipboard?.writeText(url).catch(() => {}); }} className="flex-1 h-9 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
-                  <Share2 size={14} /> Share
+                <button onClick={() => {
+                  const url = "https://skillsnap.com.au";
+                  if (navigator.share) navigator.share({ title: "SkillSnap", text: `Check out ${user.displayName} on SkillSnap!`, url }).catch(() => {});
+                  else navigator.clipboard?.writeText(url).catch(() => {});
+                }}
+                  className="flex-1 h-9 rounded-xl font-semibold text-[13px] text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
+                  <Share2 size={13} /> Share
                 </button>
               </>
             ) : (
@@ -182,7 +194,9 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 <div className="flex-1">
                   <ConnectButton onClick={() => requireAuth(() => connectTo(user.id))} fullWidth loading={connecting === user.id} />
                 </div>
-                <button onClick={() => requireAuth(() => toggleFollow(user.id))} className={`flex-1 h-9 rounded-xl font-semibold text-sm border transition-all active:scale-[0.98] ${isFollowing ? "text-white bg-[#6c47ff] border-[#6c47ff]" : "text-[#6c47ff] bg-white border-[#6c47ff]"}`}>
+                <button
+                  onClick={() => requireAuth(() => toggleFollow(user.id))}
+                  className={`flex-1 h-9 rounded-xl font-semibold text-[13px] border-2 transition-all active:scale-[0.98] ${isFollowing ? "text-white bg-[#6c47ff] border-[#6c47ff]" : "text-[#6c47ff] bg-white border-[#6c47ff]"}`}>
                   {isFollowing ? "Following" : "Follow"}
                 </button>
               </>
@@ -434,11 +448,11 @@ function MediaViewer({ post, isOwn, onClose, onDelete, onUpdate }: { post: Post;
   );
 }
 
-function Stat({ value, label, highlight }: { value: string; label: string; highlight?: boolean }) {
+function StatCell({ value, label, highlight }: { value: string; label: string; highlight?: boolean }) {
   return (
-    <div className="flex flex-col items-center gap-0.5 py-1">
-      <span className={`font-extrabold text-[15px] leading-tight tracking-tight ${highlight ? "text-[#6c47ff]" : "text-[#1a1a1a]"}`}>{value}</span>
-      <span className="text-[10px] text-[#7a7570] font-medium leading-tight text-center">{label}</span>
+    <div className="flex-1 flex flex-col items-center justify-center py-2 px-1">
+      <span className={`font-extrabold text-[14px] leading-tight ${highlight ? "text-[#6c47ff]" : "text-[#1a1a1a]"}`}>{value}</span>
+      <span className="text-[10px] text-[#7a7570] font-medium mt-0.5 text-center leading-tight">{label}</span>
     </div>
   );
 }
