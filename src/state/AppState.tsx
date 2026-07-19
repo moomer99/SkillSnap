@@ -39,6 +39,7 @@ interface AppStateShape {
   likedPosts: Set<string>;
   savedPosts: Set<string>;
   followedUsers: Set<string>;
+  isReviewMode: boolean;
   modals: { jobsDoneInfo: boolean };
   pendingJobsRequest: { jobId: string; fromName: string; notificationId: string } | null;
   unreadNotifCount: number;
@@ -88,7 +89,8 @@ type Action =
   | { type: "SET_SEARCH_QUERY"; query: string }
   | { type: "REMOVE_THREAD"; threadId: string }
   | { type: "CLEAR_THREADS" }
-  | { type: "DELETE_MESSAGE"; msgId: string };
+  | { type: "DELETE_MESSAGE"; msgId: string }
+  | { type: "SET_REVIEW_MODE"; active: boolean };
 
 // ── Initial State ────────────────────────────
 const initialState: AppStateShape = {
@@ -116,10 +118,55 @@ const initialState: AppStateShape = {
   pendingJobsRequest: null,
   unreadNotifCount: 0,
   searchQuery: "",
+  isReviewMode: false,
 };
 
 // ── Reducer ──────────────────────────────────
 function appReducer(state: AppStateShape, action: Action): AppStateShape {
+  // Review mode guard — silently ignore write actions
+  if (state.isReviewMode) {
+    switch (action.type) {
+      case "SET_REVIEW_MODE":
+        break; // allow toggling
+      case "NAVIGATE":
+        break; // allow navigation
+      case "SET_AUTH_LOADING":
+        break;
+      case "SET_POSTS":
+        break;
+      case "SET_FEED_LOADING":
+        break;
+      case "SET_THREADS":
+        break;
+      case "SET_VIEWING_USER":
+        break;
+      case "SET_ACTIVE_THREAD":
+        break;
+      case "SET_DISCOVERY_FILTER":
+        break;
+      case "SET_FOLLOWED_USERS":
+        break;
+      case "SET_UNREAD_NOTIF_COUNT":
+        break;
+      case "INCREMENT_UNREAD_NOTIF_COUNT":
+        break;
+      case "CLEAR_UNREAD_NOTIF_COUNT":
+        break;
+      case "SET_SEARCH_QUERY":
+        break;
+      case "CLEAR_THREADS":
+        break;
+      case "SHOW_AUTH_PROMPT":
+        break;
+      case "HIDE_AUTH_PROMPT":
+        break;
+      case "SET_INTERACTIONS":
+        break;
+      default:
+        return state; // block all write actions
+    }
+  }
+
   switch (action.type) {
     case "CONTINUE_AS_GUEST":
       return { ...state, isGuest: true, showAuthPrompt: false };
@@ -365,6 +412,8 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
           ).filter(m => m.id !== action.msgId),
         },
       };
+    case "SET_REVIEW_MODE":
+      return { ...state, isReviewMode: action.active };
     default:
       return state;
   }
@@ -385,6 +434,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const hydratingRef = useRef<string | null>(null);
   usePresence(state.currentUser?.id ?? null);
   const onlineUserIds = new Set<string>();
+
+  // Listen for review mode custom event from /review page
+  useEffect(() => {
+    function handleReviewMode(e: Event) {
+      const detail = (e as CustomEvent).detail;
+      dispatch({ type: "SET_REVIEW_MODE", active: !!detail?.active });
+    }
+    window.addEventListener("skillsnap:review-mode", handleReviewMode);
+    return () => window.removeEventListener("skillsnap:review-mode", handleReviewMode);
+  }, []);
 
   // Hydrate auth state from Supabase session on mount
   useEffect(() => {

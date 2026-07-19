@@ -50,6 +50,7 @@ const AuthPromptModal = dynamic(
 
 import { ToastProvider } from "@/components/skillsnap/shared/Toast";
 import { useGlobalMessages } from "@/hooks/useGlobalMessages";
+import ReviewBanner from "@/components/skillsnap/ReviewBanner";
 
 // Screens that show the bottom nav
 const NAV_SCREENS: Screen[] = ["home", "discover", "upload", "messages", "own-profile"];
