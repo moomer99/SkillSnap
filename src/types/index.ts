@@ -176,4 +176,5 @@ export type Screen =
   | "terms"
   | "reset-password"
   | "role-setup"
-  | "username-setup";
+  | "username-setup"
+  | "location-setup";

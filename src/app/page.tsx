@@ -329,6 +329,11 @@ function SkillSnapRouter() {
               {screen === "reset-password" && <ResetPasswordRedirect />}
               {screen === "role-setup"     && <RoleSetupScreen />}
               {screen === "username-setup" && <UsernameSetupScreen onDone={() => navigate("role-setup")} />}
+              {screen === "location-setup" && (
+                <div className="flex items-center justify-center min-h-screen bg-[#f8f7f5]">
+                  <div className="w-8 h-8 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
+                </div>
+              )}
               {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} onScrollToTop={handleScrollToTop} />}
             </Suspense>
           </div>
@@ -387,6 +392,11 @@ function SkillSnapRouter() {
             {screen === "reset-password" && typeof window !== "undefined" && (window.location.replace("/reset-password"), null)}
             {screen === "role-setup"     && <RoleSetupScreen />}
             {screen === "username-setup" && <UsernameSetupScreen onDone={() => navigate("role-setup")} />}
+            {screen === "location-setup" && (
+              <div className="flex items-center justify-center min-h-screen bg-[#f8f7f5]">
+                <div className="w-8 h-8 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
+              </div>
+            )}
             {showBottomNav               && <BottomNav active={screen} onNavigate={navigate} onScrollToTop={handleScrollToTop} />}
           </Suspense>
         </div>
