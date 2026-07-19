@@ -432,9 +432,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
         // Profile doesn't exist — create it directly without using Supabase client
         const meta = authUser.user_metadata ?? {};
-        const displayName = (meta.full_name as string) || (meta.name as string) || (authUser.email?.split("@")[0] ?? "User");
-        const rawUsername = displayName.toLowerCase().replace(/[^a-z0-9_]/g, "_");
-        const username = rawUsername.slice(0, 26) + "_" + authUser.id.replace(/-/g, "").slice(0, 4);
+        const displayName = (meta.full_name as string) || (meta.name as string) || "SkillSnap User";
+        const emailPrefix = authUser.email?.split("@")[0] ?? "";
+        const baseForUsername = displayName !== "SkillSnap User"
+          ? displayName
+          : emailPrefix;
+        const rawUsername = baseForUsername
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]/g, "_")
+          .replace(/_+/g, "_")
+          .replace(/^_|_$/g, "");
+        const safeBase = rawUsername.slice(0, 20) || "user";
+        const username = safeBase + "_" + authUser.id.replace(/-/g, "").slice(0, 4);
         const avatarUrl = (meta.avatar_url as string) || (meta.picture as string) || null;
         const insertRes = await fetch(
           `${supabaseUrl}/rest/v1/profiles`,
