@@ -18,6 +18,7 @@ export default function LocationSetupScreen({ onNavigate }: Props) {
   const [location, setLocation] = useState("");
   const [gpsStatus, setGpsStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [gpsMessage, setGpsMessage] = useState("");
+  const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number; label: string } | null>(null);
   const [showError, setShowError] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -56,6 +57,7 @@ export default function LocationSetupScreen({ onNavigate }: Props) {
             setLocation(detected);
             setGpsStatus("success");
             setGpsMessage(`Detected: ${detected}`);
+            setGpsCoords({ lat: latitude, lng: longitude, label: detected });
           } else {
             setGpsStatus("error");
             setGpsMessage("Could not detect location. Please enter manually.");
@@ -96,6 +98,26 @@ export default function LocationSetupScreen({ onNavigate }: Props) {
       localStorage.setItem("skillsnap_show_client_welcome", "1");
     } else {
       localStorage.setItem("skillsnap_show_pro_welcome", "1");
+    }
+
+    if (gpsCoords) {
+      localStorage.setItem("skillsnap_location", JSON.stringify({ lat: gpsCoords.lat, lng: gpsCoords.lng, label: gpsCoords.label }));
+    } else {
+      try {
+        const geoRes = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationValue)}&format=json&limit=1&countrycodes=au`,
+          { headers: { "Accept-Language": "en" } }
+        );
+        const geoData = await geoRes.json();
+        if (geoData?.length) {
+          const { lat, lon, display_name } = geoData[0];
+          const suburb = display_name.split(",")[0].trim();
+          const locationObj = { lat: parseFloat(lat), lng: parseFloat(lon), label: suburb };
+          localStorage.setItem("skillsnap_location", JSON.stringify(locationObj));
+        }
+      } catch {
+        // non-fatal — feed will show "Set location" prompt as fallback
+      }
     }
 
     dispatch({ type: "NAVIGATE", screen: "home" });
@@ -171,7 +193,7 @@ export default function LocationSetupScreen({ onNavigate }: Props) {
           onChange={(e) => {
             setLocation(e.target.value);
             setShowError(false);
-            if (gpsStatus === "success") setGpsStatus("idle");
+            if (gpsStatus === "success") { setGpsStatus("idle"); setGpsCoords(null); }
           }}
           placeholder="Enter your suburb e.g. Liverpool, NSW"
           className="w-full h-12 px-4 bg-white rounded-xl border text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none transition-colors"
