@@ -86,6 +86,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   const [locationPromptDismissed, setLocationPromptDismissed] = useState(() => {
     try { return localStorage.getItem("skillsnap_loc_prompt") === "1"; } catch { return false; }
   });
+  const { showToast } = useToast();
 
   // Infinite scroll sentinel
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -101,11 +102,13 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   }, [loadMore]);
 
   function requireAuth(action: () => void) {
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
     if (!state.isAuthenticated && !state.isGuest) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
     action();
   }
 
   function requireFullAuth(action: () => void) {
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
     if (!state.isAuthenticated) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
     action();
   }

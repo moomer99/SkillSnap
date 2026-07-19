@@ -5,6 +5,7 @@ import type { Screen } from "@/types";
 import { useAppState } from "@/state/AppState";
 import { getNotifPermission, requestNotifPermission } from "@/hooks/useNotifications";
 import UserAvatar from "./shared/UserAvatar";
+import { useToast } from "./shared/Toast";
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -17,6 +18,7 @@ interface SettingsScreenProps {
 
 export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
   const { state, dispatch } = useAppState();
+  const { showToast } = useToast();
   const user = state.currentUser;
 
   const [showLogoutConfirm, setShowLogoutConfirm]         = useState(false);
@@ -40,6 +42,7 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
 
 
   async function handleLogout() {
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
     setLoggingOut(true);
     if (SUPABASE_CONFIGURED) {
       const { getSupabase } = await import("@/lib/supabase");
@@ -309,6 +312,7 @@ function ChangePasswordSheet({ onClose, userEmail }: { onClose: () => void; user
   const [error, setError]     = useState("");
 
   async function handleSend() {
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
     setError("");
     if (!email.trim()) { setError("Please enter your email."); return; }
     setSending(true);

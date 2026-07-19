@@ -8,6 +8,7 @@ import { ChevronDown, ArrowLeft, Loader2, CheckCircle, Download } from "lucide-r
 import type { Screen } from "@/types";
 import { uploadService } from "@/services/uploadService";
 import { useAppState } from "@/state/AppState";
+import { useToast } from "./shared/Toast";
 
 interface UploadScreenProps {
   onNavigate: (s: Screen) => void;
@@ -17,6 +18,7 @@ type ContentType = "video" | "photo" | "social";
 
 export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   const { state, dispatch } = useAppState();
+  const { showToast } = useToast();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [activePreviewIndex, setActivePreviewIndex] = useState(0);
@@ -89,6 +91,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
   }
 
   async function handlePublish() {
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
     if (!caption.trim() && selectedFiles.length === 0) {
       setError("Add a caption or select a file before publishing.");
       return;

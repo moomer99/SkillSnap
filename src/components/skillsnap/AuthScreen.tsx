@@ -13,6 +13,7 @@ import { APP_CONFIG } from "@/constants/config";
 import { authService } from "@/services/authService";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
 import { useAppState } from "@/state/AppState";
+import { useToast } from "./shared/Toast";
 
 interface AuthScreenProps {
   onNavigate: (s: Screen) => void;
@@ -81,7 +82,8 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   const [forgotError, setForgotError] = useState<string | null>(null);
   const [showGoogleHint, setShowGoogleHint] = useState(false);
 
-  const { dispatch } = useAppState();
+  const { dispatch, state } = useAppState();
+  const { showToast } = useToast();
 
   // Auto-fill saved email on mount
   useEffect(() => {
@@ -94,6 +96,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
   async function handleForgotPassword(e: React.FormEvent) {
     e.preventDefault();
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
     setForgotError(null);
     if (!forgotEmail.trim()) { setForgotError("Please enter your email."); return; }
     setForgotLoading(true);
@@ -113,6 +116,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   }
 
   async function handleGoogleSignIn() {
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
     setError(null);
     setGoogleLoading(true);
     try {
@@ -130,6 +134,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
     setError(null);
     if (mode === "signup" && !displayName.trim()) {
       setError("Full name is required.");

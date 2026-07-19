@@ -115,6 +115,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
   }
 
   async function handleSave() {
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
     if (!displayName.trim()) {
       showToast("Display name is required", "info");
       return;

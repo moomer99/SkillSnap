@@ -13,20 +13,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function ReviewPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ token?: string }>;
-}) {
-  // Resolve the promise
-  const params = searchParams;
-
-  // Use a synchronous function approach since params is a promise
-  // We'll use a simpler approach
-  return <ReviewPageInner searchParams={searchParams} />;
-}
-
-async function ReviewPageInner({
+export default async function ReviewPage({
   searchParams,
 }: {
   searchParams: Promise<{ token?: string }>;

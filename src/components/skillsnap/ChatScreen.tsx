@@ -8,6 +8,7 @@ import { useChat } from "@/hooks/useChat";
 import { messageService } from "@/services/messageService";
 import { JOBS_DONE_CONFIG } from "@/constants/config";
 import UserAvatar from "./shared/UserAvatar";
+import { useToast } from "./shared/Toast";
 
 interface ChatScreenProps {
   onNavigate: (s: Screen) => void;
@@ -74,6 +75,7 @@ function recalcHappy(prev: number, prevJobs: number, isHappy: boolean): number {
 
 export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const { state, dispatch, onlineUserIds } = useAppState();
+  const { showToast } = useToast();
   const { messages, inputText, setInputText, sending, loading, sendMessage, sendImageMessage, bottomRef, threadId } = useChat();
   const [participant, setParticipant] = useState<User | null>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -228,6 +230,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   }, [showFeedback, showChatMenu]);
 
   async function handleRequestJobDone() {
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
     const conversationId = threadId || activeThread?.id || null;
     // Get the other participant's ID directly from the thread object — never rely on
     // displayParticipant which may be a mock fallback, or activeThreadParticipantId which can be null.
@@ -352,6 +355,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   }
 
   function sendMessageWithTracking() {
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
     if (activeThread && !activeThread.startedAt) {
       dispatch({
         type: "SET_THREAD_STARTED_AT",
@@ -837,6 +841,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (!file) return;
+            if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
             sendImageMessage(file);
             e.target.value = "";
           }}

@@ -14,6 +14,7 @@ import { useMessages } from "@/hooks/useMessages";
 import { useAppState } from "@/state/AppState";
 import UserAvatar from "./shared/UserAvatar";
 import ConnectButton from "./shared/ConnectButton";
+import { useToast } from "./shared/Toast";
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -30,10 +31,12 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
   const { user, isFollowing, toggleFollow } = useProfile(variant);
   const { connectTo, connecting } = useMessages();
   const { state, navigate, dispatch } = useAppState();
+  const { showToast } = useToast();
 
   console.log("[ProfileScreen] mounted, variant:", variant, "viewingUserId:", state.viewingUserId, "user:", user);
 
   function requireAuth(action: () => void) {
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
     if (!state.isAuthenticated) { dispatch({ type: "SHOW_AUTH_PROMPT" }); return; }
     action();
   }

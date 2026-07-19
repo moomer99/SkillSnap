@@ -128,6 +128,9 @@ function SkillSnapRouter() {
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f0eff7", fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif" }}>
 
+      {/* ── REVIEW MODE BANNER ── */}
+      <ReviewBanner />
+
       {/* ── LEFT SIDEBAR — three fixed floating cards, desktop only ── */}
       <style>{`
         @media (min-width: 768px) {
