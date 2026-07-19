@@ -139,7 +139,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           )}
 
           {/* 3. Skill + Location */}
-          <p className="text-xs text-[#7a7570] text-center mb-3">
+          <p className="text-sm text-[#4a4a4a] text-center mb-3">
             {user.skill || "—"} · {user.location || "Location not specified"}
           </p>
 
@@ -156,7 +156,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           </div>
 
           {/* 5. Stats */}
-          <div className="flex justify-around mb-4 border border-[#e8e4df] rounded-2xl py-3">
+          <div className="flex justify-around mb-4 border border-[#f0eeea] rounded-2xl py-3">
             <Stat value={user.jobsDone >= 1000 ? `${(user.jobsDone / 1000).toFixed(0)}k` : String(user.jobsDone)} label="Jobs" highlight />
             <div className="w-px bg-[#e8e4df]" />
             <Stat value={happyDisplay} label="Happy" />
