@@ -469,8 +469,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.error("[AppState] hydrateProfile timed out");
         dispatch({ type: "SET_AUTH_LOADING", loading: false });
       }, 15000);
+      console.log("[hydrateProfile] 1: entered, userId:", userId, "authUser.id:", authUser.id);
       try {
+        console.log("[hydrateProfile] 2: calling ensureProfile...");
         const user = await ensureProfile(authUser);
+        console.log("[hydrateProfile] 3: ensureProfile returned, user:", !!user);
         clearTimeout(timeoutId);
         console.log("[AppState] hydrateProfile result:", user ? "got user" : "null");
         if (user) {
@@ -549,7 +552,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           return;
         }
         hydratingRef.current = session.user.id;
-        console.log("[AppState] SIGNED_IN — hydrating profile");
+        console.log("[AppState] SIGNED_IN — hydrating profile, email:", session.user.email, "meta keys:", Object.keys(session.user.user_metadata ?? {}));
         clearTimeout(authTimeout);
         await hydrateProfile(session.user.id, session.user);
         // SET_AUTH reducer handles screen transition (role-setup or home)
@@ -561,8 +564,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     // Check for an existing session on every page load.
     // After a Google OAuth redirect, auth/callback/route.ts has already exchanged
-    // the code server-side and set the session cookie, so getSession() finds it here.
+    // the code server-side and set the cookie, so getSession() finds it here.
+    console.log("[AppState] calling getSession...");
     authSb.auth.getSession().then(async ({ data: { session } }) => {
+      console.log("[AppState] getSession resolved, session:", session ? "found" : "null");
       clearTimeout(authTimeout);
       if (session?.user) {
         console.log("[AppState] getSession found session for", session.user.id);
