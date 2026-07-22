@@ -55,7 +55,7 @@ function SkeletonCard({ headerH, headerVisible }: { headerH: number; headerVisib
   return (
     <div
       className="w-full bg-[#1a1a2e] flex-shrink-0 mb-2 animate-pulse"
-      style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px - ${headerVisible ? 8 : 0}px)`, transition: 'height 0.3s ease' }}
+      style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px - ${headerVisible ? 8 : 0}px)` }}
     >
       {/* Bottom info skeleton */}
       <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-3">
@@ -144,7 +144,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
     const scrollTop = e.currentTarget.scrollTop;
     if (rafRef.current !== null) return;
     rafRef.current = requestAnimationFrame(() => {
-      if (scrollTop > lastScrollY.current && scrollTop > 60) {
+      if (scrollTop > lastScrollY.current && scrollTop > 80) {
         setHeaderVisible(false);
       } else {
         setHeaderVisible(true);
@@ -191,7 +191,15 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
       {/* Sticky header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-0 w-full overflow-hidden transition-all duration-300 ease-in-out" style={{ maxHeight: headerVisible ? '200px' : '0px', opacity: headerVisible ? 1 : 0, borderBottomWidth: headerVisible ? '1px' : '0px' }}>
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-0 w-full overflow-hidden transition-all duration-300 ease-in-out" style={{
+        transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)',
+        transition: 'transform 0.2s ease',
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+        willChange: 'transform',
+        borderBottomWidth: headerVisible ? '1px' : '0px'
+      }}>
         <div className="flex items-center justify-between mb-2.5">
           <SkillSnapLogo size="sm" />
           {location ? (
