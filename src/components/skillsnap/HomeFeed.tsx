@@ -693,7 +693,7 @@ function FeedCard({
     <div
       ref={cardRef}
       className="relative w-full overflow-hidden bg-gray-900 flex-shrink-0 mb-2"
-      style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px - ${headerVisible ? 8 : 0}px)`, transition: 'height 0.3s ease', willChange: 'transform', transform: 'translateZ(0)' }}
+      style={{ height: `calc(100dvh - 64px)`, transition: 'height 0.3s ease', willChange: 'transform', transform: 'translateZ(0)' }}
     >
       {/* Media */}
       <div className="absolute inset-0 cursor-pointer" onClick={handleMediaTap}>
@@ -827,7 +827,7 @@ function FeedCard({
       </div>
 
       {/* Bottom panel */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 px-4 pb-5">
+      <div className="absolute bottom-0 left-0 right-0 z-10 px-4 pb-5" style={{ paddingBottom: 8 }}>
         <div className="flex items-start gap-3 mb-2.5">
           <div className="cursor-pointer flex-shrink-0" onClick={(e) => { e.stopPropagation(); onProfileClick(); }}>
             <UserAvatar user={author} size="sm" showVerified ring />
