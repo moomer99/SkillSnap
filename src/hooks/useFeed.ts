@@ -68,13 +68,6 @@ export function useFeed() {
       });
   }, [dispatch, state.feedVersion, state.currentUser?.id, location?.lat, location?.lng, radiusKm]);
 
-  // Re-fetch when location/radius changes after initial mount
-  const mountedRef = useRef(false);
-  useEffect(() => {
-    if (!mountedRef.current) { mountedRef.current = true; return; }
-    dispatch({ type: "REFRESH_FEED" });
-  }, [location?.lat, location?.lng, radiusKm, dispatch]);
-
   // Load next page
   const loadMore = useCallback(async () => {
     if (!hasMore || loadingMore || !SUPABASE_CONFIGURED) return;

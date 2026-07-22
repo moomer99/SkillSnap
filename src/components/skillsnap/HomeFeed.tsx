@@ -503,7 +503,7 @@ function FullscreenViewer({
             data-src={post.mediaUrl}
             className="w-full h-full object-contain"
             loop playsInline
-            preload="auto"
+            preload="none"
             muted={muted}
             poster={post.thumbnailUrl}
           />
@@ -594,6 +594,7 @@ function FeedCard({
   const { author } = post;
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
+  const [wasInView, setWasInView] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -633,6 +634,7 @@ function FeedCard({
 
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
+        setWasInView(true);
         video!.addEventListener("canplay", tryPlay, { once: true });
         tryPlay();
       } else {
@@ -692,11 +694,11 @@ function FeedCard({
         {activeMediaType === "video" && activeMediaUrl ? (
           <video
             ref={videoRef}
-            src={activeMediaUrl}
+            src={wasInView ? activeMediaUrl : undefined}
             data-src={activeMediaUrl}
             className="w-full h-full object-cover"
             loop playsInline
-            preload="auto"
+            preload="none"
             muted={muted}
             poster={post.thumbnailUrl}
             onPlay={() => setPlaying(true)}
