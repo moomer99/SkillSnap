@@ -198,7 +198,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
         top: 0,
         zIndex: 40,
         willChange: 'transform',
-        borderBottomWidth: headerVisible ? '1px' : '0px'
+        pointerEvents: headerVisible ? 'auto' : 'none',
       }}>
         <div className="flex items-center justify-between mb-2.5">
           <SkillSnapLogo size="sm" />
@@ -253,7 +253,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
       </header>
 
       {/* Feed scroll container */}
-      <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px)`, WebkitOverflowScrolling: 'touch' }} onScroll={handleFeedScroll}>
+      <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: '100dvh', WebkitOverflowScrolling: 'touch' }} onScroll={handleFeedScroll}>
         {/* Welcome card — shown once after onboarding */}
         {welcomeType && (
           <div
