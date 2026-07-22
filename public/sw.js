@@ -1,8 +1,15 @@
-// Service worker disabled
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => {
+const CACHE_NAME = "skillsnap-v1";
+const STATIC_ASSETS = ["/", "/manifest.json"];
+
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key))))
-    .then(() => self.clients.claim())
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+  );
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });

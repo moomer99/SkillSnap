@@ -1,0 +1,18 @@
+{
+  "name": "SkillSnap",
+  "short_name": "SkillSnap",
+  "description": "Don't read reviews. Watch the work.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0a1a",
+  "theme_color": "#6c47ff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/skillsnap-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
