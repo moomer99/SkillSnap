@@ -97,6 +97,11 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   const { showToast } = useToast();
 
   useEffect(() => {
+    document.body.style.background = '#000000';
+    return () => { document.body.style.background = ''; };
+  }, []);
+
+  useEffect(() => {
     if (welcomeType) {
       try {
         localStorage.removeItem("skillsnap_show_pro_welcome");
@@ -189,7 +194,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   const showRoleBanner = state.isAuthenticated && !state.currentUser?.role && !state.currentUser?.skill && !roleBannerDismissed;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
+    <div className="flex flex-col min-h-screen bg-black">
       {/* Sticky header */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-0 w-full overflow-hidden transition-all duration-300 ease-in-out" style={{
         transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)',
@@ -253,7 +258,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
       </header>
 
       {/* Feed scroll container */}
-      <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: '100dvh', WebkitOverflowScrolling: 'touch' }} onScroll={handleFeedScroll}>
+      <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar bg-black${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: '100dvh', WebkitOverflowScrolling: 'touch' }} onScroll={handleFeedScroll}>
         {/* Welcome card — shown once after onboarding */}
         {welcomeType && (
           <div
@@ -693,7 +698,7 @@ function FeedCard({
     <div
       ref={cardRef}
       className="relative w-full overflow-hidden bg-gray-900 flex-shrink-0 mb-2"
-      style={{ height: `calc(100dvh - 64px)`, transition: 'height 0.3s ease', willChange: 'transform', transform: 'translateZ(0)' }}
+      style={{ height: `calc(100dvh - 64px)`, transition: 'height 0.3s ease', willChange: 'transform', transform: 'translateZ(0)', marginTop: 0, marginBottom: 0 }}
     >
       {/* Media */}
       <div className="absolute inset-0 cursor-pointer" onClick={handleMediaTap}>
