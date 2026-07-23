@@ -143,3 +143,7 @@
 nextjs-portal {
   display: none !important;
 }
+
+body {
+  background: #f8f7f5;
+}

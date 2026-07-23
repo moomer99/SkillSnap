@@ -51,11 +51,11 @@ function computeDistance(
 }
 
 // ── Skeleton card shown while first page loads ─────────────────────────────
-function SkeletonCard({ headerH, headerVisible }: { headerH: number; headerVisible: boolean }) {
+function SkeletonCard({ headerH }: { headerH: number }) {
   return (
     <div
       className="w-full bg-[#1a1a2e] flex-shrink-0 mb-2 animate-pulse"
-      style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px - ${headerVisible ? 8 : 0}px)` }}
+      style={{ height: `calc(100dvh - ${headerH}px - 64px)` }}
     >
       {/* Bottom info skeleton */}
       <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-3">
@@ -80,9 +80,6 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   const { location, status, error, radiusKm, requestGPS, setManualLocation, setRadiusKm } = useLocation();
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [fullscreenPost, setFullscreenPost] = useState<Post | null>(null);
-  const [headerVisible, setHeaderVisible] = useState(true);
-  const lastScrollY = useRef(0);
-  const rafRef = useRef<number | null>(null);
   const feedScrollRef = useRef<HTMLDivElement>(null);
   const [locationPromptDismissed, setLocationPromptDismissed] = useState(() => {
     try { return localStorage.getItem("skillsnap_loc_prompt") === "1"; } catch { return false; }
@@ -95,11 +92,6 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
     } catch { return null; }
   });
   const { showToast } = useToast();
-
-  useEffect(() => {
-    document.body.style.background = '#000000';
-    return () => { document.body.style.background = ''; };
-  }, []);
 
   useEffect(() => {
     if (welcomeType) {
@@ -145,25 +137,10 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
     }
   }
 
-  function handleFeedScroll(e: React.UIEvent<HTMLDivElement>) {
-    const scrollTop = e.currentTarget.scrollTop;
-    if (rafRef.current !== null) return;
-    rafRef.current = requestAnimationFrame(() => {
-      if (scrollTop > lastScrollY.current && scrollTop > 80) {
-        setHeaderVisible(false);
-      } else {
-        setHeaderVisible(true);
-      }
-      lastScrollY.current = scrollTop;
-      rafRef.current = null;
-    });
-  }
-
   // Register scroll-to-top with parent so BottomNav home-tap can trigger it
   useEffect(() => {
     registerScrollToTop?.(() => {
       feedScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-      setHeaderVisible(true);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -196,15 +173,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   return (
     <div className="flex flex-col min-h-screen bg-black">
       {/* Sticky header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-0 w-full overflow-hidden transition-all duration-300 ease-in-out" style={{
-        transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)',
-        transition: 'transform 0.2s ease',
-        position: 'sticky',
-        top: 0,
-        zIndex: 40,
-        willChange: 'transform',
-        pointerEvents: headerVisible ? 'auto' : 'none',
-      }}>
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-0 w-full overflow-hidden" style={{ position: 'sticky', top: 0, zIndex: 40 }}>
         <div className="flex items-center justify-between mb-2.5">
           <SkillSnapLogo size="sm" />
           {location ? (
@@ -225,10 +194,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
             </button>
           )}
         </div>
-        <div
-          className="overflow-hidden transition-all duration-300 ease-in-out"
-          style={{ maxHeight: headerVisible ? '120px' : '0px', opacity: headerVisible ? 1 : 0 }}
-        >
+        <div>
           <SearchBar onFocus={() => onNavigate("search")} />
 
           {location && (
@@ -258,7 +224,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
       </header>
 
       {/* Feed scroll container */}
-      <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar bg-black${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: '100dvh', WebkitOverflowScrolling: 'touch' }} onScroll={handleFeedScroll}>
+      <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar bg-black${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: `calc(100dvh - ${headerH}px)`, WebkitOverflowScrolling: 'touch' }}>
         {/* Welcome card — shown once after onboarding */}
         {welcomeType && (
           <div
@@ -353,8 +319,8 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
 
         {/* Skeleton — shown immediately on first load before posts arrive */}
         {loading && filteredPosts.length === 0 ? (
-          <div className="relative" style={{ height: `calc(100dvh - ${headerH}px - 8px)` }}>
-            <SkeletonCard headerH={headerH} headerVisible={headerVisible} />
+          <div className="relative" style={{ height: `calc(100dvh - ${headerH}px - 64px)` }}>
+            <SkeletonCard headerH={headerH} />
           </div>
 
         ) : filteredPosts.length === 0 && location ? (
@@ -434,7 +400,6 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
                 connecting={connecting === post.authorId}
                 isOwnPost={post.authorId === state.currentUser?.id}
                 headerH={headerH}
-                headerVisible={headerVisible}
                 viewerLat={location?.lat}
                 viewerLng={location?.lng}
                 dispatch={dispatch}
@@ -595,12 +560,12 @@ function FullscreenViewer({
 
 // ── Feed card ──────────────────────────────────────────────────────
 function FeedCard({
-  post, isLiked, isSaved, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, connecting, isOwnPost, headerH, headerVisible, viewerLat, viewerLng, dispatch,
+  post, isLiked, isSaved, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, connecting, isOwnPost, headerH, viewerLat, viewerLng, dispatch,
 }: {
   post: Post; isLiked: boolean; isSaved: boolean;
   onLike: () => void; onSave: () => void; onProfileClick: () => void;
   onConnectClick: () => void; onShare: () => void; onFullscreen: () => void;
-  connecting: boolean; isOwnPost: boolean; headerH: number; headerVisible: boolean;
+  connecting: boolean; isOwnPost: boolean; headerH: number;
   viewerLat?: number; viewerLng?: number;
   dispatch: (a: unknown) => void;
 }) {
@@ -698,7 +663,7 @@ function FeedCard({
     <div
       ref={cardRef}
       className="relative w-full overflow-hidden bg-gray-900 flex-shrink-0 mb-2"
-      style={{ height: `calc(100dvh - 64px)`, transition: 'height 0.3s ease', willChange: 'transform', transform: 'translateZ(0)', marginTop: 0, marginBottom: 0 }}
+      style={{ height: `calc(100dvh - ${headerH}px - 64px)`, transition: 'height 0.3s ease', willChange: 'transform', transform: 'translateZ(0)', marginTop: 0, marginBottom: 0 }}
     >
       {/* Media */}
       <div className="absolute inset-0 cursor-pointer" onClick={handleMediaTap}>
