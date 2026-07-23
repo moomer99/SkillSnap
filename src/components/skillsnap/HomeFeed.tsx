@@ -171,7 +171,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   const showRoleBanner = state.isAuthenticated && !state.currentUser?.role && !state.currentUser?.skill && !roleBannerDismissed;
 
   return (
-    <div className="flex flex-col min-h-screen bg-black">
+    <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
       {/* Sticky header */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-0 w-full overflow-hidden" style={{ position: 'sticky', top: 0, zIndex: 40 }}>
         <div className="flex items-center justify-between mb-2.5">
@@ -224,7 +224,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
       </header>
 
       {/* Feed scroll container */}
-      <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar bg-black${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: `calc(100dvh - ${headerH}px)`, WebkitOverflowScrolling: 'touch' }}>
+      <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: `calc(100dvh - ${headerH}px)`, WebkitOverflowScrolling: 'touch' }}>
         {/* Welcome card — shown once after onboarding */}
         {welcomeType && (
           <div
