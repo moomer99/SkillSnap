@@ -3,6 +3,7 @@
 // ─────────────────────────────────────────────
 import { getSupabase, getAuthSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
+import { PROFILE_COLUMNS } from "./profileFields";
 import type { User } from "@/types";
 
 // Shared helper — always uses the auth client (real URL) so the session
@@ -17,7 +18,7 @@ export const userService = {
     console.log("[userService.getUser] fetching profile for id:", id);
     const { data, error } = await getSupabase()
       .from("profiles")
-      .select("*")
+      .select(PROFILE_COLUMNS)
       .eq("id", id)
       .single();
     console.log("[userService.getUser] result:", { data, error });
@@ -33,7 +34,7 @@ export const userService = {
     if (!userId) return null;
     const { data, error } = await getSupabase()
       .from("profiles")
-      .select("*")
+      .select(PROFILE_COLUMNS)
       .eq("id", userId)
       .single();
     if (error || !data) return null;
@@ -44,7 +45,7 @@ export const userService = {
     if (!query.trim()) return [];
     const { data } = await getSupabase()
       .from("profiles")
-      .select("*")
+      .select(PROFILE_COLUMNS)
       .or(`username.ilike.%${query}%,display_name.ilike.%${query}%,skill.ilike.%${query}%,location.ilike.%${query}%`)
       .limit(20);
     return (data ?? []).map((row) => mapProfile(row as Record<string, unknown>));
@@ -112,7 +113,7 @@ export const userService = {
       .from("profiles")
       .update(dbPatch)
       .eq("id", userId)
-      .select()
+      .select(PROFILE_COLUMNS)
       .single();
     if (error || !data) return null;
     return mapProfile(data as Record<string, unknown>);

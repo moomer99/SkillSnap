@@ -2,6 +2,7 @@
 // SkillSnap — Auth Service (Supabase Auth)
 // ─────────────────────────────────────────────
 import { getSupabase, getAuthSupabase } from "@/lib/supabase";
+import { PROFILE_COLUMNS } from "./profileFields";
 import type { User } from "@/types";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -68,7 +69,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
   const sb = getAuthSupabase();
   const { data, error } = await sb
     .from("profiles")
-    .select("*")
+    .select(PROFILE_COLUMNS)
     .eq("id", userId)
     .single();
   if (error || !data) return null;
@@ -127,7 +128,7 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
       avatar_initial: avatarInitial,
       avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
     })
-    .select("*")
+    .select(PROFILE_COLUMNS)
     .single();
 
   if (error || !data) {

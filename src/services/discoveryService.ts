@@ -5,6 +5,7 @@
 // ─────────────────────────────────────────────
 import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
+import { PROFILE_COLUMNS } from "./profileFields";
 import type { DiscoveryPin, SkillCategory } from "@/types";
 import type { DiscoveryFilter } from "@/mock-data/discovery";
 import { MOCK_DISCOVERY_PINS } from "@/mock-data/discovery";
@@ -85,7 +86,7 @@ export const discoveryService = {
 
   async searchBySkillAndLocation(skill: SkillCategory | "", location: string): Promise<DiscoveryPin[]> {
     const sb = getSupabase();
-    let query = sb.from("profiles").select("*").eq("role", "pro").not("skill", "is", null).neq("skill", "").limit(20);
+    let query = sb.from("profiles").select(PROFILE_COLUMNS).eq("role", "pro").not("skill", "is", null).neq("skill", "").limit(20);
     if (skill) query = query.eq("skill", skill);
     if (location) query = query.ilike("location", `%${location}%`);
     const { data } = await query;

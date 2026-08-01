@@ -3,6 +3,7 @@
 // ─────────────────────────────────────────────
 import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
+import { POST_AUTHOR_COLUMNS } from "./profileFields";
 import type { Post } from "@/types";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
@@ -89,7 +90,7 @@ export const postService = {
   async getFeed(limit = 10, offset = 0): Promise<{ posts: Post[]; likedIds: Set<string>; savedIds: Set<string> }> {
     const { data, error } = await getSupabase()
       .from("posts")
-      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*), post_media(url, type, order_index)")
+      .select(`id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, ${POST_AUTHOR_COLUMNS}, post_media(url, type, order_index)`)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -105,7 +106,7 @@ export const postService = {
   async getUserPosts(userId: string): Promise<Post[]> {
     const { data } = await getSupabase()
       .from("posts")
-      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*), post_media(url, type, order_index)")
+      .select(`id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, ${POST_AUTHOR_COLUMNS}, post_media(url, type, order_index)`)
       .eq("author_id", userId)
       .order("created_at", { ascending: false });
 
@@ -157,7 +158,7 @@ export const postService = {
   async getSavedPosts(userId: string): Promise<Post[]> {
     const { data } = await getSupabase()
       .from("saved_posts")
-      .select("posts(*, profiles!posts_author_id_fkey(*))")
+      .select(`posts(*, ${POST_AUTHOR_COLUMNS})`)
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 

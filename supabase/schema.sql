@@ -338,6 +338,43 @@ create policy "Users can insert own profile" on public.profiles for insert with 
 drop policy if exists "Users can update own profile" on public.profiles;
 create policy "Users can update own profile" on public.profiles for update using (auth.uid() = id);
 
+-- Profiles are world-readable by design, but `email` must not be. RLS is
+-- row-level and cannot hide a column, so email is removed from the columns
+-- anon/authenticated may select, and handed back only via get_own_email()
+-- below (scoped to auth.uid()). See migrations/007_profiles_email_privileges.sql
+-- for the full rationale. Consequence: `select *` on profiles is rejected —
+-- every client read must name its columns (src/services/profileFields.ts).
+do $$
+declare
+  readable_cols text;
+begin
+  select string_agg(quote_ident(column_name), ', ' order by ordinal_position)
+    into readable_cols
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name   = 'profiles'
+    and column_name <> 'email';
+
+  execute 'revoke select on public.profiles from anon, authenticated';
+  execute format(
+    'grant select (%s) on public.profiles to anon, authenticated',
+    readable_cols
+  );
+end $$;
+
+create or replace function public.get_own_email()
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select email from public.profiles where id = auth.uid();
+$$;
+
+revoke execute on function public.get_own_email() from public, anon;
+grant execute on function public.get_own_email() to authenticated;
+
 -- Posts
 drop policy if exists "Posts are publicly readable" on public.posts;
 create policy "Posts are publicly readable" on public.posts for select using (true);

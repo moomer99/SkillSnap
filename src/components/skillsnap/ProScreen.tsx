@@ -31,14 +31,15 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
       const sb = getAuthSupabase();
       const { data: { user } } = await sb.auth.getUser();
       if (user) {
-        const { data: profile } = await sb
-          .from('profiles')
-          .select('display_name, email')
-          .eq('id', user.id)
-          .single();
+        // profiles.email is no longer selectable by authenticated clients; the
+        // get_own_email() RPC is the sanctioned path and is scoped to auth.uid().
+        const [{ data: profile }, { data: ownEmail }] = await Promise.all([
+          sb.from('profiles').select('display_name').eq('id', user.id).single(),
+          sb.rpc('get_own_email'),
+        ]);
         await sb.from('pro_waitlist').upsert({
           user_id: user.id,
-          email: profile?.email ?? user.email,
+          email: ownEmail ?? user.email,
           display_name: profile?.display_name ?? 'SkillSnap User',
         }, { onConflict: 'user_id' });
       }
