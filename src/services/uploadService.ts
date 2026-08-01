@@ -1,5 +1,5 @@
 import { getSupabase, getAuthSupabase } from "@/lib/supabase";
-import { PROFILE_COLUMNS, POST_AUTHOR_COLUMNS } from "./profileFields";
+import { OWN_PROFILE_COLUMNS, POST_AUTHOR_COLUMNS } from "./profileFields";
 import type { Post, SkillCategory } from "@/types";
 
 const REAL_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
@@ -175,7 +175,7 @@ export const uploadService = {
 
     const postRow = fullPost as Record<string, unknown>;
     if (!postRow.profiles) {
-      const { data: profileRow } = await sb.from("profiles").select(PROFILE_COLUMNS).eq("id", userId).single();
+      const { data: profileRow } = await sb.from("profiles").select(OWN_PROFILE_COLUMNS).eq("id", userId).single();
       if (profileRow) postRow.profiles = profileRow;
     }
 

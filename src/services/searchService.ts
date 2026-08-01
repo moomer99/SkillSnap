@@ -5,7 +5,7 @@
 import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
 import { mapPost } from "./postService";
-import { PROFILE_COLUMNS } from "./profileFields";
+import { POST_AUTHOR_COLUMNS, PROFILE_COLUMNS, PUBLIC_PROFILE_TABLE } from "./profileFields";
 import type { User, Post } from "@/types";
 
 export interface SearchResults {
@@ -22,13 +22,13 @@ export const searchService = {
 
     const [usersRes, postsRes] = await Promise.all([
       sb
-        .from("profiles")
+        .from(PUBLIC_PROFILE_TABLE)
         .select(PROFILE_COLUMNS)
         .or(`username.ilike.%${q}%,display_name.ilike.%${q}%,skill.ilike.%${q}%,location.ilike.%${q}%`)
         .limit(10),
       sb
         .from("posts")
-        .select(`*, profiles(${PROFILE_COLUMNS})`)
+        .select(`*, ${POST_AUTHOR_COLUMNS}`)
         .or(`caption.ilike.%${q}%,skill.ilike.%${q}%,location.ilike.%${q}%`)
         .limit(10),
     ]);

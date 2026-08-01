@@ -2,7 +2,8 @@
 // SkillSnap — Auth Service (Supabase Auth)
 // ─────────────────────────────────────────────
 import { getSupabase, getAuthSupabase } from "@/lib/supabase";
-import { PROFILE_COLUMNS } from "./profileFields";
+import { OWN_PROFILE_COLUMNS } from "./profileFields";
+import { withOwnCoordinates } from "./ownCoordinates";
 import type { User } from "@/types";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -68,12 +69,13 @@ function mapProfile(profile: Record<string, unknown>): User {
 async function fetchProfile(userId: string): Promise<User | null> {
   const sb = getAuthSupabase();
   const { data, error } = await sb
+    // Own row: base table without lat/lng, exact pair from the RPC.
     .from("profiles")
-    .select(PROFILE_COLUMNS)
+    .select(OWN_PROFILE_COLUMNS)
     .eq("id", userId)
     .single();
   if (error || !data) return null;
-  return mapProfile(data as Record<string, unknown>);
+  return withOwnCoordinates(mapProfile(data as Record<string, unknown>));
 }
 
 // Upserts a profile row from Supabase auth user data.
@@ -128,7 +130,9 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
       avatar_initial: avatarInitial,
       avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
     })
-    .select(PROFILE_COLUMNS)
+    // INSERT ... RETURNING comes from the base table, so it uses the own-row
+    // list; a brand-new profile has no coordinates to fetch yet.
+    .select(OWN_PROFILE_COLUMNS)
     .single();
 
   if (error || !data) {

@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────
 import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
-import { PROFILE_COLUMNS } from "./profileFields";
+import { PROFILE_COLUMNS, PUBLIC_PROFILE_TABLE } from "./profileFields";
 import type { DiscoveryPin, SkillCategory } from "@/types";
 import type { DiscoveryFilter } from "@/mock-data/discovery";
 import { MOCK_DISCOVERY_PINS } from "@/mock-data/discovery";
@@ -53,7 +53,7 @@ function profileToPin(row: Record<string, unknown>, index: number): DiscoveryPin
 async function queryProfiles(filter: DiscoveryFilter, limit = 12): Promise<DiscoveryPin[]> {
   const sb = getSupabase();
   let query = sb
-    .from("profiles")
+    .from(PUBLIC_PROFILE_TABLE)
     .select("id, display_name, skill, jobs_done, is_client, location, avatar_url, avatar_initial, avatar_gradient")
     .eq("role", "pro")
     .not("skill", "is", null)
@@ -86,7 +86,7 @@ export const discoveryService = {
 
   async searchBySkillAndLocation(skill: SkillCategory | "", location: string): Promise<DiscoveryPin[]> {
     const sb = getSupabase();
-    let query = sb.from("profiles").select(PROFILE_COLUMNS).eq("role", "pro").not("skill", "is", null).neq("skill", "").limit(20);
+    let query = sb.from(PUBLIC_PROFILE_TABLE).select(PROFILE_COLUMNS).eq("role", "pro").not("skill", "is", null).neq("skill", "").limit(20);
     if (skill) query = query.eq("skill", skill);
     if (location) query = query.ilike("location", `%${location}%`);
     const { data } = await query;
