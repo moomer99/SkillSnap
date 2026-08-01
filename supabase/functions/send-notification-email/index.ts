@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const FROM_EMAIL = "SkillSnap <hello@skillsnap.com.au>";
+// Sending address, not just a contact address. Resend verifies the DOMAIN, so
+// any local part on skillsnap.com.au sends without a DNS or Resend change - but
+// replies land in this mailbox, so it has to exist and be read.
+const FROM_EMAIL = "SkillSnap <mo@skillsnap.com.au>";
 
 serve(async (req) => {
   if (req.method !== "POST") {

@@ -19,7 +19,7 @@ const LINKS = [
  *  Play requires a publicly findable deletion page. */
 const FOOTER_LINKS = [...LINKS, { href: "/delete-account", label: "Delete account" }];
 
-export const SUPPORT_EMAIL = "hello@skillsnap.com.au";
+export const SUPPORT_EMAIL = "mo@skillsnap.com.au";
 
 export function Section({
   title,
