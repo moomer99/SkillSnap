@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { publicLocationLabel } from "@/lib/publicLocation";
 import SkillSnapLogo from "@/components/skillsnap/shared/SkillSnapLogo";
 
 // ─────────────────────────────────────────────
@@ -22,7 +23,7 @@ import SkillSnapLogo from "@/components/skillsnap/shared/SkillSnapLogo";
 // ─────────────────────────────────────────────
 
 const PROFILE_COLUMNS =
-  "id, username, display_name, avatar_url, bio, skill, location, availability, jobs_done, happy_percent, followers_count, post_count, role, is_verified, is_early_bird";
+  "id, username, display_name, avatar_url, bio, skill, location, location_private, availability, jobs_done, happy_percent, followers_count, post_count, role, is_verified, is_early_bird";
 
 const POST_COLUMNS =
   "id, type, media_url, thumbnail_url, thumbnail_gradient, caption, likes_count, created_at";
@@ -46,6 +47,7 @@ type Profile = {
   bio: string | null;
   skill: string | null;
   location: string | null;
+  location_private: boolean | null;
   availability: string | null;
   jobs_done: number | null;
   happy_percent: number | null;
@@ -160,10 +162,10 @@ export async function generateMetadata({
   const handle = `@${normaliseUsername(profile.username) || bare}`;
   const title = `${name} (${handle}) | SkillSnap`;
 
-  const descriptionParts = [
-    profile.skill,
-    profile.location ? `in ${profile.location}` : null,
-  ].filter(Boolean);
+  const location = publicLocationLabel(profile.location, profile.location_private);
+  const descriptionParts = [profile.skill, location ? `in ${location}` : null].filter(
+    Boolean
+  );
   const description =
     profile.bio?.trim() ||
     (descriptionParts.length > 0
@@ -230,6 +232,9 @@ export default async function PublicProfilePage({
     ? AVAILABILITY_LABELS[profile.availability]
     : null;
   const initial = (name || handle).charAt(0).toUpperCase();
+  // Every viewer of this page is "other people", so the suburb-only form
+  // applies unconditionally when its owner asked for it.
+  const location = publicLocationLabel(profile.location, profile.location_private);
 
   return (
     <div className="min-h-screen bg-[#f8f7f5]">
@@ -316,7 +321,7 @@ export default async function PublicProfilePage({
           </p>
 
           <p className="text-[13px] mt-2" style={{ color: "rgba(255,255,255,0.75)" }}>
-            {profile.location || "No location set"}
+            {location || "No location set"}
             {profile.skill ? ` · ${profile.skill}` : ""}
           </p>
 
@@ -348,7 +353,7 @@ export default async function PublicProfilePage({
             <div className="w-px bg-[#f0eeea] my-1" />
             <Stat label="Connections" value={profile.followers_count ?? 0} />
             <div className="w-px bg-[#f0eeea] my-1" />
-            <Stat label="Based" value={profile.location || "—"} />
+            <Stat label="Based" value={location || "—"} />
           </div>
         </div>
 
