@@ -568,18 +568,33 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
       </section>
 
       {/* ── FOOTER — 2026 ────────────────────── */}
-      <footer className="px-5 py-6 flex flex-col items-center gap-2"
+      <footer className="px-5 py-6 flex flex-col items-center gap-3"
         style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <SkillSnapLogo variant="full" size="xs" dark />
+
+        {/* Real hrefs, not app-state navigation: app store reviewers look for
+            these on the landing page and follow them as ordinary links. */}
+        <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
+          <a href="/privacy" className="text-[11px] text-[#a78bfa] font-semibold">
+            Privacy Policy
+          </a>
+          <a href="/terms" className="text-[11px] text-[#a78bfa] font-semibold">
+            Terms of Service
+          </a>
+          <a href="/help" className="text-[11px] text-[#a78bfa] font-semibold">
+            Help
+          </a>
+          <button
+            onClick={() => onNavigate("contact")}
+            className="text-[11px] text-[#a78bfa] font-semibold"
+          >
+            Contact us
+          </button>
+        </nav>
+
         <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.25)" }}>
           © 2026 SkillSnap · Sydney
         </p>
-        <button
-          onClick={() => onNavigate("contact")}
-          className="text-[11px] text-[#a78bfa] font-semibold"
-        >
-          Need help? Contact us
-        </button>
       </footer>
     </div>
   );
