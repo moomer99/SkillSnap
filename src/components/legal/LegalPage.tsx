@@ -15,6 +15,10 @@ const LINKS = [
   { href: "/help", label: "Help" },
 ];
 
+/** Deletion is kept out of the header nav but must stay reachable — Google
+ *  Play requires a publicly findable deletion page. */
+const FOOTER_LINKS = [...LINKS, { href: "/delete-account", label: "Delete account" }];
+
 export const SUPPORT_EMAIL = "hello@skillsnap.com.au";
 
 export function Section({
@@ -115,7 +119,7 @@ export default function LegalPage({
         {children}
 
         <div className="mt-12 pt-6 border-t border-[#e8e4df] flex flex-wrap items-center gap-x-5 gap-y-2">
-          {LINKS.map((link) => (
+          {FOOTER_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}

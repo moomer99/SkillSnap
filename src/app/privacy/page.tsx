@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import LegalPage, {
   Bullets,
   Callout,
@@ -311,6 +312,13 @@ export default function PrivacyPage() {
       </Section>
 
       <Section title="Deleting your account">
+        <p>
+          Full instructions, including what to do if you cannot sign in, are on our{" "}
+          <Link href="/delete-account" className="text-[#6c47ff] font-semibold">
+            account deletion page
+          </Link>
+          .
+        </p>
         <p>In the app: open your profile, tap the menu, then Settings, then Delete Account.</p>
         <p>
           You will be asked to type the word DELETE to confirm, because it cannot be undone and

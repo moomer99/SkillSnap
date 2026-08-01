@@ -584,6 +584,9 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           <a href="/help" className="text-[11px] text-[#a78bfa] font-semibold">
             Help
           </a>
+          <a href="/delete-account" className="text-[11px] text-[#a78bfa] font-semibold">
+            Delete account
+          </a>
           <button
             onClick={() => onNavigate("contact")}
             className="text-[11px] text-[#a78bfa] font-semibold"

@@ -197,7 +197,11 @@ export default function HelpPage() {
       <Section title="Deleting your account">
         <p>
           Open your profile, tap the menu in the top corner, then Settings, then Delete Account at
-          the bottom.
+          the bottom. There is also a full{" "}
+          <Link href="/delete-account" className="text-[#6c47ff] font-semibold">
+            account deletion page
+          </Link>{" "}
+          on the web.
         </p>
         <p>
           You will be asked to type the word DELETE to confirm. This is permanent. It removes your
