@@ -5,6 +5,7 @@ import type { Screen, SkillCategory } from "@/types";
 import { SKILL_CATEGORIES } from "@/constants/config";
 import { useAppState } from "@/state/AppState";
 import { useLocation } from "@/hooks/useLocation";
+import { normaliseUsername } from "@/lib/username";
 import { useToast } from "./shared/Toast";
 
 const SUPABASE_CONFIGURED =
@@ -22,7 +23,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
   const user = state.currentUser;
 
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
-  const [username, setUsername] = useState(user?.username?.replace("@", "") ?? "");
+  const [username, setUsername] = useState(normaliseUsername(user?.username));
   const [bio, setBio] = useState(user?.bio ?? "");
   const [locationText, setLocationText] = useState(user?.location ?? "");
   const [locationLat, setLocationLat] = useState<number | undefined>(user?.lat);
@@ -160,7 +161,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
           const derivedSkill = resolvedSkill === "Client" ? null : (resolvedSkill || null);
           await userService.updateProfile({
             displayName: displayName.trim(),
-            username: `@${username.trim()}`,
+            username: normaliseUsername(username),
             bio: bio.trim(),
             location: locationText.trim(),
             ...(resolvedLat !== undefined ? { lat: resolvedLat } : {}),
@@ -186,7 +187,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
         type: "UPDATE_CURRENT_USER",
         patch: {
           displayName: displayName.trim(),
-          username: `@${username.trim()}`,
+          username: normaliseUsername(username),
           bio: bio.trim(),
           location: locationText.trim(),
           ...(resolvedLat !== undefined ? { lat: resolvedLat } : {}),

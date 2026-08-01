@@ -4,6 +4,7 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { publicLocationLabel } from "@/lib/publicLocation";
+import { displayUsername } from "@/lib/username";
 import SkillSnapLogo from "@/components/skillsnap/shared/SkillSnapLogo";
 
 // ─────────────────────────────────────────────
@@ -89,42 +90,29 @@ function bareHandle(raw: string): string | null {
 }
 
 /**
- * Live data has usernames stored three different ways: bare ("wizz55"),
- * @-prefixed ("@wizz55"), and with stray whitespace ("@foula "). Comparing on a
- * trimmed, @-stripped, lower-cased form is the only thing that finds all of
- * them.
- */
-function normaliseUsername(username: string | null): string {
-  return (username ?? "").trim().replace(/^@/, "").toLowerCase();
-}
-
-/**
  * Deduped so generateMetadata and the page itself share one round trip.
+ *
+ * A plain case-insensitive match. Usernames are stored bare and constrained to
+ * that shape by 20260801110000_normalise_usernames.sql in the app repo, so
+ * there is nothing left to be tolerant of — this route depends on that
+ * migration having been applied.
  */
 const getProfile = cache(async (bare: string): Promise<Profile | null> => {
   const supabase = await createClient();
 
-  // A trailing wildcard catches the stored-with-whitespace rows that an exact
-  // match misses. It can over-match (an underscore is a LIKE wildcard, and
-  // "wizz55*" also finds "wizz555"), so the exact row is picked out below
-  // rather than trusted from the query.
   const { data, error } = await supabase
     .from("visible_profiles")
     .select(PROFILE_COLUMNS)
-    .or(`username.ilike.${bare}*,username.ilike.@${bare}*`)
-    .limit(25);
+    .ilike("username", bare)
+    .limit(1)
+    .maybeSingle();
 
   if (error) {
     console.error("public profile lookup failed:", error.message);
     return null;
   }
 
-  const target = bare.toLowerCase();
-  const match = ((data ?? []) as unknown as Profile[]).find(
-    (row) => normaliseUsername(row.username) === target
-  );
-
-  return match ?? null;
+  return (data as unknown as Profile | null) ?? null;
 });
 
 const getPosts = cache(async (authorId: string): Promise<Post[]> => {
@@ -159,7 +147,7 @@ export async function generateMetadata({
   if (!profile) return { title: "Profile not found | SkillSnap" };
 
   const name = profile.display_name?.trim() || bare;
-  const handle = `@${normaliseUsername(profile.username) || bare}`;
+  const handle = displayUsername(profile.username) || `@${bare}`;
   const title = `${name} (${handle}) | SkillSnap`;
 
   const location = publicLocationLabel(profile.location, profile.location_private);
@@ -227,7 +215,7 @@ export default async function PublicProfilePage({
   const posts = await getPosts(profile.id);
 
   const name = profile.display_name?.trim() || bare;
-  const handle = `@${normaliseUsername(profile.username) || bare}`;
+  const handle = displayUsername(profile.username) || `@${bare}`;
   const availability = profile.availability
     ? AVAILABILITY_LABELS[profile.availability]
     : null;

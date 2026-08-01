@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { useAppState } from "@/state/AppState";
+import { normaliseUsername } from "@/lib/username";
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -24,7 +25,8 @@ export default function UsernameSetupScreen({ onDone }: { onDone: () => void }) 
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const username = value.trim().toLowerCase();
+    // Stored bare - the @ is added at render time. See @/lib/username.
+    const username = normaliseUsername(value).toLowerCase();
     if (!/^[a-z0-9_]{3,20}$/.test(username)) {
       setError("3–20 characters: letters, numbers, underscores only.");
       return;
@@ -37,7 +39,7 @@ export default function UsernameSetupScreen({ onDone }: { onDone: () => void }) 
         const { data: existing } = await getAuthSupabase()
           .from("profiles")
           .select("id")
-          .eq("username", "@" + username)
+          .eq("username", username)
           .neq("id", user.id)
           .maybeSingle();
         if (existing) {
@@ -47,14 +49,14 @@ export default function UsernameSetupScreen({ onDone }: { onDone: () => void }) 
         }
         const { error: updateError } = await getAuthSupabase()
           .from("profiles")
-          .update({ username: "@" + username })
+          .update({ username })
           .eq("id", user.id);
         if (updateError) {
           setError("Failed to save. Please try again.");
           setChecking(false);
           return;
         }
-        dispatch({ type: "UPDATE_CURRENT_USER", patch: { username: "@" + username } });
+        dispatch({ type: "UPDATE_CURRENT_USER", patch: { username } });
       }
     } catch {
       setError("Something went wrong. Please try again.");
