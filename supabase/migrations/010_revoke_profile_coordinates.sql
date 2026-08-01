@@ -137,6 +137,13 @@ grant select on public.visible_profiles to authenticated, anon;
 -- stays excluded to preserve 007; lat and lng are excluded by this migration;
 -- lat_public and lng_public are picked up automatically.
 --
+-- expo_push_token and notify_% are excluded to preserve 011. This list is the
+-- CANONICAL one and must match 011 exactly. Each of these migrations rebuilds
+-- the entire grant from information_schema, so a list missing an entry silently
+-- re-grants it — which is the bug 007 introduced by excluding only 'email', and
+-- is why applying 010 after 011 would otherwise reopen the push-token leak. Any
+-- future migration that rebuilds this grant must carry the same list.
+--
 -- NOTE: with column-level grants in place, columns added to profiles LATER are
 -- not readable by anon/authenticated until explicitly granted. Fail-closed by
 -- design — grant new columns deliberately.
@@ -149,7 +156,8 @@ begin
   from information_schema.columns
   where table_schema = 'public'
     and table_name   = 'profiles'
-    and column_name not in ('email', 'lat', 'lng');
+    and column_name not in ('email', 'lat', 'lng', 'expo_push_token')
+    and column_name not like 'notify\_%';
 
   revoke select on public.profiles from anon;
   revoke select on public.profiles from authenticated;
