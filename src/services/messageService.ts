@@ -9,6 +9,7 @@
 // ─────────────────────────────────────────────
 import { getSupabase, getAuthSupabase, getRealtimeSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
+import { notifyUser } from "./notifyService";
 import type { MessageThread, Message } from "@/types";
 
 function mapThread(
@@ -224,7 +225,44 @@ export const messageService = {
 
     messageService.incrementUnreadForOthers(conversationId, userId).catch(() => {});
 
+    // Notify the other side. Fire-and-forget: the Edge Functions derive the
+    // sender name and honour the recipient's settings, and a failure here must
+    // not make a delivered message look like a failed send.
+    //
+    // The recipient is resolved rather than assumed, because the push function
+    // requires an explicit to_user_id and checks that both parties belong to
+    // the conversation before it will send anything.
+    messageService
+      .getOtherMemberIds(conversationId, userId)
+      .then((recipientIds) =>
+        Promise.all(
+          recipientIds.map((recipientId) =>
+            notifyUser({
+              toUserId: recipientId,
+              type: "message",
+              body: lastText,
+              conversationId,
+              data: { type: "message", conversationId, participantId: userId },
+            })
+          )
+        )
+      )
+      .catch(() => {});
+
     return mapMessage(data as Record<string, unknown>, userId);
+  },
+
+  /** The other participants in a conversation, for notification fan-out. */
+  async getOtherMemberIds(conversationId: string, selfId: string): Promise<string[]> {
+    const { data } = await getAuthSupabase()
+      .from("conversation_members")
+      .select("user_id")
+      .eq("conversation_id", conversationId)
+      .neq("user_id", selfId);
+
+    // Cast because database.types.ts is stale and types every table as `never`;
+    // the surrounding service does the same.
+    return ((data ?? []) as unknown as { user_id: string }[]).map((row) => row.user_id);
   },
 
   async incrementUnreadForOthers(conversationId: string, senderId: string): Promise<void> {

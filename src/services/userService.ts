@@ -5,6 +5,7 @@ import { getSupabase, getAuthSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
 import { OWN_PROFILE_COLUMNS, PROFILE_COLUMNS, PUBLIC_PROFILE_TABLE } from "./profileFields";
 import { withOwnCoordinates } from "./ownCoordinates";
+import { notifyUser } from "./notifyService";
 import type { User } from "@/types";
 
 // Shared helper — always uses the auth client (real URL) so the session
@@ -66,10 +67,19 @@ export const userService = {
   async followUser(targetId: string): Promise<void> {
     const userId = await getAuthUserId();
     if (!userId) return;
-    await getAuthSupabase().from("follows").upsert(
+    const { error } = await getAuthSupabase().from("follows").upsert(
       { follower_id: userId, following_id: targetId },
       { onConflict: "follower_id,following_id", ignoreDuplicates: true }
     );
+
+    // Only after the row lands: the Edge Functions verify the follow exists
+    // before they will send anything, so notifying first would be rejected.
+    if (error) return;
+    notifyUser({
+      toUserId: targetId,
+      type: "follow",
+      data: { type: "follow", userId },
+    }).catch(() => {});
   },
 
   async unfollowUser(targetId: string): Promise<void> {
