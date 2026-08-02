@@ -198,7 +198,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const hoursRemaining = Math.max(0, Math.ceil(minHours - hoursIn));
 
   const canRequestJobDone = hasMessages && hoursIn >= minHours;
-  const lockedLabel = `Available in ~${hoursRemaining}h · conversation must be 24h old`;
+  const lockedLabel = `Available in ~${hoursRemaining}h · conversation must be ${minHours}h old`;
 
   // Scroll job card into view whenever it appears
   useEffect(() => {

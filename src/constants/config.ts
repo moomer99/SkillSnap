@@ -64,8 +64,12 @@ export const JOBS_DONE_CONFIG = {
   TOOLTIP_TEXT:
     "Jobs Done are confirmed after users complete work and verify it through chat. This reflects real work done, not ratings.",
   TRUST_NOTE: "Verified by both parties — no self-reporting",
-  // TODO: change back to 24 before launch
-  MIN_CONVERSATION_HOURS: 4, // 4 hours — enough for same-day jobs
+  // Deliberate: a tradesperson who finishes at 11am should be able to get the
+  // job confirmed before leaving, not the next morning. Both-party confirmation
+  // is enforced in the database (migration 012), so this window only slows
+  // collusion - it is not what stops someone confirming their own work.
+  // Anything user-facing must read this constant, never restate the number.
+  MIN_CONVERSATION_HOURS: 4,
 } as const;
 
 // Brand colors (used in dynamic styles)

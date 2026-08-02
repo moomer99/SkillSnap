@@ -34,7 +34,7 @@ export const MOCK_THREADS: MessageThread[] = [
     lastMessage: "I can come do a free quote on Thursday if you're around",
     lastMessageTime: "1h",
     unreadCount: 1,
-    startedAt: hoursAgo(2), // 2h ago — locked (< 24h)
+    startedAt: hoursAgo(2), // 2h ago — locked (< MIN_CONVERSATION_HOURS)
   },
   {
     id: "thread_4",
