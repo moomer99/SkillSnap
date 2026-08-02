@@ -165,6 +165,21 @@ export const uploadService = {
       }
     }
 
+    // The post is saved and, per the moderation trigger, already held and
+    // invisible. This only ever promotes it; a failure leaves it held for
+    // manual review. Without this call every web upload would stay invisible
+    // forever, since nothing else ever screens it.
+    try {
+      const { screenPost } = await import("./screeningService");
+      await screenPost({
+        postId: inserted.id,
+        imageUrls: mediaUrls.filter((_, i) => allFiles[i]?.type.startsWith("image/")),
+        thumbnailDataUrl: payload.thumbnailDataUrl,
+      });
+    } catch (e) {
+      console.warn("[UploadService] screening call failed:", e);
+    }
+
     const { data: fullPost } = await sb
       .from("posts")
       .select(`id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, ${POST_AUTHOR_COLUMNS}`)
