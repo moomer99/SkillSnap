@@ -31,7 +31,10 @@ function mapProfile(profile: Record<string, unknown>): User {
       isVerified: Boolean(profile.is_verified ?? false),
       jobsDone: Number(profile.jobs_done ?? 0),
       happyPercent: Number(profile.happy_percent ?? 0),
-      ratingCount: Number((profile.ratings as { count: number }[] | null)?.[0]?.count ?? 0),
+      // Was reading profile.ratings[0].count — a PostgREST embedded-count shape
+      // that no query ever asked for, so this was 0 for every user ever loaded.
+      // Migration 014 maintains the count on the profile itself.
+      ratingCount: Number(profile.rating_count ?? 0),
       followers: Number(profile.followers_count ?? 0),
       following: Number(profile.following_count ?? 0),
       postCount: Number(profile.post_count ?? 0),

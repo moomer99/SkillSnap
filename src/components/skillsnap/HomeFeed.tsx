@@ -9,6 +9,7 @@ import { useFeed } from "@/hooks/useFeed";
 import { useMessages } from "@/hooks/useMessages";
 import { useAppState } from "@/state/AppState";
 import { useLocation, distanceKm } from "@/hooks/useLocation";
+import { hasHappyPercent } from "@/lib/happyPercent";
 import SearchBar from "./shared/SearchBar";
 import UserAvatar from "./shared/UserAvatar";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
@@ -640,10 +641,9 @@ function FeedCard({
     const d = distanceKm(viewerLat, viewerLng, aLat, aLng);
     return Math.round(d * 10) / 10;
   }, [isOwnPost, viewerLat, viewerLng, author]);
-  const happyPct = author.happyPercent !== undefined &&
-    author.happyPercent !== null &&
-    author.happyPercent > 0
-    ? `${author.happyPercent}%` : "—";
+  const happyPct = hasHappyPercent(author.happyPercent, author.ratingCount)
+    ? `${author.happyPercent}%`
+    : "—";
   const showPlayOverlay = post.type === "video" && !playing;
 
   async function handleSaveEdit() {

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { publicLocationLabel } from "@/lib/publicLocation";
 import { displayUsername } from "@/lib/username";
+import { formatHappyPercent } from "@/lib/happyPercent";
 import SkillSnapLogo from "@/components/skillsnap/shared/SkillSnapLogo";
 
 // ─────────────────────────────────────────────
@@ -24,7 +25,7 @@ import SkillSnapLogo from "@/components/skillsnap/shared/SkillSnapLogo";
 // ─────────────────────────────────────────────
 
 const PROFILE_COLUMNS =
-  "id, username, display_name, avatar_url, bio, skill, location, location_private, availability, jobs_done, happy_percent, followers_count, post_count, role, is_verified, is_early_bird";
+  "id, username, display_name, avatar_url, bio, skill, location, location_private, availability, jobs_done, happy_percent, rating_count, followers_count, post_count, role, is_verified, is_early_bird";
 
 const POST_COLUMNS =
   "id, type, media_url, thumbnail_url, thumbnail_gradient, caption, likes_count, created_at";
@@ -52,6 +53,7 @@ type Profile = {
   availability: string | null;
   jobs_done: number | null;
   happy_percent: number | null;
+  rating_count: number | null;
   followers_count: number | null;
   post_count: number | null;
   role: string | null;
@@ -336,7 +338,7 @@ export default async function PublicProfilePage({
             <div className="w-px bg-[#f0eeea] my-1" />
             <Stat
               label="Happy"
-              value={(profile.happy_percent ?? 0) > 0 ? `${profile.happy_percent}%` : "New"}
+              value={formatHappyPercent(profile.happy_percent, profile.rating_count)}
             />
             <div className="w-px bg-[#f0eeea] my-1" />
             <Stat label="Connections" value={profile.followers_count ?? 0} />

@@ -42,6 +42,9 @@ const SHARED_COLUMNS = [
   "location_private",
   "jobs_done",
   "happy_percent",
+  // Added to profiles and to visible_profiles by migration 014. happy_percent
+  // is not printed without it — see src/lib/happyPercent.ts.
+  "rating_count",
   "followers_count",
   "following_count",
   "post_count",

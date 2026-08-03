@@ -4,6 +4,7 @@ import { Search, ArrowLeft, X, MapPin, Briefcase, Users } from "lucide-react";
 import type { Screen, User, SkillCategory } from "@/types";
 import { SKILL_CATEGORIES } from "@/constants/config";
 import { useAppState } from "@/state/AppState";
+import { hasHappyPercent } from "@/lib/happyPercent";
 import UserAvatar from "./shared/UserAvatar";
 import { MOCK_USERS } from "@/mock-data/users";
 
@@ -103,7 +104,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
       const sb = getSupabase();
       const { data, error } = await sb
         .from("profiles")
-        .select("id, display_name, username, skill, role, avatar_url, avatar_initial, avatar_gradient, location, jobs_done, happy_percent, post_count, followers_count, is_verified, bio")
+        .select("id, display_name, username, skill, role, avatar_url, avatar_initial, avatar_gradient, location, jobs_done, happy_percent, rating_count, post_count, followers_count, is_verified, bio")
         .or(`display_name.ilike.%${q}%,username.ilike.%${q}%,skill.ilike.%${q}%,location.ilike.%${q}%`)
         .limit(20);
       if (error) { console.error('[Search] error:', error.message); setResults([]); setLoading(false); return; }
@@ -120,7 +121,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
         isVerified: Boolean(row.is_verified ?? false),
         jobsDone: Number(row.jobs_done ?? 0),
         happyPercent: Number(row.happy_percent ?? 0),
-        ratingCount: 0,
+        ratingCount: Number(row.rating_count ?? 0),
         followers: Number(row.followers_count ?? 0),
         following: 0,
         postCount: Number(row.post_count ?? 0),
@@ -197,7 +198,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
     import("@/lib/supabase").then(({ getSupabase }) => {
       getSupabase()
         .from("profiles")
-        .select("id, display_name, username, skill, role, avatar_url, avatar_initial, avatar_gradient, location, jobs_done, happy_percent, post_count, followers_count, is_verified, bio")
+        .select("id, display_name, username, skill, role, avatar_url, avatar_initial, avatar_gradient, location, jobs_done, happy_percent, rating_count, post_count, followers_count, is_verified, bio")
         .eq("role", "pro")
         .not("skill", "is", null)
         .limit(6)
@@ -216,7 +217,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
               isVerified: Boolean(row.is_verified ?? false),
               jobsDone: Number(row.jobs_done ?? 0),
               happyPercent: Number(row.happy_percent ?? 0),
-              ratingCount: 0,
+              ratingCount: Number(row.rating_count ?? 0),
               followers: Number(row.followers_count ?? 0),
               following: 0,
               postCount: Number(row.post_count ?? 0),
@@ -455,7 +456,7 @@ function UserCard({ user, onPress }: { user: User; onPress: () => void }) {
           {user.jobsDone > 0 && (
             <span className="text-[#b0aaa5]">· {user.jobsDone} jobs</span>
           )}
-          {user.happyPercent > 0 && (
+          {hasHappyPercent(user.happyPercent, user.ratingCount) && (
             <span className="text-[#059669] font-semibold">· {user.happyPercent}% 😊</span>
           )}
         </div>

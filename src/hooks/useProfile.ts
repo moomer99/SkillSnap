@@ -72,6 +72,7 @@ export function useProfile(variant: ProfileVariant) {
           isVerified: false,
           jobsDone: 0,
           happyPercent: 0,
+          ratingCount: 0,
           followers: 0,
           following: 0,
           postCount: 0,

@@ -24,8 +24,13 @@ export interface User {
   skill: SkillCategory | null; // null = client/viewer
   isVerified: boolean;
   jobsDone: number;
-  happyPercent: number;        // % of happy feedback from completed jobs
-  ratingCount?: number;        // number of ratings received (hide happy% below 3)
+  // Weighted average of this pro's ratings — very_happy 100, okay 50,
+  // not_satisfied 0 — recalculated by the on_rating_change trigger in
+  // supabase/migrations/014. Never computed in the client.
+  happyPercent: number;
+  // Ratings received. happyPercent is not shown below MIN_RATINGS of them;
+  // print it through src/lib/happyPercent.ts rather than interpolating it.
+  ratingCount?: number;
   followers: number;
   following: number;
   postCount: number;
