@@ -22,6 +22,8 @@ export interface Database {
           skill: string | null;
           is_verified: boolean;
           jobs_done: number;
+          happy_percent: number;
+          rating_count: number;
           followers_count: number;
           following_count: number;
           post_count: number;
@@ -29,7 +31,10 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["profiles"]["Row"], "jobs_done" | "followers_count" | "following_count" | "post_count" | "created_at" | "updated_at"> & {
+        // happy_percent and rating_count are maintained by the on_rating_change
+        // trigger (migration 014) and are never written by a client, the same
+        // way jobs_done belongs to handle_job_confirmed.
+        Insert: Omit<Database["public"]["Tables"]["profiles"]["Row"], "jobs_done" | "happy_percent" | "rating_count" | "followers_count" | "following_count" | "post_count" | "created_at" | "updated_at"> & {
           jobs_done?: number;
           followers_count?: number;
           following_count?: number;
@@ -145,6 +150,23 @@ export interface Database {
           client_confirmed?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["jobs_done"]["Insert"]>;
+      };
+      ratings: {
+        Row: {
+          id: string;
+          job_id: string;
+          rater_id: string;
+          skiller_id: string;
+          rating: "very_happy" | "okay" | "not_satisfied";
+          comment: string | null;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["ratings"]["Row"], "id" | "created_at"> & {
+          id?: string;
+          comment?: string | null;
+        };
+        // No update or delete policy exists on ratings — a rating is history.
+        Update: never;
       };
       categories: {
         Row: {

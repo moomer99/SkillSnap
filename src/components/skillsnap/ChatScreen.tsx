@@ -6,6 +6,7 @@ import { MOCK_USERS } from "@/mock-data/users";
 import { useAppState } from "@/state/AppState";
 import { useChat } from "@/hooks/useChat";
 import { messageService } from "@/services/messageService";
+import { PUBLIC_PROFILE_TABLE } from "@/services/profileFields";
 import { JOBS_DONE_CONFIG } from "@/constants/config";
 import UserAvatar from "./shared/UserAvatar";
 import { useToast } from "./shared/Toast";
@@ -19,10 +20,15 @@ const SUPABASE_CONFIGURED =
   !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref");
 
-const RATINGS: { key: JobRating; emoji: string; label: string; happy: boolean }[] = [
-  { key: "very_happy",    emoji: "😊", label: "Yes, Very\nHappy",    happy: true  },
-  { key: "okay",          emoji: "😐", label: "It was okay",         happy: true  },
-  { key: "not_satisfied", emoji: "😔", label: "Not satisfied",       happy: false },
+// `key` is written straight into ratings.rating and must stay in step with that
+// column's check constraint (supabase/migrations/014). How each one weighs on
+// happy_percent lives in the DB — 100 / 50 / 0 — and deliberately not here: a
+// second copy of the scale in the client is one that can drift out of agreement
+// with the number on the profile.
+const RATINGS: { key: JobRating; emoji: string; label: string }[] = [
+  { key: "very_happy",    emoji: "😊", label: "Yes, Very\nHappy" },
+  { key: "okay",          emoji: "😐", label: "It was okay"      },
+  { key: "not_satisfied", emoji: "😔", label: "Not satisfied"    },
 ];
 
 const QUICK_REPLIES_PRO = [
@@ -64,13 +70,6 @@ function QuickReplies({ onSelect, hasMessages, isSkiller }: {
 
 function hoursElapsed(iso: string): number {
   return (Date.now() - new Date(iso).getTime()) / 3_600_000;
-}
-
-function recalcHappy(prev: number, prevJobs: number, isHappy: boolean): number {
-  if (prevJobs <= 0) return isHappy ? 100 : 0;
-  const prevHappyCount = Math.round((prev / 100) * prevJobs);
-  const newHappy = prevHappyCount + (isHappy ? 1 : 0);
-  return Math.round((newHappy / (prevJobs + 1)) * 100);
 }
 
 export default function ChatScreen({ onNavigate }: ChatScreenProps) {
@@ -426,63 +425,93 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const attachRef = useRef<HTMLInputElement>(null);
 
-  async function handleSubmitFeedback() {
-    if (!rating) return;
-    setSubmitting(true);
-    const ratingData = RATINGS.find((r) => r.key === rating)!;
-
-    // Persist rating to Supabase — triggers DB recalc of happy_percent
-    if (SUPABASE_CONFIGURED && activeJobId) {
-      try {
-        const { getAuthSupabase } = await import("@/lib/supabase");
-        await getAuthSupabase()
-          .from("ratings")
-          .insert({
-            job_id: activeJobId,
-            skiller_id: displayParticipant.id,
-            client_id: currentUser?.id,
-            rating: ratingData.key,
-            is_happy: ratingData.happy,
-            comment: comment.trim() || null,
-          });
-
-        // Re-fetch the DB-calculated happy_percent so local state reflects reality
-        const { data: profile } = await getAuthSupabase()
-          .from("profiles")
-          .select("happy_percent")
-          .eq("id", displayParticipant.id)
-          .single();
-        if (profile) {
-          dispatch({
-            type: "UPDATE_PARTICIPANT_HAPPY",
-            userId: displayParticipant.id,
-            happyPercent: Number(profile.happy_percent ?? 0),
-          });
-        }
-      } catch (e) {
-        console.warn("[ChatScreen] rating insert failed:", e);
-        // Fall back to local calculation if DB write fails
-        dispatch({
-          type: "UPDATE_PARTICIPANT_HAPPY",
-          userId: displayParticipant.id,
-          happyPercent: recalcHappy(displayParticipant.happyPercent, displayParticipant.jobsDone, ratingData.happy),
-        });
-      }
-    } else {
-      // Supabase not configured — local calculation only
-      dispatch({
-        type: "UPDATE_PARTICIPANT_HAPPY",
-        userId: displayParticipant.id,
-        happyPercent: recalcHappy(displayParticipant.happyPercent, displayParticipant.jobsDone, ratingData.happy),
-      });
-    }
-
-    setSubmitting(false);
+  function showFeedbackSuccess() {
     setFeedbackDone(true);
     setTimeout(() => {
       setShowFeedback(false);
       setJobStatus("feedback_done");
     }, 1600);
+  }
+
+  async function handleSubmitFeedback() {
+    if (!rating) return;
+    if (state.isReviewMode) { showToast("Writes are disabled in review mode"); return; }
+
+    // Demo build with no backend. Nothing to persist to, and no stored
+    // happy_percent to read back — the profiles on screen are mock data.
+    if (!SUPABASE_CONFIGURED) { showFeedbackSuccess(); return; }
+
+    if (!activeJobId) {
+      showToast("Couldn't find the job to rate — reopen the chat and try again");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { getAuthSupabase } = await import("@/lib/supabase");
+      const sb = getAuthSupabase();
+
+      // Take the skiller from the job row, not from displayParticipant, which
+      // falls back to MOCK_USERS[0] while the participant fetch is in flight.
+      // The insert policy compares the two and rejects a mismatch, so getting
+      // this wrong costs the rating rather than misfiling it.
+      const { data: job, error: jobError } = await sb
+        .from("jobs_done")
+        .select("skiller_id")
+        .eq("id", activeJobId)
+        .single();
+
+      if (jobError || !job) {
+        console.error("[ChatScreen] rating: job lookup failed:", activeJobId, jobError?.message, jobError?.code);
+        showToast("Couldn't submit your rating. Please try again.");
+        return;
+      }
+      const skillerId = job.skiller_id as string;
+
+      // supabase-js resolves a failed write into `error` instead of throwing.
+      // This check is the whole fix: without it a rejected insert is
+      // indistinguishable from a stored one, which is how every rating left so
+      // far was discarded behind the success screen.
+      const { error: insertError } = await sb.from("ratings").insert({
+        job_id: activeJobId,
+        rater_id: currentUser?.id,
+        skiller_id: skillerId,
+        rating,
+        comment: comment.trim() || null,
+      });
+
+      // 23505 is the unique index on job_id: this job is already rated. The
+      // rating that counts is stored, so telling the client it failed would be
+      // a lie in the other direction.
+      if (insertError && insertError.code !== "23505") {
+        console.error("[ChatScreen] rating insert failed:", insertError.message, insertError.code, insertError.details);
+        showToast("Couldn't submit your rating. Please try again.");
+        return;
+      }
+
+      // happy_percent is recalculated by on_rating_change (migration 014), so
+      // read back what it stored rather than approximating it here.
+      const { data: profile } = await sb
+        .from(PUBLIC_PROFILE_TABLE)
+        .select("happy_percent, rating_count")
+        .eq("id", skillerId)
+        .maybeSingle();
+      if (profile) {
+        dispatch({
+          type: "UPDATE_PARTICIPANT_HAPPY",
+          userId: skillerId,
+          happyPercent: Number(profile.happy_percent ?? 0),
+          ratingCount: Number(profile.rating_count ?? 0),
+        });
+      }
+
+      showFeedbackSuccess();
+    } catch (e) {
+      console.error("[ChatScreen] handleSubmitFeedback failed:", e);
+      showToast("Couldn't submit your rating. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (

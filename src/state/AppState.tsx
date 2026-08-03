@@ -67,7 +67,7 @@ type Action =
   | { type: "UPDATE_CURRENT_USER"; patch: Partial<User> }
   | { type: "OPEN_JOBS_DONE_MODAL" }
   | { type: "CLOSE_JOBS_DONE_MODAL" }
-  | { type: "UPDATE_PARTICIPANT_HAPPY"; userId: string; happyPercent: number }
+  | { type: "UPDATE_PARTICIPANT_HAPPY"; userId: string; happyPercent: number; ratingCount: number }
   | { type: "SET_THREAD_STARTED_AT"; threadId: string; startedAt: string }
   | { type: "SET_THREAD_MESSAGES"; threadId: string; messages: Message[] }
   | { type: "MERGE_THREAD_MESSAGES"; threadId: string; messages: Message[] }
@@ -258,13 +258,24 @@ function appReducer(state: AppStateShape, action: Action): AppStateShape {
         ...state,
         threads: state.threads.map((t) =>
           t.participant.id === action.userId
-            ? { ...t, participant: { ...t.participant, happyPercent: action.happyPercent } }
+            ? {
+                ...t,
+                participant: {
+                  ...t.participant,
+                  happyPercent: action.happyPercent,
+                  ratingCount: action.ratingCount,
+                },
+              }
             : t
         ),
         // Also update currentUser if they are the target (shouldn't happen but guard)
         currentUser:
           state.currentUser?.id === action.userId
-            ? { ...state.currentUser, happyPercent: action.happyPercent }
+            ? {
+                ...state.currentUser,
+                happyPercent: action.happyPercent,
+                ratingCount: action.ratingCount,
+              }
             : state.currentUser,
       };
     case "SET_THREAD_STARTED_AT":
