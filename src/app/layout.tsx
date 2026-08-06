@@ -5,6 +5,7 @@ import { VisualEditsMessenger } from "orchids-visual-edits";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import ErrorReporter from "@/components/ErrorReporter";
+import AnalyticsProvider from "@/components/AnalyticsProvider";
 import Script from "next/script";
 
 const geistSans = Geist({
@@ -92,6 +93,7 @@ export default function RootLayout({
         className={`${geistSans.variable} antialiased`}
       >
         <ErrorReporter />
+        <AnalyticsProvider />
         <Script
           src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts//route-messenger.js"
           strategy="afterInteractive"

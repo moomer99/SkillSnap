@@ -49,6 +49,19 @@ export const MEDIA_CONFIG = {
   ACCEPTED_IMAGE_TYPES: ["image/jpeg", "image/png", "image/webp"],
 } as const;
 
+// Analytics — Amplitude (product analytics)
+export const ANALYTICS_CONFIG = {
+  PROVIDER: "amplitude",
+  AMPLITUDE_API_KEY: "88577fb44d19e1f249a02757cdb5a2d3",
+  // Same gate as the GoogleAnalytics tag in src/app/layout.tsx: `next dev`
+  // sends nothing, so local clicking never lands in the production funnels.
+  // Export NEXT_PUBLIC_AMPLITUDE_DEV=1 to send from a dev build when you need
+  // to verify an event actually arrives.
+  ENABLED:
+    process.env.NODE_ENV === "production" ||
+    process.env.NEXT_PUBLIC_AMPLITUDE_DEV === "1",
+} as const;
+
 // Feature flags — flip to true as features ship
 export const FEATURES = {
   REAL_AUTH: true,

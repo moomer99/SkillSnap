@@ -10,6 +10,7 @@ import type { User, Post, MessageThread, Message, Screen } from "@/types";
 import type { DiscoveryFilter } from "@/mock-data/discovery";
 import { getAuthSupabase } from "@/lib/supabase";
 import { mapProfile, ensureProfile } from "@/services/authService";
+import { identifyUser, resetAnalyticsUser } from "@/lib/analytics";
 
 // ── State Shape ──────────────────────────────
 interface AppStateShape {
@@ -456,6 +457,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     window.addEventListener("skillsnap:review-mode", handleReviewMode);
     return () => window.removeEventListener("skillsnap:review-mode", handleReviewMode);
   }, []);
+
+  // Amplitude identity — attach the Supabase user id, their skill/role and
+  // their suburb so every subsequent event carries those user properties.
+  // Keyed off the hydrated profile, not the session, because skill and
+  // location only exist once the profile row has loaded.
+  const analyticsUserRef = useRef<string | null>(null);
+  useEffect(() => {
+    const user = state.currentUser;
+    if (user) {
+      analyticsUserRef.current = user.id;
+      identifyUser({
+        id: user.id,
+        skill: user.skill,
+        role: user.role,
+        location: user.location,
+      });
+      return;
+    }
+    // Only reset on a real sign-out. Calling reset() for the logged-out case
+    // on every load would churn the Amplitude device id for anonymous users.
+    if (analyticsUserRef.current) {
+      analyticsUserRef.current = null;
+      resetAnalyticsUser();
+    }
+  }, [state.currentUser]);
 
   // Hydrate auth state from Supabase session on mount
   useEffect(() => {

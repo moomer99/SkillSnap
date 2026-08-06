@@ -18,6 +18,7 @@ import LocationPickerSheet from "./shared/LocationPickerSheet";
 import { useToast } from "./shared/Toast";
 import { postService } from "@/services/postService";
 import { SKILL_CATEGORIES } from "@/constants/config";
+import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 
 interface HomeFeedProps {
   onNavigate: (s: Screen) => void;
@@ -27,6 +28,10 @@ interface HomeFeedProps {
 const HEADER_H_NO_LOC = 88;
 const HEADER_H_WITH_LOC = 120;
 const RADIUS_OPTIONS = [5, 10, 25, 50];
+
+// A feed video counts as watched after this much actual playback. Videos
+// autoplay on scroll, so anything shorter would just measure scrolling.
+const VIDEO_WATCHED_MS = 3000;
 
 function timeAgo(iso: string): string {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -629,6 +634,31 @@ function FeedCard({
     };
   }, [post.type, post.mediaUrl]);
 
+  // "Video Watched" — fires once per card, after VIDEO_WATCHED_MS of real
+  // playback. Time is accumulated across pauses and scroll-aways, so a
+  // stop-start watch still counts, but a video that only ever autoplayed for
+  // a moment as the user flicked past does not.
+  const watchedMsRef = useRef(0);
+  const watchTrackedRef = useRef(false);
+  useEffect(() => {
+    if (activeMediaType !== "video" || !playing || watchTrackedRef.current) return;
+    const startedAt = Date.now();
+    const timer = setTimeout(() => {
+      watchTrackedRef.current = true;
+      track(ANALYTICS_EVENTS.VIDEO_WATCHED, {
+        postId: post.id,
+        authorId: post.authorId,
+        skill: post.skill,
+        location: post.location,
+      });
+    }, Math.max(0, VIDEO_WATCHED_MS - watchedMsRef.current));
+
+    return () => {
+      clearTimeout(timer);
+      watchedMsRef.current += Date.now() - startedAt;
+    };
+  }, [playing, activeMediaType, post.id, post.authorId, post.skill, post.location]);
+
   const handleMediaTap = useCallback(() => { onFullscreen(); }, [onFullscreen]);
   const displayLocation = post.location ?? author.location;
   // Distance: only show if viewer has location AND author has location AND it's not their own post
@@ -866,7 +896,7 @@ function FeedCard({
           <LocationCell distanceKm={displayDistance} location={displayLocation} isOwn={isOwnPost} onPress={onProfileClick} />
         </div>
 
-        {<ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />}
+        {<ConnectButton onClick={onConnectClick} fullWidth loading={connecting} source="feed" targetUserId={post.authorId} />}
       </div>
 
       {/* Three-dot menu bottom sheet */}

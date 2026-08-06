@@ -218,6 +218,8 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                     onClick={() => requireAuth(() => connectTo(user.id))}
                     fullWidth
                     loading={connecting === user.id}
+                    source="profile"
+                    targetUserId={user.id}
                   />
                 </div>
                 <button

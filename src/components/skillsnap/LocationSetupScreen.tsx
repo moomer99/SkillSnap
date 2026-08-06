@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Loader2, Navigation } from "lucide-react";
 import { useAppState } from "@/state/AppState";
+import { ANALYTICS_EVENTS, identifyUser, track } from "@/lib/analytics";
 import type { Screen } from "@/types";
 
 const SUPABASE_CONFIGURED =
@@ -92,6 +93,25 @@ export default function LocationSetupScreen({ onNavigate }: Props) {
     }
 
     dispatch({ type: "UPDATE_CURRENT_USER", patch: { location: locationValue } });
+
+    // This is the last step of profile setup (role → location), so finishing
+    // here is the signup completing. Identify runs first, and with the new
+    // suburb rather than the stale one on state.currentUser, so the event is
+    // sent with the right user properties instead of racing the effect in
+    // AppProvider that would otherwise set them a render later.
+    if (state.currentUser) {
+      identifyUser({
+        id: state.currentUser.id,
+        skill: state.currentUser.skill,
+        role: state.currentUser.role,
+        location: locationValue,
+      });
+    }
+    track(ANALYTICS_EVENTS.SIGN_UP_COMPLETED, {
+      userType: state.currentUser?.skill ?? state.currentUser?.role,
+      location: locationValue,
+      usedGps: !!gpsCoords,
+    });
 
     const role = state.currentUser?.role;
     if (role === "client") {

@@ -9,6 +9,7 @@ import type { Screen } from "@/types";
 import { uploadService } from "@/services/uploadService";
 import { useAppState } from "@/state/AppState";
 import { useToast } from "./shared/Toast";
+import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 
 interface UploadScreenProps {
   onNavigate: (s: Screen) => void;
@@ -136,6 +137,19 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         dispatch({ type: "PREPEND_POST", post: newPost });
       }
       dispatch({ type: "REFRESH_FEED" });
+
+      // Reached only when createPost resolved without throwing — the row is in
+      // the database. A post that fails to upload takes the catch below and is
+      // never counted.
+      track(ANALYTICS_EVENTS.POST_CREATED, {
+        postId: newPost?.id,
+        postType: reorderedFiles[0]?.type.startsWith("video/") ? "video" : "photo",
+        mediaCount: reorderedFiles.length,
+        hasCaption: caption.trim().length > 0,
+        skill: state.currentUser?.skill,
+        location,
+      });
+
       setPosted(true);
       setTimeout(() => onNavigate("own-profile"), 1400);
     } catch (err) {

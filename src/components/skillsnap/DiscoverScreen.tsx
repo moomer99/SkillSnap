@@ -265,6 +265,8 @@ function ProCard({
           fullWidth
           size="sm"
           loading={connecting}
+          source="discover"
+          targetUserId={pin.userId as string}
         />
       </div>
     </div>
