@@ -36,3 +36,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# expo leftovers
+.expo/
+app.json
+
+# editor
+.vscode/
+
+# supabase temp
+supabase/.temp/
