@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { ArrowLeft, ChevronRight, User, Lock, Bell, Shield, HelpCircle, FileText, LogOut, Trash2, Loader2, CheckCircle, Zap, Info, Mail } from "lucide-react";
+import { ArrowLeft, ChevronRight, User, Lock, Bell, Shield, HelpCircle, FileText, LogOut, Trash2, Loader2, CheckCircle, Zap, Info, Mail, MessageSquare } from "lucide-react";
 import type { Screen } from "@/types";
+import { FEEDBACK_MAILTO } from "@/constants/contact";
 import { useAppState } from "@/state/AppState";
 import { getNotifPermission, requestNotifPermission } from "@/hooks/useNotifications";
 import UserAvatar from "./shared/UserAvatar";
@@ -194,6 +195,14 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
             iconBg="#e0f2fe"
             label="Contact Us"
             onPress={() => onNavigate("contact")}
+          />
+          <Divider />
+          <SettingsRow
+            icon={<MessageSquare size={16} className="text-[#6c47ff]" />}
+            iconBg="#ede9fe"
+            label="Feedback"
+            hint="Tell us what to build next"
+            onPress={() => { window.location.href = FEEDBACK_MAILTO; }}
           />
           <Divider />
           <SettingsRow

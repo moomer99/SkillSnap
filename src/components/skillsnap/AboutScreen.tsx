@@ -1,6 +1,7 @@
 "use client";
 import { ArrowLeft } from "lucide-react";
 import type { Screen } from "@/types";
+import { SUPPORT_EMAIL } from "@/constants/contact";
 
 interface AboutScreenProps {
   onNavigate: (s: Screen) => void;
@@ -60,6 +61,12 @@ export default function AboutScreen({ onNavigate }: AboutScreenProps) {
             <span className="text-sm font-semibold text-[#1a1a1a]">Contact</span>
             <span className="text-xs text-[#6c47ff] font-semibold">Get in touch ↗</span>
           </button>
+          <div className="h-px bg-[#f0eeea]" />
+          <a href={`mailto:${SUPPORT_EMAIL}`}
+            className="flex items-center justify-between px-4 py-4 active:bg-[#f8f7f5] transition-colors">
+            <span className="text-sm font-semibold text-[#1a1a1a]">Email</span>
+            <span className="text-xs text-[#6c47ff] font-semibold">{SUPPORT_EMAIL} ↗</span>
+          </a>
         </div>
 
         <p className="text-xs text-[#b0aaa5] text-center">© 2025 SkillSnap Pty Ltd · Sydney, Australia</p>

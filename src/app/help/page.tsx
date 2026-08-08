@@ -3,6 +3,7 @@ import Link from "next/link";
 import LegalPage, {
   Bullets,
   Callout,
+  FEEDBACK_MAILTO,
   Section,
   SubSection,
   SUPPORT_EMAIL,
@@ -234,6 +235,13 @@ export default function HelpPage() {
           </a>
           . Tell us your username and what happened, and include a screenshot if you have one. We
           usually reply within a couple of days.
+        </p>
+        <p>
+          Got an idea or something that could work better?{" "}
+          <a href={FEEDBACK_MAILTO} className="text-[#6c47ff] font-semibold">
+            Send us feedback
+          </a>
+          .
         </p>
         <p>SkillSnap · Sydney, New South Wales, Australia</p>
       </Section>

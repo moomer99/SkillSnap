@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import type { Screen } from "@/types";
+import { FEEDBACK_MAILTO } from "@/constants/contact";
 
 interface HelpScreenProps {
   onNavigate: (s: Screen) => void;
@@ -84,6 +85,9 @@ export default function HelpScreen({ onNavigate }: HelpScreenProps) {
           >
             Contact Us
           </button>
+          <a href={FEEDBACK_MAILTO} className="block mt-3 text-xs font-semibold text-[#6c47ff]">
+            Send feedback
+          </a>
         </div>
       </div>
     </div>

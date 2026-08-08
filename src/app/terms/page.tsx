@@ -27,7 +27,7 @@ export default function TermsPage() {
   return (
     <LegalPage
       title="Terms of Service"
-      lastUpdated="1 August 2026"
+      lastUpdated="9 August 2026"
       intro="These are the rules for using SkillSnap. By creating an account or using the app or website, you agree to them. If you do not agree, please do not use SkillSnap."
     >
       <Section title="1. About SkillSnap">
@@ -80,7 +80,21 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="4. Your content">
+      <Section title="4. Content guidelines">
+        <p>
+          All posts must relate to a skill, trade, service, or professional work. Personal content,
+          reposts from other platforms, memes, or anything unrelated to skills or professional work
+          is not permitted.
+        </p>
+        <p>
+          SkillSnap may review any post manually and remove it without prior notice if it does not
+          align with our community guidelines or Terms of Service.
+        </p>
+        <p>Repeated violations may result in account suspension or permanent removal.</p>
+        <p>SkillSnap reserves the right to make removal decisions at its sole discretion.</p>
+      </Section>
+
+      <Section title="5. Your content">
         <p>
           You own what you post. Your photos, videos, captions and profile text remain yours, and
           nothing here transfers ownership to us.
@@ -107,7 +121,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="5. SkillSnap is not a party to your work agreement">
+      <Section title="6. SkillSnap is not a party to your work agreement">
         <Callout>
           SkillSnap introduces people. It is not an employer, an agency, a contractor, or a party
           to any agreement you make with someone you meet here.
@@ -124,7 +138,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="6. No warranty on other users or their work">
+      <Section title="7. No warranty on other users or their work">
         <p>
           We do not verify the qualifications, licences, insurance, police checks, identity or work
           quality of anyone on SkillSnap. A profile on SkillSnap is not a recommendation or an
@@ -143,7 +157,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="7. The service itself">
+      <Section title="8. The service itself">
         <p>
           SkillSnap is provided &ldquo;as is&rdquo;. We will make reasonable efforts to keep it
           running, but we do not promise it will always be available, error-free, or that anything
@@ -155,7 +169,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="8. Liability">
+      <Section title="9. Liability">
         <p>
           Nothing in these terms excludes, restricts or modifies any right you have under the
           Australian Consumer Law or any other law that cannot be excluded by agreement. Where a
@@ -174,7 +188,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="9. Suspension and termination">
+      <Section title="10. Suspension and termination">
         <p>
           You can stop using SkillSnap at any time and delete your account from Settings. Deleting
           your account removes your profile, posts, media and messages, and cannot be undone.
@@ -194,7 +208,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="10. Privacy">
+      <Section title="11. Privacy">
         <p>
           Our{" "}
           <Link href="/privacy" className="text-[#6c47ff] font-semibold">
@@ -206,7 +220,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="11. Changes to these terms">
+      <Section title="12. Changes to these terms">
         <p>
           We may update these terms. We will change the date at the top, and if the change is
           significant we will tell you in the app or by email before it takes effect. Continuing to
@@ -214,7 +228,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="12. Governing law">
+      <Section title="13. Governing law">
         <p>
           These terms are governed by the laws of New South Wales, Australia. You and SkillSnap
           submit to the non-exclusive jurisdiction of the courts of New South Wales and the courts
@@ -222,7 +236,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="13. Contact">
+      <Section title="14. Contact">
         <p>
           Questions about these terms? Email{" "}
           <a href={`mailto:${SUPPORT_EMAIL}`} className="text-[#6c47ff] font-semibold">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SkillSnapLogo from "@/components/skillsnap/shared/SkillSnapLogo";
+import { FEEDBACK_MAILTO, SUPPORT_EMAIL } from "@/constants/contact";
 
 // ─────────────────────────────────────────────
 // Shared chrome for /privacy, /terms and /help
@@ -19,7 +20,8 @@ const LINKS = [
  *  Play requires a publicly findable deletion page. */
 const FOOTER_LINKS = [...LINKS, { href: "/delete-account", label: "Delete account" }];
 
-export const SUPPORT_EMAIL = "mo@skillsnap.com.au";
+// Re-exported so the legal pages can keep importing everything from here.
+export { FEEDBACK_MAILTO, SUPPORT_EMAIL };
 
 export function Section({
   title,

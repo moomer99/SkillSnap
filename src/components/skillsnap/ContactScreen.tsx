@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import type { Screen } from "@/types";
+import { SUPPORT_EMAIL } from "@/constants/contact";
 
 interface ContactScreenProps {
   onNavigate: (s: Screen) => void;
@@ -68,8 +69,15 @@ export default function ContactScreen({ onNavigate }: ContactScreenProps) {
           </div>
         ) : (
           <>
-            <p className="text-sm text-[#7a7570] mb-6 leading-relaxed">
+            <p className="text-sm text-[#7a7570] mb-2 leading-relaxed">
               Have a question or feedback? We'd love to hear from you.
+            </p>
+            <p className="text-sm text-[#7a7570] mb-6 leading-relaxed">
+              You can also email us at{" "}
+              <a href={`mailto:${SUPPORT_EMAIL}`} className="text-[#6c47ff] font-semibold">
+                {SUPPORT_EMAIL}
+              </a>
+              .
             </p>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
