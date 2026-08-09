@@ -13,7 +13,7 @@ import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import Image from "next/image";
 import {
   Heart, Bookmark, MessageCircle, Send, MapPin, Volume2, VolumeX,
-  Navigation, X, Play, MoreVertical, Maximize2, Share2,
+  Navigation, X, Play, MoreHorizontal, Share2,
 } from "lucide-react";
 import type { Post, Screen } from "@/types";
 import { formatLikes } from "@/mock-data/posts";
@@ -239,10 +239,10 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
       </header>
 
       {/* ── Feed column ── */}
-      <div className="flex flex-col gap-5 px-3 sm:px-0 py-4">
+      <div className="flex flex-col">
         {showRoleBanner && (
           <div
-            className="rounded-2xl flex items-center gap-3 px-4 py-3"
+            className="mx-3 mt-4 rounded-2xl flex items-center gap-3 px-4 py-3"
             style={{ background: "var(--ss-purple-soft)", border: "1px solid var(--ss-purple-border)" }}
           >
             <div className="flex-1 min-w-0">
@@ -266,7 +266,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
 
         {showLocationBanner && (
           <div
-            className="rounded-2xl flex items-center gap-3 px-4 py-3"
+            className="mx-3 mt-4 rounded-2xl flex items-center gap-3 px-4 py-3"
             style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
           >
             <div
@@ -667,7 +667,9 @@ function FeedCard({
     };
   }, [activeMediaType, activeMediaUrl]);
 
-  const togglePlay = useCallback(() => {
+  // Video toggles playback in place; a photo has no play state, so tapping it
+  // opens the full-screen viewer instead.
+  const handleMediaClick = useCallback(() => {
     const video = videoRef.current;
     if (!video) { onFullscreen(); return; }
     if (video.paused) { video.play().catch(() => {}); } else { video.pause(); }
@@ -685,13 +687,6 @@ function FeedCard({
   const caption = post.caption ?? "";
   const captionIsLong = caption.length > 140;
 
-  // Portrait video shot for phones is taller than most desktop viewports, so
-  // anything more portrait than 3:4 is sized from a capped height and centred
-  // on the card instead of stretched to the full 600px column.
-  const mediaBoxStyle: React.CSSProperties = aspect < 0.75
-    ? { aspectRatio: String(aspect), height: "min(78vh, 760px)", maxWidth: "100%" }
-    : { aspectRatio: String(aspect), width: "100%" };
-
   async function handleSaveEdit() {
     const patch = { caption: editCaption, skill: editSkill || null, location: editLocation };
     dispatch({ type: "UPDATE_POST", postId: post.id, patch });
@@ -708,158 +703,23 @@ function FeedCard({
   return (
     <article
       ref={cardRef}
-      className="relative w-full rounded-3xl overflow-hidden"
-      style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
+      className="relative w-full"
+      style={{ background: "#0d0a1a", borderBottom: "1px solid #ffffff10" }}
     >
-      {/* ── Media ── */}
-      <div
-        className="relative w-full bg-black flex justify-center cursor-pointer select-none"
-        onClick={togglePlay}
-      >
-        <div className="relative" style={mediaBoxStyle}>
-          {activeMediaType === "video" && activeMediaUrl ? (
-            <video
-              ref={videoRef}
-              src={activeMediaUrl}
-              className="w-full h-full object-cover"
-              loop playsInline
-              preload="metadata"
-              muted={muted}
-              poster={post.thumbnailUrl}
-              onLoadedMetadata={(e) => {
-                const v = e.currentTarget;
-                setAspect(clampAspect(v.videoWidth, v.videoHeight));
-              }}
-              onPlay={() => setPlaying(true)}
-              onPause={() => setPlaying(false)}
-            />
-          ) : activeMediaUrl ? (
-            <img
-              src={activeMediaUrl}
-              alt={caption || `Work by ${author.displayName}`}
-              className="w-full h-full object-cover"
-              loading="lazy"
-              onLoad={(e) => {
-                const img = e.currentTarget;
-                setAspect(clampAspect(img.naturalWidth, img.naturalHeight));
-              }}
-            />
-          ) : (
-            <div className="w-full h-full" style={{ background: post.thumbnailGradient }} />
-          )}
-
-          {/* Play overlay */}
-          {activeMediaType === "video" && !playing && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center"
-                style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(6px)", border: "2px solid rgba(255,255,255,0.28)" }}
-              >
-                <Play size={22} fill="white" color="white" />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Top-left meta */}
-        <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">
-          <span
-            className="text-[11px] font-semibold text-white px-2 py-1 rounded-full"
-            style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
-          >
-            {timeAgo(post.createdAt)}
-          </span>
-        </div>
-
-        {/* Top-right controls */}
-        <div className="absolute top-3 right-3 flex items-center gap-2">
-          {activeMediaType === "video" && activeMediaUrl && (
-            <button
-              aria-label={muted ? "Unmute" : "Mute"}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-white"
-              style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
-              onClick={(e) => { e.stopPropagation(); setMuted(m => !m); }}
-            >
-              {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-            </button>
-          )}
-          <button
-            aria-label="Open full screen"
-            className="w-9 h-9 rounded-full flex items-center justify-center text-white"
-            style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
-            onClick={(e) => { e.stopPropagation(); onFullscreen(); }}
-          >
-            <Maximize2 size={15} />
-          </button>
-          {isOwnPost && (
-            <button
-              aria-label="Post options"
-              className="w-9 h-9 rounded-full flex items-center justify-center text-white"
-              style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
-              onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
-            >
-              <MoreVertical size={16} />
-            </button>
-          )}
-        </div>
-
-        {/* Carousel controls */}
-        {mediaItems && (
-          <>
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
-              {mediaItems.map((_, i) => (
-                <button
-                  key={i}
-                  aria-label={`Go to media ${i + 1}`}
-                  onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i); }}
-                  className="transition-all"
-                  style={{
-                    width: i === activeMediaIndex ? 18 : 6,
-                    height: 6,
-                    borderRadius: 99,
-                    background: i === activeMediaIndex ? "white" : "rgba(255,255,255,0.45)",
-                  }}
-                />
-              ))}
-            </div>
-            {activeMediaIndex > 0 && (
-              <button
-                aria-label="Previous"
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-white"
-                style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
-                onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i => i - 1); }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M15 18l-6-6 6-6" /></svg>
-              </button>
-            )}
-            {activeMediaIndex < mediaItems.length - 1 && (
-              <button
-                aria-label="Next"
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-white"
-                style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
-                onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i => i + 1); }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
-              </button>
-            )}
-          </>
-        )}
-      </div>
-
       {/* ── Author row ── */}
-      <div className="flex items-start gap-3 px-4 pt-4">
+      <div className="flex items-center gap-3 px-4 py-3">
         <button onClick={onProfileClick} className="flex-shrink-0" aria-label={`View ${author.displayName}'s profile`}>
           <UserAvatar user={author} size="sm" showVerified />
         </button>
 
         <div className="flex-1 min-w-0">
           <button onClick={onProfileClick} className="block text-left max-w-full">
-            <span className="text-[15px] font-bold text-white leading-tight truncate block">
+            <span className="text-[14px] font-bold text-white leading-tight truncate block">
               {author.displayName}
             </span>
           </button>
 
-          <div className="flex items-center gap-2 flex-wrap mt-1">
+          <div className="flex items-center gap-2 flex-wrap mt-0.5">
             {author.skill && (
               <span
                 className="text-[11px] font-bold px-2 py-0.5 rounded-full"
@@ -869,17 +729,16 @@ function FeedCard({
               </span>
             )}
             {displayLocation && (
-              <span className="flex items-center gap-1 text-[12px]" style={{ color: "var(--ss-text-dim)" }}>
-                <MapPin size={11} />
+              <span className="flex items-center gap-1 text-[12px] truncate" style={{ color: "var(--ss-text-dim)" }}>
+                <MapPin size={11} className="flex-shrink-0" />
                 {displayDistance !== undefined ? `${displayDistance < 1 ? "<1" : displayDistance}km · ` : ""}
                 {displayLocation.split(",")[0]}
               </span>
             )}
-          </div>
-
-          <div className="flex items-center gap-3 mt-1.5 text-[12px]" style={{ color: "var(--ss-text-muted)" }}>
-            <span><strong className="text-white font-bold">{fmtNum(author.jobsDone)}</strong> jobs done</span>
-            {happyPct && <span><strong className="text-[#4ade80] font-bold">{happyPct}</strong> happy</span>}
+            {/* The separator only earns its place when something precedes it */}
+            <span className="text-[12px]" style={{ color: "var(--ss-text-dim)" }}>
+              {author.skill || displayLocation ? "· " : ""}{timeAgo(post.createdAt)}
+            </span>
           </div>
         </div>
 
@@ -896,41 +755,135 @@ function FeedCard({
             {isFollowed ? "Following" : "Follow"}
           </button>
         )}
+
+        {isOwnPost && (
+          <button
+            aria-label="Post options"
+            className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/[0.06]"
+            style={{ color: "var(--ss-text-muted)" }}
+            onClick={() => setMenuOpen(true)}
+          >
+            <MoreHorizontal size={20} />
+          </button>
+        )}
+      </div>
+
+      {/* ── Media — full card width, own aspect ratio, nothing overlaid ── */}
+      <div
+        className="relative w-full bg-black cursor-pointer select-none"
+        style={{ aspectRatio: String(aspect) }}
+        onClick={handleMediaClick}
+      >
+        {activeMediaType === "video" && activeMediaUrl ? (
+          <video
+            ref={videoRef}
+            src={activeMediaUrl}
+            className="w-full h-full object-cover"
+            loop playsInline
+            preload="metadata"
+            muted={muted}
+            poster={post.thumbnailUrl}
+            onLoadedMetadata={(e) => {
+              const v = e.currentTarget;
+              setAspect(clampAspect(v.videoWidth, v.videoHeight));
+            }}
+            onPlay={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
+          />
+        ) : activeMediaUrl ? (
+          <img
+            src={activeMediaUrl}
+            alt={caption || `Work by ${author.displayName}`}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              setAspect(clampAspect(img.naturalWidth, img.naturalHeight));
+            }}
+          />
+        ) : (
+          <div className="w-full h-full" style={{ background: post.thumbnailGradient }} />
+        )}
+
+        {/* Carousel dots — the one exception, since multi-media posts are
+            otherwise indistinguishable from single ones */}
+        {mediaItems && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+            {mediaItems.map((_, i) => (
+              <button
+                key={i}
+                aria-label={`Go to media ${i + 1}`}
+                onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i); }}
+                className="transition-all"
+                style={{
+                  width: i === activeMediaIndex ? 18 : 6,
+                  height: 6,
+                  borderRadius: 99,
+                  background: i === activeMediaIndex ? "white" : "rgba(255,255,255,0.45)",
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Action row ── */}
-      <div className="flex items-center gap-1 px-2 pt-3">
-        <ActionButton
-          icon={<Heart size={21} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "currentColor"} strokeWidth={1.9} />}
-          label={formatLikes(post.likes)}
-          onClick={onLike}
-          active={isLiked}
-          title="Like"
-        />
-        <ActionButton
-          icon={<MessageCircle size={21} strokeWidth={1.9} />}
-          label={formatLikes(post.commentsCount ?? 0)}
-          onClick={onComment}
-          title="Comments"
-        />
-        <ActionButton
-          icon={<Bookmark size={20} fill={isSaved ? "currentColor" : "none"} strokeWidth={1.9} />}
-          label={isSaved ? "Saved" : "Save"}
-          onClick={onSave}
-          active={isSaved}
-          title="Save"
-        />
-        <ActionButton
-          icon={<Send size={20} strokeWidth={1.9} />}
-          label={(post.recommendCount ?? 0) > 0 ? formatLikes(post.recommendCount ?? 0) : "Recommend"}
-          onClick={onShare}
-          title="Recommend"
-        />
+      <div className="flex items-center justify-between gap-3 px-2 pt-2.5">
+        <div className="flex items-center gap-0.5 min-w-0">
+          <ActionButton
+            title="Like"
+            label={formatLikes(post.likes)}
+            active={isLiked}
+            onClick={onLike}
+            icon={<Heart size={22} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "currentColor"} strokeWidth={1.9} />}
+          />
+          <ActionButton
+            title="Comments"
+            label={formatLikes(post.commentsCount ?? 0)}
+            onClick={onComment}
+            icon={<MessageCircle size={22} strokeWidth={1.9} />}
+          />
+          <ActionButton
+            title="Save"
+            active={isSaved}
+            onClick={onSave}
+            icon={<Bookmark size={21} fill={isSaved ? "currentColor" : "none"} strokeWidth={1.9} />}
+          />
+          <ActionButton
+            title="Recommend"
+            label={(post.recommendCount ?? 0) > 0 ? formatLikes(post.recommendCount ?? 0) : undefined}
+            onClick={onShare}
+            icon={<Send size={21} strokeWidth={1.9} />}
+          />
+          {/* Sound lives here rather than over the video, which the layout keeps clear */}
+          {activeMediaType === "video" && activeMediaUrl && (
+            <ActionButton
+              title={muted ? "Unmute" : "Mute"}
+              active={!muted}
+              onClick={() => setMuted((m) => !m)}
+              icon={muted ? <VolumeX size={20} strokeWidth={1.9} /> : <Volume2 size={20} strokeWidth={1.9} />}
+            />
+          )}
+        </div>
+
+        <div className="flex-shrink-0">
+          {isOwnPost ? (
+            <button
+              onClick={onShare}
+              className="h-9 px-4 rounded-full font-semibold text-[13px] text-white flex items-center justify-center gap-1.5 transition-colors"
+              style={{ border: "1px solid var(--ss-line-strong)", background: "var(--ss-surface-2)" }}
+            >
+              <Share2 size={15} /> Share
+            </button>
+          ) : (
+            <ConnectButton onClick={onConnectClick} size="sm" loading={connecting} />
+          )}
+        </div>
       </div>
 
       {/* ── Caption ── */}
       {caption && (
-        <div className="px-4 pt-2">
+        <div className="px-4 pt-2 pb-4">
           <p
             className={`text-[14px] leading-relaxed ${captionIsLong && !captionExpanded ? "ss-clamp-2" : ""}`}
             style={{ color: "rgba(255,255,255,0.82)" }}
@@ -939,30 +892,16 @@ function FeedCard({
           </p>
           {captionIsLong && (
             <button
-              onClick={() => setCaptionExpanded(v => !v)}
+              onClick={() => setCaptionExpanded((v) => !v)}
               className="text-[13px] font-semibold mt-1"
               style={{ color: "var(--ss-text-dim)" }}
             >
-              {captionExpanded ? "Show less" : "Show more"}
+              {captionExpanded ? "less" : "more"}
             </button>
           )}
         </div>
       )}
-
-      {/* ── Primary action ── */}
-      <div className="px-4 pt-4 pb-4">
-        {isOwnPost ? (
-          <button
-            onClick={onShare}
-            className="w-full h-11 rounded-2xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-colors"
-            style={{ border: "1px solid var(--ss-line-strong)", background: "var(--ss-surface-2)" }}
-          >
-            <Share2 size={16} /> Share
-          </button>
-        ) : (
-          <ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />
-        )}
-      </div>
+      {!caption && <div className="pb-4" />}
 
       {/* ── Own-post menu ── */}
       {menuOpen && (
@@ -1089,19 +1028,24 @@ function FeedCard({
   );
 }
 
+/**
+ * One action-row control. Icons are outline at rest and filled once active
+ * (the fill is supplied by the caller, which knows the semantic colour).
+ * `label` is omitted for the controls that have no count to show.
+ */
 function ActionButton({ icon, label, onClick, active, title }: {
-  icon: React.ReactNode; label: string; onClick: () => void; active?: boolean; title: string;
+  icon: React.ReactNode; label?: string; onClick: () => void; active?: boolean; title: string;
 }) {
   return (
     <button
       onClick={onClick}
       title={title}
       aria-label={title}
-      className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl transition-colors hover:bg-white/[0.06]"
+      className="flex items-center gap-1.5 px-2 py-2 rounded-xl transition-colors hover:bg-white/[0.06]"
       style={{ color: active ? "white" : "var(--ss-text-muted)" }}
     >
       {icon}
-      <span className="text-[13px] font-semibold">{label}</span>
+      {label !== undefined && <span className="text-[13px] font-semibold">{label}</span>}
     </button>
   );
 }
