@@ -6,7 +6,7 @@
 // desktop (1280px+). Dark-first, matching the mobile app.
 // ─────────────────────────────────────────────
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Menu, X, ArrowRight, MapPin, Play } from "lucide-react";
+import { Menu, X, ArrowRight, Play } from "lucide-react";
 import type { Screen } from "@/types";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
 import AppStoreButtons from "./shared/AppStoreButtons";
@@ -76,20 +76,17 @@ const FALLBACK_GRADIENTS = [
 ];
 
 /**
- * Top pros that have at least one post, newest work first.
+ * Top pros that have at least one post, newest work first. Feeds the hero
+ * phone mockup, which shows the first one's work as the on-screen feed card.
  * Two queries (profiles, then their posts) mirroring the shape the rest of
  * the app uses — the anon key can read both under RLS.
  */
-function useFeaturedPros(): { pros: FeaturedPro[]; loading: boolean } {
+function useFeaturedPros(): FeaturedPro[] {
   const [pros, setPros] = useState<FeaturedPro[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (!supabaseUrl || supabaseUrl.includes("your-project-ref")) {
-      setLoading(false);
-      return;
-    }
+    if (!supabaseUrl || supabaseUrl.includes("your-project-ref")) return;
     let cancelled = false;
 
     void (async () => {
@@ -106,7 +103,6 @@ function useFeaturedPros(): { pros: FeaturedPro[]; loading: boolean } {
         if (cancelled) return;
         if (profErr || !profiles || profiles.length === 0) {
           if (profErr) console.error("[LandingPage] profiles query failed:", profErr.message);
-          setLoading(false);
           return;
         }
 
@@ -120,7 +116,6 @@ function useFeaturedPros(): { pros: FeaturedPro[]; loading: boolean } {
         if (cancelled) return;
         if (postsErr) {
           console.error("[LandingPage] posts query failed:", postsErr.message);
-          setLoading(false);
           return;
         }
 
@@ -160,17 +155,15 @@ function useFeaturedPros(): { pros: FeaturedPro[]; loading: boolean } {
           });
 
         setPros(featured);
-        setLoading(false);
       } catch (e) {
         console.error("[LandingPage] featured pros fetch failed:", e);
-        if (!cancelled) setLoading(false);
       }
     })();
 
     return () => { cancelled = true; };
   }, []);
 
-  return { pros, loading };
+  return pros;
 }
 
 // ── Shared bits ────────────────────────────────────────────────────────────
@@ -418,81 +411,9 @@ function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
   );
 }
 
-// ── Featured pro card ──────────────────────────────────────────────────────
-function ProCard({ pro }: { pro: FeaturedPro }) {
-  const href = pro.username ? `/@${pro.username}` : undefined;
-  const Wrapper = href ? "a" : "div";
-
-  return (
-    <Wrapper
-      {...(href ? { href } : {})}
-      className="group block w-[190px] sm:w-auto flex-shrink-0 rounded-2xl overflow-hidden transition-transform hover:-translate-y-1"
-      style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
-    >
-      <div className="relative w-full" style={{ aspectRatio: "3 / 4", background: pro.cardGradient }}>
-        {pro.thumbnailUrl && (
-          <img
-            src={pro.thumbnailUrl}
-            alt={`Work by ${pro.name}`}
-            className="absolute inset-0 w-full h-full object-cover"
-            loading="lazy"
-          />
-        )}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 55%, rgba(0,0,0,0.55) 100%)" }} />
-        {pro.isVideo && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div
-              className="rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
-              style={{ width: 44, height: 44, background: "rgba(255,255,255,0.22)", backdropFilter: "blur(6px)", border: "1.5px solid rgba(255,255,255,0.35)" }}
-            >
-              <Play size={16} fill="white" color="white" />
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="p-4">
-        <div className="flex items-center gap-2 mb-2">
-          {pro.avatarUrl ? (
-            <img src={pro.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" loading="lazy" />
-          ) : (
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-              style={{ background: pro.avatarGradient }}
-            >
-              {pro.avatarInitial}
-            </div>
-          )}
-          <p className="text-sm font-bold text-white truncate">
-            {pro.username ? `@${pro.username}` : pro.name}
-          </p>
-        </div>
-
-        <span
-          className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full mb-2"
-          style={{ background: "var(--ss-purple-soft)", border: "1px solid var(--ss-purple-border)", color: "var(--ss-purple-light)" }}
-        >
-          {pro.skill}
-        </span>
-
-        {pro.location && (
-          <p className="flex items-center gap-1 text-[12px] truncate" style={{ color: "var(--ss-text-dim)" }}>
-            <MapPin size={11} className="flex-shrink-0" />
-            <span className="truncate">{pro.location.split(",")[0]}</span>
-          </p>
-        )}
-
-        <p className="text-[12px] font-semibold mt-1.5" style={{ color: "var(--ss-text-muted)" }}>
-          {pro.jobsDone} {pro.jobsDone === 1 ? "job" : "jobs"} done
-        </p>
-      </div>
-    </Wrapper>
-  );
-}
-
 // ── Page ───────────────────────────────────────────────────────────────────
 export default function LandingPage({ onNavigate }: LandingPageProps) {
-  const { pros, loading } = useFeaturedPros();
+  const pros = useFeaturedPros();
 
   const goToFeed = useCallback(() => onNavigate("home"), [onNavigate]);
   const goToSignup = useCallback(() => onNavigate("auth"), [onNavigate]);
@@ -731,65 +652,6 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           </div>
         </div>
       </section>
-
-      {/* ── 1E. FEATURED PROS ─────────────────────────────────────── */}
-      {(loading || pros.length > 0) && (
-        <section className="py-16 sm:py-24" style={{ background: "var(--ss-bg-alt)", borderTop: "1px solid var(--ss-line)" }}>
-          <div className={CONTAINER}>
-            <FadeIn>
-              <div className="text-center mb-10">
-                <SectionLabel>Featured pros</SectionLabel>
-                <h2 className="text-[28px] sm:text-[38px] font-extrabold mt-3 leading-tight">Real work, real people</h2>
-              </div>
-            </FadeIn>
-
-            {loading ? (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                {[0, 1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="rounded-2xl overflow-hidden animate-pulse"
-                    style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
-                  >
-                    <div className="w-full" style={{ aspectRatio: "3 / 4", background: "rgba(255,255,255,0.05)" }} />
-                    <div className="p-4 flex flex-col gap-2">
-                      <div className="h-3 w-2/3 rounded" style={{ background: "rgba(255,255,255,0.08)" }} />
-                      <div className="h-3 w-1/2 rounded" style={{ background: "rgba(255,255,255,0.06)" }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <FadeIn>
-                {/* Mobile: horizontal scroll · Tablet: 2 up · Desktop: up to 4 up.
-                    With fewer than four pros the grid narrows and centres rather
-                    than leaving dead columns on the right. */}
-                <div
-                  className={`flex gap-4 overflow-x-auto no-scrollbar -mx-5 px-5 sm:mx-auto sm:px-0 sm:overflow-visible sm:grid sm:gap-5 ${
-                    pros.length === 1 ? "sm:grid-cols-1 sm:max-w-[300px]"
-                      : pros.length === 2 ? "sm:grid-cols-2 sm:max-w-[620px]"
-                      : pros.length === 3 ? "sm:grid-cols-2 lg:grid-cols-3 lg:max-w-[940px]"
-                      : "sm:grid-cols-2 lg:grid-cols-4"
-                  }`}
-                >
-                  {pros.map((pro) => <ProCard key={pro.id} pro={pro} />)}
-                </div>
-              </FadeIn>
-            )}
-
-            <div className="flex justify-center mt-10">
-              <button
-                onClick={goToFeed}
-                className="group inline-flex items-center gap-2 text-[15px] font-bold transition-colors hover:text-white"
-                style={{ color: "var(--ss-purple-light)" }}
-              >
-                Browse All Pros
-                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-              </button>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ── 1F. FOOTER CTA ────────────────────────────────────────── */}
       <section id="download" className="relative overflow-hidden py-16 sm:py-20" style={{ background: "var(--ss-purple)" }}>
