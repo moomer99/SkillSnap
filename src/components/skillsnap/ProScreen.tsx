@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { ArrowLeft, Zap, Star, TrendingUp, Video, Shield, Gift, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import type { Screen } from "@/types";
-import { useEarlyBirdCount } from '@/hooks/useEarlyBirdCount';
 
 interface ProScreenProps {
   onNavigate: (s: Screen) => void;
@@ -22,7 +21,6 @@ const FEATURES = [
 export default function ProScreen({ onNavigate }: ProScreenProps) {
   const [expanded, setExpanded] = useState(false);
   const [notified, setNotified] = useState(false);
-  const { count, remaining, loading } = useEarlyBirdCount();
 
   async function handleNotify() {
     setNotified(true);
@@ -93,40 +91,6 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
           <div className="flex items-center justify-center gap-2 mt-5">
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#6c47ff", animation: "pulse 1.5s infinite" }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: "#a78bfa", letterSpacing: 1 }}>LAUNCHING SOON</span>
-          </div>
-        </div>
-
-        {/* Early Bird Banner */}
-        <div className="mx-4 mb-5 rounded-2xl overflow-hidden" style={{ background: "linear-gradient(135deg, #1a0f3c 0%, #2d1b69 100%)", border: "1px solid rgba(167,139,250,0.25)" }}>
-          <div className="px-4 py-4">
-            <div className="flex items-start gap-3">
-              <div style={{ width: 44, height: 44, borderRadius: 14, background: "linear-gradient(135deg, #f59e0b, #fbbf24)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Gift size={22} color="white" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span style={{ fontSize: 13, fontWeight: 800, color: "#fff" }}>Free 3-Month Pro Access</span>
-                  <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 99, background: "rgba(251,191,36,0.2)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>EXCLUSIVE</span>
-                </div>
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>
-                  Be one of the <span style={{ color: "#fbbf24", fontWeight: 700 }}>first 100 users</span> to sign up and upload a video — get <span style={{ color: "#fbbf24", fontWeight: 700 }}>3 months of Pro Plus free</span>, no credit card needed.
-                </p>
-              </div>
-            </div>
-
-            {/* Progress bar */}
-            <div className="mt-3">
-              <div className="flex justify-between mb-1.5">
-                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>Early spots claimed</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#fbbf24" }}>{loading ? '...' : `${count} / 100`}</span>
-              </div>
-              <div style={{ height: 6, borderRadius: 99, background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${loading ? 0 : count}%`, borderRadius: 99, background: "linear-gradient(90deg, #f59e0b, #fbbf24)", transition: "width 0.6s ease" }} />
-              </div>
-              <p style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", marginTop: 5, textAlign: "center" }}>
-                {loading ? 'Checking spots...' : `${remaining} spots remaining — sign up and upload your first video to claim yours`}
-              </p>
-            </div>
           </div>
         </div>
 
@@ -221,7 +185,7 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
                 <span style={{ fontSize: 22 }}>✓</span>
               </div>
               <p style={{ color: "#34d399", fontWeight: 700, fontSize: 15 }}>You're on the list!</p>
-              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, textAlign: "center" }}>We'll notify you the moment Pro launches. You're in the early bird window.</p>
+              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, textAlign: "center" }}>We&apos;ll notify you the moment Pro launches.</p>
             </div>
           ) : (
             <>
