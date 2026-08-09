@@ -181,19 +181,43 @@ html.light {
   .ss-right-rail { display: none !important; }
 }
 
-/* Mapbox popup — the default is a white bubble with a white tip, which reads
-   as a hole punched in the dark map style. */
-.ss-map-popup .mapboxgl-popup-content {
+/* ── Leaflet ──
+   Leaflet ships a light chrome: a grey canvas, a white popup bubble and white
+   zoom buttons, all of which punch holes in the dark basemap. */
+.leaflet-container {
+  background: var(--ss-bg);
+  font: inherit;
+}
+/* divIcon draws a white box with a border by default — the pin supplies its own */
+.ss-map-pin {
+  background: transparent;
+  border: 0;
+}
+.ss-map-popup .leaflet-popup-content-wrapper {
   background: var(--ss-surface);
+  color: var(--ss-text);
   border: 1px solid var(--ss-line);
   border-radius: 14px;
-  padding: 10px;
   box-shadow: 0 10px 34px rgba(0, 0, 0, 0.55);
 }
-.ss-map-popup .mapboxgl-popup-tip { border-top-color: var(--ss-surface); }
-.ss-map-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-tip { border-bottom-color: var(--ss-surface); border-top-color: transparent; }
-.ss-map-popup.mapboxgl-popup-anchor-left .mapboxgl-popup-tip { border-right-color: var(--ss-surface); border-top-color: transparent; }
-.ss-map-popup.mapboxgl-popup-anchor-right .mapboxgl-popup-tip { border-left-color: var(--ss-surface); border-top-color: transparent; }
+.ss-map-popup .leaflet-popup-content { margin: 10px; }
+.ss-map-popup .leaflet-popup-tip {
+  background: var(--ss-surface);
+  border: 1px solid var(--ss-line);
+}
+.leaflet-control-attribution {
+  background: rgba(13, 10, 26, 0.72) !important;
+  color: var(--ss-text-dim) !important;
+  font-size: 10px;
+}
+.leaflet-control-attribution a { color: var(--ss-purple-light) !important; }
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background: var(--ss-surface);
+  color: var(--ss-text);
+  border-bottom-color: var(--ss-line);
+}
+.leaflet-bar a:hover { background: var(--ss-surface-2); }
 
 /* Caption clamp used by feed cards */
 .ss-clamp-2 {

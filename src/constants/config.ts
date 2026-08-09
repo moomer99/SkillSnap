@@ -29,10 +29,11 @@ export const DB_CONFIG = {
   URL: "",
 } as const;
 
-// Maps — swap with real maps SDK key
+// Maps — the Discover map runs on Leaflet over CARTO dark tiles, which needs
+// no key. These stay for the mobile app and any future keyed provider.
 export const MAP_CONFIG = {
-  PROVIDER: "", // e.g. "mapbox" | "google"
-  API_KEY: "", // e.g. process.env.NEXT_PUBLIC_MAP_KEY
+  PROVIDER: "leaflet-carto",
+  API_KEY: "", // not required by the current provider
   DEFAULT_LAT: -33.9214,
   DEFAULT_LNG: 150.9224,
   DEFAULT_ZOOM: 13,

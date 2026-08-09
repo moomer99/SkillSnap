@@ -9,9 +9,9 @@
 // with real coordinates (`mappablePros`), so a pro who has not set a location
 // is still discoverable — they just have no pin.
 //
-// The map is Mapbox, loaded only when NEXT_PUBLIC_MAPBOX_TOKEN is set. Without
-// a token the deploy still works: <MapPanel> takes the same slot and says the
-// map is coming.
+// The map is Leaflet over CARTO dark tiles — no API key. When nobody has
+// coordinates there is nothing to plot, so <MapPanel> takes the same slot and
+// says the map is coming.
 // ─────────────────────────────────────────────
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
@@ -25,13 +25,11 @@ import SearchBar from "./shared/SearchBar";
 import FilterChips from "./shared/FilterChips";
 import ConnectButton from "./shared/ConnectButton";
 
-// mapbox-gl touches window at import time, so the map is client-only.
+// Leaflet touches window/document at construction, so the map is client-only.
 const DiscoverMap = dynamic(() => import("./DiscoverMap"), {
   ssr: false,
   loading: () => <MapFrame><span className="text-[13px]" style={{ color: "var(--ss-text-dim)" }}>Loading map…</span></MapFrame>,
 });
-
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 interface DiscoverScreenProps {
   onNavigate: (s: Screen) => void;
@@ -175,7 +173,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
           </aside>
 
           <div className="min-w-0">
-            {MAPBOX_TOKEN ? (
+            {mappablePros.length > 0 ? (
               <DiscoverMap
                 pins={mappablePros}
                 connectingUserId={connecting}
@@ -183,7 +181,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
                 onProfile={handleProfileClick}
               />
             ) : (
-              <MapPanel mappable={mappablePros.length} total={allPros.length} />
+              <MapPanel total={allPros.length} />
             )}
 
             <div className="flex items-end justify-between mt-6 mb-3">
@@ -339,15 +337,10 @@ function MapFrame({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Shown when NEXT_PUBLIC_MAPBOX_TOKEN is absent. Also reports how many of the
- * listed pros have a position, since the map can only ever show those.
+ * Shown when none of the matching pros has coordinates — there is nothing to
+ * plot, so the map is replaced rather than rendered empty.
  */
-function MapPanel({ mappable, total }: { mappable: number; total: number }) {
-  const coverage =
-    mappable === total
-      ? `all ${total} pro${total !== 1 ? "s" : ""}`
-      : `${mappable} of ${total} pros`;
-
+function MapPanel({ total }: { total: number }) {
   return (
     <MapFrame>
       <div
@@ -358,7 +351,9 @@ function MapPanel({ mappable, total }: { mappable: number; total: number }) {
       </div>
       <p className="text-[15px] font-bold text-white">Map coming soon</p>
       <p className="text-[13px] leading-relaxed mt-1.5 max-w-[440px]" style={{ color: "var(--ss-text-muted)" }}>
-        {coverage} have set a location. Set NEXT_PUBLIC_MAPBOX_TOKEN to plot them.
+        {total === 0
+          ? "No pros to place on the map yet."
+          : `None of these ${total} pros has set a location yet.`}{" "}
         Every pro below is listed either way.
       </p>
     </MapFrame>

@@ -1,7 +1,6 @@
 // ─────────────────────────────────────────────
 // SkillSnap — Discovery / Map Service (Supabase)
-// Map integration: replace SVG with Mapbox/Google
-// when NEXT_PUBLIC_MAP_KEY is set.
+// Pins feed the Leaflet map in DiscoverMap.tsx.
 // ─────────────────────────────────────────────
 import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
