@@ -1,9 +1,18 @@
 "use client";
+// ─────────────────────────────────────────────
+// SkillSnap — Home feed
+//
+// Instagram-style card column: the document scrolls, cards are capped at 600px
+// and centred, and each card keeps its media's own aspect ratio instead of
+// being stretched to fill the viewport.
+// ─────────────────────────────────────────────
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { Heart, Bookmark, MessageCircle, Send, MapPin, Volume2, VolumeX, Navigation, X, Play, MoreVertical } from "lucide-react";
-import type { Post } from "@/types";
-import type { Screen } from "@/types";
+import {
+  Heart, Bookmark, MessageCircle, Send, MapPin, Volume2, VolumeX,
+  Navigation, X, Play, MoreVertical, Maximize2, Share2,
+} from "lucide-react";
+import type { Post, Screen } from "@/types";
 import { formatLikes } from "@/mock-data/posts";
 import { useFeed } from "@/hooks/useFeed";
 import { useMessages } from "@/hooks/useMessages";
@@ -25,9 +34,17 @@ interface HomeFeedProps {
   registerScrollToTop?: (fn: () => void) => void;
 }
 
-const HEADER_H_NO_LOC = 88;
-const HEADER_H_WITH_LOC = 120;
 const RADIUS_OPTIONS = [5, 10, 25, 50];
+
+// Media narrower than 9:16 or wider than 16:9 is letterboxed rather than cropped
+const MIN_ASPECT = 9 / 16;
+const MAX_ASPECT = 16 / 9;
+const DEFAULT_ASPECT = 4 / 5;
+
+function clampAspect(w: number, h: number): number {
+  if (!w || !h) return DEFAULT_ASPECT;
+  return Math.min(MAX_ASPECT, Math.max(MIN_ASPECT, w / h));
+}
 
 function timeAgo(iso: string): string {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -52,26 +69,25 @@ function computeDistance(
   return Math.round(distanceKm(viewerLat, viewerLng, authorLat, authorLng) * 10) / 10;
 }
 
-// ── Skeleton card shown while first page loads ─────────────────────────────
-function SkeletonCard({ headerH, headerVisible }: { headerH: number; headerVisible: boolean }) {
+// ── Skeleton card shown while the first page loads ─────────────────────────
+function SkeletonCard() {
   return (
-    <div
-      className="w-full bg-[#1a1a2e] flex-shrink-0 mb-2 animate-pulse"
-      style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px - ${headerVisible ? 8 : 0}px)`, transition: 'height 0.3s ease' }}
+    <article
+      className="w-full rounded-3xl overflow-hidden animate-pulse"
+      style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
     >
-      {/* Bottom info skeleton */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-3">
+      <div className="w-full" style={{ aspectRatio: "4 / 5", background: "rgba(255,255,255,0.05)" }} />
+      <div className="p-4 flex flex-col gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white/10" />
-          <div className="flex flex-col gap-1.5">
-            <div className="w-28 h-3 rounded bg-white/10" />
-            <div className="w-16 h-2.5 rounded bg-white/10" />
+          <div className="w-10 h-10 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }} />
+          <div className="flex flex-col gap-2">
+            <div className="w-32 h-3 rounded" style={{ background: "rgba(255,255,255,0.08)" }} />
+            <div className="w-20 h-2.5 rounded" style={{ background: "rgba(255,255,255,0.06)" }} />
           </div>
         </div>
-        <div className="w-full h-12 rounded-2xl bg-white/10" />
-        <div className="w-full h-12 rounded-2xl bg-white/10" />
+        <div className="w-full h-11 rounded-2xl" style={{ background: "rgba(255,255,255,0.06)" }} />
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -84,22 +100,19 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   const [fullscreenPost, setFullscreenPost] = useState<Post | null>(null);
   // Commenting is app-only for now — tapping Comment explains where to do it.
   const [commentPrompt, setCommentPrompt] = useState<Post | null>(null);
-  const [headerVisible, setHeaderVisible] = useState(true);
-  const lastScrollY = useRef(0);
-  const feedScrollRef = useRef<HTMLDivElement>(null);
   const [locationPromptDismissed, setLocationPromptDismissed] = useState(() => {
     try { return localStorage.getItem("skillsnap_loc_prompt") === "1"; } catch { return false; }
   });
   const { showToast } = useToast();
 
-  // Infinite scroll sentinel
+  // Infinite scroll sentinel — the document is the scroll container now
   const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
     const obs = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) loadMore(); },
-      { threshold: 0.1 }
+      { rootMargin: "600px" }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -126,24 +139,9 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
     }
   }
 
-  function handleFeedScroll(e: React.UIEvent<HTMLDivElement>) {
-    const currentY = e.currentTarget.scrollTop;
-    if (currentY > lastScrollY.current && currentY > 60) {
-      // Scrolling down — hide full header
-      setHeaderVisible(false);
-    } else {
-      // Scrolling up — show full header
-      setHeaderVisible(true);
-    }
-    lastScrollY.current = currentY;
-  }
-
-  // Register scroll-to-top with parent so BottomNav home-tap can trigger it
+  // Register scroll-to-top with the shell so the bottom-nav home tap can trigger it
   useEffect(() => {
-    registerScrollToTop?.(() => {
-      feedScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-      setHeaderVisible(true);
-    });
+    registerScrollToTop?.(() => window.scrollTo({ top: 0, behavior: "smooth" }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -166,137 +164,160 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   }, [posts, location, radiusKm]);
 
   const showLocationBanner = !location && !locationPromptDismissed;
-  const headerH = location ? HEADER_H_WITH_LOC : HEADER_H_NO_LOC;
 
   // Role setup banner — shown once per session until role/skill is set
   const [roleBannerDismissed, setRoleBannerDismissed] = useState(false);
   const showRoleBanner = state.isAuthenticated && !state.currentUser?.role && !state.currentUser?.skill && !roleBannerDismissed;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
-      {/* Sticky header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-3 pb-0 w-full overflow-hidden transition-all duration-300 ease-in-out" style={{ maxHeight: headerVisible ? '200px' : '0px', opacity: headerVisible ? 1 : 0, borderBottomWidth: headerVisible ? '1px' : '0px' }}>
-        <div className="flex items-center justify-between mb-2.5">
-          <SkillSnapLogo size="sm" />
-          {location ? (
-            <button
-              onClick={() => setShowLocationPicker(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#e8e4df] bg-[#f8f7f5] active:bg-[#f0eeea] transition-colors"
-            >
-              <MapPin size={11} className="text-[#6c47ff]" />
-              <span className="text-[11px] font-semibold text-[#1a1a1a] max-w-[80px] truncate">{location.label}</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => setShowLocationPicker(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-dashed border-[#6c47ff]/40 bg-[#ede9fe]/30 active:bg-[#ede9fe]/60 transition-colors"
-            >
-              <Navigation size={11} className="text-[#6c47ff]" />
-              <span className="text-[11px] font-bold text-[#6c47ff]">Set location</span>
-            </button>
-          )}
-        </div>
-        <div
-          className="overflow-hidden transition-all duration-300 ease-in-out"
-          style={{ maxHeight: headerVisible ? '120px' : '0px', opacity: headerVisible ? 1 : 0 }}
-        >
-          <SearchBar onFocus={() => onNavigate("search")} />
+    <div className="flex flex-col w-full">
+      {/* ── Sticky header ── */}
+      <header
+        className="sticky top-0 z-30 px-4 pt-3 pb-3"
+        style={{
+          background: "rgba(13,10,26,0.90)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid var(--ss-line)",
+        }}
+      >
+        <div className="flex items-center justify-between gap-3 mb-2.5">
+          {/* The rail already shows the logo from md up */}
+          <span className="md:hidden"><SkillSnapLogo size="sm" dark /></span>
+          <h1 className="hidden md:block text-[20px] font-bold text-white">Feed</h1>
 
-          {location && (
-            <div className="flex items-center gap-2 pb-2.5 pt-2 overflow-x-auto no-scrollbar">
-              <span className="text-[10px] font-bold text-[#b0aaa5] uppercase tracking-wider flex-shrink-0">Radius</span>
-              <div className="flex items-center gap-1.5">
-                {RADIUS_OPTIONS.map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => setRadiusKm(r)}
-                    className={`flex-shrink-0 px-3 py-1 rounded-full text-[11px] font-bold transition-all ${
-                      radiusKm === r
-                        ? "bg-[#6c47ff] text-white shadow-sm"
-                        : "bg-[#f0eeea] text-[#7a7570] active:bg-[#e8e4df]"
-                    }`}
-                  >
-                    {r} km
-                  </button>
-                ))}
-              </div>
-              <span className="ml-auto text-[10px] text-[#b0aaa5] font-medium flex-shrink-0">
-                {filteredPosts.length} result{filteredPosts.length !== 1 ? "s" : ""}
-              </span>
-            </div>
-          )}
+          <button
+            onClick={() => setShowLocationPicker(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors"
+            style={
+              location
+                ? { border: "1px solid var(--ss-line)", background: "var(--ss-surface-2)" }
+                : { border: "1px dashed var(--ss-purple-border)", background: "var(--ss-purple-soft)" }
+            }
+          >
+            {location
+              ? <MapPin size={12} style={{ color: "var(--ss-purple-light)" }} />
+              : <Navigation size={12} style={{ color: "var(--ss-purple-light)" }} />}
+            <span
+              className="text-[12px] font-semibold max-w-[110px] truncate"
+              style={{ color: location ? "white" : "var(--ss-purple-light)" }}
+            >
+              {location ? location.label : "Set location"}
+            </span>
+          </button>
         </div>
+
+        <SearchBar onFocus={() => onNavigate("search")} />
+
+        {location && (
+          <div className="flex items-center gap-2 pt-2.5 overflow-x-auto no-scrollbar">
+            <span className="text-[10px] font-bold uppercase tracking-wider flex-shrink-0" style={{ color: "var(--ss-text-dim)" }}>
+              Radius
+            </span>
+            <div className="flex items-center gap-1.5">
+              {RADIUS_OPTIONS.map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setRadiusKm(r)}
+                  className="flex-shrink-0 px-3 py-1 rounded-full text-[11px] font-bold transition-colors"
+                  style={
+                    radiusKm === r
+                      ? { background: "var(--ss-purple)", color: "white" }
+                      : { background: "var(--ss-surface-2)", color: "var(--ss-text-muted)" }
+                  }
+                >
+                  {r} km
+                </button>
+              ))}
+            </div>
+            <span className="ml-auto text-[11px] font-medium flex-shrink-0" style={{ color: "var(--ss-text-dim)" }}>
+              {filteredPosts.length} result{filteredPosts.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+        )}
       </header>
 
-      {/* Feed scroll container */}
-      <div ref={feedScrollRef} className={`overflow-y-auto no-scrollbar${showLocationPicker ? ' !overflow-hidden' : ''}`} style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px)`, transition: 'height 0.3s ease' }} onScroll={handleFeedScroll}>
-        {/* Role setup banner */}
+      {/* ── Feed column ── */}
+      <div className="flex flex-col gap-5 px-3 sm:px-4 py-4">
         {showRoleBanner && (
           <div
-            className="mx-3 mt-3 mb-1 rounded-2xl flex items-center gap-3 px-4 py-3"
-            style={{ background: "#eef0ff", border: "1.5px solid rgba(108,71,255,0.18)" }}
+            className="rounded-2xl flex items-center gap-3 px-4 py-3"
+            style={{ background: "var(--ss-purple-soft)", border: "1px solid var(--ss-purple-border)" }}
           >
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-bold" style={{ color: "#4c35c4" }}>Complete your profile</p>
-              <p className="text-[11px] leading-snug" style={{ color: "#6c55d4" }}>Let people know if you&apos;re a Client or a skilled Pro</p>
+              <p className="text-[13px] font-bold text-white">Complete your profile</p>
+              <p className="text-[12px] leading-snug" style={{ color: "var(--ss-text-muted)" }}>
+                Let people know if you&apos;re a Client or a skilled Pro
+              </p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => onNavigate("edit-profile")}
-                className="text-[11px] font-bold text-white px-3 py-1.5 rounded-full"
-                style={{ background: "#6c47ff" }}
+                className="text-[12px] font-bold text-white px-3 py-1.5 rounded-full"
+                style={{ background: "var(--ss-purple)" }}
               >
                 Set my role
               </button>
-              <button onClick={() => setRoleBannerDismissed(true)} className="p-1" style={{ color: "#9480e8" }}>✕</button>
+              <button onClick={() => setRoleBannerDismissed(true)} aria-label="Dismiss" className="p-1" style={{ color: "var(--ss-text-dim)" }}>✕</button>
             </div>
           </div>
         )}
 
         {showLocationBanner && (
           <div
-            className="mx-3 mt-3 mb-1 rounded-2xl overflow-hidden flex items-center gap-3 px-4 py-3"
-            style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)", border: "1.5px solid rgba(108,71,255,0.18)" }}
+            className="rounded-2xl flex items-center gap-3 px-4 py-3"
+            style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
           >
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}>
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+            >
               <Navigation size={16} color="white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-bold text-[#1a1a1a]">Find pros near you</p>
-              <p className="text-[11px] text-[#7a7570] leading-snug">Set your location to see skilled workers in your area</p>
+              <p className="text-[13px] font-bold text-white">Find pros near you</p>
+              <p className="text-[12px] leading-snug" style={{ color: "var(--ss-text-muted)" }}>
+                Set your location to see skilled workers in your area
+              </p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <button onClick={() => setShowLocationPicker(true)}
-                className="text-[11px] font-bold text-white px-3 py-1.5 rounded-full"
-                style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}>
+              <button
+                onClick={() => setShowLocationPicker(true)}
+                className="text-[12px] font-bold text-white px-3 py-1.5 rounded-full"
+                style={{ background: "var(--ss-purple)" }}
+              >
                 Set
               </button>
-              <button onClick={dismissPrompt} className="text-[#b0aaa5] p-1">✕</button>
+              <button onClick={dismissPrompt} aria-label="Dismiss" className="p-1" style={{ color: "var(--ss-text-dim)" }}>✕</button>
             </div>
           </div>
         )}
 
-        {/* Skeleton — shown immediately on first load before posts arrive */}
         {loading && filteredPosts.length === 0 ? (
-          <div className="relative" style={{ height: `calc(100dvh - ${headerH}px - 8px)` }}>
-            <SkeletonCard headerH={headerH} headerVisible={headerVisible} />
-          </div>
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
 
         ) : filteredPosts.length === 0 && location ? (
           <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
-            <div className="w-16 h-16 rounded-3xl mb-4 flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)" }}>
-              <MapPin size={28} className="text-[#6c47ff]" />
+            <div
+              className="w-16 h-16 rounded-3xl mb-4 flex items-center justify-center"
+              style={{ background: "var(--ss-purple-soft)", border: "1px solid var(--ss-purple-border)" }}
+            >
+              <MapPin size={28} style={{ color: "var(--ss-purple-light)" }} />
             </div>
-            <p className="font-bold text-[#1a1a1a] text-base mb-2">No pros within {radiusKm} km</p>
-            <p className="text-[#7a7570] text-sm leading-relaxed mb-5">
+            <p className="font-bold text-white text-base mb-2">No pros within {radiusKm} km</p>
+            <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--ss-text-muted)" }}>
               Try expanding your radius or check back later as more skilled workers join.
             </p>
             <div className="flex gap-2">
               {RADIUS_OPTIONS.filter(r => r > radiusKm).slice(0, 2).map((r) => (
-                <button key={r} onClick={() => setRadiusKm(r)}
-                  className="px-4 py-2 rounded-xl text-sm font-bold border-2 border-[#6c47ff] text-[#6c47ff] active:bg-[#ede9fe]">
+                <button
+                  key={r}
+                  onClick={() => setRadiusKm(r)}
+                  className="px-4 py-2 rounded-xl text-sm font-bold"
+                  style={{ border: "1px solid var(--ss-purple-border)", color: "var(--ss-purple-light)" }}
+                >
                   Try {r} km
                 </button>
               ))}
@@ -305,32 +326,32 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
 
         ) : filteredPosts.length === 0 && !loading ? (
           <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
-            <div className="w-20 h-20 rounded-3xl mb-5 flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}>
+            <div
+              className="w-20 h-20 rounded-3xl mb-5 flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
+            >
               <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
                 <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="2.5" fill="none" />
                 <circle cx="20" cy="20" r="5" fill="white" />
-                <circle cx="20" cy="10" r="2" fill="white" opacity="0.8" />
-                <circle cx="28.7" cy="25" r="2" fill="white" opacity="0.8" />
-                <circle cx="11.3" cy="25" r="2" fill="white" opacity="0.8" />
               </svg>
             </div>
-            <h2 className="font-bold text-[#1a1a1a] text-lg mb-2 leading-tight">Welcome to SkillSnap</h2>
-            <p className="text-[#7a7570] text-sm leading-relaxed mb-6 max-w-[260px]">
+            <h2 className="font-bold text-white text-lg mb-2 leading-tight">Welcome to SkillSnap</h2>
+            <p className="text-sm leading-relaxed mb-6 max-w-[280px]" style={{ color: "var(--ss-text-muted)" }}>
               Set your location to discover skilled pros near you — or browse everyone on the platform.
             </p>
             <div className="flex flex-col gap-3 w-full max-w-[280px]">
               <button
                 onClick={() => setShowLocationPicker(true)}
                 className="w-full h-12 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2"
-                style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 16px rgba(108,71,255,0.30)" }}
+                style={{ background: "var(--ss-purple)", boxShadow: "0 4px 16px rgba(108,71,255,0.35)" }}
               >
                 <Navigation size={15} />
                 Set My Location
               </button>
               <button
                 onClick={dismissPrompt}
-                className="w-full h-12 rounded-2xl font-semibold text-sm text-[#6c47ff] border-2 border-[#ede9fe] bg-white"
+                className="w-full h-12 rounded-2xl font-semibold text-sm text-white"
+                style={{ border: "1px solid var(--ss-line-strong)" }}
               >
                 Browse Everyone
               </button>
@@ -364,19 +385,22 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
                 isOwnPost={post.authorId === state.currentUser?.id}
                 isFollowed={state.followedUsers.has(post.authorId)}
                 onFollow={() => requireFullAuth(() => dispatch({ type: "TOGGLE_FOLLOW", userId: post.authorId }))}
-                headerH={headerH}
-                headerVisible={headerVisible}
                 viewerLat={location?.lat}
                 viewerLng={location?.lng}
                 dispatch={dispatch}
               />
             ))}
-            {/* Infinite scroll sentinel */}
+
             <div ref={sentinelRef} className="w-full h-1" />
             {loadingMore && (
               <div className="flex justify-center py-6">
                 <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
               </div>
+            )}
+            {!hasMore && filteredPosts.length > 0 && (
+              <p className="text-center text-[12px] py-6" style={{ color: "var(--ss-text-dim)" }}>
+                You&apos;re all caught up
+              </p>
             )}
           </>
         )}
@@ -400,34 +424,37 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
           onProfileClick={() => { setFullscreenPost(null); handleProfileClick(fullscreenPost.authorId); }}
           onLike={() => requireAuth(() => toggleLike(fullscreenPost.id))}
           isLiked={likedPosts.has(fullscreenPost.id)}
-          isOwnPost={fullscreenPost.authorId === state.currentUser?.id}
         />
       )}
 
       {/* Comment sheet — reading and writing comments lives in the mobile app */}
       {commentPrompt && (
         <div
-          className="fixed inset-0 z-[200] flex items-end justify-center bg-black/50"
+          className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/60"
           onClick={(e) => { if (e.target === e.currentTarget) setCommentPrompt(null); }}
         >
-          <div className="w-full max-w-[600px] bg-white rounded-t-3xl px-6 pt-5 pb-9">
-            <div className="w-10 h-1 rounded-full bg-[#e8e4df] mx-auto mb-5" />
+          <div
+            className="w-full max-w-[520px] rounded-t-3xl sm:rounded-3xl px-6 pt-5 pb-9 sm:pb-6"
+            style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
+          >
+            <div className="w-10 h-1 rounded-full mx-auto mb-5 sm:hidden" style={{ background: "var(--ss-line-strong)" }} />
             <div className="flex items-center gap-2 mb-2">
-              <MessageCircle size={18} className="text-[#6c47ff]" />
-              <h3 className="font-bold text-[#1a1a1a] text-base">
+              <MessageCircle size={18} style={{ color: "var(--ss-purple-light)" }} />
+              <h3 className="font-bold text-white text-base">
                 {(commentPrompt.commentsCount ?? 0) === 1
                   ? "1 comment"
                   : `${commentPrompt.commentsCount ?? 0} comments`}
               </h3>
             </div>
-            <p className="text-sm text-[#7a7570] leading-relaxed mb-5">
+            <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--ss-text-muted)" }}>
               Comments live in the SkillSnap app. Get it to join the conversation on{" "}
               {commentPrompt.author.displayName}&apos;s work.
             </p>
             <AppStoreButtons variant="black" />
             <button
               onClick={() => setCommentPrompt(null)}
-              className="w-full mt-3 py-3 text-sm font-semibold text-[#7a7570]"
+              className="w-full mt-3 py-3 text-sm font-semibold"
+              style={{ color: "var(--ss-text-muted)" }}
             >
               Not now
             </button>
@@ -440,14 +467,13 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
 
 // ── Full-screen viewer overlay ─────────────────────────────────────────────
 function FullscreenViewer({
-  post, onClose, onProfileClick, onLike, isLiked, isOwnPost,
+  post, onClose, onProfileClick, onLike, isLiked,
 }: {
   post: Post;
   onClose: () => void;
   onProfileClick: () => void;
   onLike: () => void;
   isLiked: boolean;
-  isOwnPost: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -459,6 +485,12 @@ function FullscreenViewer({
     return () => { document.body.style.overflow = ""; };
   }, []);
 
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   function togglePlay() {
     if (!videoRef.current) return;
     if (playing) { videoRef.current.pause(); setPlaying(false); }
@@ -469,13 +501,12 @@ function FullscreenViewer({
   const displayLocation = post.location ?? author.location;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black flex flex-col" style={{ touchAction: "none" }}>
+    <div className="fixed inset-0 z-[100] bg-black flex flex-col">
       <div className="absolute inset-0" onClick={togglePlay}>
         {post.type === "video" && post.mediaUrl ? (
           <video
             ref={videoRef}
             src={post.mediaUrl}
-            data-src={post.mediaUrl}
             className="w-full h-full object-contain"
             loop playsInline
             preload="auto"
@@ -494,43 +525,42 @@ function FullscreenViewer({
         }} />
         {post.type === "video" && !playing && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-18 h-18 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "2px solid rgba(255,255,255,0.3)", width: 72, height: 72 }}>
+            <div
+              className="rounded-full flex items-center justify-center"
+              style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "2px solid rgba(255,255,255,0.3)", width: 72, height: 72 }}
+            >
               <Play size={28} fill="white" color="white" />
             </div>
           </div>
         )}
       </div>
 
-      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-12 z-10">
-        <button onClick={onClose}
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-6 sm:pt-8 z-10">
+        <button
+          onClick={onClose}
+          aria-label="Close"
           className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}>
+          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
+        >
           <X size={20} color="white" />
         </button>
         {post.type === "video" && post.mediaUrl && (
-          <button onClick={(e) => { e.stopPropagation(); setMuted(m => !m); }}
+          <button
+            onClick={(e) => { e.stopPropagation(); setMuted(m => !m); }}
+            aria-label={muted ? "Unmute" : "Mute"}
             className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}>
+            style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
+          >
             {muted ? <VolumeX size={18} color="white" /> : <Volume2 size={18} color="white" />}
           </button>
         )}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 z-10 px-5 pb-10">
+      <div className="absolute bottom-0 left-0 right-0 z-10 px-5 pb-10 max-w-[900px] mx-auto w-full">
         <button className="flex items-center gap-3 mb-3" onClick={(e) => { e.stopPropagation(); onProfileClick(); }}>
           <UserAvatar user={author} size="sm" showVerified ring />
           <div className="text-left">
-            <div className="flex items-center gap-1.5">
-              <span className="text-white font-bold text-[16px]">{author.displayName}</span>
-              {author.isVerified && (
-                <span className="w-[17px] h-[17px] rounded-full bg-[#6c47ff] flex items-center justify-center">
-                  <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                    <path d="M1 3.5l2.5 2.5L8 1" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-              )}
-            </div>
+            <span className="text-white font-bold text-[16px]">{author.displayName}</span>
             <p className="text-white/60 text-[12px]">{author.skill}</p>
           </div>
         </button>
@@ -544,9 +574,11 @@ function FullscreenViewer({
             </span>
           </div>
         )}
-        <button onClick={(e) => { e.stopPropagation(); onLike(); }}
+        <button
+          onClick={(e) => { e.stopPropagation(); onLike(); }}
           className="flex items-center gap-2 px-4 py-2.5 rounded-full"
-          style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.2)" }}>
+          style={{ background: "rgba(255,255,255,0.15)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.2)" }}
+        >
           <Heart size={18} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "white"} strokeWidth={1.8} />
           <span className="text-white text-sm font-semibold">{isLiked ? "Liked" : "Like"}</span>
         </button>
@@ -555,23 +587,26 @@ function FullscreenViewer({
   );
 }
 
-// ── Feed card ──────────────────────────────────────────────────────
+// ── Feed card ──────────────────────────────────────────────────────────────
 function FeedCard({
-  post, isLiked, isSaved, isFollowed, onLike, onSave, onProfileClick, onConnectClick, onShare, onComment, onFullscreen, onFollow, connecting, isOwnPost, headerH, headerVisible, viewerLat, viewerLng, dispatch,
+  post, isLiked, isSaved, isFollowed, onLike, onSave, onProfileClick, onConnectClick,
+  onShare, onComment, onFullscreen, onFollow, connecting, isOwnPost, viewerLat, viewerLng, dispatch,
 }: {
   post: Post; isLiked: boolean; isSaved: boolean; isFollowed: boolean;
   onLike: () => void; onSave: () => void; onProfileClick: () => void;
   onConnectClick: () => void; onShare: () => void; onComment: () => void; onFullscreen: () => void;
   onFollow: () => void;
-  connecting: boolean; isOwnPost: boolean; headerH: number; headerVisible: boolean;
+  connecting: boolean; isOwnPost: boolean;
   viewerLat?: number; viewerLng?: number;
   dispatch: (a: unknown) => void;
 }) {
   const { author } = post;
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
+  const [aspect, setAspect] = useState(DEFAULT_ASPECT);
+  const [captionExpanded, setCaptionExpanded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLElement>(null);
 
   // Multi-media carousel
   const mediaItems = post.mediaItems && post.mediaItems.length > 1 ? post.mediaItems : null;
@@ -579,33 +614,48 @@ function FeedCard({
   const activeMedia = mediaItems ? mediaItems[activeMediaIndex] : null;
   const activeMediaUrl = activeMedia ? activeMedia.url : post.mediaUrl;
   const activeMediaType = activeMedia ? activeMedia.type : post.type;
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [editMode, setEditMode] = useState<"caption" | "skill" | "location" | "delete" | null>(null);
   const [editCaption, setEditCaption] = useState(post.caption ?? "");
   const [editSkill, setEditSkill] = useState<string>(post.skill ?? "");
   const [editLocation, setEditLocation] = useState(post.location ?? "");
 
+  // Size the card from the thumbnail first — video metadata can take seconds to
+  // arrive over the storage proxy, and until it does the card would letterbox.
   useEffect(() => {
-    if (post.type !== "video" || !post.mediaUrl) return;
+    const url = post.thumbnailUrl;
+    if (!url) return;
+    const probe = new window.Image();
+    probe.onload = () => {
+      setAspect((current) =>
+        current === DEFAULT_ASPECT ? clampAspect(probe.naturalWidth, probe.naturalHeight) : current
+      );
+    };
+    probe.src = url;
+  }, [post.thumbnailUrl]);
+
+  // Autoplay while the card is mostly on screen, pause when it leaves
+  useEffect(() => {
+    if (activeMediaType !== "video" || !activeMediaUrl) return;
     const card = cardRef.current;
     const video = videoRef.current;
     if (!card || !video) return;
 
     function tryPlay() {
-      if (!video) return;
-      video.play().then(() => setPlaying(true)).catch(() => {});
+      video?.play().then(() => setPlaying(true)).catch(() => {});
     }
 
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
-        video!.addEventListener("canplay", tryPlay, { once: true });
+        video.addEventListener("canplay", tryPlay, { once: true });
         tryPlay();
       } else {
-        video!.removeEventListener("canplay", tryPlay);
-        video!.pause();
+        video.removeEventListener("canplay", tryPlay);
+        video.pause();
         setPlaying(false);
       }
-    }, { threshold: 0.6 });
+    }, { threshold: 0.55 });
 
     observer.observe(card);
     return () => {
@@ -613,25 +663,32 @@ function FeedCard({
       video.removeEventListener("canplay", tryPlay);
       video.pause();
     };
-  }, [post.type, post.mediaUrl]);
+  }, [activeMediaType, activeMediaUrl]);
 
-  const handleMediaTap = useCallback(() => { onFullscreen(); }, [onFullscreen]);
+  const togglePlay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) { onFullscreen(); return; }
+    if (video.paused) { video.play().catch(() => {}); } else { video.pause(); }
+  }, [onFullscreen]);
+
   const displayLocation = post.location ?? author.location;
-  // Distance: only show if viewer has location AND author has location AND it's not their own post
   const displayDistance = useMemo(() => {
     if (isOwnPost) return undefined;
     if (viewerLat == null || viewerLng == null) return undefined;
-    const aLat = author.lat ?? (author as Record<string, unknown>).lat as number | undefined;
-    const aLng = author.lng ?? (author as Record<string, unknown>).lng as number | undefined;
-    if (aLat == null || aLng == null) return undefined;
-    const d = distanceKm(viewerLat, viewerLng, aLat, aLng);
-    return Math.round(d * 10) / 10;
-  }, [isOwnPost, viewerLat, viewerLng, author]);
-  const happyPct = author.happyPercent !== undefined &&
-    author.happyPercent !== null &&
-    author.happyPercent > 0
-    ? `${author.happyPercent}%` : "—";
-  const showPlayOverlay = post.type === "video" && !playing;
+    if (author.lat == null || author.lng == null) return undefined;
+    return Math.round(distanceKm(viewerLat, viewerLng, author.lat, author.lng) * 10) / 10;
+  }, [isOwnPost, viewerLat, viewerLng, author.lat, author.lng]);
+
+  const happyPct = author.happyPercent && author.happyPercent > 0 ? `${author.happyPercent}%` : null;
+  const caption = post.caption ?? "";
+  const captionIsLong = caption.length > 140;
+
+  // Portrait video shot for phones is taller than most desktop viewports, so
+  // anything more portrait than 3:4 is sized from a capped height and centred
+  // on the card instead of stretched to the full 600px column.
+  const mediaBoxStyle: React.CSSProperties = aspect < 0.75
+    ? { aspectRatio: String(aspect), height: "min(78vh, 760px)", maxWidth: "100%" }
+    : { aspectRatio: String(aspect), width: "100%" };
 
   async function handleSaveEdit() {
     const patch = { caption: editCaption, skill: editSkill || null, location: editLocation };
@@ -647,340 +704,403 @@ function FeedCard({
   }
 
   return (
-    <div
+    <article
       ref={cardRef}
-      className="relative w-full overflow-hidden bg-gray-900 flex-shrink-0 mb-2"
-      style={{ height: `calc(100dvh - ${headerVisible ? headerH : 0}px - ${headerVisible ? 8 : 0}px)`, transition: 'height 0.3s ease' }}
+      className="relative w-full rounded-3xl overflow-hidden"
+      style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
     >
-      {/* Media */}
-      <div className="absolute inset-0 cursor-pointer" onClick={handleMediaTap}>
-        {activeMediaType === "video" && activeMediaUrl ? (
-          <video
-            ref={videoRef}
-            src={activeMediaUrl}
-            data-src={activeMediaUrl}
-            className="w-full h-full object-cover"
-            loop playsInline
-            preload="auto"
-            muted={muted}
-            poster={post.thumbnailUrl}
-            onPlay={() => setPlaying(true)}
-            onPause={() => setPlaying(false)}
-          />
-        ) : activeMediaUrl ? (
-          <div className="relative w-full h-full">
-            <Image
+      {/* ── Media ── */}
+      <div
+        className="relative w-full bg-black flex justify-center cursor-pointer select-none"
+        onClick={togglePlay}
+      >
+        <div className="relative" style={mediaBoxStyle}>
+          {activeMediaType === "video" && activeMediaUrl ? (
+            <video
+              ref={videoRef}
               src={activeMediaUrl}
-              alt={post.caption}
-              fill
-              className="object-cover"
-              sizes="430px"
-              unoptimized
+              className="w-full h-full object-cover"
+              loop playsInline
+              preload="metadata"
+              muted={muted}
+              poster={post.thumbnailUrl}
+              onLoadedMetadata={(e) => {
+                const v = e.currentTarget;
+                setAspect(clampAspect(v.videoWidth, v.videoHeight));
+              }}
+              onPlay={() => setPlaying(true)}
+              onPause={() => setPlaying(false)}
             />
-          </div>
-        ) : (
-          <div className="w-full h-full" style={{ background: post.thumbnailGradient }} />
-        )}
-        <div className="absolute inset-0" style={{
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 22%, transparent 50%, rgba(0,0,0,0.6) 75%, rgba(0,0,0,0.88) 100%)",
-        }} />
+          ) : activeMediaUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={activeMediaUrl}
+              alt={caption || `Work by ${author.displayName}`}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              onLoad={(e) => {
+                const img = e.currentTarget;
+                setAspect(clampAspect(img.naturalWidth, img.naturalHeight));
+              }}
+            />
+          ) : (
+            <div className="w-full h-full" style={{ background: post.thumbnailGradient }} />
+          )}
 
-        {/* Carousel dots — only shown for multi-media posts */}
-        {mediaItems && mediaItems.length > 1 && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
-            {mediaItems.map((_, i) => (
-              <button
-                key={i}
-                onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i); }}
-                className="transition-all"
-                style={{
-                  width: i === activeMediaIndex ? 18 : 6,
-                  height: 6,
-                  borderRadius: 99,
-                  background: i === activeMediaIndex ? "white" : "rgba(255,255,255,0.45)",
-                }}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Swipe left/right arrows for multi-media */}
-        {mediaItems && activeMediaIndex > 0 && (
-          <button
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}
-            onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i => i - 1); }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-        )}
-        {mediaItems && activeMediaIndex < mediaItems.length - 1 && (
-          <button
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}
-            onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i => i + 1); }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
-          </button>
-        )}
-      </div>
-
-      {/* Top bar */}
-      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-4 z-10">
-        <div className="flex items-center gap-2">
-          <span className="text-white/70 text-[12px] font-medium">{timeAgo(post.createdAt)}</span>
-          {post.viewCount !== undefined && post.viewCount > 0 && (
-            <span className="text-white/60 text-[11px] font-medium flex items-center gap-1">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              {formatLikes(post.viewCount)}
-            </span>
+          {/* Play overlay */}
+          {activeMediaType === "video" && !playing && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center"
+                style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(6px)", border: "2px solid rgba(255,255,255,0.28)" }}
+              >
+                <Play size={22} fill="white" color="white" />
+              </div>
+            </div>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          {post.type === "video" && post.mediaUrl && (
+
+        {/* Top-left meta */}
+        <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">
+          <span
+            className="text-[11px] font-semibold text-white px-2 py-1 rounded-full"
+            style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
+          >
+            {timeAgo(post.createdAt)}
+          </span>
+        </div>
+
+        {/* Top-right controls */}
+        <div className="absolute top-3 right-3 flex items-center gap-2">
+          {activeMediaType === "video" && activeMediaUrl && (
             <button
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-sm text-white active:bg-black/60 transition-colors"
+              aria-label={muted ? "Unmute" : "Mute"}
+              className="w-9 h-9 rounded-full flex items-center justify-center text-white"
+              style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
               onClick={(e) => { e.stopPropagation(); setMuted(m => !m); }}
             >
-              {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
-              <span className="text-[11px] font-semibold">{muted ? "Tap for sound" : "Mute"}</span>
+              {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
             </button>
           )}
+          <button
+            aria-label="Open full screen"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-white"
+            style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
+            onClick={(e) => { e.stopPropagation(); onFullscreen(); }}
+          >
+            <Maximize2 size={15} />
+          </button>
           {isOwnPost && (
             <button
-              className="w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-sm active:bg-black/60 transition-colors"
+              aria-label="Post options"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-white"
+              style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
               onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }}
             >
-              <MoreVertical size={16} color="white" />
+              <MoreVertical size={16} />
             </button>
           )}
         </div>
+
+        {/* Carousel controls */}
+        {mediaItems && (
+          <>
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+              {mediaItems.map((_, i) => (
+                <button
+                  key={i}
+                  aria-label={`Go to media ${i + 1}`}
+                  onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i); }}
+                  className="transition-all"
+                  style={{
+                    width: i === activeMediaIndex ? 18 : 6,
+                    height: 6,
+                    borderRadius: 99,
+                    background: i === activeMediaIndex ? "white" : "rgba(255,255,255,0.45)",
+                  }}
+                />
+              ))}
+            </div>
+            {activeMediaIndex > 0 && (
+              <button
+                aria-label="Previous"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-white"
+                style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
+                onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i => i - 1); }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M15 18l-6-6 6-6" /></svg>
+              </button>
+            )}
+            {activeMediaIndex < mediaItems.length - 1 && (
+              <button
+                aria-label="Next"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-white"
+                style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)" }}
+                onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i => i + 1); }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
+              </button>
+            )}
+          </>
+        )}
       </div>
 
-      {/* Play overlay */}
-      {showPlayOverlay && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(6px)", border: "2px solid rgba(255,255,255,0.28)" }}>
-            <svg width="20" height="24" viewBox="0 0 20 24" fill="white"><path d="M1 1l18 11-18 11V1z" /></svg>
+      {/* ── Author row ── */}
+      <div className="flex items-start gap-3 px-4 pt-4">
+        <button onClick={onProfileClick} className="flex-shrink-0" aria-label={`View ${author.displayName}'s profile`}>
+          <UserAvatar user={author} size="sm" showVerified />
+        </button>
+
+        <div className="flex-1 min-w-0">
+          <button onClick={onProfileClick} className="block text-left max-w-full">
+            <span className="text-[15px] font-bold text-white leading-tight truncate block">
+              {author.displayName}
+            </span>
+          </button>
+
+          <div className="flex items-center gap-2 flex-wrap mt-1">
+            {author.skill && (
+              <span
+                className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                style={{ background: "var(--ss-purple-soft)", border: "1px solid var(--ss-purple-border)", color: "var(--ss-purple-light)" }}
+              >
+                {author.skill}
+              </span>
+            )}
+            {displayLocation && (
+              <span className="flex items-center gap-1 text-[12px]" style={{ color: "var(--ss-text-dim)" }}>
+                <MapPin size={11} />
+                {displayDistance !== undefined ? `${displayDistance < 1 ? "<1" : displayDistance}km · ` : ""}
+                {displayLocation.split(",")[0]}
+              </span>
+            )}
           </div>
+
+          <div className="flex items-center gap-3 mt-1.5 text-[12px]" style={{ color: "var(--ss-text-muted)" }}>
+            <span><strong className="text-white font-bold">{fmtNum(author.jobsDone)}</strong> jobs done</span>
+            {happyPct && <span><strong className="text-[#4ade80] font-bold">{happyPct}</strong> happy</span>}
+          </div>
+        </div>
+
+        {!isOwnPost && (
+          <button
+            onClick={onFollow}
+            className="flex-shrink-0 text-[12px] font-bold px-3.5 py-1.5 rounded-full transition-colors"
+            style={
+              isFollowed
+                ? { color: "var(--ss-text-muted)", background: "var(--ss-surface-2)", border: "1px solid var(--ss-line)" }
+                : { color: "white", background: "var(--ss-purple)", border: "1px solid var(--ss-purple)" }
+            }
+          >
+            {isFollowed ? "Following" : "Follow"}
+          </button>
+        )}
+      </div>
+
+      {/* ── Action row ── */}
+      <div className="flex items-center gap-1 px-2 pt-3">
+        <ActionButton
+          icon={<Heart size={21} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "currentColor"} strokeWidth={1.9} />}
+          label={formatLikes(post.likes)}
+          onClick={onLike}
+          active={isLiked}
+          title="Like"
+        />
+        <ActionButton
+          icon={<MessageCircle size={21} strokeWidth={1.9} />}
+          label={formatLikes(post.commentsCount ?? 0)}
+          onClick={onComment}
+          title="Comments"
+        />
+        <ActionButton
+          icon={<Bookmark size={20} fill={isSaved ? "currentColor" : "none"} strokeWidth={1.9} />}
+          label={isSaved ? "Saved" : "Save"}
+          onClick={onSave}
+          active={isSaved}
+          title="Save"
+        />
+        <ActionButton
+          icon={<Send size={20} strokeWidth={1.9} />}
+          label={(post.recommendCount ?? 0) > 0 ? formatLikes(post.recommendCount ?? 0) : "Recommend"}
+          onClick={onShare}
+          title="Recommend"
+        />
+      </div>
+
+      {/* ── Caption ── */}
+      {caption && (
+        <div className="px-4 pt-2">
+          <p
+            className={`text-[14px] leading-relaxed ${captionIsLong && !captionExpanded ? "ss-clamp-2" : ""}`}
+            style={{ color: "rgba(255,255,255,0.82)" }}
+          >
+            {caption}
+          </p>
+          {captionIsLong && (
+            <button
+              onClick={() => setCaptionExpanded(v => !v)}
+              className="text-[13px] font-semibold mt-1"
+              style={{ color: "var(--ss-text-dim)" }}
+            >
+              {captionExpanded ? "Show less" : "Show more"}
+            </button>
+          )}
         </div>
       )}
 
-      {/* Right actions — mirrors the mobile app: Like, Comment, Recommend, Save */}
-      <div className="absolute right-3 z-10 flex flex-col items-center gap-5" style={{ bottom: 234 }}>
-        <RightAction
-          icon={<Heart size={26} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "white"} strokeWidth={1.8} />}
-          label={formatLikes(post.likes)} onClick={onLike}
-        />
-        <RightAction
-          icon={<MessageCircle size={25} stroke="white" strokeWidth={1.8} />}
-          label={formatLikes(post.commentsCount ?? 0)}
-          onClick={onComment}
-        />
-        <RightAction
-          icon={<Send size={24} stroke="white" strokeWidth={1.8} />}
-          label={(post.recommendCount ?? 0) > 0 ? formatLikes(post.recommendCount ?? 0) : "Recommend"}
-          onClick={onShare}
-        />
-        <RightAction
-          icon={<Bookmark size={24} fill={isSaved ? "white" : "none"} stroke="white" strokeWidth={1.8} />}
-          label={isSaved ? "Saved" : "Save"} onClick={onSave} active={isSaved}
-        />
+      {/* ── Primary action ── */}
+      <div className="px-4 pt-4 pb-4">
+        {isOwnPost ? (
+          <button
+            onClick={onShare}
+            className="w-full h-11 rounded-2xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-colors"
+            style={{ border: "1px solid var(--ss-line-strong)", background: "var(--ss-surface-2)" }}
+          >
+            <Share2 size={16} /> Share
+          </button>
+        ) : (
+          <ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />
+        )}
       </div>
 
-      {/* Bottom panel */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 px-4 pb-5">
-        <div className="flex items-start gap-3 mb-2.5">
-          <div className="cursor-pointer flex-shrink-0" onClick={(e) => { e.stopPropagation(); onProfileClick(); }}>
-            <UserAvatar user={author} size="sm" showVerified ring />
-          </div>
-          <div className="flex-1 min-w-0 cursor-pointer" onClick={(e) => { e.stopPropagation(); onProfileClick(); }}>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-white font-bold text-[15px] leading-tight">{author.displayName}</span>
-              {author.isVerified && (
-                <span className="w-[17px] h-[17px] rounded-full bg-[#6c47ff] flex items-center justify-center flex-shrink-0">
-                  <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                    <path d="M1 3.5l2.5 2.5L8 1" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-              )}
-            </div>
-            {/* Badges on their own line */}
-            <div className="flex items-center gap-1.5 mt-0.5">
-              {author.happyPercent >= 90 && (author.jobsDone ?? 0) >= 5 && (
-                <span className="text-[9px] font-bold text-emerald-300 bg-emerald-900/50 px-1.5 py-0.5 rounded-full border border-emerald-400/40">
-                  Top Rated
-                </span>
-              )}
-              {author.isVerified && (author.jobsDone ?? 0) >= 10 && (
-                <span className="text-[9px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded-full border border-blue-400/40">
-                  Verified Business
-                </span>
-              )}
-            </div>
-            <p className="text-white/60 text-[12px] mt-0.5">{author.skill}</p>
-          </div>
-          {!isOwnPost && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onFollow(); }}
-              className={`flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-all active:scale-95 ${
-                isFollowed
-                  ? "text-white/70 bg-white/15 border border-white/25"
-                  : "text-white bg-[#6c47ff] border border-[#6c47ff]"
-              }`}
-            >
-              {isFollowed ? "Following" : "Follow"}
-            </button>
-          )}
-        </div>
-
-        {post.caption ? <p className="text-white/90 text-[14px] leading-snug mb-3 line-clamp-2">{post.caption}</p> : null}
-
-        <div className="flex items-stretch mb-3 rounded-2xl overflow-hidden"
-          style={{ background: "rgba(0,0,0,0.42)", backdropFilter: "blur(10px)" }}>
-          <StatCell value={fmtNum(author.jobsDone)} label="Jobs Done" icon={
-            <svg width="14" height="13" viewBox="0 0 16 14" fill="white">
-              <path d="M6 0h4a1 1 0 011 1v1h3a1 1 0 011 1v9a1 1 0 01-1 1H2a1 1 0 01-1-1V3a1 1 0 011-1h3V1a1 1 0 011-1zm0 2h4V1H6v1zM1 6v1h14V6H1zm0 2v4h14V8H1z"/>
-            </svg>
-          } />
-          <VSep />
-          <StatCell value={fmtNum(author.followers)} label="Connections" icon={
-            <svg width="14" height="13" viewBox="0 0 16 14" fill="white">
-              <path d="M6 7a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H1zm10-6a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm1.5 1.5c1.8.4 3 1.8 3 3.5h-3"/>
-            </svg>
-          } />
-          <VSep />
-          <StatCell value={happyPct} label="Happy" green={happyPct !== "—" && happyPct !== "0%"} icon={
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-              <circle cx="12" cy="12" r="10"/>
-              <circle cx="9" cy="9.5" r="1.2" fill="#000" opacity="0.45"/>
-              <circle cx="15" cy="9.5" r="1.2" fill="#000" opacity="0.45"/>
-              <path d="M7.5 13.5c1 2 8 2 9 0" stroke="#000" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.45"/>
-            </svg>
-          } />
-          <VSep />
-          <LocationCell distanceKm={displayDistance} location={displayLocation} isOwn={isOwnPost} onPress={onProfileClick} />
-        </div>
-
-        {!isOwnPost && <ConnectButton onClick={onConnectClick} fullWidth loading={connecting} />}
-      </div>
-
-      {/* Three-dot menu bottom sheet */}
+      {/* ── Own-post menu ── */}
       {menuOpen && (
-        <div className="absolute inset-0 z-50 flex flex-col justify-end" onClick={() => setMenuOpen(false)}>
-          <div className="bg-white rounded-t-3xl p-4 pb-8 mx-0" onClick={(e) => e.stopPropagation()}>
-            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+        <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60" onClick={() => setMenuOpen(false)}>
+          <div
+            className="w-full max-w-[420px] rounded-t-3xl sm:rounded-3xl p-4 pb-8 sm:pb-4"
+            style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 rounded-full mx-auto mb-4 sm:hidden" style={{ background: "var(--ss-line-strong)" }} />
             {[
               { label: "Edit Caption", mode: "caption" as const },
               { label: "Edit Skill", mode: "skill" as const },
               { label: "Edit Location", mode: "location" as const },
             ].map(({ label, mode }) => (
-              <button key={mode} className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-[#1a1a1a] active:bg-gray-50 rounded-xl"
-                onClick={() => { setMenuOpen(false); setEditMode(mode); }}>
+              <button
+                key={mode}
+                className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-white rounded-xl hover:bg-white/[0.05]"
+                onClick={() => { setMenuOpen(false); setEditMode(mode); }}
+              >
                 {label}
               </button>
             ))}
-            <button className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-red-500 active:bg-red-50 rounded-xl"
-              onClick={() => { setMenuOpen(false); setEditMode("delete"); }}>
+            <button
+              className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-red-400 rounded-xl hover:bg-red-500/10"
+              onClick={() => { setMenuOpen(false); setEditMode("delete"); }}
+            >
               Delete Post
             </button>
           </div>
         </div>
       )}
 
-      {/* Edit modals */}
+      {/* ── Edit modals ── */}
       {(editMode === "caption" || editMode === "skill" || editMode === "location") && (
-        <div className="absolute inset-0 z-50 flex flex-col justify-end" onClick={() => setEditMode(null)}>
-          <div className="bg-white rounded-t-3xl p-5 pb-8" onClick={(e) => e.stopPropagation()}>
-            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-            <p className="font-bold text-[16px] text-[#1a1a1a] mb-4">
+        <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60" onClick={() => setEditMode(null)}>
+          <div
+            className="w-full max-w-[480px] rounded-t-3xl sm:rounded-3xl p-5 pb-8 sm:pb-5"
+            style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 rounded-full mx-auto mb-4 sm:hidden" style={{ background: "var(--ss-line-strong)" }} />
+            <p className="font-bold text-[16px] text-white mb-4">
               {editMode === "caption" ? "Edit Caption" : editMode === "skill" ? "Edit Skill" : "Edit Location"}
             </p>
             {editMode === "caption" && (
-              <textarea className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-[14px] text-[#1a1a1a] resize-none outline-none focus:border-[#6c47ff]"
-                rows={4} value={editCaption} onChange={(e) => setEditCaption(e.target.value)} />
+              <textarea
+                className="w-full rounded-2xl px-4 py-3 text-[14px] text-white resize-none outline-none focus:border-[#6c47ff]"
+                style={{ background: "var(--ss-surface-2)", border: "1px solid var(--ss-line)" }}
+                rows={4} value={editCaption} onChange={(e) => setEditCaption(e.target.value)}
+              />
             )}
             {editMode === "skill" && (
-              <div className="flex flex-wrap gap-2 mb-2">
+              <div className="flex flex-wrap gap-2 mb-2 max-h-[240px] overflow-y-auto">
                 {SKILL_CATEGORIES.map((cat) => (
-                  <button key={cat} onClick={() => setEditSkill(cat)}
-                    className={`px-3 py-1.5 rounded-full text-[13px] font-semibold border transition-all ${editSkill === cat ? "bg-[#6c47ff] text-white border-[#6c47ff]" : "bg-white text-[#1a1a1a] border-gray-200"}`}>
+                  <button
+                    key={cat}
+                    onClick={() => setEditSkill(cat)}
+                    className="px-3 py-1.5 rounded-full text-[13px] font-semibold transition-colors"
+                    style={
+                      editSkill === cat
+                        ? { background: "var(--ss-purple)", color: "white", border: "1px solid var(--ss-purple)" }
+                        : { background: "var(--ss-surface-2)", color: "var(--ss-text-muted)", border: "1px solid var(--ss-line)" }
+                    }
+                  >
                     {cat}
                   </button>
                 ))}
               </div>
             )}
             {editMode === "location" && (
-              <input className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-[14px] text-[#1a1a1a] outline-none focus:border-[#6c47ff]"
-                value={editLocation} onChange={(e) => setEditLocation(e.target.value)} placeholder="e.g. Sydney, NSW" />
+              <input
+                className="w-full rounded-2xl px-4 py-3 text-[14px] text-white outline-none focus:border-[#6c47ff]"
+                style={{ background: "var(--ss-surface-2)", border: "1px solid var(--ss-line)" }}
+                value={editLocation} onChange={(e) => setEditLocation(e.target.value)} placeholder="e.g. Sydney, NSW"
+              />
             )}
             <div className="flex gap-3 mt-4">
-              <button onClick={() => setEditMode(null)} className="flex-1 h-11 rounded-2xl border border-gray-200 text-[14px] font-semibold text-[#7a7570]">Cancel</button>
-              <button onClick={handleSaveEdit} className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-white" style={{ background: "#6c47ff" }}>Save</button>
+              <button
+                onClick={() => setEditMode(null)}
+                className="flex-1 h-11 rounded-2xl text-[14px] font-semibold"
+                style={{ border: "1px solid var(--ss-line)", color: "var(--ss-text-muted)" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-white"
+                style={{ background: "var(--ss-purple)" }}
+              >
+                Save
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Delete confirmation */}
+      {/* ── Delete confirmation ── */}
       {editMode === "delete" && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setEditMode(null)}>
-          <div className="bg-white rounded-3xl p-6 mx-6 w-full" onClick={(e) => e.stopPropagation()}>
-            <p className="font-bold text-[16px] text-[#1a1a1a] mb-2">Delete this post?</p>
-            <p className="text-[13px] text-[#7a7570] mb-6">This cannot be undone.</p>
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 px-6" onClick={() => setEditMode(null)}>
+          <div
+            className="rounded-3xl p-6 w-full max-w-[400px]"
+            style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="font-bold text-[16px] text-white mb-2">Delete this post?</p>
+            <p className="text-[13px] mb-6" style={{ color: "var(--ss-text-muted)" }}>This cannot be undone.</p>
             <div className="flex gap-3">
-              <button onClick={() => setEditMode(null)} className="flex-1 h-11 rounded-2xl border border-gray-200 text-[14px] font-semibold text-[#7a7570]">Cancel</button>
-              <button onClick={handleDeleteConfirm} className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-white bg-red-500">Delete</button>
+              <button
+                onClick={() => setEditMode(null)}
+                className="flex-1 h-11 rounded-2xl text-[14px] font-semibold"
+                style={{ border: "1px solid var(--ss-line)", color: "var(--ss-text-muted)" }}
+              >
+                Cancel
+              </button>
+              <button onClick={handleDeleteConfirm} className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-white bg-red-500">
+                Delete
+              </button>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </article>
   );
 }
 
-function StatCell({ value, label, icon, green }: { value: string; label: string; icon: React.ReactNode; green?: boolean }) {
+function ActionButton({ icon, label, onClick, active, title }: {
+  icon: React.ReactNode; label: string; onClick: () => void; active?: boolean; title: string;
+}) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 px-1">
-      <span className="leading-none mb-0.5">{icon}</span>
-      <span className={`text-[14px] font-extrabold leading-tight tracking-tight ${green ? "text-[#4ade80]" : "text-white"}`}>{value}</span>
-      <span className="text-[10px] text-white/55 font-medium leading-tight text-center">{label}</span>
-    </div>
-  );
-}
-
-function LocationCell({ distanceKm: d, location, isOwn, onPress }: { distanceKm?: number; location?: string; isOwn?: boolean; onPress: () => void }) {
-  const suburb = location ? location.split(",")[0].trim() : "";
-  const truncated = suburb.length > 10 ? suburb.slice(0, 10) + "…" : (suburb || "—");
-  const distanceValue = isOwn ? "Mine" : (d !== undefined ? `${d < 1 ? "<1" : d}km` : "—");
-  return (
-    <button className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 px-1 active:opacity-70 transition-opacity"
-      onClick={(e) => { e.stopPropagation(); onPress(); }}>
-      <span className="leading-none mb-0.5">
-        <svg width="14" height="14" viewBox="0 0 11 14" fill="white">
-          <path d="M5.5 0A5.5 5.5 0 000 5.5C0 9.625 5.5 14 5.5 14S11 9.625 11 5.5A5.5 5.5 0 005.5 0zm0 7.5a2 2 0 110-4 2 2 0 010 4z"/>
-        </svg>
-      </span>
-      <span className="text-[14px] font-extrabold leading-tight tracking-tight text-white">{distanceValue}</span>
-      <span className="text-[10px] text-white/55 font-medium leading-tight text-center">{truncated}</span>
-    </button>
-  );
-}
-
-function VSep() { return <div className="w-px bg-white/15 self-stretch my-2" />; }
-
-function RightAction({ icon, label, onClick, active }: { icon: React.ReactNode; label: string; onClick?: () => void; active?: boolean }) {
-  return (
-    <button className="flex flex-col items-center gap-1 active:scale-90 transition-transform" onClick={onClick}>
-      <div className="w-11 h-11 rounded-full flex items-center justify-center"
-        style={{ background: active ? "rgba(255,255,255,0.22)" : "rgba(0,0,0,0.30)", backdropFilter: "blur(6px)", border: "1.5px solid rgba(255,255,255,0.16)" }}>
-        {icon}
-      </div>
-      <span className="text-white text-[11px] font-semibold">{label}</span>
+    <button
+      onClick={onClick}
+      title={title}
+      aria-label={title}
+      className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl transition-colors hover:bg-white/[0.06]"
+      style={{ color: active ? "white" : "var(--ss-text-muted)" }}
+    >
+      {icon}
+      <span className="text-[13px] font-semibold">{label}</span>
     </button>
   );
 }

@@ -213,12 +213,12 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
   const initials = displayName.trim() ? displayName.trim()[0].toUpperCase() : "?";
 
   return (
-    <div className="flex flex-col bg-[#f8f7f5] overflow-hidden" style={{ height: "100dvh" }}>
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center gap-3 px-4 h-14">
-        <button onClick={() => onNavigate("own-profile")} className="text-[#7a7570]">
+    <div className="flex flex-col bg-[#0d0a1a] overflow-hidden" style={{ height: "100dvh" }}>
+      <header className="sticky top-0 z-40 bg-[#0d0a1a]/92 backdrop-blur-sm border-b border-[#26203f] flex items-center gap-3 px-4 h-14">
+        <button onClick={() => onNavigate("own-profile")} className="text-[#9d97b5]">
           <ArrowLeft size={20} />
         </button>
-        <h1 className="font-bold text-base text-[#1a1a1a] flex-1">Edit Profile</h1>
+        <h1 className="font-bold text-base text-[#ffffff] flex-1">Edit Profile</h1>
         <button
           onClick={handleSave}
           disabled={saving}
@@ -230,15 +230,15 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
 
       {saved ? (
         <div className="flex flex-col items-center justify-center flex-1 gap-4 px-6">
-          <div className="w-16 h-16 rounded-full bg-[#dcfce7] flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-[rgba(16,185,129,0.14)] flex items-center justify-center">
             <CheckCircle size={30} className="text-green-500" />
           </div>
-          <p className="font-bold text-[#1a1a1a] text-lg">Profile updated!</p>
+          <p className="font-bold text-[#ffffff] text-lg">Profile updated!</p>
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto no-scrollbar pb-28">
           {/* Avatar */}
-          <div className="flex flex-col items-center py-8 bg-white border-b border-[#e8e4df]">
+          <div className="flex flex-col items-center py-8 bg-[#16122a] border-b border-[#26203f]">
             <div className="relative">
               {avatarPreview ? (
                 <img src={avatarPreview} alt="Avatar" className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md" />
@@ -252,7 +252,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
               </button>
             </div>
             <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarChange} />
-            <p className="text-xs text-[#b0aaa5] mt-3">Tap camera to change photo</p>
+            <p className="text-xs text-[#6f6889] mt-3">Tap camera to change photo</p>
           </div>
 
           {/* Form */}
@@ -263,19 +263,19 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value.slice(0, 50))}
                 placeholder="Name, business or nickname"
-                className="w-full bg-white rounded-2xl border border-[#e8e4df] px-4 h-12 text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none focus:border-[#6c47ff] transition-colors"
+                className="w-full bg-[#16122a] rounded-2xl border border-[#26203f] px-4 h-12 text-sm text-[#ffffff] placeholder-[#6f6889] outline-none focus:border-[#6c47ff] transition-colors"
               />
             </Field>
 
             <Field label="Username">
-              <div className="flex items-center bg-white rounded-2xl border border-[#e8e4df] px-4 h-12 gap-1 focus-within:border-[#6c47ff] transition-colors">
-                <span className="text-[#b0aaa5] text-sm">@</span>
+              <div className="flex items-center bg-[#16122a] rounded-2xl border border-[#26203f] px-4 h-12 gap-1 focus-within:border-[#6c47ff] transition-colors">
+                <span className="text-[#6f6889] text-sm">@</span>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 30))}
                   placeholder="username"
-                  className="flex-1 bg-transparent text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none"
+                  className="flex-1 bg-transparent text-sm text-[#ffffff] placeholder-[#6f6889] outline-none"
                 />
               </div>
             </Field>
@@ -286,9 +286,9 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                 onChange={(e) => setBio(e.target.value.slice(0, 200))}
                 rows={3}
                 placeholder="Tell people what you do and what makes you great…"
-                className="w-full bg-white rounded-2xl border border-[#e8e4df] px-4 py-3 text-sm text-[#1a1a1a] placeholder-[#b0aaa5] resize-none outline-none focus:border-[#6c47ff] transition-colors leading-relaxed"
+                className="w-full bg-[#16122a] rounded-2xl border border-[#26203f] px-4 py-3 text-sm text-[#ffffff] placeholder-[#6f6889] resize-none outline-none focus:border-[#6c47ff] transition-colors leading-relaxed"
               />
-              <p className="text-right text-xs text-[#b0aaa5] mt-1">{bio.length} / 200</p>
+              <p className="text-right text-xs text-[#6f6889] mt-1">{bio.length} / 200</p>
             </Field>
 
             {/* Skill Category — moved above Location */}
@@ -304,9 +304,9 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                       fontWeight: 600,
                       padding: "6px 14px",
                       borderRadius: 999,
-                      border: `1.5px solid ${skill === cat ? "#6c47ff" : "#e8e4df"}`,
+                      border: `1.5px solid ${skill === cat ? "#6c47ff" : "#26203f"}`,
                       background: skill === cat ? "#6c47ff" : "#fff",
-                      color: skill === cat ? "#fff" : "#7a7570",
+                      color: skill === cat ? "#fff" : "#9d97b5",
                       cursor: "pointer",
                     }}
                   >
@@ -316,27 +316,27 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
               </div>
 
               <div style={{ display: skill === "Other" ? "block" : "none", marginTop: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#fff", border: "2px solid #6c47ff", borderRadius: 16, padding: "0 16px", height: 48 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--ss-surface-2)", border: "2px solid #6c47ff", borderRadius: 16, padding: "0 16px", height: 48 }}>
                   <input
                     ref={customInputRef}
                     type="text"
                     value={customSkill}
                     onChange={(e) => setCustomSkill(e.target.value.slice(0, 40))}
                     placeholder="e.g. Carpenter, Hairdresser, Chef…"
-                    style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontSize: 14, color: "#1a1a1a" }}
+                    style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontSize: 14, color: "#ffffff" }}
                   />
                   {customSkill ? (
-                    <button type="button" onClick={() => setCustomSkill("")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "#b0aaa5" }}>
+                    <button type="button" onClick={() => setCustomSkill("")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "#6f6889" }}>
                       <X size={14} />
                     </button>
                   ) : null}
                 </div>
-                <p style={{ fontSize: 12, color: "#b0aaa5", marginTop: 6, paddingLeft: 4 }}>
+                <p style={{ fontSize: 12, color: "#6f6889", marginTop: 6, paddingLeft: 4 }}>
                   This is what clients will see on your profile.
                 </p>
               </div>
 
-              <p className="text-xs text-[#7a7570] mt-2 leading-relaxed">
+              <p className="text-xs text-[#9d97b5] mt-2 leading-relaxed">
                 ✨ Select a skill to become a Pro — post your work and get discovered for free. Select Client if you&apos;re here to find and hire.
               </p>
             </Field>
@@ -347,7 +347,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
               <button
                 onClick={handleGPSLocation}
                 disabled={locGpsLoading}
-                className="w-full flex items-center gap-3 rounded-2xl border px-4 py-3 mb-2.5 transition-all active:bg-[#f5f3ff] disabled:opacity-60"
+                className="w-full flex items-center gap-3 rounded-2xl border px-4 py-3 mb-2.5 transition-all active:bg-[#1c1733] disabled:opacity-60"
                 style={{ borderColor: "#6c47ff", background: "rgba(108,71,255,0.04)" }}
               >
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -359,25 +359,25 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                   )}
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-semibold text-[#1a1a1a]">
+                  <p className="text-sm font-semibold text-[#ffffff]">
                     {locGpsLoading ? "Detecting location…" : "Use GPS Location"}
                   </p>
-                  <p className="text-xs text-[#7a7570]">Auto-detect your current suburb</p>
+                  <p className="text-xs text-[#9d97b5]">Auto-detect your current suburb</p>
                 </div>
               </button>
 
               {/* Manual text input */}
-              <div className="flex items-center bg-white rounded-2xl border border-[#e8e4df] px-4 h-12 gap-2.5 focus-within:border-[#6c47ff] transition-colors">
+              <div className="flex items-center bg-[#16122a] rounded-2xl border border-[#26203f] px-4 h-12 gap-2.5 focus-within:border-[#6c47ff] transition-colors">
                 <MapPin size={15} className="text-[#6c47ff] flex-shrink-0" />
                 <input
                   type="text"
                   value={locationText}
                   onChange={(e) => setLocationText(e.target.value)}
                   placeholder="e.g. Liverpool, NSW"
-                  className="flex-1 bg-transparent text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none"
+                  className="flex-1 bg-transparent text-sm text-[#ffffff] placeholder-[#6f6889] outline-none"
                 />
                 {locationText && (
-                  <button onClick={() => setLocationText("")} className="text-[#b0aaa5]">
+                  <button onClick={() => setLocationText("")} className="text-[#6f6889]">
                     <X size={14} />
                   </button>
                 )}
@@ -385,23 +385,23 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
 
               {/* GPS error */}
               {locError && (
-                <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-100 px-3 py-2 mt-2">
+                <div className="flex items-start gap-2 rounded-xl bg-red-500/10 border border-red-500/30 px-3 py-2 mt-2">
                   <AlertCircle size={13} className="text-red-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-red-600">{locError}</p>
+                  <p className="text-xs text-red-400">{locError}</p>
                 </div>
               )}
 
               {/* Privacy toggle */}
-              <div className="flex items-center justify-between bg-white rounded-2xl border border-[#e8e4df] px-4 py-3 mt-2.5">
+              <div className="flex items-center justify-between bg-[#16122a] rounded-2xl border border-[#26203f] px-4 py-3 mt-2.5">
                 <div className="flex items-center gap-2.5">
                   {locationPrivate ? (
-                    <EyeOff size={16} className="text-[#7a7570]" />
+                    <EyeOff size={16} className="text-[#9d97b5]" />
                   ) : (
                     <Eye size={16} className="text-[#6c47ff]" />
                   )}
                   <div>
-                    <p className="text-sm font-semibold text-[#1a1a1a]">Show exact location</p>
-                    <p className="text-xs text-[#7a7570]">
+                    <p className="text-sm font-semibold text-[#ffffff]">Show exact location</p>
+                    <p className="text-xs text-[#9d97b5]">
                       {locationPrivate ? "Only suburb is visible to others" : "Full address visible to others"}
                     </p>
                   </div>
@@ -409,14 +409,14 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                 {/* Toggle switch */}
                 <button
                   onClick={() => setLocationPrivate(v => !v)}
-                  className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${locationPrivate ? "bg-[#e8e4df]" : "bg-[#6c47ff]"}`}
+                  className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${locationPrivate ? "bg-[#26203f]" : "bg-[#6c47ff]"}`}
                 >
                   <span
-                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${locationPrivate ? "translate-x-0.5" : "translate-x-6"}`}
+                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-[#16122a] shadow transition-transform ${locationPrivate ? "translate-x-0.5" : "translate-x-6"}`}
                   />
                 </button>
               </div>
-              <p className="text-xs text-[#b0aaa5] px-1 mt-1.5">
+              <p className="text-xs text-[#6f6889] px-1 mt-1.5">
                 {locationPrivate
                   ? "Privacy on — only your suburb name is shown on your profile."
                   : "Privacy off — your full location text is visible publicly."}
@@ -441,7 +441,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">{label}</label>
+      <label className="text-xs font-bold text-[#9d97b5] uppercase tracking-wider">{label}</label>
       {children}
     </div>
   );

@@ -122,6 +122,21 @@
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Right rail — Tailwind has no 1200px breakpoint, and the feed column needs
+   the full remaining width below it, so the cutoff lives here. */
+.ss-right-rail { display: block; }
+@media (max-width: 1199px) {
+  .ss-right-rail { display: none !important; }
+}
+
+/* Caption clamp used by feed cards */
+.ss-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* No .dark override — :root is already the dark palette and the web app
    ships dark-only. Keeping the block would make `dark:` variants diverge
    from the base theme for no benefit. */
@@ -135,12 +150,17 @@
     margin: 0;
     padding: 0;
     width: 100%;
-    height: 100%;
-    overflow-x: hidden;
   }
+  /* Only body carries overflow-x. With <html> left at `visible`, body's overflow
+     propagates to the viewport, so the window stays the scroll container — the
+     feed scrolls the document, and setting body.style.overflow = "hidden" still
+     locks the page behind modals. Putting overflow on <html> too would make body
+     its own scroll box and window.scrollTo would silently do nothing. */
   body {
     @apply text-foreground;
     background: var(--ss-bg);
+    min-height: 100%;
+    overflow-x: hidden;
   }
   /* Headings use Poppins (matching the mobile app); body text stays on Geist.
      An element-level rule beats the inherited font-family the app shell sets

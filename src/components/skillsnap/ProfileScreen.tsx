@@ -71,7 +71,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#f8f7f5]">
+      <div className="flex items-center justify-center min-h-screen bg-[#0d0a1a]">
         <div className="w-8 h-8 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
       </div>
     );
@@ -85,22 +85,22 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
     ? `${user.happyPercent}%` : "—";
 
   return (
-    <div className="flex flex-col bg-[#f8f7f5] overflow-hidden" style={{ height: "100dvh" }}>
+    <div className="flex flex-col bg-[#0d0a1a] overflow-hidden" style={{ height: "100dvh" }}>
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center gap-3 px-4 h-14">
-        <button onClick={() => navigate(state.previousScreen ?? "home")} className="text-[#7a7570]">
+      <header className="sticky top-0 z-40 bg-[#0d0a1a]/92 backdrop-blur-sm border-b border-[#26203f] flex items-center gap-3 px-4 h-14">
+        <button onClick={() => navigate(state.previousScreen ?? "home")} className="text-[#9d97b5]">
           <ArrowLeft size={20} />
         </button>
-        <span className="font-semibold text-[#1a1a1a] text-sm flex-1">{user.username?.startsWith('@') ? user.username : `@${user.username}`}</span>
+        <span className="font-semibold text-[#ffffff] text-sm flex-1">{user.username?.startsWith('@') ? user.username : `@${user.username}`}</span>
         {isOwn ? (
-          <button onClick={() => onNavigate("settings")} className="text-[#7a7570]">
+          <button onClick={() => onNavigate("settings")} className="text-[#9d97b5]">
             <Menu size={22} />
           </button>
         ) : (
           /* FIX 3 — Show user's actual skill instead of hardcoded "Client" */
           user.skill ? (
-            <span className="text-[10px] px-2.5 py-1 rounded-full font-semibold bg-[#ede9fe] text-[#5b3dd8] max-w-[110px] truncate">
+            <span className="text-[10px] px-2.5 py-1 rounded-full font-semibold bg-[#241d40] text-[#a78bfa] max-w-[110px] truncate">
               {user.skill}
             </span>
           ) : null
@@ -110,34 +110,34 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
       <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pb-10">
 
         {/* ── Profile card ── */}
-        <div className="bg-white px-5 pt-6 pb-5 border-b border-[#e8e4df]">
+        <div className="bg-[#16122a] px-5 pt-6 pb-5 border-b border-[#26203f]">
           <div className="flex items-start gap-4 mb-4">
             <UserAvatar user={user} size="lg" showVerified={isOwn} />
             <div className="flex-1 flex items-center justify-around pt-1 pb-1">
               <Stat value={user.jobsDone >= 1000 ? `${(user.jobsDone / 1000).toFixed(0)}k` : String(user.jobsDone)} label={user.role === "client" ? "Hired" : "Jobs Done"} highlight />
-              <div className="w-px h-8 bg-[#e8e4df]" />
+              <div className="w-px h-8 bg-[#26203f]" />
               <Stat value={happyDisplay} label="😊 Happy" />
-              <div className="w-px h-8 bg-[#e8e4df]" />
+              <div className="w-px h-8 bg-[#26203f]" />
               <Stat value={connections} label="Connections" />
             </div>
           </div>
           <div className="mb-1">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <h2 className="font-bold text-base text-[#1a1a1a]">{user.displayName}</h2>
+              <h2 className="font-bold text-base text-[#ffffff]">{user.displayName}</h2>
               {user.skill && user.role !== "client" ? (
                 <>
                   <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: "#6c47ff" }}>Pro</span>
                   {(user as any).isEarlyBird && (
-                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "linear-gradient(135deg, #f59e0b, #fbbf24)", color: "#1a1a1a" }}>🔥 Early Bird</span>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "linear-gradient(135deg, #f59e0b, #fbbf24)", color: "#ffffff" }}>🔥 Early Bird</span>
                   )}
                 </>
               ) : user.role === "client" ? (
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "#f0f0f0", color: "#7a7570" }}>Client</span>
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "#f0f0f0", color: "#9d97b5" }}>Client</span>
               ) : isOwn ? (
                 <button
                   onClick={() => onNavigate("edit-profile")}
                   className="text-xs font-bold px-2.5 py-0.5 rounded-full transition-all active:scale-95"
-                  style={{ background: "#fff7ed", color: "#c2410c", border: "1px solid #fed7aa" }}
+                  style={{ background: "rgba(249,115,22,0.12)", color: "#c2410c", border: "1px solid #fed7aa" }}
                 >
                   Complete Profile
                 </button>
@@ -154,15 +154,15 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 {user.location}
               </a>
             ) : null}
-            <p className="text-sm text-[#4a4a4a] leading-relaxed">{user.bio}</p>
+            <p className="text-sm text-[#b8b2cc] leading-relaxed">{user.bio}</p>
           </div>
           <div className="flex gap-2.5 mt-4">
             {isOwn ? (
               <>
-                <button onClick={() => onNavigate("edit-profile")} className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
+                <button onClick={() => onNavigate("edit-profile")} className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#ffffff] border border-[#26203f] bg-[#16122a] flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
                   <Edit3 size={14} /> Edit Profile
                 </button>
-                <button onClick={() => { shareProfile({ username: user.username, displayName: user.displayName, text: `Check out ${user.displayName} on SkillSnap — Sydney's skills platform!` }).then((r) => { if (r === "copied") showToast("Profile link copied"); }); }} className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
+                <button onClick={() => { shareProfile({ username: user.username, displayName: user.displayName, text: `Check out ${user.displayName} on SkillSnap — Sydney's skills platform!` }).then((r) => { if (r === "copied") showToast("Profile link copied"); }); }} className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#ffffff] border border-[#26203f] bg-[#16122a] flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
                   <Share2 size={14} /> Share
                 </button>
               </>
@@ -171,7 +171,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 <div className="flex-1">
                   <ConnectButton onClick={() => requireAuth(() => connectTo(user.id))} fullWidth loading={connecting === user.id} />
                 </div>
-                <button onClick={() => requireAuth(() => toggleFollow(user.id))} className={`flex-1 h-11 rounded-2xl font-semibold text-sm border-2 transition-all active:scale-[0.98] ${isFollowing ? "text-white bg-[#6c47ff] border-[#6c47ff]" : "text-[#6c47ff] bg-white border-[#6c47ff]"}`}>
+                <button onClick={() => requireAuth(() => toggleFollow(user.id))} className={`flex-1 h-11 rounded-2xl font-semibold text-sm border-2 transition-all active:scale-[0.98] ${isFollowing ? "text-white bg-[#6c47ff] border-[#6c47ff]" : "text-[#6c47ff] bg-[#16122a] border-[#6c47ff]"}`}>
                   {isFollowing ? "Following" : "Follow"}
                 </button>
               </>
@@ -182,11 +182,11 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
         {/* ── Tabs ── */}
         <div className="pt-0">
           {isOwn && (
-            <div className="flex border-b border-[#e8e4df] bg-white">
+            <div className="flex border-b border-[#26203f] bg-[#16122a]">
               {(["work", "saved"] as const).map((tab) => (
                 <button key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${activeTab === tab ? "text-[#6c47ff] border-b-2 border-[#6c47ff]" : "text-[#7a7570]"}`}>
+                  className={`flex-1 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${activeTab === tab ? "text-[#6c47ff] border-b-2 border-[#6c47ff]" : "text-[#9d97b5]"}`}>
                   {tab === "work" ? (state.currentUser?.role === "client" ? "Hired History" : "My Works") : "Saved"}
                   {tab === "work" && (() => { const count = gridLoading ? null : (mergedPosts.length || (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)); return count ? <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">{count}</span> : null; })()}
                   {tab === "saved" && savedPostsList.length > 0 && <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">{savedPostsList.length}</span>}
@@ -199,7 +199,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
           {(isOwn ? activeTab === "work" : true) && (
             <div className="grid grid-cols-3 gap-0.5 pt-0.5">
               {gridLoading ? (
-                Array.from({ length: 6 }).map((_, i) => <div key={i} className="aspect-square bg-gray-200 animate-pulse" />)
+                Array.from({ length: 6 }).map((_, i) => <div key={i} className="aspect-square bg-white/10 animate-pulse" />)
               ) : mergedPosts.length > 0 ? (
                 mergedPosts.map((post) => <GridTile key={post.id} post={post} onClick={() => setViewingPost(post)} />)
               ) : !SUPABASE_CONFIGURED ? (
@@ -212,7 +212,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
               ) : (
                 /* FIX UX4 — Empty grid state for BOTH own and client profiles */
                 <div className="col-span-3 py-14 flex flex-col items-center gap-3 text-center px-8">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1" style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)" }}>
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1" style={{ background: "linear-gradient(135deg, #241d40, #1c1733)" }}>
                     {!isOwn ? (
                       <svg width="26" height="22" viewBox="0 0 24 20" fill="none" stroke="#6c47ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
@@ -227,8 +227,8 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                       </svg>
                     )}
                   </div>
-                  <p className="text-sm font-bold text-[#1a1a1a]">No posts yet</p>
-                  <p className="text-xs text-[#b0aaa5] leading-relaxed">
+                  <p className="text-sm font-bold text-[#ffffff]">No posts yet</p>
+                  <p className="text-xs text-[#6f6889] leading-relaxed">
                     {isOwn
                       ? (state.currentUser?.role === "client" || !state.currentUser?.role)
                         ? "Set up your Pro profile to showcase your work and start getting hired"
@@ -266,11 +266,11 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
 
           {activeTab === "work" && isOwn && state.currentUser?.role === "client" && (
             <div className="py-14 flex flex-col items-center gap-3 text-center px-8">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1" style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)" }}>
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1" style={{ background: "linear-gradient(135deg, #241d40, #1c1733)" }}>
                 <span className="text-2xl">✅</span>
               </div>
-              <p className="text-sm font-bold text-[#1a1a1a]">No hired history yet</p>
-              <p className="text-xs text-[#b0aaa5] leading-relaxed">Jobs you confirm via SkillSnap will appear here</p>
+              <p className="text-sm font-bold text-[#ffffff]">No hired history yet</p>
+              <p className="text-xs text-[#6f6889] leading-relaxed">Jobs you confirm via SkillSnap will appear here</p>
             </div>
           )}
 
@@ -280,9 +280,9 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 savedPostsList.map((post) => <GridTile key={post.id} post={post} onClick={() => setViewingPost(post)} />)
               ) : (
                 <div className="col-span-3 py-12 flex flex-col items-center gap-2 text-center">
-                  <div className="w-12 h-12 rounded-full bg-[#f0eeea] flex items-center justify-center mb-1"><Bookmark size={20} className="text-[#b0aaa5]" /></div>
-                  <p className="text-sm font-semibold text-[#7a7570]">Nothing saved yet</p>
-                  <p className="text-xs text-[#b0aaa5]">Tap the bookmark on any post to save it here</p>
+                  <div className="w-12 h-12 rounded-full bg-[#1c1733] flex items-center justify-center mb-1"><Bookmark size={20} className="text-[#6f6889]" /></div>
+                  <p className="text-sm font-semibold text-[#9d97b5]">Nothing saved yet</p>
+                  <p className="text-xs text-[#6f6889]">Tap the bookmark on any post to save it here</p>
                 </div>
               )}
             </div>
@@ -372,7 +372,7 @@ function MediaViewer({ post, isOwn, onClose, onDelete, onUpdate }: { post: Post;
       )}
       {showMenu && (
         <div className="fixed inset-0 z-60 flex items-end" onClick={() => setShowMenu(false)}>
-          <div className="w-full bg-[#1a1a1a] rounded-t-2xl pb-8 pt-2" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full bg-[#16122a] rounded-t-2xl pb-8 pt-2" onClick={(e) => e.stopPropagation()}>
             <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-4" />
             <button className="w-full flex items-center gap-4 px-5 py-4 text-white text-sm font-medium active:bg-white/5" onClick={() => { setShowMenu(false); setShowEdit(true); }}><Edit3 size={18} className="text-[#a78bfa]" /> Edit Post</button>
             <div className="h-px bg-white/10 mx-5" />
@@ -384,7 +384,7 @@ function MediaViewer({ post, isOwn, onClose, onDelete, onUpdate }: { post: Post;
       )}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-60 flex items-end" onClick={() => setShowDeleteConfirm(false)}>
-          <div className="w-full bg-[#1a1a1a] rounded-t-2xl pb-8 pt-2" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full bg-[#16122a] rounded-t-2xl pb-8 pt-2" onClick={(e) => e.stopPropagation()}>
             <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-4" />
             <div className="px-5 pb-4"><p className="text-white font-bold text-base mb-1">Delete this post?</p><p className="text-white/50 text-sm">This action can't be undone.</p></div>
             <button disabled={saving} className="w-full flex items-center justify-center gap-2 px-5 py-4 text-red-400 text-sm font-bold active:bg-white/5 disabled:opacity-50" onClick={handleDelete}>{saving ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}{saving ? "Deleting..." : "Delete Post"}</button>
@@ -395,7 +395,7 @@ function MediaViewer({ post, isOwn, onClose, onDelete, onUpdate }: { post: Post;
       )}
       {showEdit && (
         <div className="fixed inset-0 z-60 flex items-end" onClick={() => setShowEdit(false)}>
-          <div className="w-full bg-[#1a1a1a] rounded-t-2xl pb-8 pt-2 max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full bg-[#16122a] rounded-t-2xl pb-8 pt-2 max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-3" />
             <div className="flex items-center justify-between px-5 mb-5"><p className="text-white font-bold text-base">Edit Post</p><button onClick={() => setShowEdit(false)} className="text-white/50"><X size={18} /></button></div>
             <div className="px-5 mb-4">
@@ -431,8 +431,8 @@ function MediaViewer({ post, isOwn, onClose, onDelete, onUpdate }: { post: Post;
 function Stat({ value, label, highlight }: { value: string; label: string; highlight?: boolean }) {
   return (
     <div className="flex flex-col items-center gap-0.5 py-1">
-      <span className={`font-extrabold text-[15px] leading-tight tracking-tight ${highlight ? "text-[#6c47ff]" : "text-[#1a1a1a]"}`}>{value}</span>
-      <span className="text-[10px] text-[#7a7570] font-medium leading-tight text-center">{label}</span>
+      <span className={`font-extrabold text-[15px] leading-tight tracking-tight ${highlight ? "text-[#6c47ff]" : "text-[#ffffff]"}`}>{value}</span>
+      <span className="text-[10px] text-[#9d97b5] font-medium leading-tight text-center">{label}</span>
     </div>
   );
 }
@@ -447,7 +447,7 @@ const PRO_FEATURES = [
 function ProTab({ notified, onNotify, expanded, onToggleExpand }: { notified: boolean; onNotify: () => void; expanded: boolean; onToggleExpand: () => void; }) {
   const visibleFeatures = expanded ? PRO_FEATURES : PRO_FEATURES.slice(0, 2);
   return (
-    <div className="bg-[#f8f7f5] pb-6">
+    <div className="bg-[#0d0a1a] pb-6">
       <div className="relative px-5 pt-8 pb-8 overflow-hidden flex flex-col items-center text-center" style={{ background: "linear-gradient(160deg, #0d0a1a 0%, #1a0f3c 100%)" }}>
         <div style={{ position: "absolute", top: -40, left: -40, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.3) 0%, transparent 70%)", pointerEvents: "none" }} />
         <div className="relative mb-4">
@@ -475,32 +475,32 @@ function ProTab({ notified, onNotify, expanded, onToggleExpand }: { notified: bo
         <div className="flex items-center gap-2 mb-3"><Sparkles size={12} color="#a78bfa" /><span style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa", textTransform: "uppercase", letterSpacing: 1.2 }}>What's included</span></div>
         <div className="flex flex-col gap-2.5">
           {visibleFeatures.map((f, i) => (
-            <div key={i} className="flex items-start gap-3 rounded-2xl p-3.5" style={{ background: "#fff", border: "1px solid #e8e4df" }}>
+            <div key={i} className="flex items-start gap-3 rounded-2xl p-3.5" style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}>
               <div style={{ width: 38, height: 38, borderRadius: 12, background: f.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: f.color }}>{f.icon}</div>
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1"><span className="text-sm font-bold text-[#1a1a1a]">{f.title}</span>{f.later && <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 6px", borderRadius: 99, background: "rgba(251,191,36,0.1)", color: "#d97706", border: "1px solid rgba(217,119,6,0.2)" }}>Later</span>}</div>
-                <p className="text-xs text-[#7a7570] leading-relaxed">{f.desc}</p>
+                <div className="flex items-center gap-2 mb-1"><span className="text-sm font-bold text-[#ffffff]">{f.title}</span>{f.later && <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 6px", borderRadius: 99, background: "rgba(251,191,36,0.1)", color: "#d97706", border: "1px solid rgba(217,119,6,0.2)" }}>Later</span>}</div>
+                <p className="text-xs text-[#9d97b5] leading-relaxed">{f.desc}</p>
               </div>
             </div>
           ))}
         </div>
         <button onClick={onToggleExpand} className="flex items-center justify-center gap-1.5 w-full py-3 text-[#6c47ff] text-xs font-bold active:opacity-70 transition-opacity">{expanded ? <><ChevronUp size={13} /> Show less</> : <><ChevronDown size={13} /> See all features</>}</button>
       </div>
-      <div className="mx-4 rounded-2xl overflow-hidden" style={{ background: "#fff", border: "1px solid #e8e4df" }}>
+      <div className="mx-4 rounded-2xl overflow-hidden" style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}>
         <div className="px-4 py-4">
-          <p className="text-[10px] font-bold text-[#b0aaa5] uppercase tracking-wider mb-3">Pricing</p>
+          <p className="text-[10px] font-bold text-[#6f6889] uppercase tracking-wider mb-3">Pricing</p>
           <div className="flex gap-2.5">
-            <div className="flex-1 rounded-xl border border-[#e8e4df] p-3 text-center"><p className="text-[10px] text-[#b0aaa5] mb-1.5">Monthly</p><p className="text-xl font-extrabold text-[#1a1a1a]">$9<span className="text-xs font-medium text-[#b0aaa5]">/mo</span></p><p className="text-[10px] text-[#b0aaa5] mt-1">Cancel anytime</p></div>
+            <div className="flex-1 rounded-xl border border-[#26203f] p-3 text-center"><p className="text-[10px] text-[#6f6889] mb-1.5">Monthly</p><p className="text-xl font-extrabold text-[#ffffff]">$9<span className="text-xs font-medium text-[#6f6889]">/mo</span></p><p className="text-[10px] text-[#6f6889] mt-1">Cancel anytime</p></div>
             <div className="flex-1 rounded-xl p-3 text-center relative" style={{ background: "linear-gradient(135deg, rgba(108,71,255,0.08), rgba(167,139,250,0.05))", border: "1.5px solid #6c47ff" }}>
               <div style={{ position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(90deg, #6c47ff, #a78bfa)", color: "#fff", fontSize: 8, fontWeight: 700, padding: "2px 8px", borderRadius: 99, whiteSpace: "nowrap" }}>BEST VALUE</div>
-              <p className="text-[10px] text-[#7a7570] mb-1.5">Yearly</p><p className="text-xl font-extrabold text-[#1a1a1a]">$7<span className="text-xs font-medium text-[#b0aaa5]">/mo</span></p><p className="text-[10px] text-[#6c47ff] font-semibold mt-1">Save $24/year</p>
+              <p className="text-[10px] text-[#9d97b5] mb-1.5">Yearly</p><p className="text-xl font-extrabold text-[#ffffff]">$7<span className="text-xs font-medium text-[#6f6889]">/mo</span></p><p className="text-[10px] text-[#6c47ff] font-semibold mt-1">Save $24/year</p>
             </div>
           </div>
         </div>
       </div>
       <div className="px-4 mt-4">
         {notified ? (
-          <div className="flex flex-col items-center gap-2 py-4"><div className="w-12 h-12 rounded-full bg-[#dcfce7] flex items-center justify-center"><span className="text-xl">✓</span></div><p className="font-bold text-[#1a1a1a] text-sm">You're on the list!</p><p className="text-xs text-[#7a7570] text-center">We'll notify you when Pro launches. Early bird window secured.</p></div>
+          <div className="flex flex-col items-center gap-2 py-4"><div className="w-12 h-12 rounded-full bg-[rgba(16,185,129,0.14)] flex items-center justify-center"><span className="text-xl">✓</span></div><p className="font-bold text-[#ffffff] text-sm">You're on the list!</p><p className="text-xs text-[#9d97b5] text-center">We'll notify you when Pro launches. Early bird window secured.</p></div>
         ) : (
           <button onClick={onNotify} className="w-full h-13 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 active:scale-[0.98] transition-transform py-3.5" style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 20px rgba(108,71,255,0.3)" }}><Zap size={17} fill="white" color="white" /> Notify Me at Launch</button>
         )}

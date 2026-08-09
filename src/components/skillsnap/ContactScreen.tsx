@@ -42,22 +42,22 @@ export default function ContactScreen({ onNavigate }: ContactScreenProps) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center gap-3 px-4 h-14">
-        <button onClick={() => onNavigate("settings")} className="text-[#7a7570]">
+    <div className="flex flex-col min-h-screen bg-[#0d0a1a]">
+      <header className="sticky top-0 z-40 bg-[#0d0a1a]/92 backdrop-blur-sm border-b border-[#26203f] flex items-center gap-3 px-4 h-14">
+        <button onClick={() => onNavigate("settings")} className="text-[#9d97b5]">
           <ArrowLeft size={20} />
         </button>
-        <h1 className="font-bold text-base text-[#1a1a1a] flex-1">Contact Us</h1>
+        <h1 className="font-bold text-base text-[#ffffff] flex-1">Contact Us</h1>
       </header>
 
       <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-6">
         {done ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-full bg-[#dcfce7] flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-[rgba(16,185,129,0.14)] flex items-center justify-center mb-4">
               <CheckCircle size={32} className="text-green-500" />
             </div>
-            <h2 className="font-bold text-[#1a1a1a] text-lg mb-2">Message sent!</h2>
-            <p className="text-[#7a7570] text-sm leading-relaxed mb-6">We'll get back to you soon.</p>
+            <h2 className="font-bold text-[#ffffff] text-lg mb-2">Message sent!</h2>
+            <p className="text-[#9d97b5] text-sm leading-relaxed mb-6">We'll get back to you soon.</p>
             <button
               onClick={() => onNavigate("settings")}
               className="px-6 py-3 rounded-2xl font-bold text-sm text-white"
@@ -68,38 +68,38 @@ export default function ContactScreen({ onNavigate }: ContactScreenProps) {
           </div>
         ) : (
           <>
-            <p className="text-sm text-[#7a7570] mb-6 leading-relaxed">
+            <p className="text-sm text-[#9d97b5] mb-6 leading-relaxed">
               Have a question or feedback? We'd love to hear from you.
             </p>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
-                <label className="text-xs font-semibold text-[#7a7570] mb-1.5 block">Name</label>
+                <label className="text-xs font-semibold text-[#9d97b5] mb-1.5 block">Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
-                  className="w-full h-12 px-4 rounded-2xl border border-[#e8e4df] bg-white text-sm text-[#1a1a1a] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
+                  className="w-full h-12 px-4 rounded-2xl border border-[#26203f] bg-[#16122a] text-sm text-[#ffffff] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-[#7a7570] mb-1.5 block">Email</label>
+                <label className="text-xs font-semibold text-[#9d97b5] mb-1.5 block">Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="w-full h-12 px-4 rounded-2xl border border-[#e8e4df] bg-white text-sm text-[#1a1a1a] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
+                  className="w-full h-12 px-4 rounded-2xl border border-[#26203f] bg-[#16122a] text-sm text-[#ffffff] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-[#7a7570] mb-1.5 block">Message</label>
+                <label className="text-xs font-semibold text-[#9d97b5] mb-1.5 block">Message</label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="How can we help?"
                   rows={5}
-                  className="w-full px-4 py-3 rounded-2xl border border-[#e8e4df] bg-white text-sm text-[#1a1a1a] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5] resize-none"
+                  className="w-full px-4 py-3 rounded-2xl border border-[#26203f] bg-[#16122a] text-sm text-[#ffffff] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889] resize-none"
                 />
               </div>
               {error && <p className="text-xs text-red-500 text-center">{error}</p>}

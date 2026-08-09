@@ -38,7 +38,7 @@ export default function ResetPasswordScreen({ onNavigate }: ResetPasswordScreenP
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f7f5] items-center justify-center px-6">
+    <div className="flex flex-col min-h-screen bg-[#0d0a1a] items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-6">
           <SkillSnapLogo size="md" />
@@ -46,49 +46,49 @@ export default function ResetPasswordScreen({ onNavigate }: ResetPasswordScreenP
 
         {done ? (
           <div className="flex flex-col items-center text-center py-8">
-            <div className="w-16 h-16 rounded-full bg-[#dcfce7] flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-[rgba(16,185,129,0.14)] flex items-center justify-center mb-4">
               <CheckCircle size={32} className="text-green-500" />
             </div>
-            <h2 className="font-bold text-[#1a1a1a] text-lg mb-2">Password updated!</h2>
-            <p className="text-sm text-[#7a7570]">Taking you to the app…</p>
+            <h2 className="font-bold text-[#ffffff] text-lg mb-2">Password updated!</h2>
+            <p className="text-sm text-[#9d97b5]">Taking you to the app…</p>
           </div>
         ) : (
           <>
-            <h1 className="font-extrabold text-[#1a1a1a] text-2xl mb-1 text-center">Set New Password</h1>
-            <p className="text-sm text-[#7a7570] text-center mb-8 leading-relaxed">
+            <h1 className="font-extrabold text-[#ffffff] text-2xl mb-1 text-center">Set New Password</h1>
+            <p className="text-sm text-[#9d97b5] text-center mb-8 leading-relaxed">
               Choose a strong password for your account.
             </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
-                <label className="text-xs font-semibold text-[#7a7570] mb-1.5 block">New Password</label>
-                <div className="flex items-center h-12 px-4 rounded-2xl border border-[#e8e4df] bg-white gap-2 focus-within:border-[#6c47ff] transition-colors">
+                <label className="text-xs font-semibold text-[#9d97b5] mb-1.5 block">New Password</label>
+                <div className="flex items-center h-12 px-4 rounded-2xl border border-[#26203f] bg-[#16122a] gap-2 focus-within:border-[#6c47ff] transition-colors">
                   <input
                     type={showPw ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 8 characters"
-                    className="flex-1 bg-transparent text-sm text-[#1a1a1a] outline-none placeholder-[#b0aaa5]"
+                    className="flex-1 bg-transparent text-sm text-[#ffffff] outline-none placeholder-[#6f6889]"
                     autoComplete="new-password"
                   />
-                  <button type="button" onClick={() => setShowPw(s => !s)} className="text-[#b0aaa5] flex-shrink-0">
+                  <button type="button" onClick={() => setShowPw(s => !s)} className="text-[#6f6889] flex-shrink-0">
                     {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#7a7570] mb-1.5 block">Confirm Password</label>
-                <div className="flex items-center h-12 px-4 rounded-2xl border border-[#e8e4df] bg-white gap-2 focus-within:border-[#6c47ff] transition-colors">
+                <label className="text-xs font-semibold text-[#9d97b5] mb-1.5 block">Confirm Password</label>
+                <div className="flex items-center h-12 px-4 rounded-2xl border border-[#26203f] bg-[#16122a] gap-2 focus-within:border-[#6c47ff] transition-colors">
                   <input
                     type={showCf ? "text" : "password"}
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                     placeholder="Repeat new password"
-                    className="flex-1 bg-transparent text-sm text-[#1a1a1a] outline-none placeholder-[#b0aaa5]"
+                    className="flex-1 bg-transparent text-sm text-[#ffffff] outline-none placeholder-[#6f6889]"
                     autoComplete="new-password"
                   />
-                  <button type="button" onClick={() => setShowCf(s => !s)} className="text-[#b0aaa5] flex-shrink-0">
+                  <button type="button" onClick={() => setShowCf(s => !s)} className="text-[#6f6889] flex-shrink-0">
                     {showCf ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>

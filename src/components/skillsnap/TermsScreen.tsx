@@ -9,24 +9,24 @@ interface TermsScreenProps {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-6">
-      <h2 className="font-bold text-[#1a1a1a] text-sm mb-2">{title}</h2>
-      <div className="text-sm text-[#7a7570] leading-relaxed space-y-2">{children}</div>
+      <h2 className="font-bold text-[#ffffff] text-sm mb-2">{title}</h2>
+      <div className="text-sm text-[#9d97b5] leading-relaxed space-y-2">{children}</div>
     </div>
   );
 }
 
 export default function TermsScreen({ onNavigate }: TermsScreenProps) {
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center gap-3 px-4 h-14">
-        <button onClick={() => onNavigate("settings")} className="text-[#7a7570]">
+    <div className="flex flex-col min-h-screen bg-[#0d0a1a]">
+      <header className="sticky top-0 z-40 bg-[#0d0a1a]/92 backdrop-blur-sm border-b border-[#26203f] flex items-center gap-3 px-4 h-14">
+        <button onClick={() => onNavigate("settings")} className="text-[#9d97b5]">
           <ArrowLeft size={20} />
         </button>
-        <h1 className="font-bold text-base text-[#1a1a1a] flex-1">Terms & Privacy Policy</h1>
+        <h1 className="font-bold text-base text-[#ffffff] flex-1">Terms & Privacy Policy</h1>
       </header>
 
       <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-6">
-        <p className="text-xs text-[#b0aaa5] mb-6">Last updated: August 2026</p>
+        <p className="text-xs text-[#6f6889] mb-6">Last updated: August 2026</p>
 
         <Section title="1. About SkillSnap">
           <p>SkillSnap is an Australian platform operated by SkillSnap Australia ("we", "us", "our") that connects skilled professionals with local clients through video portfolios. By creating an account or using SkillSnap, you agree to these Terms and our Privacy Policy.</p>
@@ -80,8 +80,8 @@ export default function TermsScreen({ onNavigate }: TermsScreenProps) {
           <p>SkillSnap Australia · Sydney, NSW, Australia</p>
         </Section>
 
-        <div className="mt-4 mb-8 rounded-2xl p-4 text-center" style={{ background: "linear-gradient(135deg,#ede9fe,#f5f3ff)", border: "1.5px solid rgba(108,71,255,0.15)" }}>
-          <p className="text-xs text-[#7a7570]">Questions about our terms or privacy policy?</p>
+        <div className="mt-4 mb-8 rounded-2xl p-4 text-center" style={{ background: "linear-gradient(135deg,#241d40,#1c1733)", border: "1.5px solid rgba(108,71,255,0.15)" }}>
+          <p className="text-xs text-[#9d97b5]">Questions about our terms or privacy policy?</p>
           <button
             onClick={() => onNavigate("contact")}
             className="mt-2 px-5 py-2 rounded-xl font-bold text-sm text-white"

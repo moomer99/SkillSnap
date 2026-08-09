@@ -23,9 +23,9 @@ export default function JobsDoneBadge({
 }: JobsDoneBadgeProps) {
   const [open, setOpen] = useState(false);
 
-  const textColor = dark ? "text-white/80" : "text-[#7a7570]";
-  const iconColor = dark ? "rgba(255,255,255,0.5)" : "#b0aaa5";
-  const iconStroke = dark ? "rgba(255,255,255,0.6)" : "#7a7570";
+  const textColor = dark ? "text-white/80" : "text-[#9d97b5]";
+  const iconColor = dark ? "rgba(255,255,255,0.5)" : "#6f6889";
+  const iconStroke = dark ? "rgba(255,255,255,0.6)" : "#9d97b5";
   const fontSize = size === "xs" ? "text-[10px]" : "text-xs";
   const iconSize = size === "xs" ? 10 : 12;
 
@@ -62,12 +62,12 @@ export default function JobsDoneBadge({
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-[358px] bg-white rounded-3xl p-6 shadow-2xl"
+            className="w-full max-w-[358px] bg-[#16122a] rounded-3xl p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-[#ede9fe] flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-[#241d40] flex items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="#6c47ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="7" width="20" height="14" rx="2" />
@@ -75,27 +75,27 @@ export default function JobsDoneBadge({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm text-[#1a1a1a]">Jobs Done</h3>
+                  <h3 className="font-bold text-sm text-[#ffffff]">Jobs Done</h3>
                   <p className="text-xs text-[#6c47ff] font-semibold">{count} verified</p>
                 </div>
               </div>
-              <button onClick={() => setOpen(false)} className="text-[#b0aaa5] p-1">
+              <button onClick={() => setOpen(false)} className="text-[#6f6889] p-1">
                 <X size={18} />
               </button>
             </div>
 
-            <div className="h-px bg-[#e8e4df] mb-4" />
+            <div className="h-px bg-[#26203f] mb-4" />
 
-            <p className="text-sm text-[#4a4a4a] leading-relaxed">
+            <p className="text-sm text-[#b8b2cc] leading-relaxed">
               {JOBS_DONE_CONFIG.TOOLTIP_TEXT}
             </p>
 
-            <div className="mt-4 flex items-center gap-2 bg-[#f8f7f5] rounded-2xl px-4 py-3">
+            <div className="mt-4 flex items-center gap-2 bg-[#0d0a1a] rounded-2xl px-4 py-3">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff"
                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
-              <p className="text-xs text-[#7a7570]">{JOBS_DONE_CONFIG.TRUST_NOTE}</p>
+              <p className="text-xs text-[#9d97b5]">{JOBS_DONE_CONFIG.TRUST_NOTE}</p>
             </div>
 
             <button

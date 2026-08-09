@@ -24,7 +24,7 @@ export default function FilterChips<T extends string>({
           className={`flex-shrink-0 px-3.5 h-8 rounded-full text-xs font-semibold transition-all ${
             active === chip
               ? "bg-[#6c47ff] text-white"
-              : "bg-[#f0eeea] text-[#7a7570]"
+              : "bg-[#1c1733] text-[#9d97b5]"
           }`}
         >
           {chip}

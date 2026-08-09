@@ -14,12 +14,12 @@ export function EmptyState({ icon, title, subtitle, action }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
       {icon && (
-        <div className="w-14 h-14 rounded-2xl bg-[#ede9fe] flex items-center justify-center mb-4">
+        <div className="w-14 h-14 rounded-2xl bg-[#241d40] flex items-center justify-center mb-4">
           {icon}
         </div>
       )}
-      <p className="text-base font-semibold text-[#1a1a1a] mb-1">{title}</p>
-      {subtitle && <p className="text-sm text-[#7a7570] leading-relaxed">{subtitle}</p>}
+      <p className="text-base font-semibold text-[#ffffff] mb-1">{title}</p>
+      {subtitle && <p className="text-sm text-[#9d97b5] leading-relaxed">{subtitle}</p>}
       {action && (
         <button
           onClick={action.onClick}
@@ -37,13 +37,13 @@ export function LoadingSpinner({ label = "Loading..." }: { label?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-3">
       <div className="w-8 h-8 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
-      <p className="text-xs text-[#7a7570] font-medium">{label}</p>
+      <p className="text-xs text-[#9d97b5] font-medium">{label}</p>
     </div>
   );
 }
 
 export function SkeletonCard() {
   return (
-    <div className="w-full aspect-[9/16] max-h-[85vh] bg-[#e8e4df] mb-2 animate-pulse" />
+    <div className="w-full aspect-[9/16] max-h-[85vh] bg-[#26203f] mb-2 animate-pulse" />
   );
 }

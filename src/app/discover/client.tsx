@@ -18,7 +18,7 @@ export default function DiscoverClientPage() {
   return (
     <AppProvider>
       <ToastProvider>
-        <div className="w-full max-w-[600px] mx-auto min-h-screen bg-[#f8f7f5]">
+        <div className="w-full max-w-[600px] mx-auto min-h-screen bg-[#0d0a1a]">
           <DiscoverInner />
         </div>
       </ToastProvider>

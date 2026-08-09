@@ -66,20 +66,20 @@ export default function UsernameSetupScreen({ onDone }: { onDone: () => void }) 
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white px-5 pt-14 pb-10">
+    <div className="flex flex-col min-h-screen bg-[#16122a] px-5 pt-14 pb-10">
       <div className="mb-8">
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
           style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}>
           <span className="text-2xl">✦</span>
         </div>
-        <h1 className="text-2xl font-extrabold text-[#1a1a1a] mb-2">Choose your username</h1>
-        <p className="text-[#7a7570] text-sm leading-relaxed">
+        <h1 className="text-2xl font-extrabold text-[#ffffff] mb-2">Choose your username</h1>
+        <p className="text-[#9d97b5] text-sm leading-relaxed">
           This is how people find and mention you on SkillSnap.
         </p>
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="flex items-center gap-2 border-2 border-[#e8e4df] rounded-2xl px-4 h-14 focus-within:border-[#6c47ff] transition-colors bg-[#fafafa]">
-          <span className="text-[#b0aaa5] font-semibold text-base select-none">@</span>
+        <div className="flex items-center gap-2 border-2 border-[#26203f] rounded-2xl px-4 h-14 focus-within:border-[#6c47ff] transition-colors bg-[#fafafa]">
+          <span className="text-[#6f6889] font-semibold text-base select-none">@</span>
           <input
             ref={inputRef}
             type="text"
@@ -92,11 +92,11 @@ export default function UsernameSetupScreen({ onDone }: { onDone: () => void }) 
             maxLength={20}
             autoComplete="off"
             autoCapitalize="none"
-            className="flex-1 bg-transparent text-[#1a1a1a] text-base font-semibold placeholder-[#c0bcb8] outline-none"
+            className="flex-1 bg-transparent text-[#ffffff] text-base font-semibold placeholder-[#c0bcb8] outline-none"
           />
         </div>
         {error && <p className="text-xs text-red-500 font-medium px-1">{error}</p>}
-        <p className="text-[11px] text-[#b0aaa5] px-1">
+        <p className="text-[11px] text-[#6f6889] px-1">
           3–20 characters · letters, numbers, underscores only
         </p>
         <button

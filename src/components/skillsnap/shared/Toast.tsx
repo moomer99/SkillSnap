@@ -52,7 +52,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   ? "linear-gradient(135deg, #6c47ff, #8b6af5)"
                   : t.type === "success"
                   ? "#16a34a"
-                  : "#1a1a1a",
+                  : "#ffffff",
             }}
           >
             <span className="flex-shrink-0 text-white">

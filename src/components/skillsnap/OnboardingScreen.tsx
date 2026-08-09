@@ -59,7 +59,7 @@ function SlideSkills() {
           <stop offset="100%" stopColor="#ef4444"/>
         </linearGradient>
         <linearGradient id="sk-s1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#fef3c7"/>
+          <stop offset="0%" stopColor="rgba(251,191,36,0.14)"/>
           <stop offset="100%" stopColor="#fbbf24"/>
         </linearGradient>
         <linearGradient id="sk-s2" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -92,8 +92,8 @@ function SlideLocal() {
           <stop offset="100%" stopColor="#6c47ff"/>
         </radialGradient>
         <radialGradient id="lc-map" cx="50%" cy="50%" r="65%">
-          <stop offset="0%" stopColor="#ede9fe"/>
-          <stop offset="100%" stopColor="#ddd6fe"/>
+          <stop offset="0%" stopColor="#241d40"/>
+          <stop offset="100%" stopColor="#2e2550"/>
         </radialGradient>
         <filter id="lc-drop" x="-40%" y="-40%" width="180%" height="180%">
           <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#6c47ff" floodOpacity="0.28"/>
@@ -267,10 +267,10 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
                 {s.illustration}
               </div>
               <div className="text-center">
-                <h2 className="text-[26px] font-extrabold text-[#1a1a1a] leading-tight mb-3 tracking-tight">
+                <h2 className="text-[26px] font-extrabold text-[#ffffff] leading-tight mb-3 tracking-tight">
                   {s.title}
                 </h2>
-                <p className="text-[15px] text-[#7a7570] leading-relaxed max-w-[280px] mx-auto">
+                <p className="text-[15px] text-[#9d97b5] leading-relaxed max-w-[280px] mx-auto">
                   {s.subtitle}
                 </p>
               </div>
@@ -321,7 +321,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
           <div className="w-full flex gap-3">
             <button
               onClick={back}
-              className="flex-1 h-14 rounded-2xl font-semibold text-base text-[#1a1a1a] bg-white border border-[#ddd6fe] active:scale-[0.98] transition-transform"
+              className="flex-1 h-14 rounded-2xl font-semibold text-base text-[#ffffff] bg-[#16122a] border border-[#2e2550] active:scale-[0.98] transition-transform"
             >
               Back
             </button>
@@ -345,7 +345,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
           <div className="w-full flex gap-3">
             <button
               onClick={back}
-              className="flex-1 h-14 rounded-2xl font-semibold text-base text-[#1a1a1a] bg-white border border-[#ddd6fe] active:scale-[0.98] transition-transform"
+              className="flex-1 h-14 rounded-2xl font-semibold text-base text-[#ffffff] bg-[#16122a] border border-[#2e2550] active:scale-[0.98] transition-transform"
             >
               Back
             </button>
@@ -358,7 +358,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
             </button>
           </div>
         )}
-        <p className="text-[13px] text-[#b0aaa5] font-medium tabular-nums">
+        <p className="text-[13px] text-[#6f6889] font-medium tabular-nums">
           {current + 1} of {slides.length}
         </p>
       </div>

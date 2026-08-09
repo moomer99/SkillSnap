@@ -48,12 +48,12 @@ function QuickReplies({ onSelect, hasMessages, isSkiller }: {
 }) {
   const replies = isSkiller ? QUICK_REPLIES_PRO : QUICK_REPLIES_CLIENT;
   return (
-    <div className="bg-white border-t border-[#f0eeea] px-3 py-2 flex gap-2 overflow-x-auto no-scrollbar">
+    <div className="bg-[#16122a] border-t border-[#1c1733] px-3 py-2 flex gap-2 overflow-x-auto no-scrollbar">
       {replies.map((r) => (
         <button
           key={r}
           onClick={() => onSelect(r)}
-          className="flex-shrink-0 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-[#e8e4df] bg-[#f8f7f5] text-[#4a4a4a] active:bg-[#ede9fe] active:border-[#c4b5fd] active:text-[#6c47ff] transition-all whitespace-nowrap"
+          className="flex-shrink-0 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-[#26203f] bg-[#0d0a1a] text-[#b8b2cc] active:bg-[#241d40] active:border-[#c4b5fd] active:text-[#6c47ff] transition-all whitespace-nowrap"
         >
           {r}
         </button>
@@ -486,11 +486,11 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   }
 
   return (
-    <div className="flex flex-col bg-[#f8f7f5] relative overflow-hidden" style={{ height: "100dvh" }}>
+    <div className="flex flex-col bg-[#0d0a1a] relative overflow-hidden" style={{ height: "100dvh" }}>
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] flex items-center gap-3 px-4 h-14 flex-shrink-0">
-        <button onClick={() => onNavigate("messages")} className="text-[#7a7570]">
+      <header className="sticky top-0 z-40 bg-[#0d0a1a]/92 backdrop-blur-sm border-b border-[#26203f] flex items-center gap-3 px-4 h-14 flex-shrink-0">
+        <button onClick={() => onNavigate("messages")} className="text-[#9d97b5]">
           <ArrowLeft size={20} />
         </button>
         <button onClick={() => onNavigate("client-profile")} className="flex items-center gap-2.5 flex-1 min-w-0">
@@ -502,9 +502,9 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 min-w-0">
-              <p className="text-sm font-bold text-[#1a1a1a] leading-tight truncate">{displayParticipant.displayName}</p>
+              <p className="text-sm font-bold text-[#ffffff] leading-tight truncate">{displayParticipant.displayName}</p>
               {!isSkiller && (jobStatus === "confirmed" || jobStatus === "feedback_done") && (
-                <span className="flex-shrink-0 text-[9px] px-1.5 py-0.5 rounded-full bg-[#f0fdf4] text-green-600 font-semibold border border-green-200">
+                <span className="flex-shrink-0 text-[9px] px-1.5 py-0.5 rounded-full bg-[rgba(16,185,129,0.10)] text-emerald-400 font-semibold border border-emerald-500/30">
                   Hired ✓
                 </span>
               )}
@@ -521,7 +521,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowChatMenu(true)}
-            className="w-9 h-9 flex items-center justify-center text-[#7a7570] active:text-[#6c47ff] transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-[#9d97b5] active:text-[#6c47ff] transition-colors"
           >
             <MoreVertical size={18} />
           </button>
@@ -539,9 +539,9 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         }}
       >
         <div className="flex items-center gap-2 my-2">
-          <div className="flex-1 h-px bg-[#e8e4df]" />
-          <span className="text-[11px] text-[#b0aaa5] font-medium px-2">Today</span>
-          <div className="flex-1 h-px bg-[#e8e4df]" />
+          <div className="flex-1 h-px bg-[#26203f]" />
+          <span className="text-[11px] text-[#6f6889] font-medium px-2">Today</span>
+          <div className="flex-1 h-px bg-[#26203f]" />
         </div>
 
         {loading ? (
@@ -557,8 +557,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center flex-1 text-center py-8">
-            <p className="text-sm font-semibold text-[#1a1a1a] mb-1">Start the conversation</p>
-            <p className="text-xs text-[#b0aaa5]">Say hello to {displayParticipant.displayName} 👋</p>
+            <p className="text-sm font-semibold text-[#ffffff] mb-1">Start the conversation</p>
+            <p className="text-xs text-[#6f6889]">Say hello to {displayParticipant.displayName} 👋</p>
           </div>
         ) : (
           messagesBeforeCard.map((msg) => {
@@ -580,14 +580,14 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                 >
                   <button
                     onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(msg.text ?? ""); setPressedMsgId(null); }}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white shadow-md border border-[#e8e4df] text-xs font-semibold text-[#1a1a1a] z-20 relative"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#16122a] shadow-md border border-[#26203f] text-xs font-semibold text-[#ffffff] z-20 relative"
                   >
                     <Copy size={13} /> Copy
                   </button>
                   {msg.from === "me" && (
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDeleteMessage(msg.id); setPressedMsgId(null); }}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white shadow-md border border-[#e8e4df] text-xs font-semibold text-red-500 z-20 relative"
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#16122a] shadow-md border border-[#26203f] text-xs font-semibold text-red-500 z-20 relative"
                     >
                       <Trash2 size={13} /> Delete
                     </button>
@@ -627,7 +627,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                       className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                         msg.from === "me"
                           ? "text-white rounded-br-sm"
-                          : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
+                          : "bg-[#16122a] text-[#ffffff] rounded-bl-sm shadow-sm border border-[#26203f]"
                       } ${msg.failed ? "opacity-60" : ""}`}
                       style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #6c47ff, #8b6af5)", userSelect: "none" } : { userSelect: "none" }}
                     >
@@ -638,7 +638,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                     )}
                   </>
                 )}
-                <span className={`text-[10px] text-[#b0aaa5] flex items-center gap-0.5 ${msg.from === "me" ? "justify-end" : "justify-start"} px-1`}>
+                <span className={`text-[10px] text-[#6f6889] flex items-center gap-0.5 ${msg.from === "me" ? "justify-end" : "justify-start"} px-1`}>
                   {msg.time}
                   {msg.from === "me" && !msg.failed && (
                     <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="ml-0.5 flex-shrink-0">
@@ -657,64 +657,64 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         {/* ── Job done status cards — inline in scroll flow ── */}
         <div ref={jobCardRef}>
         {isSkiller && jobStatus === "requested" && (
-          <div className="mx-2 mt-2 bg-[#f5f0ff] rounded-2xl border border-[#6c47ff]/20 px-4 py-3 flex items-center gap-3">
+          <div className="mx-2 mt-2 bg-[#1c1733] rounded-2xl border border-[#6c47ff]/20 px-4 py-3 flex items-center gap-3">
             <Loader2 size={18} className="text-[#6c47ff] flex-shrink-0 animate-spin" />
             <div>
-              <p className="text-sm font-bold text-[#1a1a1a]">Job done request sent</p>
-              <p className="text-xs text-[#7a7570]">Waiting for {displayParticipant.displayName} to confirm…</p>
+              <p className="text-sm font-bold text-[#ffffff]">Job done request sent</p>
+              <p className="text-xs text-[#9d97b5]">Waiting for {displayParticipant.displayName} to confirm…</p>
             </div>
           </div>
         )}
 
         {!isSkiller && jobStatus === "requested" && (
-          <div className="mx-2 mt-2 bg-white rounded-2xl border border-[#e8e4df] shadow-sm overflow-hidden">
+          <div className="mx-2 mt-2 bg-[#16122a] rounded-2xl border border-[#26203f] shadow-sm overflow-hidden">
             <div className="px-4 pt-4 pb-3">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">✅</span>
-                <p className="font-bold text-[#1a1a1a] text-sm">{displayParticipant.displayName} marked the job as done</p>
+                <p className="font-bold text-[#ffffff] text-sm">{displayParticipant.displayName} marked the job as done</p>
               </div>
-              <p className="text-xs text-[#7a7570] leading-snug">Did they complete the work to your satisfaction? Confirm to leave feedback.</p>
+              <p className="text-xs text-[#9d97b5] leading-snug">Did they complete the work to your satisfaction? Confirm to leave feedback.</p>
             </div>
-            <div className="flex border-t border-[#e8e4df]">
-              <button className="flex-1 py-3 text-sm font-semibold text-[#7a7570] active:bg-gray-50 transition-colors" onClick={handleClientDecline}>Decline</button>
-              <div className="w-px bg-[#e8e4df]" />
-              <button className="flex-1 py-3 text-sm font-bold text-[#6c47ff] active:bg-[#f5f0ff] transition-colors" onClick={handleClientConfirm}>Yes, Confirm ✓</button>
+            <div className="flex border-t border-[#26203f]">
+              <button className="flex-1 py-3 text-sm font-semibold text-[#9d97b5] active:bg-white/10 transition-colors" onClick={handleClientDecline}>Decline</button>
+              <div className="w-px bg-[#26203f]" />
+              <button className="flex-1 py-3 text-sm font-bold text-[#6c47ff] active:bg-[#1c1733] transition-colors" onClick={handleClientConfirm}>Yes, Confirm ✓</button>
             </div>
           </div>
         )}
 
         {!isSkiller && jobStatus === "declined" && (
-          <div className="mx-2 mt-2 bg-[#fff7ed] rounded-2xl border border-orange-200 px-4 py-3 flex items-center gap-2">
+          <div className="mx-2 mt-2 bg-[rgba(249,115,22,0.12)] rounded-2xl border border-orange-500/30 px-4 py-3 flex items-center gap-2">
             <X size={16} className="text-orange-400 flex-shrink-0" />
-            <p className="text-sm font-semibold text-[#1a1a1a]">Job completion declined.</p>
+            <p className="text-sm font-semibold text-[#ffffff]">Job completion declined.</p>
           </div>
         )}
 
         {isSkiller && jobStatus === "confirmed" && (
-          <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
+          <div className="mx-2 mt-2 bg-[rgba(16,185,129,0.10)] rounded-2xl border border-emerald-500/30 px-4 py-3 flex items-center gap-3">
             <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
             <div>
-              <p className="text-sm font-bold text-[#1a1a1a]">Job confirmed by client!</p>
-              <p className="text-xs text-[#7a7570]">Your happy % will update once they rate.</p>
+              <p className="text-sm font-bold text-[#ffffff]">Job confirmed by client!</p>
+              <p className="text-xs text-[#9d97b5]">Your happy % will update once they rate.</p>
             </div>
           </div>
         )}
 
         {!isSkiller && jobStatus === "confirmed" && !showFeedback && !feedbackDone && (
-          <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
+          <div className="mx-2 mt-2 bg-[rgba(16,185,129,0.10)] rounded-2xl border border-emerald-500/30 px-4 py-3 flex items-center gap-3">
             <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-[#1a1a1a]">Job confirmed!</p>
-              <p className="text-xs text-[#7a7570]">Share your experience with the community.</p>
+              <p className="text-sm font-bold text-[#ffffff]">Job confirmed!</p>
+              <p className="text-xs text-[#9d97b5]">Share your experience with the community.</p>
             </div>
             <button className="flex-shrink-0 text-xs font-bold text-white px-3 py-1.5 rounded-xl" style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)" }} onClick={() => setShowFeedback(true)}>Rate</button>
           </div>
         )}
 
         {jobStatus === "feedback_done" && (
-          <div className="mx-2 mt-2 bg-[#f0fdf4] rounded-2xl border border-green-200 px-4 py-3 flex items-center gap-3">
+          <div className="mx-2 mt-2 bg-[rgba(16,185,129,0.10)] rounded-2xl border border-emerald-500/30 px-4 py-3 flex items-center gap-3">
             <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
-            <p className="text-sm font-semibold text-[#1a1a1a]">Thanks for your feedback! 🎉</p>
+            <p className="text-sm font-semibold text-[#ffffff]">Thanks for your feedback! 🎉</p>
           </div>
         )}
         </div>{/* end jobCardRef wrapper */}
@@ -761,7 +761,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                           className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                             msg.from === "me"
                               ? "text-white rounded-br-sm"
-                              : "bg-white text-[#1a1a1a] rounded-bl-sm shadow-sm border border-[#e8e4df]"
+                              : "bg-[#16122a] text-[#ffffff] rounded-bl-sm shadow-sm border border-[#26203f]"
                           } ${msg.failed ? "opacity-60" : ""}`}
                           style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #6c47ff, #8b6af5)", userSelect: "none" } : { userSelect: "none" }}
                         >
@@ -772,7 +772,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                         )}
                       </>
                     )}
-                    <span className={`text-[10px] text-[#b0aaa5] flex items-center gap-0.5 ${msg.from === "me" ? "justify-end" : "justify-start"} px-1`}>
+                    <span className={`text-[10px] text-[#6f6889] flex items-center gap-0.5 ${msg.from === "me" ? "justify-end" : "justify-start"} px-1`}>
                       {msg.time}
                       {msg.from === "me" && !msg.failed && (
                         <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="ml-0.5 flex-shrink-0">
@@ -803,7 +803,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       {showScrollBtn && (
         <button
           onClick={() => bottomRef.current?.scrollIntoView({ behavior: "smooth" })}
-          className="absolute bottom-[160px] right-4 z-30 w-9 h-9 rounded-full bg-white shadow-lg border border-[#e8e4df] flex items-center justify-center text-[#6c47ff] active:scale-95 transition-transform"
+          className="absolute bottom-[160px] right-4 z-30 w-9 h-9 rounded-full bg-[#16122a] shadow-lg border border-[#26203f] flex items-center justify-center text-[#6c47ff] active:scale-95 transition-transform"
         >
           <ChevronDown size={18} />
         </button>
@@ -815,15 +815,15 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           {canRequestJobDone ? (
             <button
               onClick={handleRequestJobDone}
-              className="w-full h-10 rounded-2xl font-semibold text-xs border-2 border-[#6c47ff]/30 text-[#6c47ff] flex items-center justify-center gap-2 bg-[#f5f0ff] transition-all active:scale-[0.98]"
+              className="w-full h-10 rounded-2xl font-semibold text-xs border-2 border-[#6c47ff]/30 text-[#6c47ff] flex items-center justify-center gap-2 bg-[#1c1733] transition-all active:scale-[0.98]"
             >
               <CheckCircle size={14} />
               Mark Job as Done
             </button>
           ) : (
-            <div className="w-full h-10 rounded-2xl flex items-center justify-center gap-2 bg-[#f0eeea] border border-[#e8e4df]">
-              <Clock size={13} className="text-[#b0aaa5]" />
-              <span className="text-xs text-[#b0aaa5] font-medium">{lockedLabel}</span>
+            <div className="w-full h-10 rounded-2xl flex items-center justify-center gap-2 bg-[#1c1733] border border-[#26203f]">
+              <Clock size={13} className="text-[#6f6889]" />
+              <span className="text-xs text-[#6f6889] font-medium">{lockedLabel}</span>
             </div>
           )}
         </div>
@@ -834,7 +834,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
 
       {/* Input bar */}
       <div
-        className="flex-shrink-0 bg-white border-t border-[#e8e4df] px-4 py-3 flex items-center gap-3"
+        className="flex-shrink-0 bg-[#16122a] border-t border-[#26203f] px-4 py-3 flex items-center gap-3"
         style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
       >
         <input ref={attachRef} type="file" accept="image/*" className="hidden"
@@ -846,7 +846,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             e.target.value = "";
           }}
         />
-        <button type="button" onClick={() => attachRef.current?.click()} className="text-[#7a7570] flex-shrink-0 active:text-[#6c47ff] transition-colors">
+        <button type="button" onClick={() => attachRef.current?.click()} className="text-[#9d97b5] flex-shrink-0 active:text-[#6c47ff] transition-colors">
           <Paperclip size={20} />
         </button>
         <input
@@ -857,7 +857,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessageWithTracking(); } }}
           placeholder="Message..."
           autoComplete="off"
-          className="flex-1 bg-[#f0eeea] rounded-2xl px-4 py-2.5 min-h-[40px] text-sm text-[#1a1a1a] placeholder-[#b0aaa5] focus:outline-none focus:ring-2 focus:ring-[#6c47ff]/30"
+          className="flex-1 bg-[#1c1733] rounded-2xl px-4 py-2.5 min-h-[40px] text-sm text-[#ffffff] placeholder-[#6f6889] focus:outline-none focus:ring-2 focus:ring-[#6c47ff]/30"
         />
         <button type="button" onClick={sendMessageWithTracking}
           disabled={!inputText.trim() || sending}
@@ -872,40 +872,40 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       {/* ── Chat options menu ── */}
       {showChatMenu && (
         <div className="fixed inset-0 z-[200] flex items-end" onClick={() => setShowChatMenu(false)}>
-          <div className="w-full bg-white rounded-t-3xl pb-8 pt-2 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="w-10 h-1 rounded-full bg-[#e8e4df] mx-auto mb-4" />
+          <div className="w-full bg-[#16122a] rounded-t-3xl pb-8 pt-2 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="w-10 h-1 rounded-full bg-[#26203f] mx-auto mb-4" />
             <div className="px-4 pb-2">
-              <p className="text-xs font-bold text-[#b0aaa5] uppercase tracking-wider mb-1">{displayParticipant.displayName}</p>
+              <p className="text-xs font-bold text-[#6f6889] uppercase tracking-wider mb-1">{displayParticipant.displayName}</p>
             </div>
-            <button className="w-full flex items-center gap-4 px-5 py-4 text-[#1a1a1a] text-sm font-medium active:bg-[#f8f7f5]" onClick={() => { setShowChatMenu(false); onNavigate("client-profile"); }}>
-              <div className="w-9 h-9 rounded-full bg-[#ede9fe] flex items-center justify-center flex-shrink-0">
+            <button className="w-full flex items-center gap-4 px-5 py-4 text-[#ffffff] text-sm font-medium active:bg-[#0d0a1a]" onClick={() => { setShowChatMenu(false); onNavigate("client-profile"); }}>
+              <div className="w-9 h-9 rounded-full bg-[#241d40] flex items-center justify-center flex-shrink-0">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" /></svg>
               </div>
               View Profile
             </button>
-            <div className="h-px bg-[#f0eeea] mx-5" />
-            <button className="w-full flex items-center gap-4 px-5 py-4 text-[#1a1a1a] text-sm font-medium active:bg-[#f8f7f5]" onClick={() => setShowChatMenu(false)}>
-              <div className="w-9 h-9 rounded-full bg-[#f0eeea] flex items-center justify-center flex-shrink-0"><Bell size={16} className="text-[#7a7570]" /></div>
+            <div className="h-px bg-[#1c1733] mx-5" />
+            <button className="w-full flex items-center gap-4 px-5 py-4 text-[#ffffff] text-sm font-medium active:bg-[#0d0a1a]" onClick={() => setShowChatMenu(false)}>
+              <div className="w-9 h-9 rounded-full bg-[#1c1733] flex items-center justify-center flex-shrink-0"><Bell size={16} className="text-[#9d97b5]" /></div>
               Mute Notifications
               <span className="ml-auto text-[10px] font-bold text-white bg-[#6c47ff] px-2 py-0.5 rounded-full">Soon</span>
             </button>
-            <div className="h-px bg-[#f0eeea] mx-5" />
-            <button className="w-full flex items-center gap-4 px-5 py-4 text-red-500 text-sm font-medium active:bg-red-50" onClick={() => setShowChatMenu(false)}>
-              <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0"><Flag size={16} className="text-red-400" /></div>
+            <div className="h-px bg-[#1c1733] mx-5" />
+            <button className="w-full flex items-center gap-4 px-5 py-4 text-red-500 text-sm font-medium active:bg-red-500/10" onClick={() => setShowChatMenu(false)}>
+              <div className="w-9 h-9 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0"><Flag size={16} className="text-red-400" /></div>
               Report Conversation
               <span className="ml-auto text-[10px] font-bold text-white bg-[#6c47ff] px-2 py-0.5 rounded-full">Soon</span>
             </button>
-            <div className="h-px bg-[#f0eeea] mx-5" />
+            <div className="h-px bg-[#1c1733] mx-5" />
             <button
-              className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-[#f8f7f5] transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-[#0d0a1a] transition-colors"
               onClick={() => { setShowChatMenu(false); setShowDeleteConvConfirm(true); }}
             >
               <Trash2 size={16} className="text-red-500 flex-shrink-0" />
               <span className="text-sm font-semibold text-red-500">Delete conversation</span>
             </button>
-            <div className="h-px bg-[#f0eeea] mx-5" />
-            <button className="w-full flex items-center gap-4 px-5 py-4 text-[#7a7570] text-sm font-medium active:bg-[#f8f7f5]" onClick={() => setShowChatMenu(false)}>
-              <div className="w-9 h-9 rounded-full bg-[#f0eeea] flex items-center justify-center flex-shrink-0"><X size={16} className="text-[#7a7570]" /></div>
+            <div className="h-px bg-[#1c1733] mx-5" />
+            <button className="w-full flex items-center gap-4 px-5 py-4 text-[#9d97b5] text-sm font-medium active:bg-[#0d0a1a]" onClick={() => setShowChatMenu(false)}>
+              <div className="w-9 h-9 rounded-full bg-[#1c1733] flex items-center justify-center flex-shrink-0"><X size={16} className="text-[#9d97b5]" /></div>
               Cancel
             </button>
           </div>
@@ -915,14 +915,14 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       {/* ── Delete conversation confirmation sheet ── */}
       {showDeleteConvConfirm && (
         <div className="fixed inset-0 z-[200] flex items-end" onClick={() => setShowDeleteConvConfirm(false)}>
-          <div className="w-full bg-white rounded-t-3xl px-5 pt-3 pb-8 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="w-10 h-1 rounded-full bg-[#e8e4df] mx-auto mb-5" />
+          <div className="w-full bg-[#16122a] rounded-t-3xl px-5 pt-3 pb-8 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="w-10 h-1 rounded-full bg-[#26203f] mx-auto mb-5" />
             <div className="flex flex-col items-center text-center px-2 pb-2">
-              <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4">
+              <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
                 <Trash2 size={24} className="text-red-500" />
               </div>
-              <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">Delete conversation?</h3>
-              <p className="text-sm text-[#7a7570] mb-6 leading-relaxed">
+              <h3 className="font-bold text-[#ffffff] text-lg mb-1">Delete conversation?</h3>
+              <p className="text-sm text-[#9d97b5] mb-6 leading-relaxed">
                 This removes the chat from your list only. The other person won't be notified.
               </p>
               <button
@@ -934,7 +934,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
               </button>
               <button
                 onClick={() => setShowDeleteConvConfirm(false)}
-                className="w-full h-12 rounded-2xl font-semibold text-sm text-[#7a7570] bg-[#f0eeea]"
+                className="w-full h-12 rounded-2xl font-semibold text-sm text-[#9d97b5] bg-[#1c1733]"
               >
                 Cancel
               </button>
@@ -946,8 +946,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       {/* ── Feedback modal ── */}
       {showFeedback && (
         <div className="fixed inset-0 z-[200] flex flex-col bg-[#f5f5f5]">
-          <div className="bg-white border-b border-[#ebebeb] px-4 py-3 flex items-center gap-3">
-            <button onClick={() => setShowFeedback(false)} className="w-8 h-8 flex items-center justify-center text-[#7a7570]"><X size={20} /></button>
+          <div className="bg-[#16122a] border-b border-[#ebebeb] px-4 py-3 flex items-center gap-3">
+            <button onClick={() => setShowFeedback(false)} className="w-8 h-8 flex items-center justify-center text-[#9d97b5]"><X size={20} /></button>
             {displayParticipant.avatarUrl ? (
               <img src={displayParticipant.avatarUrl} className="w-10 h-10 rounded-full object-cover" alt="" />
             ) : (
@@ -957,45 +957,45 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-[#1a1a1a] text-[15px]">{displayParticipant.displayName}</span>
+                <span className="font-bold text-[#ffffff] text-[15px]">{displayParticipant.displayName}</span>
                 <span className="text-green-500">★</span>
               </div>
-              {displayParticipant.skill && <p className="text-xs text-[#7a7570]">{displayParticipant.skill}</p>}
+              {displayParticipant.skill && <p className="text-xs text-[#9d97b5]">{displayParticipant.skill}</p>}
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto bg-white">
+          <div className="flex-1 overflow-y-auto bg-[#16122a]">
             {feedbackDone ? (
               <div className="flex flex-col items-center justify-center h-full gap-4 px-6">
-                <div className="w-16 h-16 rounded-full bg-[#dcfce7] flex items-center justify-center"><CheckCircle size={30} className="text-green-500" /></div>
-                <p className="font-bold text-[#1a1a1a] text-lg text-center">Thank you for your feedback!</p>
-                <p className="text-sm text-[#7a7570] text-center">Your review helps build trust in the community.</p>
+                <div className="w-16 h-16 rounded-full bg-[rgba(16,185,129,0.14)] flex items-center justify-center"><CheckCircle size={30} className="text-green-500" /></div>
+                <p className="font-bold text-[#ffffff] text-lg text-center">Thank you for your feedback!</p>
+                <p className="text-sm text-[#9d97b5] text-center">Your review helps build trust in the community.</p>
               </div>
             ) : (
               <>
                 <div className="flex justify-start px-4 pt-4 pb-2">
-                  <button onClick={() => setShowFeedback(false)} className="w-8 h-8 rounded-full bg-[#e8e4df] flex items-center justify-center text-[#7a7570]"><X size={15} /></button>
+                  <button onClick={() => setShowFeedback(false)} className="w-8 h-8 rounded-full bg-[#26203f] flex items-center justify-center text-[#9d97b5]"><X size={15} /></button>
                 </div>
                 <div className="px-5 pb-5 text-center">
-                  <h2 className="font-bold text-[#1a1a1a] text-[18px] leading-tight mb-1">Were You Happy With the Work?</h2>
-                  <p className="text-sm text-[#7a7570]">Your feedback helps {displayParticipant.displayName} improve!</p>
+                  <h2 className="font-bold text-[#ffffff] text-[18px] leading-tight mb-1">Were You Happy With the Work?</h2>
+                  <p className="text-sm text-[#9d97b5]">Your feedback helps {displayParticipant.displayName} improve!</p>
                 </div>
                 <div className="flex gap-3 px-5 mb-5">
                   {RATINGS.map(({ key, emoji, label }) => (
                     <button key={key} onClick={() => setRating(key)}
                       className={`flex-1 flex flex-col items-center gap-2 py-4 px-1 rounded-2xl border-2 transition-all ${
                         rating === key
-                          ? key === "not_satisfied" ? "border-red-300 bg-red-50" : "border-[#6c47ff] bg-[#f5f0ff]"
-                          : "border-[#e8e4df] bg-white"
+                          ? key === "not_satisfied" ? "border-red-500/30 bg-red-500/10" : "border-[#6c47ff] bg-[#1c1733]"
+                          : "border-[#26203f] bg-[#16122a]"
                       }`}>
                       <span className="text-3xl leading-none">{emoji}</span>
-                      <span className={`text-[11px] font-semibold text-center leading-tight whitespace-pre-line ${rating === key ? key === "not_satisfied" ? "text-red-500" : "text-[#6c47ff]" : "text-[#4a4a4a]"}`}>{label}</span>
+                      <span className={`text-[11px] font-semibold text-center leading-tight whitespace-pre-line ${rating === key ? key === "not_satisfied" ? "text-red-500" : "text-[#6c47ff]" : "text-[#b8b2cc]"}`}>{label}</span>
                     </button>
                   ))}
                 </div>
-                <div className="mx-5 mb-5 border border-[#e8e4df] rounded-2xl overflow-hidden bg-[#fafafa]">
-                  <div className="px-4 pt-4 pb-1"><span className="text-sm font-semibold text-[#1a1a1a]">Leave a note: </span></div>
-                  <textarea value={comment} onChange={(e) => setComment(e.target.value.slice(0, 200))} rows={3} className="w-full px-4 pb-4 text-sm text-[#4a4a4a] bg-transparent resize-none outline-none leading-relaxed" placeholder="Share your experience…" />
+                <div className="mx-5 mb-5 border border-[#26203f] rounded-2xl overflow-hidden bg-[#fafafa]">
+                  <div className="px-4 pt-4 pb-1"><span className="text-sm font-semibold text-[#ffffff]">Leave a note: </span></div>
+                  <textarea value={comment} onChange={(e) => setComment(e.target.value.slice(0, 200))} rows={3} className="w-full px-4 pb-4 text-sm text-[#b8b2cc] bg-transparent resize-none outline-none leading-relaxed" placeholder="Share your experience…" />
                 </div>
                 <div className="px-5 pb-8">
                   <button onClick={handleSubmitFeedback} disabled={rating === null || submitting}
@@ -1003,7 +1003,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                     style={{ background: "linear-gradient(135deg, #6c47ff, #7c5ce7)" }}>
                     {submitting ? <><Loader2 size={18} className="animate-spin" /> Submitting…</> : "Submit Feedback"}
                   </button>
-                  {rating === null && <p className="text-center text-xs text-[#b0aaa5] mt-2">Select an option above to continue</p>}
+                  {rating === null && <p className="text-center text-xs text-[#6f6889] mt-2">Select an option above to continue</p>}
                 </div>
               </>
             )}
@@ -1062,16 +1062,16 @@ function ChatImage({ path, alt, className, style }: {
 
   if (error) {
     return (
-      <div className={`${className} bg-[#f0eeea] flex items-center justify-center`} style={style}>
-        <span className="text-xs text-[#b0aaa5]">Image unavailable</span>
+      <div className={`${className} bg-[#1c1733] flex items-center justify-center`} style={style}>
+        <span className="text-xs text-[#6f6889]">Image unavailable</span>
       </div>
     );
   }
 
   if (!signedUrl) {
     return (
-      <div className={`${className} bg-[#f0eeea] flex items-center justify-center`} style={style}>
-        <Loader2 size={18} className="text-[#b0aaa5] animate-spin" />
+      <div className={`${className} bg-[#1c1733] flex items-center justify-center`} style={style}>
+        <Loader2 size={18} className="text-[#6f6889] animate-spin" />
       </div>
     );
   }

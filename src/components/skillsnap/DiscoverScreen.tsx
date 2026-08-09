@@ -38,13 +38,13 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
   const filteredLabel = activeFilter === "All" ? "All Skills" : activeFilter;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
+    <div className="flex flex-col min-h-screen bg-[#0d0a1a]">
 
       {/* ── Sticky header ── */}
-      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm px-4 pt-4 pb-3 border-b border-[#e8e4df]">
+      <div className="sticky top-0 z-40 bg-[#0d0a1a]/92 backdrop-blur-sm px-4 pt-4 pb-3 border-b border-[#26203f]">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-bold text-[#1a1a1a]">Discover</h1>
-          <span className="text-xs font-semibold text-[#7a7570] bg-[#f0eeea] px-2.5 py-1 rounded-full">
+          <h1 className="text-xl font-bold text-[#ffffff]">Discover</h1>
+          <span className="text-xs font-semibold text-[#9d97b5] bg-[#1c1733] px-2.5 py-1 rounded-full">
             {pins.length} {state.currentUser?.location ? "nearby" : "pros"}
           </span>
         </div>
@@ -63,12 +63,12 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
         {/* ── Section label ── */}
         <div className="flex items-center justify-between px-4 mt-5 mb-3">
           <div>
-            <p className="text-[13px] font-bold text-[#1a1a1a]">{filteredLabel}</p>
-            <p className="text-[11px] text-[#7a7570] mt-0.5">
+            <p className="text-[13px] font-bold text-[#ffffff]">{filteredLabel}</p>
+            <p className="text-[11px] text-[#9d97b5] mt-0.5">
               {pins.length} skilled pro{pins.length !== 1 ? "s" : ""} near you
             </p>
           </div>
-          <button className="flex items-center gap-1.5 text-[11px] font-semibold text-[#6c47ff] bg-[#ede9fe] px-3 py-1.5 rounded-full active:bg-[#ddd6fe] transition-colors">
+          <button className="flex items-center gap-1.5 text-[11px] font-semibold text-[#6c47ff] bg-[#241d40] px-3 py-1.5 rounded-full active:bg-[#2e2550] transition-colors">
             <SlidersHorizontal size={11} />
             Filter
           </button>
@@ -79,12 +79,12 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
           <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
             <div
               className="w-16 h-16 rounded-3xl mb-4 flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #ede9fe, #f5f3ff)" }}
+              style={{ background: "linear-gradient(135deg, #241d40, #1c1733)" }}
             >
               <MapPin size={28} className="text-[#6c47ff]" />
             </div>
-            <p className="font-bold text-[#1a1a1a] text-base mb-2">No pros found</p>
-            <p className="text-[#7a7570] text-sm leading-relaxed">
+            <p className="font-bold text-[#ffffff] text-base mb-2">No pros found</p>
+            <p className="text-[#9d97b5] text-sm leading-relaxed">
               Try a different filter or check back soon as more skilled workers join.
             </p>
           </div>
@@ -108,7 +108,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
               <div
                 className="mx-4 mt-5 rounded-2xl px-4 py-4 flex items-center gap-3"
                 style={{
-                  background: "linear-gradient(135deg, #ede9fe, #f5f3ff)",
+                  background: "linear-gradient(135deg, #241d40, #1c1733)",
                   border: "1.5px solid rgba(108,71,255,0.18)",
                 }}
               >
@@ -119,8 +119,8 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
                   <MapPin size={18} color="white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-bold text-[#1a1a1a]">Set your location</p>
-                  <p className="text-[11px] text-[#7a7570] leading-snug">
+                  <p className="text-[13px] font-bold text-[#ffffff]">Set your location</p>
+                  <p className="text-[11px] text-[#9d97b5] leading-snug">
                     See pros sorted by distance from you
                   </p>
                 </div>
@@ -179,7 +179,7 @@ function ProCard({
 
   return (
     <div
-      className="bg-white rounded-2xl overflow-hidden border border-[#e8e4df] flex flex-col"
+      className="bg-[#16122a] rounded-2xl overflow-hidden border border-[#26203f] flex flex-col"
       style={{ boxShadow: "0 1px 6px rgba(0,0,0,0.05)" }}
     >
       {/* Colour header with avatar */}
@@ -204,7 +204,7 @@ function ProCard({
         )}
 
         {/* Name */}
-        <p className="text-[13px] font-bold text-[#1a1a1a] leading-tight text-center truncate w-full">
+        <p className="text-[13px] font-bold text-[#ffffff] leading-tight text-center truncate w-full">
           {pin.name}
         </p>
 
@@ -220,7 +220,7 @@ function ProCard({
 
         {/* Location */}
         {pin.location && (
-          <p className="text-[11px] text-[#b0aaa5] mt-1 flex items-center gap-1 justify-center">
+          <p className="text-[11px] text-[#6f6889] mt-1 flex items-center gap-1 justify-center">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
             {pin.location}
           </p>
@@ -229,8 +229,8 @@ function ProCard({
         {/* Distance pill — only if available */}
         {pin.distanceKm !== undefined && (
           <div className="flex items-center gap-0.5 mt-1.5">
-            <MapPin size={9} className="text-[#b0aaa5]" />
-            <span className="text-[10px] text-[#7a7570] font-medium">
+            <MapPin size={9} className="text-[#6f6889]" />
+            <span className="text-[10px] text-[#9d97b5] font-medium">
               {pin.distanceKm < 1 ? "<1" : pin.distanceKm} km away
             </span>
           </div>
@@ -239,20 +239,20 @@ function ProCard({
 
       {/* Stats row — graceful if not available */}
       {(pin.jobsDone !== undefined || pin.happyPct !== undefined) && (
-        <div className="flex items-center justify-around px-2 py-2 border-t border-[#f0eeea]">
+        <div className="flex items-center justify-around px-2 py-2 border-t border-[#1c1733]">
           {pin.jobsDone !== undefined && (
             <>
               <div className="flex flex-col items-center">
-                <span className="text-[12px] font-extrabold text-[#1a1a1a]">{pin.jobsDone}</span>
-                <span className="text-[9px] text-[#b0aaa5] font-medium">Jobs</span>
+                <span className="text-[12px] font-extrabold text-[#ffffff]">{pin.jobsDone}</span>
+                <span className="text-[9px] text-[#6f6889] font-medium">Jobs</span>
               </div>
-              {pin.happyPct !== undefined && <div className="w-px h-5 bg-[#f0eeea]" />}
+              {pin.happyPct !== undefined && <div className="w-px h-5 bg-[#1c1733]" />}
             </>
           )}
           {pin.happyPct !== undefined && (
             <div className="flex flex-col items-center">
               <span className="text-[12px] font-extrabold text-[#4ade80]">{pin.happyPct}%</span>
-              <span className="text-[9px] text-[#b0aaa5] font-medium">Happy</span>
+              <span className="text-[9px] text-[#6f6889] font-medium">Happy</span>
             </div>
           )}
         </div>

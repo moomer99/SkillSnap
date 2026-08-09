@@ -39,9 +39,14 @@ export default function BottomNav({ active, onNavigate, onScrollToTop }: BottomN
 
   return (
     <nav
-      // max-w matches the tablet content column in page.tsx so the two line up
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-white border-t border-[#e8e4df] flex items-center justify-around px-2 z-50 lg:hidden"
-      style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
+      // Phones only — tablets and desktops get the left rail instead
+      className="fixed bottom-0 left-0 right-0 flex items-center justify-around px-2 z-50 md:hidden"
+      style={{
+        background: "rgba(22,18,42,0.96)",
+        backdropFilter: "blur(12px)",
+        borderTop: "1px solid var(--ss-line)",
+        paddingBottom: "max(12px, env(safe-area-inset-bottom))",
+      }}
     >
       <NavItem icon={<Home size={22} />} label="Home" active={active === "home"} onClick={() => {
         if (active === "home") { onScrollToTop?.(); } else { guardedNavigate("home"); }
@@ -76,8 +81,10 @@ function NavItem({ icon, label, active, onClick }: {
 }) {
   return (
     <button onClick={onClick} className="flex flex-col items-center gap-0.5 py-2 px-3 min-w-[52px]">
-      <span className={active ? "text-[#6c47ff]" : "text-[#b0aaa5]"}>{icon}</span>
-      <span className={`text-[10px] font-medium ${active ? "text-[#6c47ff]" : "text-[#b0aaa5]"}`}>{label}</span>
+      <span style={{ color: active ? "var(--ss-purple-light)" : "var(--ss-text-dim)" }}>{icon}</span>
+      <span className="text-[10px] font-medium" style={{ color: active ? "var(--ss-purple-light)" : "var(--ss-text-dim)" }}>
+        {label}
+      </span>
     </button>
   );
 }

@@ -13,34 +13,34 @@ const SUPABASE_CONFIGURED =
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref");
 
 const SKILL_META: Record<string, { emoji: string; color: string; bg: string }> = {
-  "Barber":           { emoji: "✂️",  color: "#6c47ff", bg: "#ede9fe" },
+  "Barber":           { emoji: "✂️",  color: "#6c47ff", bg: "#241d40" },
   "Makeup Artist":    { emoji: "💄",  color: "#db2777", bg: "#fce7f3" },
   "Tiler":            { emoji: "🧱",  color: "#0284c7", bg: "#e0f2fe" },
-  "Cleaning":         { emoji: "🧹",  color: "#d97706", bg: "#fef3c7" },
-  "Cleaner":          { emoji: "🧹",  color: "#d97706", bg: "#fef3c7" },
+  "Cleaning":         { emoji: "🧹",  color: "#d97706", bg: "rgba(251,191,36,0.14)" },
+  "Cleaner":          { emoji: "🧹",  color: "#d97706", bg: "rgba(251,191,36,0.14)" },
   "Fitness / PT":     { emoji: "💪",  color: "#059669", bg: "#d1fae5" },
   "Plumber":          { emoji: "🔧",  color: "#0369a1", bg: "#dbeafe" },
   "Electrician":      { emoji: "⚡",  color: "#b45309", bg: "#fef9c3" },
-  "Landscaping":      { emoji: "🌿",  color: "#15803d", bg: "#dcfce7" },
-  "Landscaper":       { emoji: "🌿",  color: "#15803d", bg: "#dcfce7" },
+  "Landscaping":      { emoji: "🌿",  color: "#15803d", bg: "rgba(16,185,129,0.14)" },
+  "Landscaper":       { emoji: "🌿",  color: "#15803d", bg: "rgba(16,185,129,0.14)" },
   "Nails":            { emoji: "💅",  color: "#be185d", bg: "#fce7f3" },
   "Driver":           { emoji: "🚗",  color: "#0ea5e9", bg: "#e0f2fe" },
-  "Cook":             { emoji: "👨‍🍳", color: "#ef4444", bg: "#fee2e2" },
-  "Chef":             { emoji: "👨‍🍳", color: "#ef4444", bg: "#fee2e2" },
-  "Carpenter":        { emoji: "🪚",  color: "#92400e", bg: "#fef3c7" },
-  "Mechanic":         { emoji: "🔩",  color: "#374151", bg: "#f3f4f6" },
-  "Painter":          { emoji: "🖌️",  color: "#7c3aed", bg: "#ede9fe" },
-  "Mover":            { emoji: "📦",  color: "#d97706", bg: "#fef3c7" },
+  "Cook":             { emoji: "👨‍🍳", color: "#ef4444", bg: "rgba(239,68,68,0.14)" },
+  "Chef":             { emoji: "👨‍🍳", color: "#ef4444", bg: "rgba(239,68,68,0.14)" },
+  "Carpenter":        { emoji: "🪚",  color: "#92400e", bg: "rgba(251,191,36,0.14)" },
+  "Mechanic":         { emoji: "🔩",  color: "#374151", bg: "#1c1733" },
+  "Painter":          { emoji: "🖌️",  color: "#7c3aed", bg: "#241d40" },
+  "Mover":            { emoji: "📦",  color: "#d97706", bg: "rgba(251,191,36,0.14)" },
   "Photographer":     { emoji: "📷",  color: "#0f766e", bg: "#ccfbf1" },
   "Videographer":     { emoji: "🎥",  color: "#1d4ed8", bg: "#dbeafe" },
   "Personal Trainer": { emoji: "🏋️",  color: "#059669", bg: "#d1fae5" },
   "Nail Tech":        { emoji: "💅",  color: "#be185d", bg: "#fce7f3" },
-  "Singer":           { emoji: "🎤",  color: "#7c3aed", bg: "#ede9fe" },
+  "Singer":           { emoji: "🎤",  color: "#7c3aed", bg: "#241d40" },
   "Musician":         { emoji: "🎸",  color: "#1d4ed8", bg: "#dbeafe" },
-  "DJ":               { emoji: "🎧",  color: "#6c47ff", bg: "#ede9fe" },
-  "Restaurant":       { emoji: "🍽️",  color: "#dc2626", bg: "#fee2e2" },
-  "Tattoo Artist":    { emoji: "🖊️",  color: "#374151", bg: "#f3f4f6" },
-  "Other":            { emoji: "⭐",  color: "#6b7280", bg: "#f3f4f6" },
+  "DJ":               { emoji: "🎧",  color: "#6c47ff", bg: "#241d40" },
+  "Restaurant":       { emoji: "🍽️",  color: "#dc2626", bg: "rgba(239,68,68,0.14)" },
+  "Tattoo Artist":    { emoji: "🖊️",  color: "#374151", bg: "#1c1733" },
+  "Other":            { emoji: "⭐",  color: "#6b7280", bg: "#1c1733" },
 };
 
 type FilterTab = "all" | "pros" | "with_posts";
@@ -230,30 +230,30 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
   }, []);
 
   return (
-    <div className="flex flex-col bg-[#f8f7f5] min-h-screen">
+    <div className="flex flex-col bg-[#0d0a1a] min-h-screen">
 
       {/* ── Header ── */}
-      <div className="sticky top-0 z-40 bg-white border-b border-[#e8e4df] px-3 pt-3 pb-3">
+      <div className="sticky top-0 z-40 bg-[#16122a] border-b border-[#26203f] px-3 pt-3 pb-3">
         <form onSubmit={handleSubmit} className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => navigate(state.previousScreen ?? "home")}
-            className="w-9 h-9 flex items-center justify-center text-[#7a7570] flex-shrink-0 active:text-[#1a1a1a] transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-[#9d97b5] flex-shrink-0 active:text-[#ffffff] transition-colors"
           >
             <ArrowLeft size={20} />
           </button>
 
-          <div className="flex-1 flex items-center gap-2.5 bg-[#f0eeea] rounded-2xl px-3.5 h-10">
-            <Search size={14} className="text-[#b0aaa5] flex-shrink-0" />
+          <div className="flex-1 flex items-center gap-2.5 bg-[#1c1733] rounded-2xl px-3.5 h-10">
+            <Search size={14} className="text-[#6f6889] flex-shrink-0" />
             <input
               ref={inputRef}
               value={query}
               onChange={e => { setQuery(e.target.value); setActiveSkill(null); }}
               placeholder="Search skills, people, location…"
-              className="flex-1 bg-transparent text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none"
+              className="flex-1 bg-transparent text-sm text-[#ffffff] placeholder-[#6f6889] outline-none"
             />
             {(query || activeSkill) && (
-              <button type="button" onClick={clearSearch} className="text-[#b0aaa5] active:text-[#1a1a1a]">
+              <button type="button" onClick={clearSearch} className="text-[#6f6889] active:text-[#ffffff]">
                 <X size={14} />
               </button>
             )}
@@ -277,7 +277,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
               style={
                 filter === tab
                   ? { background: "#6c47ff", color: "white" }
-                  : { background: "#f0eeea", color: "#7a7570" }
+                  : { background: "#1c1733", color: "#9d97b5" }
               }
             >
               {tab === "all"     && <Users size={11} />}
@@ -295,12 +295,12 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
         {loading && (
           <div className="px-4 pt-4 space-y-3">
             {[1,2,3].map(i => (
-              <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-2xl">
-                <div className="w-12 h-12 rounded-full bg-[#f0eeea] animate-pulse flex-shrink-0" />
+              <div key={i} className="flex items-center gap-3 p-3 bg-[#16122a] rounded-2xl">
+                <div className="w-12 h-12 rounded-full bg-[#1c1733] animate-pulse flex-shrink-0" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-3.5 bg-[#f0eeea] rounded-full w-2/5 animate-pulse" />
-                  <div className="h-3 bg-[#f0eeea] rounded-full w-1/3 animate-pulse" />
-                  <div className="h-3 bg-[#f0eeea] rounded-full w-1/2 animate-pulse" />
+                  <div className="h-3.5 bg-[#1c1733] rounded-full w-2/5 animate-pulse" />
+                  <div className="h-3 bg-[#1c1733] rounded-full w-1/3 animate-pulse" />
+                  <div className="h-3 bg-[#1c1733] rounded-full w-1/2 animate-pulse" />
                 </div>
               </div>
             ))}
@@ -314,7 +314,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
             {recentSearches.length > 0 && (
               <div className="px-4 pt-5">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-bold text-[#1a1a1a]">Recent</h3>
+                  <h3 className="text-sm font-bold text-[#ffffff]">Recent</h3>
                   <button
                     onClick={() => { clearRecent(); setRecentSearches([]); }}
                     className="text-xs font-semibold text-[#6c47ff] active:opacity-70"
@@ -327,9 +327,9 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
                     <button
                       key={term}
                       onClick={() => applyRecent(term)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#e8e4df] rounded-full text-sm text-[#4a4a4a] font-medium active:bg-[#f0eeea] transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#16122a] border border-[#26203f] rounded-full text-sm text-[#b8b2cc] font-medium active:bg-[#1c1733] transition-colors"
                     >
-                      <Search size={11} className="text-[#b0aaa5]" />
+                      <Search size={11} className="text-[#6f6889]" />
                       {term}
                     </button>
                   ))}
@@ -339,7 +339,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
 
             {/* Browse by skill */}
             <div className="px-4 pt-5">
-              <h3 className="text-sm font-bold text-[#1a1a1a] mb-3">Browse by Skill</h3>
+              <h3 className="text-sm font-bold text-[#ffffff] mb-3">Browse by Skill</h3>
               <div className="grid grid-cols-2 gap-2">
                 {liveSkills.map(skill => {
                   const meta = SKILL_META[skill] ?? SKILL_META["Other"];
@@ -350,14 +350,14 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
                       onClick={() => applySkill(skill as SkillCategory)}
                       className="flex items-center gap-2.5 p-3.5 rounded-2xl border transition-all active:scale-[0.98] text-left"
                       style={{
-                        background: isActive ? meta.color : "white",
-                        borderColor: isActive ? meta.color : "#e8e4df",
+                        background: isActive ? "var(--ss-purple)" : "var(--ss-surface-2)",
+                        borderColor: isActive ? "var(--ss-purple)" : "var(--ss-line)",
                       }}
                     >
                       <span className="text-xl leading-none">{meta.emoji}</span>
                       <span
                         className="text-sm font-semibold leading-tight"
-                        style={{ color: isActive ? "white" : "#1a1a1a" }}
+                        style={{ color: isActive ? "white" : "#ffffff" }}
                       >
                         {skill}
                       </span>
@@ -370,7 +370,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
             {/* Suggested pros */}
             {suggestedPros.length > 0 && (
               <div className="px-4 pt-6">
-                <h3 className="text-sm font-bold text-[#1a1a1a] mb-3">Nearby Pros</h3>
+                <h3 className="text-sm font-bold text-[#ffffff] mb-3">Nearby Pros</h3>
                 <div className="space-y-2">
                   {suggestedPros.map(user => (
                     <UserCard key={user.id} user={user} onPress={() => openUserProfile(user)} />
@@ -386,7 +386,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
           <div className="px-4 pt-4">
             {results.length > 0 ? (
               <>
-                <p className="text-xs text-[#b0aaa5] font-medium mb-3">
+                <p className="text-xs text-[#6f6889] font-medium mb-3">
                   {results.length} result{results.length !== 1 ? "s" : ""} for&nbsp;
                   <span className="text-[#6c47ff] font-semibold">
                     "{activeSkill ?? query.trim()}"
@@ -416,7 +416,7 @@ function UserCard({ user, onPress }: { user: User; onPress: () => void }) {
   return (
     <button
       onClick={onPress}
-      className="w-full flex items-center gap-3 p-3.5 bg-white rounded-2xl border border-[#e8e4df] active:bg-[#f8f7f5] transition-colors text-left"
+      className="w-full flex items-center gap-3 p-3.5 bg-[#16122a] rounded-2xl border border-[#26203f] active:bg-[#0d0a1a] transition-colors text-left"
     >
       {/* Avatar */}
       <div className="flex-shrink-0">
@@ -426,7 +426,7 @@ function UserCard({ user, onPress }: { user: User; onPress: () => void }) {
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="text-sm font-bold text-[#1a1a1a] truncate">{user.displayName}</span>
+          <span className="text-sm font-bold text-[#ffffff] truncate">{user.displayName}</span>
           {skillMeta && user.skill && (
             <span
               className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
@@ -442,18 +442,18 @@ function UserCard({ user, onPress }: { user: User; onPress: () => void }) {
           )}
         </div>
 
-        <p className="text-xs text-[#b0aaa5] mb-1">{user.username?.startsWith('@') ? user.username : `@${user.username}`}</p>
+        <p className="text-xs text-[#6f6889] mb-1">{user.username?.startsWith('@') ? user.username : `@${user.username}`}</p>
 
-        <div className="flex items-center gap-3 text-[11px] text-[#7a7570]">
+        <div className="flex items-center gap-3 text-[11px] text-[#9d97b5]">
           <span className="flex items-center gap-0.5">
-            <MapPin size={10} className="text-[#b0aaa5]" />
+            <MapPin size={10} className="text-[#6f6889]" />
             {user.location}
           </span>
           {user.distanceKm !== undefined && (
-            <span className="text-[#b0aaa5]">· {user.distanceKm}km</span>
+            <span className="text-[#6f6889]">· {user.distanceKm}km</span>
           )}
           {user.jobsDone > 0 && (
-            <span className="text-[#b0aaa5]">· {user.jobsDone} jobs</span>
+            <span className="text-[#6f6889]">· {user.jobsDone} jobs</span>
           )}
           {user.happyPercent > 0 && (
             <span className="text-[#059669] font-semibold">· {user.happyPercent}% 😊</span>
@@ -473,16 +473,16 @@ function UserCard({ user, onPress }: { user: User; onPress: () => void }) {
 function NoResults({ query, onClear }: { query: string; onClear: () => void }) {
   return (
     <div className="flex flex-col items-center py-16 text-center px-6">
-      <div className="w-16 h-16 rounded-full bg-[#ede9fe] flex items-center justify-center mb-4">
+      <div className="w-16 h-16 rounded-full bg-[#241d40] flex items-center justify-center mb-4">
         <Search size={24} className="text-[#6c47ff]" />
       </div>
-      <p className="text-base font-bold text-[#1a1a1a] mb-1">No results for "{query}"</p>
-      <p className="text-sm text-[#7a7570] mb-5 leading-relaxed">
+      <p className="text-base font-bold text-[#ffffff] mb-1">No results for "{query}"</p>
+      <p className="text-sm text-[#9d97b5] mb-5 leading-relaxed">
         Try searching by name, skill, or suburb
       </p>
       <button
         onClick={onClear}
-        className="px-5 py-2.5 rounded-full text-sm font-semibold text-[#6c47ff] border border-[#6c47ff] active:bg-[#ede9fe] transition-colors"
+        className="px-5 py-2.5 rounded-full text-sm font-semibold text-[#6c47ff] border border-[#6c47ff] active:bg-[#241d40] transition-colors"
       >
         Clear search
       </button>

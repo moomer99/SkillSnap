@@ -1,4 +1,8 @@
 "use client";
+// ─────────────────────────────────────────────
+// SkillSnap — Right rail (desktop ≥1200px)
+// Suggested pros, trending skills and the app download nudge.
+// ─────────────────────────────────────────────
 import { useEffect, useState } from "react";
 import { Edit3, MapPin } from "lucide-react";
 import type { Screen } from "@/types";
@@ -10,8 +14,70 @@ interface RightSidebarProps {
   onNavigate: (s: Screen) => void;
 }
 
+interface SuggestedPro {
+  id: string;
+  username: string | null;
+  displayName: string;
+  skill: string;
+  location: string | null;
+  jobsDone: number;
+  avatarUrl: string | null;
+  avatarGradient: string;
+  avatarInitial: string;
+}
+
+/** Top pros by jobs done, excluding the signed-in user. */
+function useSuggestedPros(excludeId?: string): SuggestedPro[] {
+  const [pros, setPros] = useState<SuggestedPro[]>([]);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const sb = getSupabase();
+        const { data } = await sb
+          .from("profiles")
+          .select("id, username, display_name, skill, location, jobs_done, avatar_url, avatar_gradient, avatar_initial")
+          .not("skill", "is", null)
+          .order("jobs_done", { ascending: false })
+          .limit(8);
+        if (!data) return;
+
+        type Row = {
+          id: string; username: string | null; display_name: string | null; skill: string | null;
+          location: string | null; jobs_done: number | null; avatar_url: string | null;
+          avatar_gradient: string | null; avatar_initial: string | null;
+        };
+
+        setPros(
+          (data as Row[])
+            .filter((p) => p.id !== excludeId)
+            .slice(0, 4)
+            .map((p) => {
+              const displayName = p.display_name || p.username || "SkillSnap Pro";
+              return {
+                id: p.id,
+                username: p.username,
+                displayName,
+                skill: p.skill ?? "Skilled Pro",
+                location: p.location,
+                jobsDone: p.jobs_done ?? 0,
+                avatarUrl: p.avatar_url,
+                avatarGradient: p.avatar_gradient ?? "linear-gradient(135deg,#6c47ff,#a78bfa)",
+                avatarInitial: p.avatar_initial ?? displayName.charAt(0).toUpperCase(),
+              };
+            })
+        );
+      } catch {
+        // the rail is non-critical
+      }
+    })();
+  }, [excludeId]);
+
+  return pros;
+}
+
 function useTrendingSkills() {
-  const [skills, setSkills] = useState<{ skill: string; count: number }[]>([]);
+  const [skills, setSkills] = useState<string[]>([]);
 
   useEffect(() => {
     void (async () => {
@@ -27,13 +93,14 @@ function useTrendingSkills() {
         (rows as { skill: string | null }[]).forEach((r) => {
           if (r.skill) counts[r.skill] = (counts[r.skill] ?? 0) + 1;
         });
-        const sorted = Object.entries(counts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 16)
-          .map(([skill, count]) => ({ skill, count }));
-        setSkills(sorted);
+        setSkills(
+          Object.entries(counts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 12)
+            .map(([skill]) => skill)
+        );
       } catch {
-        // sidebar is non-critical
+        // the rail is non-critical
       }
     })();
   }, []);
@@ -41,102 +108,62 @@ function useTrendingSkills() {
   return skills;
 }
 
-const SKILL_COLORS: Record<string, string> = {
-  "Barber":             "#fde68a",
-  "Makeup Artist":      "#fbcfe8",
-  "Nail Tech":          "#fce7f3",
-  "Tiler":              "#d1fae5",
-  "Cleaning":           "#bfdbfe",
-  "Cleaner":            "#bfdbfe",
-  "Fitness / PT":       "#fed7aa",
-  "Plumber":            "#c7d2fe",
-  "Electrician":        "#fef08a",
-  "Landscaping":        "#bbf7d0",
-  "Nails":              "#fce7f3",
-  "Carpenter":          "#fef3c7",
-  "Mechanic":           "#e0f2fe",
-  "Mover":              "#ede9fe",
-  "Photographer":       "#fce7f3",
-  "Videographer":       "#dbeafe",
-  "Singer":             "#fde68a",
-  "Musician":           "#fef3c7",
-  "DJ":                 "#ede9fe",
-  "Personal Trainer":   "#fed7aa",
-  "Chef":               "#ffedd5",
-  "Restaurant":         "#ffedd5",
-  "Café":               "#fef3c7",
-  "Tattoo Artist":      "#e0e7ff",
-  "Florist":            "#d1fae5",
-  "Event Planner":      "#fce7f3",
-  "Wedding Stylist":    "#fbcfe8",
-  "Interior Designer":  "#e0f2fe",
-  "Graphic Designer":   "#dbeafe",
-  "Web Developer":      "#c7d2fe",
-  "Tutor":              "#fef08a",
-  "Life Coach":         "#d1fae5",
-  "Yoga Instructor":    "#d1fae5",
-  "Personal Shopper":   "#fce7f3",
-  "Pet Groomer":        "#fde68a",
-  "Landscaper":         "#bbf7d0",
-  "Plasterer":          "#e0e7ff",
-  "Concreter":          "#f1f5f9",
-  "Roofer":             "#fef3c7",
-  "Welder":             "#e0f2fe",
-  "Automotive":         "#e0f2fe",
-  "Driving Instructor": "#fef08a",
-  "Painter":            "#dbeafe",
-};
-
-const FALLBACK_SKILLS = [
-  "Barber", "Cleaner", "Tiler", "Plumber", "Electrician",
-  "Carpenter", "Mechanic", "Painter", "Mover", "Chef",
-  "Makeup Artist", "Nail Tech", "Photographer", "Videographer",
-  "Personal Trainer", "Driving Instructor", "Landscaper",
-  "Welder", "Plasterer", "Roofer",
-];
-
-function skillColor(skill: string) {
-  return SKILL_COLORS[skill] ?? "#ede9fe";
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={`rounded-2xl p-4 ${className}`}
+      style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
+    >
+      {children}
+    </div>
+  );
 }
 
 export default function RightSidebar({ onNavigate }: RightSidebarProps) {
   const { state, dispatch } = useAppState();
   const { isAuthenticated, currentUser } = state;
+  const suggested = useSuggestedPros(currentUser?.id);
   const trendingSkills = useTrendingSkills();
+
+  function viewProfile(userId: string) {
+    dispatch({ type: "SET_VIEWING_USER", userId });
+    onNavigate("client-profile");
+  }
 
   return (
     <div className="flex flex-col gap-3 w-full">
-
-      {/* Unauthenticated: Join SkillSnap card */}
+      {/* Signed out — join prompt */}
       {!isAuthenticated && (
-        <div className="rounded-2xl bg-white shadow-sm p-5 flex flex-col gap-3">
+        <Card className="flex flex-col gap-3">
           <div>
-            <h3 className="font-bold text-[#1a1a1a] text-base">Join SkillSnap</h3>
-            <p className="text-sm text-[#7a7570] mt-1 leading-relaxed">
+            <h3 className="font-bold text-white text-base">Join SkillSnap</h3>
+            <p className="text-sm mt-1 leading-relaxed" style={{ color: "var(--ss-text-muted)" }}>
               Connect with skilled pros in your area
             </p>
           </div>
           <button
             onClick={() => onNavigate("auth")}
             className="w-full h-10 rounded-xl font-bold text-sm text-white flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)" }}
+            style={{ background: "var(--ss-purple)" }}
           >
             Sign Up Free
           </button>
           <button
             onClick={() => onNavigate("auth")}
-            className="w-full h-10 rounded-xl font-bold text-sm text-[#6c47ff] border-2 border-[#6c47ff] flex items-center justify-center hover:bg-[#f0ebff] transition-colors"
+            className="w-full h-10 rounded-xl font-bold text-sm flex items-center justify-center transition-colors hover:bg-white/[0.06]"
+            style={{ color: "var(--ss-purple-light)", border: "1px solid var(--ss-purple-border)" }}
           >
             Log In
           </button>
-        </div>
+        </Card>
       )}
 
-      {/* Logged-in: profile card */}
+      {/* Signed in — profile card */}
       {isAuthenticated && currentUser && (
-        <div className="rounded-2xl bg-white shadow-sm p-4 flex flex-col gap-3">
+        <Card className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
             {currentUser.avatarUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={currentUser.avatarUrl}
                 alt={currentUser.displayName}
@@ -151,14 +178,17 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
               </div>
             )}
             <div className="min-w-0">
-              <p className="font-bold text-[#1a1a1a] text-sm truncate">{currentUser.displayName}</p>
+              <p className="font-bold text-white text-sm truncate">{currentUser.displayName}</p>
               {currentUser.skill && (
-                <span className="inline-block text-xs font-semibold text-[#6c47ff] bg-[#f0ebff] rounded-full px-2 py-0.5 mt-0.5">
+                <span
+                  className="inline-block text-xs font-semibold rounded-full px-2 py-0.5 mt-0.5"
+                  style={{ background: "var(--ss-purple-soft)", color: "var(--ss-purple-light)" }}
+                >
                   {currentUser.skill}
                 </span>
               )}
               {currentUser.location && (
-                <p className="text-xs text-[#7a7570] flex items-center gap-1 mt-0.5">
+                <p className="text-xs flex items-center gap-1 mt-0.5" style={{ color: "var(--ss-text-dim)" }}>
                   <MapPin size={11} />
                   {currentUser.location}
                 </p>
@@ -167,63 +197,100 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
           </div>
           <button
             onClick={() => onNavigate("edit-profile")}
-            className="w-full h-9 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 hover:bg-[#f5f3ff] hover:text-[#6c47ff] hover:border-[#c4b5fd] transition-all"
+            className="w-full h-9 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-1.5 transition-colors hover:bg-white/[0.06]"
+            style={{ border: "1px solid var(--ss-line)" }}
           >
             <Edit3 size={13} /> Edit Profile
           </button>
-        </div>
+        </Card>
       )}
 
-      {/* Trending Skills card — always shown, padded with fallbacks */}
-      {(() => {
-        const displaySkills = trendingSkills.map(s => s.skill);
-        return (
-          <div className="rounded-2xl bg-white shadow-sm p-4">
-            <h3 className="font-bold text-[#1a1a1a] text-sm mb-3">Trending Skills</h3>
-            <div className="flex flex-wrap gap-1.5">
-              {displaySkills.map((skill) => (
-                <button
-                  key={skill}
-                  onClick={() => {
-                    dispatch({ type: "SET_SEARCH_QUERY", query: skill });
-                    onNavigate("search");
-                  }}
-                  className="text-xs font-semibold text-[#4a4540] rounded-full px-3 py-1.5 hover:opacity-80 active:scale-95 transition-all"
-                  style={{ background: skillColor(skill) }}
-                >
-                  {skill}
-                </button>
-              ))}
-            </div>
+      {/* Suggested pros */}
+      {suggested.length > 0 && (
+        <Card>
+          <h3 className="font-bold text-white text-sm mb-3">Suggested pros</h3>
+          <div className="flex flex-col gap-1">
+            {suggested.map((pro) => (
+              <button
+                key={pro.id}
+                onClick={() => viewProfile(pro.id)}
+                className="flex items-center gap-3 w-full text-left p-2 -mx-2 rounded-xl transition-colors hover:bg-white/[0.05]"
+              >
+                {pro.avatarUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={pro.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                ) : (
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                    style={{ background: pro.avatarGradient }}
+                  >
+                    {pro.avatarInitial}
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-bold text-white truncate">{pro.displayName}</p>
+                  <p className="text-[11px] truncate" style={{ color: "var(--ss-text-dim)" }}>
+                    {pro.skill}
+                    {pro.location ? ` · ${pro.location.split(",")[0]}` : ""}
+                  </p>
+                </div>
+                <span className="text-[11px] font-semibold flex-shrink-0" style={{ color: "var(--ss-purple-light)" }}>
+                  {pro.jobsDone} jobs
+                </span>
+              </button>
+            ))}
           </div>
-        );
-      })()}
+        </Card>
+      )}
 
-      {/* QR / mobile card — scans straight to the App Store listing */}
-      <div className="rounded-2xl bg-white shadow-sm p-4 flex flex-col items-center gap-3 text-center">
-        <p className="text-sm font-semibold text-[#1a1a1a]">📱 Get the app</p>
-        <p className="text-xs text-[#7a7570] leading-relaxed">
+      {/* Trending skills */}
+      {trendingSkills.length > 0 && (
+        <Card>
+          <h3 className="font-bold text-white text-sm mb-3">Trending skills</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {trendingSkills.map((skill) => (
+              <button
+                key={skill}
+                onClick={() => {
+                  dispatch({ type: "SET_SEARCH_QUERY", query: skill });
+                  onNavigate("search");
+                }}
+                className="text-xs font-semibold rounded-full px-3 py-1.5 transition-colors hover:bg-white/[0.10]"
+                style={{ background: "var(--ss-surface-2)", color: "var(--ss-text-muted)", border: "1px solid var(--ss-line)" }}
+              >
+                {skill}
+              </button>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Download nudge — the QR scans straight to the App Store listing */}
+      <Card className="flex flex-col items-center gap-3 text-center">
+        <p className="text-sm font-semibold text-white">📱 Get the app</p>
+        <p className="text-xs leading-relaxed" style={{ color: "var(--ss-text-muted)" }}>
           Scan to download SkillSnap and get the full experience on your phone.
         </p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(APP_STORE_URL)}`}
           alt="Scan to download SkillSnap from the App Store"
           width={120}
           height={120}
-          className="rounded-xl border border-[#e8e4df]"
+          className="rounded-xl bg-white p-1"
         />
         <div className="flex items-center gap-3 text-[11px] font-semibold">
-          <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" className="text-[#6c47ff]">
+          <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--ss-purple-light)" }}>
             App Store
           </a>
-          <span className="text-[#e8e4df]">·</span>
-          <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="text-[#6c47ff]">
+          <span style={{ color: "var(--ss-line-strong)" }}>·</span>
+          <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--ss-purple-light)" }}>
             Google Play
           </a>
         </div>
-      </div>
+      </Card>
 
-      <p className="text-[11px] text-[#b0aaa5] px-1">
+      <p className="text-[11px] px-1" style={{ color: "var(--ss-text-dim)" }}>
         © 2026 SkillSnap Australia · Sydney, NSW
       </p>
     </div>

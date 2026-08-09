@@ -40,9 +40,9 @@ function GoogleButton({ onClick, loading }: { onClick: () => void; loading: bool
       type="button"
       onClick={onClick}
       disabled={loading}
-      className="w-full h-14 rounded-2xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-60 shadow-sm hover:border-[#d0ccc8] hover:shadow-md"
+      className="w-full h-14 rounded-2xl font-semibold text-sm text-[#ffffff] border border-[#26203f] bg-[#16122a] flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-60 shadow-sm hover:border-[#d0ccc8] hover:shadow-md"
     >
-      {loading ? <Loader2 size={18} className="animate-spin text-[#7a7570]" /> : <GoogleIcon />}
+      {loading ? <Loader2 size={18} className="animate-spin text-[#9d97b5]" /> : <GoogleIcon />}
       Continue with Google
     </button>
   );
@@ -52,9 +52,9 @@ function GoogleButton({ onClick, loading }: { onClick: () => void; loading: bool
 function OrDivider() {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex-1 h-px bg-[#e8e4df]" />
-      <span className="text-xs text-[#b0aaa5] font-medium">or</span>
-      <div className="flex-1 h-px bg-[#e8e4df]" />
+      <div className="flex-1 h-px bg-[#26203f]" />
+      <span className="text-xs text-[#6f6889] font-medium">or</span>
+      <div className="flex-1 h-px bg-[#26203f]" />
     </div>
   );
 }
@@ -193,18 +193,18 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   // ── Sign-up / Login form view ─────────────────
   if (mode !== "landing") {
     return (
-      <div className="flex flex-col min-h-screen bg-white">
+      <div className="flex flex-col min-h-screen bg-[#16122a]">
         {/* Header */}
         <div className="flex items-center gap-3 px-5 pt-5 pb-2">
           <button
             onClick={() => { setMode("landing"); setError(null); setShowGoogleHint(false); }}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#f0eeea] text-[#7a7570]"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#1c1733] text-[#9d97b5]"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 12H5M12 5l-7 7 7 7" />
             </svg>
           </button>
-          <h2 className="font-bold text-lg text-[#1a1a1a]">
+          <h2 className="font-bold text-lg text-[#ffffff]">
             {mode === "signup" ? "Create account" : "Welcome back"}
           </h2>
         </div>
@@ -218,7 +218,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
             {/* Full Name — sign up only, required */}
             {mode === "signup" && (
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Name</label>
+                <label className="text-xs font-bold text-[#9d97b5] uppercase tracking-wider">Name</label>
                 <input
                   type="text"
                   value={displayName}
@@ -226,14 +226,14 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                   placeholder="Name, business name or nickname"
                   autoComplete="name"
                   required
-                  className="h-12 rounded-xl border border-[#e8e4df] px-4 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
+                  className="h-12 rounded-xl border border-[#26203f] px-4 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
                 />
               </div>
             )}
 
             {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">
+              <label className="text-xs font-bold text-[#9d97b5] uppercase tracking-wider">
                 {mode === "login" ? "Email or Username" : "Email"}
               </label>
               <input
@@ -243,13 +243,13 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                 placeholder={mode === "login" ? "you@email.com or @username" : "you@email.com"}
                 autoComplete={mode === "signup" ? "email" : "username"}
                 required
-                className="h-12 rounded-xl border border-[#e8e4df] px-4 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
+                className="h-12 rounded-xl border border-[#26203f] px-4 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
               />
             </div>
 
             {/* Password */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Password</label>
+              <label className="text-xs font-bold text-[#9d97b5] uppercase tracking-wider">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -259,12 +259,12 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                   autoComplete={mode === "signup" ? "new-password" : "current-password"}
                   required
                   minLength={8}
-                  className="w-full h-12 rounded-xl border border-[#e8e4df] px-4 pr-12 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
+                  className="w-full h-12 rounded-xl border border-[#26203f] px-4 pr-12 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#b0aaa5] hover:text-[#7a7570]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6f6889] hover:text-[#9d97b5]"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -290,7 +290,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                 <div
                   onClick={() => setRememberMe(r => !r)}
                   className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                    rememberMe ? "bg-[#6c47ff] border-[#6c47ff]" : "bg-white border-[#d0ccc8]"
+                    rememberMe ? "bg-[#6c47ff] border-[#6c47ff]" : "bg-[#16122a] border-[#d0ccc8]"
                   }`}
                 >
                   {rememberMe && (
@@ -299,14 +299,14 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                     </svg>
                   )}
                 </div>
-                <span className="text-sm text-[#4a4a4a] font-medium">Remember my email</span>
+                <span className="text-sm text-[#b8b2cc] font-medium">Remember my email</span>
               </label>
             )}
 
             {/* Google OAuth hint */}
             {showGoogleHint && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
-                <p className="text-sm text-blue-700 leading-snug">
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-3">
+                <p className="text-sm text-blue-300 leading-snug">
                   Looks like you signed up with Google. Please use{" "}
                   <strong>Continue with Google</strong> to log in, or{" "}
                   <button
@@ -323,8 +323,8 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
             {/* Error */}
             {error && !showGoogleHint && (
-              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
+                <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
 
@@ -343,7 +343,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
             </button>
 
             {/* Toggle mode */}
-            <p className="text-center text-sm text-[#7a7570]">
+            <p className="text-center text-sm text-[#9d97b5]">
               {mode === "signup" ? "Already have an account? " : "Don't have an account? "}
               <button
                 type="button"
@@ -360,17 +360,17 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         {/* Forgot Password modal */}
         {showForgotPassword && (
           <div className="fixed inset-0 z-[200] flex items-end bg-black/40" onClick={() => setShowForgotPassword(false)}>
-            <div className="w-full bg-white rounded-t-3xl px-6 pt-6 pb-10 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-              <div className="w-10 h-1 rounded-full bg-[#e8e4df] mx-auto mb-5" />
-              <h3 className="font-bold text-[#1a1a1a] text-lg mb-1">Reset your password</h3>
-              <p className="text-sm text-[#7a7570] mb-5">We&apos;ll send a reset link to your email.</p>
+            <div className="w-full bg-[#16122a] rounded-t-3xl px-6 pt-6 pb-10 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className="w-10 h-1 rounded-full bg-[#26203f] mx-auto mb-5" />
+              <h3 className="font-bold text-[#ffffff] text-lg mb-1">Reset your password</h3>
+              <p className="text-sm text-[#9d97b5] mb-5">We&apos;ll send a reset link to your email.</p>
 
               {forgotSent ? (
                 <div className="flex flex-col items-center text-center py-4 gap-3">
-                  <div className="w-12 h-12 rounded-full bg-[#dcfce7] flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-[rgba(16,185,129,0.14)] flex items-center justify-center">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                   </div>
-                  <p className="text-sm font-semibold text-[#1a1a1a]">Check your email for a reset link</p>
+                  <p className="text-sm font-semibold text-[#ffffff]">Check your email for a reset link</p>
                   <button
                     type="button"
                     className="mt-2 text-sm font-semibold text-[#6c47ff]"
@@ -382,7 +382,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
               ) : (
                 <form onSubmit={handleForgotPassword} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[#7a7570] uppercase tracking-wider">Email</label>
+                    <label className="text-xs font-bold text-[#9d97b5] uppercase tracking-wider">Email</label>
                     <input
                       type="email"
                       value={forgotEmail}
@@ -390,7 +390,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                       placeholder="you@email.com"
                       autoComplete="email"
                       required
-                      className="h-12 rounded-xl border border-[#e8e4df] px-4 text-sm text-[#1a1a1a] bg-white outline-none focus:border-[#6c47ff] transition-colors placeholder-[#b0aaa5]"
+                      className="h-12 rounded-xl border border-[#26203f] px-4 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
                     />
                   </div>
                   {forgotError && (
@@ -406,7 +406,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                   </button>
                   <button
                     type="button"
-                    className="text-sm text-[#7a7570] font-medium text-center"
+                    className="text-sm text-[#9d97b5] font-medium text-center"
                     onClick={() => setShowForgotPassword(false)}
                   >
                     Cancel
@@ -422,7 +422,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
   // ── Landing view ──────────────────────────────
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-[#16122a]">
       {/* Hero */}
       <div
         className="relative flex flex-col items-center justify-center text-center overflow-hidden px-8 pt-16 pb-14"
@@ -471,7 +471,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
       </div>
 
       {/* CTA section */}
-      <div className="px-5 pt-5 pb-10 flex flex-col gap-3 bg-white">
+      <div className="px-5 pt-5 pb-10 flex flex-col gap-3 bg-[#16122a]">
         {/* Google — primary */}
         <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} />
         <OrDivider />
@@ -485,12 +485,12 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         </button>
         <button
           onClick={() => setMode("login")}
-          className="w-full h-14 rounded-2xl font-semibold text-base text-[#6c47ff] border-2 border-[#6c47ff]/30 bg-white transition-all active:scale-[0.98]"
+          className="w-full h-14 rounded-2xl font-semibold text-base text-[#6c47ff] border-2 border-[#6c47ff]/30 bg-[#16122a] transition-all active:scale-[0.98]"
         >
           Log in with email
         </button>
 
-        <p className="text-center text-[12px] text-[#7a7570] leading-relaxed -mt-1">
+        <p className="text-center text-[12px] text-[#9d97b5] leading-relaxed -mt-1">
           Be among the first 1,000 local professionals and clients.
         </p>
 
@@ -499,18 +499,18 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
             dispatch({ type: "CONTINUE_AS_GUEST" });
             onNavigate("home");
           }}
-          className="text-center text-xs text-[#b0aaa5] py-1"
+          className="text-center text-xs text-[#6f6889] py-1"
         >
           Browse without signing up
         </button>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-            <p className="text-sm text-red-600 text-center">{error}</p>
+          <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
+            <p className="text-sm text-red-400 text-center">{error}</p>
           </div>
         )}
 
-        <p className="text-center text-[11px] text-[#b0aaa5]">
+        <p className="text-center text-[11px] text-[#6f6889]">
           By continuing, you agree to our Terms &amp; Privacy Policy
         </p>
         <button

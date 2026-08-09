@@ -50,25 +50,25 @@ export default function LocationPickerSheet({
     <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
       <div
         className="w-full rounded-t-3xl overflow-hidden"
-        style={{ background: "#fff", boxShadow: "0 -4px 40px rgba(0,0,0,0.12)" }}
+        style={{ background: "var(--ss-surface)", boxShadow: "0 -4px 40px rgba(0,0,0,0.5)" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-[#e8e4df]" />
+          <div className="w-10 h-1 rounded-full bg-[#26203f]" />
         </div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3">
           <div>
-            <h2 className="font-bold text-base text-[#1a1a1a]">Set Your Location</h2>
-            <p className="text-xs text-[#7a7570] mt-0.5">
+            <h2 className="font-bold text-base text-[#ffffff]">Set Your Location</h2>
+            <p className="text-xs text-[#9d97b5] mt-0.5">
               {currentLabel ? `Currently: ${currentLabel}` : "Find skilled pros near you"}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#f0eeea] flex items-center justify-center text-[#7a7570] active:opacity-70"
+            className="w-8 h-8 rounded-full bg-[#1c1733] flex items-center justify-center text-[#9d97b5] active:opacity-70"
           >
             <X size={15} />
           </button>
@@ -96,8 +96,8 @@ export default function LocationPickerSheet({
               )}
             </div>
             <div className="flex-1 text-left">
-              <p className="font-bold text-sm text-[#1a1a1a]">Use My GPS Location</p>
-              <p className="text-xs text-[#7a7570] mt-0.5">Automatically detect your suburb</p>
+              <p className="font-bold text-sm text-[#ffffff]">Use My GPS Location</p>
+              <p className="text-xs text-[#9d97b5] mt-0.5">Automatically detect your suburb</p>
             </div>
             {isSet && status === "set" && (
               <CheckCircle size={18} className="text-[#6c47ff] flex-shrink-0" />
@@ -106,14 +106,14 @@ export default function LocationPickerSheet({
 
           {/* Divider */}
           <div className="flex items-center gap-3 mb-5">
-            <div className="flex-1 h-px bg-[#e8e4df]" />
-            <span className="text-[11px] font-semibold text-[#b0aaa5] uppercase tracking-wider">or enter manually</span>
-            <div className="flex-1 h-px bg-[#e8e4df]" />
+            <div className="flex-1 h-px bg-[#26203f]" />
+            <span className="text-[11px] font-semibold text-[#6f6889] uppercase tracking-wider">or enter manually</span>
+            <div className="flex-1 h-px bg-[#26203f]" />
           </div>
 
           {/* Quick picks */}
           <div className="mb-6">
-            <p className="text-[11px] font-bold text-[#b0aaa5] uppercase tracking-wider mb-3">Quick picks</p>
+            <p className="text-[11px] font-bold text-[#6f6889] uppercase tracking-wider mb-3">Quick picks</p>
             <div className="flex flex-wrap gap-3">
               {QUICK_SUBURBS.map((suburb) => (
                 <button
@@ -123,7 +123,7 @@ export default function LocationPickerSheet({
                     const ok = await onManualEntry(suburb);
                     if (ok) setTimeout(onClose, 800);
                   }}
-                  className="text-sm font-semibold px-4 py-2 rounded-full border border-[#e8e4df] bg-white text-[#7a7570] active:border-[#6c47ff] active:text-[#6c47ff] transition-colors"
+                  className="text-sm font-semibold px-4 py-2 rounded-full border border-[#26203f] bg-[#16122a] text-[#9d97b5] active:border-[#6c47ff] active:text-[#6c47ff] transition-colors"
                 >
                   {suburb}
                 </button>
@@ -134,10 +134,10 @@ export default function LocationPickerSheet({
           {/* Manual search */}
           <div
             className="flex items-center gap-2 rounded-2xl border px-4 h-12 mb-4 transition-colors"
-            style={{ borderColor: "#e8e4df", background: "#fafaf9" }}
+            style={{ borderColor: "#26203f", background: "#fafaf9" }}
             onClick={() => inputRef.current?.focus()}
           >
-            <Search size={16} className="text-[#b0aaa5] flex-shrink-0" />
+            <Search size={16} className="text-[#6f6889] flex-shrink-0" />
             <input
               ref={inputRef}
               type="text"
@@ -145,10 +145,10 @@ export default function LocationPickerSheet({
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
               placeholder="Suburb, postcode or address…"
-              className="flex-1 bg-transparent text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none"
+              className="flex-1 bg-transparent text-sm text-[#ffffff] placeholder-[#6f6889] outline-none"
             />
             {query && (
-              <button onClick={() => setQuery("")} className="text-[#b0aaa5] active:text-[#7a7570]">
+              <button onClick={() => setQuery("")} className="text-[#6f6889] active:text-[#9d97b5]">
                 <X size={14} />
               </button>
             )}
@@ -172,17 +172,17 @@ export default function LocationPickerSheet({
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-100 px-3 py-2.5 mb-4">
+            <div className="flex items-start gap-2 rounded-xl bg-red-500/10 border border-red-500/30 px-3 py-2.5 mb-4">
               <AlertCircle size={15} className="text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-red-600 leading-relaxed">{error}</p>
+              <p className="text-xs text-red-400 leading-relaxed">{error}</p>
             </div>
           )}
 
           {/* Success */}
           {isSet && (
-            <div className="flex items-center gap-2 rounded-xl bg-green-50 border border-green-100 px-3 py-2.5 mb-4">
+            <div className="flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-3 py-2.5 mb-4">
               <CheckCircle size={15} className="text-green-500 flex-shrink-0" />
-              <p className="text-xs text-green-700 font-semibold">Location set! Feed updating…</p>
+              <p className="text-xs text-emerald-400 font-semibold">Location set! Feed updating…</p>
             </div>
           )}
         </div>

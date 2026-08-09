@@ -162,11 +162,11 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
     : threads;
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-[#16122a]">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#e8e4df] px-4 pt-4 pb-3">
+      <header className="sticky top-0 z-40 bg-[#0d0a1a]/92 backdrop-blur-sm border-b border-[#26203f] px-4 pt-4 pb-3">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-bold text-[#1a1a1a]">Messages</h1>
+          <h1 className="text-xl font-bold text-[#ffffff]">Messages</h1>
           {threads.reduce((n, t) => n + t.unreadCount, 0) > 0 && (
             <span className="text-xs font-bold bg-[#6c47ff] text-white px-2 py-0.5 rounded-full">
               {threads.reduce((n, t) => n + t.unreadCount, 0)}
@@ -174,17 +174,17 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
           )}
         </div>
         {/* Live search input */}
-        <div className="flex items-center gap-2.5 bg-[#f0eeea] rounded-2xl px-4 h-10">
-          <Search size={15} className="text-[#b0aaa5] flex-shrink-0" />
+        <div className="flex items-center gap-2.5 bg-[#1c1733] rounded-2xl px-4 h-10">
+          <Search size={15} className="text-[#6f6889] flex-shrink-0" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name, skill or location…"
-            className="flex-1 bg-transparent text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none"
+            className="flex-1 bg-transparent text-sm text-[#ffffff] placeholder-[#6f6889] outline-none"
           />
           {query && (
-            <button onClick={() => setQuery("")} className="text-[#b0aaa5] text-xs font-semibold">
+            <button onClick={() => setQuery("")} className="text-[#6f6889] text-xs font-semibold">
               ✕
             </button>
           )}
@@ -193,18 +193,18 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
 
       {/* Notification permission banner */}
       {showNotifBanner && (
-        <div className="mx-4 mt-3 mb-1 bg-[#f5f0ff] border border-[#c4b5fd] rounded-2xl px-4 py-3 flex items-center gap-3">
+        <div className="mx-4 mt-3 mb-1 bg-[#1c1733] border border-[#c4b5fd] rounded-2xl px-4 py-3 flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-[#6c47ff] flex items-center justify-center flex-shrink-0">
             <Bell size={16} color="white" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-[#1a1a1a] leading-tight">Get message alerts</p>
-            <p className="text-xs text-[#7a7570] mt-0.5">Know instantly when someone messages you</p>
+            <p className="text-sm font-bold text-[#ffffff] leading-tight">Get message alerts</p>
+            <p className="text-xs text-[#9d97b5] mt-0.5">Know instantly when someone messages you</p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={handleDismissNotifs}
-              className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#b0aaa5] active:bg-[#f0eeea]"
+              className="w-7 h-7 rounded-full bg-[#16122a] flex items-center justify-center text-[#6f6889] active:bg-[#1c1733]"
             >
               <BellOff size={13} />
             </button>
@@ -221,34 +221,34 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
 
       {/* Notification granted confirmation */}
       {notifPerm === "granted" && (
-        <div className="mx-4 mt-3 mb-1 bg-[#f0fdf4] border border-green-200 rounded-2xl px-4 py-2.5 flex items-center gap-2.5">
+        <div className="mx-4 mt-3 mb-1 bg-[rgba(16,185,129,0.10)] border border-emerald-500/30 rounded-2xl px-4 py-2.5 flex items-center gap-2.5">
           <Bell size={14} className="text-green-500 flex-shrink-0" />
-          <p className="text-xs font-semibold text-green-700">Message notifications are on</p>
+          <p className="text-xs font-semibold text-emerald-400">Message notifications are on</p>
         </div>
       )}
 
       {/* Jobs Done request banners */}
       {jobsRequests.map((req) => (
-        <div key={req.jobId} className="mx-4 mt-3 bg-white rounded-2xl border border-[#e8e4df] shadow-sm overflow-hidden">
+        <div key={req.jobId} className="mx-4 mt-3 bg-[#16122a] rounded-2xl border border-[#26203f] shadow-sm overflow-hidden">
           <div className="px-4 pt-3 pb-2.5">
             <div className="flex items-center gap-2 mb-0.5">
               <span className="text-base">✅</span>
-              <p className="font-bold text-[#1a1a1a] text-sm">{req.fromName}</p>
+              <p className="font-bold text-[#ffffff] text-sm">{req.fromName}</p>
             </div>
-            <p className="text-xs text-[#7a7570] leading-snug">requested a Jobs Done confirmation. Did they complete the work?</p>
+            <p className="text-xs text-[#9d97b5] leading-snug">requested a Jobs Done confirmation. Did they complete the work?</p>
           </div>
-          <div className="flex border-t border-[#f0eeea]">
+          <div className="flex border-t border-[#1c1733]">
             <button
               disabled={processingId === req.jobId}
-              className="flex-1 py-2.5 text-sm font-semibold text-[#7a7570] active:bg-gray-50 flex items-center justify-center gap-1.5 disabled:opacity-40"
+              className="flex-1 py-2.5 text-sm font-semibold text-[#9d97b5] active:bg-white/10 flex items-center justify-center gap-1.5 disabled:opacity-40"
               onClick={() => handleDecline(req)}
             >
               <X size={14} /> Decline
             </button>
-            <div className="w-px bg-[#f0eeea]" />
+            <div className="w-px bg-[#1c1733]" />
             <button
               disabled={processingId === req.jobId}
-              className="flex-1 py-2.5 text-sm font-bold text-[#6c47ff] active:bg-[#f5f0ff] flex items-center justify-center gap-1.5 disabled:opacity-40"
+              className="flex-1 py-2.5 text-sm font-bold text-[#6c47ff] active:bg-[#1c1733] flex items-center justify-center gap-1.5 disabled:opacity-40"
               onClick={() => handleConfirm(req)}
             >
               <CheckCircle size={14} /> Confirm ✓
@@ -258,29 +258,29 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
       ))}
 
       {/* Thread list */}
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-24 divide-y divide-[#f0eeea]">
+      <div className="flex-1 overflow-y-auto no-scrollbar pb-24 divide-y divide-[#1c1733]">
         {threadsLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3.5 px-4 py-3.5">
-              <div className="w-11 h-11 rounded-full bg-gray-200 animate-pulse flex-shrink-0" />
+              <div className="w-11 h-11 rounded-full bg-white/10 animate-pulse flex-shrink-0" />
               <div className="flex-1 space-y-2">
-                <div className="h-3 bg-gray-200 rounded animate-pulse w-2/5" />
-                <div className="h-2.5 bg-gray-100 rounded animate-pulse w-3/4" />
+                <div className="h-3 bg-white/10 rounded animate-pulse w-2/5" />
+                <div className="h-2.5 bg-white/10 rounded animate-pulse w-3/4" />
               </div>
             </div>
           ))
         ) : filtered.length === 0 && query ? (
           <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
-            <p className="text-sm font-semibold text-[#1a1a1a] mb-1">No results for "{query}"</p>
-            <p className="text-xs text-[#b0aaa5]">Try searching by name, skill or location</p>
+            <p className="text-sm font-semibold text-[#ffffff] mb-1">No results for "{query}"</p>
+            <p className="text-xs text-[#6f6889]">Try searching by name, skill or location</p>
           </div>
         ) : threads.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
-            <div className="w-16 h-16 rounded-full bg-[#ede9fe] flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-[#241d40] flex items-center justify-center mb-4">
               <MessageSquare size={28} className="text-[#6c47ff]" />
             </div>
-            <p className="text-sm font-semibold text-[#1a1a1a] mb-1">No messages yet</p>
-            <p className="text-xs text-[#b0aaa5]">
+            <p className="text-sm font-semibold text-[#ffffff] mb-1">No messages yet</p>
+            <p className="text-xs text-[#6f6889]">
               Tap Connect on a skiller's profile to start a conversation
             </p>
           </div>

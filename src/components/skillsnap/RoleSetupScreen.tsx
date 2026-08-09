@@ -59,12 +59,12 @@ export default function RoleSetupScreen() {
   const canContinue = selected === "Other" ? customSkill.trim().length > 0 : !!selected;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f7f5]">
+    <div className="flex flex-col min-h-screen bg-[#0d0a1a]">
       {/* Header */}
       <div className="pt-12 pb-6 px-6 text-center">
         <img src="/skillsnap-icon.svg" alt="SkillSnap" width={64} height={64} className="mx-auto mb-5" />
-        <h1 className="text-2xl font-black text-[#1a1a1a] mb-2">What brings you to SkillSnap?</h1>
-        <p className="text-[#7a7570] text-sm">Choose your role to get started</p>
+        <h1 className="text-2xl font-black text-[#ffffff] mb-2">What brings you to SkillSnap?</h1>
+        <p className="text-[#9d97b5] text-sm">Choose your role to get started</p>
       </div>
 
       {/* Category cards */}
@@ -82,8 +82,8 @@ export default function RoleSetupScreen() {
                   gap: 16,
                   padding: "16px 20px",
                   borderRadius: 16,
-                  border: `2px solid ${isSelected ? "#6c47ff" : "#e8e4df"}`,
-                  background: isSelected ? "#f5f3ff" : "white",
+                  border: `2px solid ${isSelected ? "#6c47ff" : "#26203f"}`,
+                  background: isSelected ? "var(--ss-surface-3)" : "var(--ss-surface-2)",
                   cursor: "pointer",
                   transition: "all 0.12s",
                   textAlign: "left",
@@ -91,10 +91,10 @@ export default function RoleSetupScreen() {
               >
                 <span style={{ fontSize: 26, flexShrink: 0 }}>{CATEGORY_ICONS[cat] ?? "🛠️"}</span>
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontWeight: 700, fontSize: 15, color: isSelected ? "#6c47ff" : "#1a1a1a" }}>
+                  <p style={{ fontWeight: 700, fontSize: 15, color: isSelected ? "#6c47ff" : "#ffffff" }}>
                     {cat === "Client" ? "I'm a Client" : cat === "Other" ? "Something else…" : cat}
                   </p>
-                  <p style={{ fontSize: 12, color: "#7a7570", marginTop: 2 }}>
+                  <p style={{ fontSize: 12, color: "#9d97b5", marginTop: 2 }}>
                     {cat === "Client" ? "I hire skilled pros for jobs"
                       : cat === "Other" ? "Enter your own skill category"
                       : `I offer ${cat.toLowerCase()} services`}
@@ -102,7 +102,7 @@ export default function RoleSetupScreen() {
                 </div>
                 <div style={{
                   width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
-                  border: `2px solid ${isSelected ? "#6c47ff" : "#e8e4df"}`,
+                  border: `2px solid ${isSelected ? "#6c47ff" : "#26203f"}`,
                   background: isSelected ? "#6c47ff" : "transparent",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
@@ -122,14 +122,14 @@ export default function RoleSetupScreen() {
               value={customSkill}
               onChange={(e) => setCustomSkill(e.target.value.slice(0, 40))}
               placeholder="e.g. Carpenter, Hairdresser, Chef…"
-              className="w-full bg-white rounded-2xl border-2 border-[#6c47ff] px-4 h-12 text-sm text-[#1a1a1a] placeholder-[#b0aaa5] outline-none"
+              className="w-full bg-[#16122a] rounded-2xl border-2 border-[#6c47ff] px-4 h-12 text-sm text-[#ffffff] placeholder-[#6f6889] outline-none"
             />
           </div>
         )}
       </div>
 
       {/* Continue button */}
-      <div className="px-4 pb-10 pt-3 bg-[#f8f7f5]">
+      <div className="px-4 pb-10 pt-3 bg-[#0d0a1a]">
         <button
           onClick={handleContinue}
           disabled={!canContinue || saving}
