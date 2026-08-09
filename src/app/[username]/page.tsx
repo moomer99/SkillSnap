@@ -170,26 +170,28 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
       {/* ── Top bar ── */}
       <nav
-        className="sticky top-0 z-50 h-14 px-5 flex items-center justify-between"
-        style={{ background: "rgba(13,10,26,0.92)", backdropFilter: "blur(8px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        className="sticky top-0 z-50"
+        style={{ background: "rgba(13,10,26,0.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}
       >
-        <a href="/" aria-label="SkillSnap home">
-          <SkillSnapLogo variant="full" size="sm" dark />
-        </a>
-        <a
-          href="/"
-          className="text-xs font-bold px-4 py-2 rounded-full transition-all active:scale-95"
-          style={{ background: "rgba(108,71,255,0.18)", border: "1px solid rgba(108,71,255,0.45)", color: "#a78bfa" }}
-        >
-          Browse SkillSnap
-        </a>
+        <div className="mx-auto w-full max-w-[1120px] px-5 sm:px-8 h-16 flex items-center justify-between">
+          <a href="/" aria-label="SkillSnap home">
+            <SkillSnapLogo variant="full" size="sm" dark />
+          </a>
+          <a
+            href="/"
+            className="text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 rounded-full transition-all active:scale-95"
+            style={{ background: "rgba(108,71,255,0.18)", border: "1px solid rgba(108,71,255,0.45)", color: "#a78bfa" }}
+          >
+            Browse SkillSnap
+          </a>
+        </div>
       </nav>
 
-      <div className="mx-auto w-full max-w-[720px] px-5 pb-16">
+      <div className="mx-auto w-full max-w-[1120px] px-5 sm:px-8 pb-16">
 
         {/* ── Banner ── */}
         <div
-          className="relative h-32 sm:h-40 rounded-b-3xl -mx-5 sm:mx-0 sm:mt-4 sm:rounded-3xl overflow-hidden"
+          className="relative h-32 sm:h-44 lg:h-56 rounded-b-3xl -mx-5 sm:-mx-8 lg:mx-0 lg:mt-6 lg:rounded-3xl overflow-hidden"
           style={{ background: gradient }}
         >
           <div
@@ -198,140 +200,146 @@ export default async function PublicProfilePage({ params }: PageProps) {
           />
         </div>
 
-        {/* ── Identity ── */}
-        <section className="-mt-12 relative flex flex-col items-center text-center">
-          <div
-            className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-extrabold overflow-hidden"
-            style={{ background: gradient, border: "4px solid #0d0a1a" }}
-          >
-            {profile.avatar_url ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={profile.avatar_url}
-                alt={name}
-                width={96}
-                height={96}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span>{profile.avatar_initial ?? name.charAt(0).toUpperCase()}</span>
-            )}
-          </div>
+        {/* Desktop: identity column beside the work grid. Mobile: identity, then grid. */}
+        <div className="grid grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)] gap-8 lg:gap-12">
 
-          <div className="flex items-center gap-2 mt-4">
-            <h1 className="text-[24px] font-extrabold leading-tight">{name}</h1>
-            {profile.is_verified && <BadgeCheck size={20} color="#6c47ff" fill="rgba(108,71,255,0.2)" />}
-          </div>
-
-          <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.45)" }}>
-            @{profile.username}
-          </p>
-
-          <div className="flex items-center gap-2 mt-3 flex-wrap justify-center">
-            {profile.skill && (
-              <span
-                className="text-xs font-bold px-3 py-1.5 rounded-full"
-                style={{ background: "rgba(108,71,255,0.18)", border: "1px solid rgba(108,71,255,0.45)", color: "#a78bfa" }}
+          {/* ── Left column — identity, stats, connect, download ── */}
+          <div className="-mt-12 lg:-mt-16 relative">
+            <section className="flex flex-col items-center lg:items-start text-center lg:text-left">
+              <div
+                className="w-24 h-24 lg:w-28 lg:h-28 rounded-full flex items-center justify-center text-3xl font-extrabold overflow-hidden"
+                style={{ background: gradient, border: "4px solid #0d0a1a" }}
               >
-                {profile.skill}
-              </span>
-            )}
-            {isPro && (
-              <span
-                className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
-                style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
-              >
-                Pro
-              </span>
-            )}
-          </div>
+                {profile.avatar_url ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={profile.avatar_url}
+                    alt={name}
+                    width={112}
+                    height={112}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>{profile.avatar_initial ?? name.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
 
-          {profile.bio && (
-            <p className="text-sm leading-relaxed mt-4 max-w-[420px]" style={{ color: "rgba(255,255,255,0.72)" }}>
-              {profile.bio}
-            </p>
-          )}
+              <div className="flex items-center gap-2 mt-4">
+                <h1 className="text-[24px] lg:text-[28px] font-extrabold leading-tight">{name}</h1>
+                {profile.is_verified && <BadgeCheck size={20} color="#6c47ff" fill="rgba(108,71,255,0.2)" />}
+              </div>
 
-          {profile.location && (
-            <p className="flex items-center gap-1.5 text-sm mt-3" style={{ color: "#a78bfa" }}>
-              <MapPin size={14} />
-              {profile.location}
-            </p>
-          )}
-        </section>
-
-        {/* ── Stats ── */}
-        <section
-          className="mt-6 rounded-2xl flex items-stretch"
-          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-        >
-          <Stat value={jobsDone >= 1000 ? `${(jobsDone / 1000).toFixed(1)}k` : String(jobsDone)} label="Jobs Done" highlight />
-          <Divider />
-          <Stat value={happy > 0 ? `${happy}%` : "—"} label="😊 Happy" />
-          <Divider />
-          <Stat
-            value={followers >= 1000 ? `${(followers / 1000).toFixed(1)}k` : String(followers)}
-            label="Followers"
-          />
-        </section>
-
-        {/* ── Connect ── */}
-        <section className="mt-4">
-          <ConnectAction userId={profile.id} />
-          <p className="text-center text-[11px] mt-2" style={{ color: "rgba(255,255,255,0.35)" }}>
-            Message {name.split(" ")[0]} directly on SkillSnap — free
-          </p>
-        </section>
-
-        {/* ── Download CTA ── */}
-        <section
-          className="mt-7 rounded-3xl p-6 text-center relative overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, rgba(108,71,255,0.22), rgba(167,139,250,0.10))",
-            border: "1px solid rgba(108,71,255,0.35)",
-          }}
-        >
-          <div
-            className="absolute pointer-events-none"
-            style={{ top: "-40%", left: "50%", transform: "translateX(-50%)", width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.30) 0%, transparent 65%)" }}
-          />
-          <div className="relative">
-            <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#a78bfa" }}>
-              Get the app
-            </p>
-            <h2 className="text-[20px] font-extrabold mt-2 leading-snug">
-              Download SkillSnap
-            </h2>
-            <p className="text-[13px] leading-relaxed mt-2 mb-5 max-w-[340px] mx-auto" style={{ color: "rgba(255,255,255,0.55)" }}>
-              Watch {name.split(" ")[0]}&apos;s work, message directly and find more skilled locals near you.
-            </p>
-            <AppStoreButtons />
-          </div>
-        </section>
-
-        {/* ── Work grid ── */}
-        <section className="mt-8">
-          <div className="flex items-baseline justify-between mb-3">
-            <h2 className="text-[15px] font-bold">Work</h2>
-            <span className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>
-              {posts.length} {posts.length === 1 ? "post" : "posts"}
-            </span>
-          </div>
-
-          {posts.length > 0 ? (
-            <WorkGrid posts={posts} />
-          ) : (
-            <div
-              className="rounded-2xl py-12 px-6 text-center"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px dashed rgba(255,255,255,0.12)" }}
-            >
-              <p className="text-sm font-bold">No work posted yet</p>
-              <p className="text-xs mt-1.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-                {name.split(" ")[0]} is new to SkillSnap. Connect directly to ask about their work.
+              <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.45)" }}>
+                @{profile.username}
               </p>
+
+              <div className="flex items-center gap-2 mt-3 flex-wrap justify-center lg:justify-start">
+                {profile.skill && (
+                  <span
+                    className="text-xs font-bold px-3 py-1.5 rounded-full"
+                    style={{ background: "rgba(108,71,255,0.18)", border: "1px solid rgba(108,71,255,0.45)", color: "#a78bfa" }}
+                  >
+                    {profile.skill}
+                  </span>
+                )}
+                {isPro && (
+                  <span
+                    className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
+                    style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+                  >
+                    Pro
+                  </span>
+                )}
+              </div>
+
+              {profile.bio && (
+                <p className="text-sm leading-relaxed mt-4 max-w-[420px]" style={{ color: "rgba(255,255,255,0.72)" }}>
+                  {profile.bio}
+                </p>
+              )}
+
+              {profile.location && (
+                <p className="flex items-center gap-1.5 text-sm mt-3" style={{ color: "#a78bfa" }}>
+                  <MapPin size={14} />
+                  {profile.location}
+                </p>
+              )}
+            </section>
+
+            {/* ── Stats ── */}
+            <section
+              className="mt-6 rounded-2xl flex items-stretch"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <Stat value={jobsDone >= 1000 ? `${(jobsDone / 1000).toFixed(1)}k` : String(jobsDone)} label="Jobs Done" highlight />
+              <Divider />
+              <Stat value={happy > 0 ? `${happy}%` : "—"} label="😊 Happy" />
+              <Divider />
+              <Stat
+                value={followers >= 1000 ? `${(followers / 1000).toFixed(1)}k` : String(followers)}
+                label="Followers"
+              />
+            </section>
+
+            {/* ── Connect ── */}
+            <section className="mt-4">
+              <ConnectAction userId={profile.id} />
+              <p className="text-center lg:text-left text-[11px] mt-2" style={{ color: "rgba(255,255,255,0.35)" }}>
+                Message {name.split(" ")[0]} directly on SkillSnap — free
+              </p>
+            </section>
+
+            {/* ── Download CTA ── */}
+            <section
+              className="mt-6 rounded-3xl p-6 text-center relative overflow-hidden"
+              style={{
+                background: "linear-gradient(135deg, rgba(108,71,255,0.28), rgba(167,139,250,0.10))",
+                border: "1px solid rgba(108,71,255,0.45)",
+              }}
+            >
+              <div
+                className="absolute pointer-events-none"
+                style={{ top: "-40%", left: "50%", transform: "translateX(-50%)", width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.30) 0%, transparent 65%)" }}
+              />
+              <div className="relative">
+                <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#a78bfa" }}>
+                  Get the app
+                </p>
+                <h2 className="text-[22px] font-extrabold mt-2 leading-snug">
+                  Download SkillSnap
+                </h2>
+                <p className="text-[13px] leading-relaxed mt-2 mb-5 max-w-[340px] mx-auto" style={{ color: "rgba(255,255,255,0.60)" }}>
+                  Watch {name.split(" ")[0]}&apos;s work, message directly and find more skilled locals near you.
+                </p>
+                <AppStoreButtons variant="black" stacked />
+              </div>
+            </section>
+          </div>
+
+          {/* ── Right column — work grid ── */}
+          <section className="lg:mt-8">
+            <div className="flex items-baseline justify-between mb-3">
+              <h2 className="text-[17px] font-bold">Work</h2>
+              <span className="text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>
+                {posts.length} {posts.length === 1 ? "post" : "posts"}
+              </span>
             </div>
-          )}
-        </section>
+
+            {posts.length > 0 ? (
+              <WorkGrid posts={posts} />
+            ) : (
+              <div
+                className="rounded-2xl py-12 px-6 text-center"
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px dashed rgba(255,255,255,0.12)" }}
+              >
+                <p className="text-sm font-bold">No work posted yet</p>
+                <p className="text-xs mt-1.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+                  {name.split(" ")[0]} is new to SkillSnap. Connect directly to ask about their work.
+                </p>
+              </div>
+            )}
+          </section>
+        </div>
 
         <footer className="mt-12 text-center">
           <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.30)" }}>

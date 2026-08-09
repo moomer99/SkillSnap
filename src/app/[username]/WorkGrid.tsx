@@ -19,12 +19,12 @@ export default function WorkGrid({ posts }: { posts: PublicPost[] }) {
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
         {posts.map((post) => (
           <button
             key={post.id}
             onClick={() => setActive(post)}
-            className="relative aspect-square overflow-hidden rounded-md group"
+            className="relative aspect-square overflow-hidden rounded-lg sm:rounded-xl group"
             style={{ background: post.thumbnail_gradient ?? "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
             aria-label={post.caption || "View work"}
           >
