@@ -74,6 +74,7 @@
 
   /* Brand ink */
   --ss-text: #ffffff;
+  --ss-text-soft: rgba(255, 255, 255, 0.70);
   --ss-text-muted: rgba(255, 255, 255, 0.60);
   --ss-text-dim: rgba(255, 255, 255, 0.40);
 
@@ -142,6 +143,7 @@ html.light {
   --ss-line-strong: rgba(26, 26, 26, 0.20);
 
   --ss-text: #1a1a1a;
+  --ss-text-soft: rgba(26, 26, 26, 0.70);
   --ss-text-muted: rgba(26, 26, 26, 0.66);
   --ss-text-dim: rgba(26, 26, 26, 0.45);
 

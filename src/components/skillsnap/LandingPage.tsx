@@ -6,7 +6,7 @@
 // desktop (1280px+). Dark-first, matching the mobile app.
 // ─────────────────────────────────────────────
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Menu, X, ArrowRight, Play } from "lucide-react";
+import { Menu, X, ArrowRight, Play, Sparkles } from "lucide-react";
 import type { Screen } from "@/types";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
 import AppStoreButtons from "./shared/AppStoreButtons";
@@ -501,6 +501,30 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           </div>
         </div>
       </section>
+
+      {/* ── FOUNDING MEMBER NUDGE ─────────────────────────────────── */}
+      {/* Sits in the same container as the hero so it lines up with the copy
+          column above it rather than spanning the whole viewport. */}
+      <div className={`${CONTAINER} pb-10 lg:pb-4`}>
+        <FadeIn>
+          <div
+            className="flex items-center justify-center gap-2.5 text-center"
+            style={{
+              background: "rgba(108,71,255,0.1)",
+              border: "1px solid rgba(108,71,255,0.2)",
+              borderRadius: 8,
+              padding: "12px 20px",
+            }}
+          >
+            <Sparkles size={16} className="flex-shrink-0" style={{ color: "var(--ss-purple-light)" }} />
+            {/* --ss-text-soft is rgba(255,255,255,0.7) in dark, which is the
+                spec'd colour, and flips to dark ink in light mode */}
+            <p className="text-[13px]" style={{ color: "var(--ss-text-soft)" }}>
+              Sign up now — early members get first access to Pro features when we launch.
+            </p>
+          </div>
+        </FadeIn>
+      </div>
 
       {/* ── 1C. HOW IT WORKS ──────────────────────────────────────── */}
       <section className="py-16 sm:py-24" style={{ background: "var(--ss-bg-alt)", borderTop: "1px solid var(--ss-line)" }}>
