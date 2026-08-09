@@ -1,0 +1,72 @@
+// ─────────────────────────────────────────────
+// SkillSnap — App Store / Google Play download buttons
+// Shared by the landing page and the public profile page.
+// ─────────────────────────────────────────────
+import { APP_STORE_URL, PLAY_STORE_URL } from "@/constants/config";
+
+function AppleIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M17.05 12.54c-.02-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.14-2.76.83-3.48.83-.72 0-1.83-.81-3-.79-1.54.02-2.96.9-3.75 2.28-1.6 2.78-.41 6.9 1.15 9.16.76 1.1 1.67 2.34 2.86 2.3 1.15-.05 1.58-.74 2.97-.74 1.39 0 1.78.74 3 .72 1.24-.02 2.02-1.12 2.78-2.23.87-1.28 1.23-2.52 1.25-2.58-.03-.01-2.4-.92-2.42-3.69zM14.79 5.4c.63-.77 1.06-1.83.94-2.9-.91.04-2.01.61-2.67 1.37-.59.68-1.1 1.77-.96 2.81 1.01.08 2.05-.51 2.69-1.28z" />
+    </svg>
+  );
+}
+
+function PlayIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3.6 2.2c-.25.26-.4.67-.4 1.2v17.2c0 .53.15.94.4 1.2l.06.06 9.64-9.64v-.23L3.66 2.14l-.06.06z" fill="#00d4ff" />
+      <path d="M16.5 15.44l-3.2-3.2v-.23l3.2-3.21.07.04 3.8 2.16c1.09.62 1.09 1.63 0 2.25l-3.8 2.16-.07.03z" fill="#ffce00" />
+      <path d="M16.57 15.4L13.3 12.13 3.6 21.8c.36.38.95.43 1.62.05l11.35-6.45z" fill="#ff3a44" />
+      <path d="M16.57 8.86L5.22 2.4C4.55 2.03 3.96 2.08 3.6 2.46l9.7 9.67 3.27-3.27z" fill="#00e676" />
+    </svg>
+  );
+}
+
+interface AppStoreButtonsProps {
+  /** "dark" renders light buttons for dark backgrounds (default). */
+  theme?: "dark" | "light";
+  className?: string;
+}
+
+export default function AppStoreButtons({ theme = "dark", className = "" }: AppStoreButtonsProps) {
+  const onDark = theme === "dark";
+
+  const baseStyle: React.CSSProperties = {
+    background: onDark ? "rgba(255,255,255,0.06)" : "#1a1a1a",
+    border: onDark ? "1px solid rgba(255,255,255,0.14)" : "1px solid #1a1a1a",
+    color: onDark ? "white" : "white",
+  };
+
+  return (
+    <div className={`flex flex-col sm:flex-row gap-2.5 w-full ${className}`}>
+      <a
+        href={APP_STORE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-3 px-5 transition-all active:scale-[0.97] hover:brightness-125"
+        style={baseStyle}
+      >
+        <AppleIcon size={24} />
+        <span className="flex flex-col items-start leading-none">
+          <span className="text-[10px] opacity-70">Download on the</span>
+          <span className="text-[15px] font-bold">App Store</span>
+        </span>
+      </a>
+
+      <a
+        href={PLAY_STORE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-3 px-5 transition-all active:scale-[0.97] hover:brightness-125"
+        style={baseStyle}
+      >
+        <PlayIcon size={22} />
+        <span className="flex flex-col items-start leading-none">
+          <span className="text-[10px] opacity-70">GET IT ON</span>
+          <span className="text-[15px] font-bold">Google Play</span>
+        </span>
+      </a>
+    </div>
+  );
+}

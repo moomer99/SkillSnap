@@ -49,6 +49,20 @@ export const MEDIA_CONFIG = {
   ACCEPTED_IMAGE_TYPES: ["image/jpeg", "image/png", "image/webp"],
 } as const;
 
+// Public web surface
+export const SITE_URL = "https://skillsnap.com.au";
+
+/** Canonical public profile URL for a username, e.g. https://skillsnap.com.au/@wizz55 */
+export function profileUrl(username: string | null | undefined): string {
+  if (!username) return SITE_URL;
+  const handle = username.startsWith("@") ? username.slice(1) : username;
+  return `${SITE_URL}/@${handle}`;
+}
+
+// Mobile app store listings — the web app funnels to these
+export const APP_STORE_URL = "https://apps.apple.com/au/app/skillsnap/id6797864031";
+export const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=au.com.skillsnap.app";
+
 // Feature flags — flip to true as features ship
 export const FEATURES = {
   REAL_AUTH: true,

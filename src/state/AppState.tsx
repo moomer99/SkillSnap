@@ -4,7 +4,7 @@
 // Auth: hydrated from Supabase session on mount.
 // onAuthStateChange keeps session in sync.
 // ─────────────────────────────────────────────
-import { createContext, useContext, useReducer, useEffect, useRef, type ReactNode } from "react";
+import { createContext, useContext, useReducer, useEffect, useRef, useState, type ReactNode } from "react";
 import { usePresence } from "@/hooks/usePresence";
 import type { User, Post, MessageThread, Message, Screen } from "@/types";
 import type { DiscoveryFilter } from "@/mock-data/discovery";
@@ -435,6 +435,43 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const hydratingRef = useRef<string | null>(null);
   usePresence(state.currentUser?.id ?? null);
   const onlineUserIds = new Set<string>();
+
+  // ── Connect deep link ──────────────────────
+  // The public profile page (/@username) sends visitors here as /?connect=<userId>.
+  // Logged in  → open the chat with that person straight away.
+  // Logged out → show the auth prompt and keep the target pending, so the connect
+  //              resumes automatically once they sign in.
+  const [pendingConnect, setPendingConnect] = useState<string | null>(null);
+
+  useEffect(() => {
+    const target = new URLSearchParams(window.location.search).get("connect");
+    if (!target) return;
+    setPendingConnect(target);
+    window.history.replaceState({}, "", window.location.pathname);
+  }, []);
+
+  useEffect(() => {
+    if (!pendingConnect || state.authLoading) return;
+
+    if (!state.isAuthenticated) {
+      dispatch({ type: "SHOW_AUTH_PROMPT" });
+      return; // keep pendingConnect — this effect re-runs after sign-in
+    }
+
+    setPendingConnect(null);
+    dispatch({ type: "HIDE_AUTH_PROMPT" });
+    // Navigate optimistically with a placeholder thread, then resolve the real one.
+    dispatch({ type: "SET_ACTIVE_THREAD", threadId: "", participantId: pendingConnect });
+    dispatch({ type: "NAVIGATE", screen: "chat" });
+
+    const participantId = pendingConnect;
+    import("@/services/messageService")
+      .then(({ messageService }) => messageService.getOrCreateConversation(participantId))
+      .then((conversationId) => {
+        dispatch({ type: "SET_ACTIVE_THREAD", threadId: conversationId, participantId });
+      })
+      .catch((e) => console.error("[AppState] connect deep link failed:", e));
+  }, [pendingConnect, state.authLoading, state.isAuthenticated]);
 
   // Listen for review mode custom event from /review page
   useEffect(() => {
