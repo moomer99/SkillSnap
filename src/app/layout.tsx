@@ -63,8 +63,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // No maximumScale / userScalable: false — blocking pinch-zoom fails WCAG 1.4.4
+  // and also disables zoom in desktop browsers.
 };
 
 export default function RootLayout({

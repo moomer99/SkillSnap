@@ -1,13 +1,11 @@
 "use client";
 
 import React from "react";
-import { AppProvider, useAppState } from "@/state/AppState";
+import { AppProvider } from "@/state/AppState";
 import { ToastProvider } from "@/components/skillsnap/shared/Toast";
 import DiscoverScreen from "@/components/skillsnap/DiscoverScreen";
 
 function DiscoverInner() {
-  const { navigate } = useAppState();
-
   function handleNavigate() {
     // Redirect to the main SPA for all navigation actions
     window.location.href = "/";
