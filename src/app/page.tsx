@@ -151,7 +151,6 @@ function SkillSnapRouter() {
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
       style={{ background: "var(--ss-bg)" }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/skillsnap-icon.svg" alt="SkillSnap" width={64} height={64} className="mb-4" />
       <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
     </div>

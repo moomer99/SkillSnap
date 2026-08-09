@@ -163,7 +163,6 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
         <Card className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
             {currentUser.avatarUrl ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={currentUser.avatarUrl}
                 alt={currentUser.displayName}
@@ -217,7 +216,6 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
                 className="flex items-center gap-3 w-full text-left p-2 -mx-2 rounded-xl transition-colors hover:bg-white/[0.05]"
               >
                 {pro.avatarUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={pro.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                 ) : (
                   <div
@@ -271,7 +269,6 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
         <p className="text-xs leading-relaxed" style={{ color: "var(--ss-text-muted)" }}>
           Scan to download SkillSnap and get the full experience on your phone.
         </p>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(APP_STORE_URL)}`}
           alt="Scan to download SkillSnap from the App Store"

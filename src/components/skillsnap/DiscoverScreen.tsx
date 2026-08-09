@@ -14,7 +14,7 @@
 // ─────────────────────────────────────────────
 import { useEffect, useMemo, useState } from "react";
 import { MapPin, ChevronRight, Search, X, SlidersHorizontal } from "lucide-react";
-import type { Screen } from "@/types";
+import type { DiscoveryPin, Screen } from "@/types";
 import { DISCOVERY_FILTER_CHIPS, type DiscoveryFilter } from "@/mock-data/discovery";
 import { useDiscovery } from "@/hooks/useDiscovery";
 import { useAppState } from "@/state/AppState";
@@ -355,16 +355,26 @@ function skillColor(skill: string): string {
 }
 
 // ── Pro card ───────────────────────────────────────────────────────
+// discoveryService hydrates pins with profile fields beyond DiscoveryPin, and
+// which ones are present depends on the query — hence the optional extras.
+type DiscoveryPinLike = DiscoveryPin & {
+  avatarUrl?: string | null;
+  avatarInitial?: string | null;
+  avatarGradient?: string | null;
+  location?: string | null;
+  distanceKm?: number;
+  happyPct?: number;
+};
+
 function ProCard({
   pin, connecting, onProfile, onConnect,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  pin: any;
+  pin: DiscoveryPinLike;
   connecting: boolean;
   onProfile: () => void;
   onConnect: () => void;
 }) {
-  const initial = (pin.name as string)?.charAt(0) ?? "?";
+  const initial = pin.name?.charAt(0) ?? "?";
 
   return (
     <div
@@ -376,7 +386,6 @@ function ProCard({
         className="relative flex flex-col items-center pt-5 pb-3 px-3 transition-opacity hover:opacity-90"
       >
         {pin.avatarUrl ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={pin.avatarUrl}
             alt={pin.name}

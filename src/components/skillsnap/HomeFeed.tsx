@@ -142,7 +142,6 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   // Register scroll-to-top with the shell so the bottom-nav home tap can trigger it
   useEffect(() => {
     registerScrollToTop?.(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function dismissPrompt() {
@@ -732,7 +731,6 @@ function FeedCard({
               onPause={() => setPlaying(false)}
             />
           ) : activeMediaUrl ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={activeMediaUrl}
               alt={caption || `Work by ${author.displayName}`}

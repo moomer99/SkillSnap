@@ -207,10 +207,15 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
         }}
       >
         <div className={`${CONTAINER} h-16 flex items-center justify-between`}>
-          <a href="/" aria-label="SkillSnap home" className="flex items-center">
+          {/* Already on "/" — scroll to top rather than reload the page */}
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            aria-label="Back to top"
+            className="flex items-center"
+          >
             <span className="hidden sm:block"><SkillSnapLogo variant="full" size="md" dark /></span>
             <span className="sm:hidden"><SkillSnapLogo variant="full" size="sm" dark /></span>
-          </a>
+          </button>
 
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-6">
@@ -331,7 +336,6 @@ function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
           {/* Feed media */}
           <div className="relative flex-1" style={{ background: gradient }}>
             {pro?.thumbnailUrl && (
-              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={pro.thumbnailUrl}
                 alt=""
@@ -359,7 +363,6 @@ function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
             <div className="absolute bottom-0 left-0 right-0 p-3">
               <div className="flex items-center gap-2 mb-2">
                 {pro?.avatarUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={pro.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover border border-white/30" loading="lazy" />
                 ) : (
                   <div
@@ -428,7 +431,6 @@ function ProCard({ pro }: { pro: FeaturedPro }) {
     >
       <div className="relative w-full" style={{ aspectRatio: "3 / 4", background: pro.cardGradient }}>
         {pro.thumbnailUrl && (
-          /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={pro.thumbnailUrl}
             alt={`Work by ${pro.name}`}
@@ -452,7 +454,6 @@ function ProCard({ pro }: { pro: FeaturedPro }) {
       <div className="p-4">
         <div className="flex items-center gap-2 mb-2">
           {pro.avatarUrl ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
             <img src={pro.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" loading="lazy" />
           ) : (
             <div
