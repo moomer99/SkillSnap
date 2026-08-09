@@ -73,8 +73,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
+        {/* Applies the saved theme before first paint. Inline and synchronous
+            on purpose: deferring it to React would flash the default theme.
+            The storage key matches THEME_STORAGE_KEY in hooks/useTheme.ts. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('skillsnap-theme');var r=document.documentElement;r.classList.remove('dark','light');r.classList.add(t==='light'?'light':'dark');}catch(e){}})();`,
+          }}
+        />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />

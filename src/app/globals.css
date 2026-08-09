@@ -48,9 +48,17 @@
 }
 
 /* ─────────────────────────────────────────────
-   SkillSnap web — dark-first design tokens.
-   The web app has one theme (dark) matching the mobile app; there is no
-   light mode, so these live on :root rather than behind a .dark selector.
+   SkillSnap web — design tokens.
+
+   Dark is the default and lives on :root, so anything rendered before the
+   theme class lands (SSR, first paint) is dark rather than flashing white.
+   `html.light` overrides the same --ss-* names; the shadcn bridge below reads
+   through them, so it follows both modes without being redeclared.
+
+   Note: much of the app still hardcodes dark hexes and rgba(255,255,255,…)
+   instead of reading these tokens, so light mode is only fully wired on the
+   landing page for now. Converting a screen means swapping its literals for
+   the --ss-* names — no other change is needed.
    ───────────────────────────────────────────── */
 :root {
   --radius: 0.75rem;
@@ -77,6 +85,12 @@
 
   /* Light surface — kept for the few inverted elements (white pill buttons) */
   --ss-light-surface: #f8f7f5;
+
+  /* Composites that can't be derived from the flat tokens above */
+  --ss-nav-bg: rgba(13, 10, 26, 0.88);      /* translucent sticky nav */
+  --ss-scrim: rgba(5, 3, 12, 0.72);         /* behind drawers and sheets */
+  --ss-card-tint: rgba(255, 255, 255, 0.035); /* barely-there card fill */
+  --ss-card-pro: linear-gradient(150deg, #1a0f3c, #150c2e); /* Pro card */
 
   /* shadcn/ui token bridge — mapped onto the dark palette above */
   --background: var(--ss-bg);
@@ -114,10 +128,46 @@
   color-scheme: dark;
 }
 
+/* ── Light mode ──
+   Only the --ss-* names are redefined; every consumer (including the shadcn
+   bridge above) reads through them. Purple darkens from the pale #a78bfa,
+   which is unreadable on a light surface, to the deeper brand tint. */
+html.light {
+  --ss-bg: #f8f7f5;
+  --ss-bg-alt: #f1efec;
+  --ss-surface: #ffffff;
+  --ss-surface-2: #f0eeea;
+  --ss-surface-3: #e4dffa;
+  --ss-line: rgba(26, 26, 26, 0.10);
+  --ss-line-strong: rgba(26, 26, 26, 0.20);
+
+  --ss-text: #1a1a1a;
+  --ss-text-muted: rgba(26, 26, 26, 0.66);
+  --ss-text-dim: rgba(26, 26, 26, 0.45);
+
+  --ss-purple: #6c47ff;
+  --ss-purple-light: #5b3dd8;
+  --ss-purple-soft: rgba(108, 71, 255, 0.10);
+  --ss-purple-border: rgba(108, 71, 255, 0.28);
+
+  --ss-light-surface: #1a1a1a;
+
+  --ss-nav-bg: rgba(248, 247, 245, 0.88);
+  --ss-scrim: rgba(26, 26, 26, 0.45);
+  --ss-card-tint: rgba(26, 26, 26, 0.03);
+  --ss-card-pro: linear-gradient(150deg, #efeaff, #e3dbff);
+
+  --secondary-foreground: #5b3dd8;
+  --accent-foreground: #5b3dd8;
+  --sidebar-accent-foreground: #5b3dd8;
+
+  color-scheme: light;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.16); border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: var(--ss-line-strong); border-radius: 10px; }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

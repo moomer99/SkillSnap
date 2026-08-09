@@ -10,6 +10,8 @@ import { Menu, X, ArrowRight, Play } from "lucide-react";
 import type { Screen } from "@/types";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
 import AppStoreButtons from "./shared/AppStoreButtons";
+import ThemeToggle from "./shared/ThemeToggle";
+import { useTheme } from "@/hooks/useTheme";
 import { getSupabase } from "@/lib/supabase";
 
 interface LandingPageProps {
@@ -180,6 +182,8 @@ const CONTAINER = "mx-auto w-full max-w-[1200px] px-5 sm:px-8";
 // ── Navigation ─────────────────────────────────────────────────────────────
 function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload: () => void }) {
   const [open, setOpen] = useState(false);
+  const { theme } = useTheme();
+  const onDark = theme === "dark";
 
   // Lock body scroll while the mobile drawer is open
   useEffect(() => {
@@ -194,7 +198,7 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
       <nav
         className="sticky top-0 z-50 w-full"
         style={{
-          background: "rgba(13,10,26,0.88)",
+          background: "var(--ss-nav-bg)",
           backdropFilter: "blur(12px)",
           borderBottom: "1px solid var(--ss-line)",
         }}
@@ -206,19 +210,20 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
             aria-label="Back to top"
             className="flex items-center"
           >
-            <span className="hidden sm:block"><SkillSnapLogo variant="full" size="md" dark /></span>
-            <span className="sm:hidden"><SkillSnapLogo variant="full" size="sm" dark /></span>
+            <span className="hidden sm:block"><SkillSnapLogo variant="full" size="md" dark={onDark} /></span>
+            <span className="sm:hidden"><SkillSnapLogo variant="full" size="sm" dark={onDark} /></span>
           </button>
 
           {/* Desktop actions */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-5">
             <button
               onClick={onBrowse}
-              className="text-sm font-semibold transition-colors hover:text-white"
+              className="text-sm font-semibold transition-opacity hover:opacity-70"
               style={{ color: "var(--ss-text-muted)" }}
             >
               Browse Pros
             </button>
+            <ThemeToggle />
             <button
               onClick={onDownload}
               className="h-10 px-5 rounded-full text-sm font-bold text-white transition-transform active:scale-95 hover:-translate-y-0.5"
@@ -228,15 +233,18 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
             </button>
           </div>
 
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setOpen(true)}
-            aria-label="Open menu"
-            className="md:hidden w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: "var(--ss-surface-2)", border: "1px solid var(--ss-line)", color: "white" }}
-          >
-            <Menu size={20} />
-          </button>
+          {/* Mobile — the toggle stays reachable without opening the drawer */}
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setOpen(true)}
+              aria-label="Open menu"
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: "var(--ss-surface-2)", border: "1px solid var(--ss-line)", color: "var(--ss-text)" }}
+            >
+              <Menu size={20} />
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -244,7 +252,7 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
       {open && (
         <div
           className="fixed inset-0 z-[100] md:hidden"
-          style={{ background: "rgba(5,3,12,0.72)", backdropFilter: "blur(4px)" }}
+          style={{ background: "var(--ss-scrim)", backdropFilter: "blur(4px)" }}
           onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
         >
           <div
@@ -252,12 +260,12 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
             style={{ background: "var(--ss-bg)", borderLeft: "1px solid var(--ss-line)" }}
           >
             <div className="flex items-center justify-between mb-8">
-              <SkillSnapLogo variant="full" size="sm" dark />
+              <SkillSnapLogo variant="full" size="sm" dark={onDark} />
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Close menu"
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: "var(--ss-surface-2)", border: "1px solid var(--ss-line)", color: "white" }}
+                style={{ background: "var(--ss-surface-2)", border: "1px solid var(--ss-line)", color: "var(--ss-text)" }}
               >
                 <X size={20} />
               </button>
@@ -265,8 +273,8 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
 
             <button
               onClick={() => { setOpen(false); onBrowse(); }}
-              className="w-full py-4 rounded-2xl text-left px-5 text-[15px] font-semibold text-white mb-3"
-              style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
+              className="w-full py-4 rounded-2xl text-left px-5 text-[15px] font-semibold mb-3"
+              style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)", color: "var(--ss-text)" }}
             >
               Browse Pros
             </button>
@@ -285,6 +293,8 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
 }
 
 // ── Phone mockup ───────────────────────────────────────────────────────────
+// Colours inside the device are hardcoded dark on purpose: this is a picture
+// of the mobile app, which is dark-only, so it must not follow the web theme.
 function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
   const gradient = pro?.cardGradient ?? "linear-gradient(160deg,#6c47ff,#2d1b69)";
 
@@ -317,7 +327,7 @@ function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
         {/* Screen */}
         <div
           className="relative w-full h-full overflow-hidden flex flex-col"
-          style={{ borderRadius: 36, background: "var(--ss-bg)" }}
+          style={{ borderRadius: 36, background: "#0d0a1a" }}
         >
           {/* Notch */}
           <div
@@ -389,7 +399,7 @@ function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
 
               <div
                 className="h-7 rounded-xl flex items-center justify-center text-[10px] font-bold text-white"
-                style={{ background: "var(--ss-purple)" }}
+                style={{ background: "#6c47ff" }}
               >
                 Connect
               </div>
@@ -399,7 +409,7 @@ function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
           {/* Bottom tab bar */}
           <div
             className="flex items-center justify-around py-2"
-            style={{ background: "var(--ss-surface)", borderTop: "1px solid var(--ss-line)" }}
+            style={{ background: "#16122a", borderTop: "1px solid rgba(255,255,255,0.10)" }}
           >
             {["#6c47ff", "rgba(255,255,255,0.28)", "rgba(255,255,255,0.28)", "rgba(255,255,255,0.28)"].map((c, i) => (
               <span key={i} style={{ width: 16, height: 16, borderRadius: 5, background: c }} />
@@ -414,6 +424,7 @@ function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
 // ── Page ───────────────────────────────────────────────────────────────────
 export default function LandingPage({ onNavigate }: LandingPageProps) {
   const pros = useFeaturedPros();
+  const { theme } = useTheme();
 
   const goToFeed = useCallback(() => onNavigate("home"), [onNavigate]);
   const goToSignup = useCallback(() => onNavigate("auth"), [onNavigate]);
@@ -423,7 +434,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
   }, []);
 
   return (
-    <div className="w-full min-h-screen" style={{ background: "var(--ss-bg)", color: "white" }}>
+    <div className="w-full min-h-screen" style={{ background: "var(--ss-bg)", color: "var(--ss-text)" }}>
       <LandingNav onBrowse={goToFeed} onDownload={scrollToDownload} />
 
       {/* ── 1B. HERO ──────────────────────────────────────────────── */}
@@ -473,7 +484,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
 
                   <button
                     onClick={goToFeed}
-                    className="group inline-flex items-center gap-2 h-12 px-6 rounded-2xl text-[15px] font-bold text-white transition-all active:scale-[0.97] hover:bg-white/[0.06]"
+                    className="group inline-flex items-center gap-2 h-12 px-6 rounded-2xl text-[15px] font-bold transition-all active:scale-[0.97] hover:opacity-80"
                     style={{ border: "1px solid var(--ss-line-strong)" }}
                   >
                     Browse Pros
@@ -508,7 +519,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                 desc: "Short work videos from skilled pros near you",
                 color: "#6c47ff",
                 icon: (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                     <path d="M15 10l4.553-2.277A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
                   </svg>
                 ),
@@ -518,7 +529,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                 desc: "Jobs Done counts and real client satisfaction scores",
                 color: "#8b6af5",
                 icon: (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                     <path d="M9 12l2 2 4-4" />
                   </svg>
@@ -529,7 +540,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                 desc: "Message directly. No middleman, no platform fees",
                 color: "#a78bfa",
                 icon: (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                     <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
                   </svg>
                 ),
@@ -538,11 +549,11 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
               <FadeIn key={title} delay={i * 100}>
                 <div
                   className="h-full p-6 sm:p-7 rounded-3xl transition-transform hover:-translate-y-1"
-                  style={{ background: "rgba(255,255,255,0.035)", border: "1px solid var(--ss-line)" }}
+                  style={{ background: "var(--ss-card-tint)", border: "1px solid var(--ss-line)" }}
                 >
                   <div
                     className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5"
-                    style={{ background: `${color}26`, border: `1px solid ${color}55` }}
+                    style={{ background: `${color}26`, border: `1px solid ${color}55`, color }}
                   >
                     {icon}
                   </div>
@@ -573,7 +584,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
             <FadeIn delay={60}>
               <div
                 className="relative h-full flex flex-col overflow-hidden rounded-3xl p-6 sm:p-8"
-                style={{ background: "linear-gradient(150deg,#1a0f3c,#150c2e)", border: "1px solid var(--ss-purple-border)" }}
+                style={{ background: "var(--ss-card-pro)", border: "1px solid var(--ss-purple-border)" }}
               >
                 <div
                   aria-hidden
@@ -594,10 +605,10 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                   <ul className="flex flex-col gap-3 mb-8">
                     {["Upload video portfolios", "Appear in local discovery", "Get direct client messages", "Track jobs done and happy %"].map((f) => (
                       <li key={f} className="flex items-center gap-3">
-                        <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(108,71,255,0.35)" }}>
-                          <svg width="10" height="8" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="#c4b5fd" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(108,71,255,0.22)", color: "var(--ss-purple-light)" }}>
+                          <svg width="10" height="8" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         </span>
-                        <span className="text-[14px] font-medium" style={{ color: "rgba(255,255,255,0.78)" }}>{f}</span>
+                        <span className="text-[14px] font-medium" style={{ color: "var(--ss-text)" }}>{f}</span>
                       </li>
                     ))}
                   </ul>
@@ -616,12 +627,12 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
             <FadeIn delay={120}>
               <div
                 className="relative h-full flex flex-col overflow-hidden rounded-3xl p-6 sm:p-8"
-                style={{ background: "rgba(255,255,255,0.035)", border: "1px solid var(--ss-line)" }}
+                style={{ background: "var(--ss-card-tint)", border: "1px solid var(--ss-line)" }}
               >
                 <div className="relative flex flex-col h-full">
                   <span
                     className="self-start text-[10px] font-bold tracking-[0.18em] uppercase px-2.5 py-1 rounded-full mb-4"
-                    style={{ background: "rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.70)" }}
+                    style={{ background: "var(--ss-surface-2)", color: "var(--ss-text-muted)" }}
                   >
                     I&apos;m looking to
                   </span>
@@ -632,17 +643,17 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                   <ul className="flex flex-col gap-3 mb-8">
                     {["Browse video work samples", "Filter by your suburb", "See jobs done and ratings", "Message pros directly"].map((f) => (
                       <li key={f} className="flex items-center gap-3">
-                        <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.10)" }}>
-                          <svg width="10" height="8" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="rgba(255,255,255,0.6)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--ss-surface-2)" }}>
+                          <svg width="10" height="8" viewBox="0 0 8 6" fill="none" style={{ color: "var(--ss-text-muted)" }}><path d="M1 3l2 2 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         </span>
-                        <span className="text-[14px] font-medium" style={{ color: "rgba(255,255,255,0.70)" }}>{f}</span>
+                        <span className="text-[14px] font-medium" style={{ color: "var(--ss-text-muted)" }}>{f}</span>
                       </li>
                     ))}
                   </ul>
                   <button
                     onClick={goToFeed}
-                    className="mt-auto w-full py-4 rounded-2xl font-bold text-[15px] text-white flex items-center justify-center gap-2 transition-all active:scale-[0.97] hover:bg-white/[0.06]"
-                    style={{ border: "1px solid var(--ss-line-strong)", background: "rgba(255,255,255,0.04)" }}
+                    className="mt-auto w-full py-4 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all active:scale-[0.97] hover:opacity-80"
+                    style={{ border: "1px solid var(--ss-line-strong)", background: "var(--ss-card-tint)", color: "var(--ss-text)" }}
                   >
                     Find Local Pros <ArrowRight size={17} />
                   </button>
@@ -687,7 +698,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         <div className={`${CONTAINER} py-12`}>
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-10">
             <div className="flex flex-col items-start gap-3">
-              <SkillSnapLogo variant="full" size="md" dark />
+              <SkillSnapLogo variant="full" size="md" dark={theme === "dark"} />
               <p className="text-[14px] max-w-[280px]" style={{ color: "var(--ss-text-muted)" }}>
                 Watch. Trust. Connect. Western Sydney&apos;s skill marketplace.
               </p>
@@ -704,7 +715,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                 <button
                   key={`${label}-${i}`}
                   onClick={() => onNavigate(screen)}
-                  className="text-[14px] font-medium transition-colors hover:text-white"
+                  className="text-[14px] font-medium transition-opacity hover:opacity-70"
                   style={{ color: "var(--ss-text-muted)" }}
                 >
                   {label}
