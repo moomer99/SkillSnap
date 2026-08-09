@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"; // v2
-import { Geist } from "next/font/google";
+import { Geist, Poppins } from "next/font/google";
 import "./globals.css";
 import { VisualEditsMessenger } from "orchids-visual-edits";
 import { Analytics } from "@vercel/analytics/next";
@@ -10,6 +10,14 @@ import Script from "next/script";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+// Headings use Poppins to match the mobile app; body text stays on Geist.
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -73,7 +81,7 @@ export default function RootLayout({
 
       </head>
       <body
-        className={`${geistSans.variable} antialiased`}
+        className={`${geistSans.variable} ${poppins.variable} antialiased`}
       >
         <ErrorReporter />
         <Script

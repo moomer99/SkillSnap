@@ -155,7 +155,14 @@ export default async function PublicProfilePage({ params }: PageProps) {
   };
 
   return (
-    <main className="min-h-screen" style={{ background: "#0d0a1a", color: "white" }}>
+    <main
+      className="min-h-screen"
+      style={{
+        background: "#0d0a1a",
+        color: "white",
+        fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif",
+      }}
+    >
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
