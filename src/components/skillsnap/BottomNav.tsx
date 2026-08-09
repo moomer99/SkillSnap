@@ -1,9 +1,9 @@
 "use client";
 // ─────────────────────────────────────────────
 // SkillSnap — Bottom Navigation Bar
-// FIX UX1: Added "Post" label under centre upload button
+// Browse-only: Feed, Discover, Messages, Profile. Posting lives in the app.
 // ─────────────────────────────────────────────
-import { Home, MapPin, Plus, MessageCircle, User } from "lucide-react";
+import { Home, MapPin, MessageCircle, User } from "lucide-react";
 import type { Screen } from "@/types";
 import { useAppState } from "@/state/AppState";
 import { getAuthSupabase } from "@/lib/supabase";
@@ -18,7 +18,7 @@ export default function BottomNav({ active, onNavigate, onScrollToTop }: BottomN
   const { state, dispatch } = useAppState();
 
   function guardedNavigate(screen: Screen) {
-    if (!state.isAuthenticated && (screen === "upload" || screen === "messages" || screen === "own-profile")) {
+    if (!state.isAuthenticated && (screen === "messages" || screen === "own-profile")) {
       dispatch({ type: "SHOW_AUTH_PROMPT" });
       return;
     }
@@ -46,27 +46,6 @@ export default function BottomNav({ active, onNavigate, onScrollToTop }: BottomN
         if (active === "home") { onScrollToTop?.(); } else { guardedNavigate("home"); }
       }} />
       <NavItem icon={<MapPin size={22} />} label="Discover" active={active === "discover"} onClick={() => guardedNavigate("discover")} />
-
-      {/* Centre upload button — FIX: added "Post" label for consistency */}
-      <button
-        onClick={() => guardedNavigate("upload")}
-        className="flex flex-col items-center justify-center gap-0.5 py-2 -mt-3"
-      >
-        <span
-          className={`flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-all ${
-            active === "upload" ? "bg-[#5b3dd8] scale-110" : "bg-[#6c47ff]"
-          }`}
-        >
-          <Plus size={24} color="white" strokeWidth={2.5} />
-        </span>
-        <span
-          className={`text-[10px] font-medium ${
-            active === "upload" ? "text-[#6c47ff]" : "text-[#b0aaa5]"
-          }`}
-        >
-          Post
-        </span>
-      </button>
 
       <NavItem
         icon={

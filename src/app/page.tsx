@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────
 import React, { lazy, Suspense, useRef, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Home, Compass, PlusCircle, MessageCircle, User, Settings, MoreHorizontal, HelpCircle, LogOut } from "lucide-react";
+import { Home, Compass, MessageCircle, User, Settings, MoreHorizontal, HelpCircle, LogOut } from "lucide-react";
 import { AppProvider, useAppState } from "@/state/AppState";
 import type { Screen } from "@/types";
 
@@ -26,7 +26,7 @@ const SearchScreen      = lazy(() => import("@/components/skillsnap/SearchScreen
 const HomeFeed          = lazy(() => import("@/components/skillsnap/HomeFeed"));
 const DiscoverScreen    = lazy(() => import("@/components/skillsnap/DiscoverScreen"));
 const ProfileScreen     = lazy(() => import("@/components/skillsnap/ProfileScreen"));
-const UploadScreen      = lazy(() => import("@/components/skillsnap/UploadScreen"));
+// No UploadScreen — the web app is browse-only; posting happens in the mobile app.
 const MessagesScreen    = lazy(() => import("@/components/skillsnap/MessagesScreen"));
 const ChatScreen        = lazy(() => import("@/components/skillsnap/ChatScreen"));
 const EditProfileScreen = lazy(() => import("@/components/skillsnap/EditProfileScreen"));
@@ -53,7 +53,7 @@ import { useGlobalMessages } from "@/hooks/useGlobalMessages";
 import ReviewBanner from "@/components/skillsnap/ReviewBanner";
 
 // Screens that show the bottom nav
-const NAV_SCREENS: Screen[] = ["home", "discover", "upload", "messages", "own-profile"];
+const NAV_SCREENS: Screen[] = ["home", "discover", "messages", "own-profile"];
 
 // Only show dev tools on the Orchids sandbox preview, never on the real domain
 const isOrchidsPreview =
@@ -88,8 +88,6 @@ function SkillSnapRouter() {
 
   // More popover state
   const [moreOpen, setMoreOpen] = useState(false);
-  // Post restriction modal — shown when non-Pro users tap the Post (+) button
-  const [showPostRestriction, setShowPostRestriction] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!moreOpen) return;
@@ -100,16 +98,10 @@ function SkillSnapRouter() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [moreOpen]);
 
-  const AUTH_REQUIRED: Screen[] = ["upload", "messages", "own-profile", "client-profile", "chat", "edit-profile"];
+  const AUTH_REQUIRED: Screen[] = ["messages", "own-profile", "client-profile", "chat", "edit-profile"];
   function handleNavClick(s: Screen) {
     if (!state.isAuthenticated && AUTH_REQUIRED.includes(s)) {
       dispatch({ type: "SHOW_AUTH_PROMPT" });
-      return;
-    }
-    // Only Pro (skiller) users can post — block clients and users with no role set
-    const role = state.currentUser?.role;
-    if (s === "upload" && (role === "client" || role === null || role === undefined)) {
-      setShowPostRestriction(true);
       return;
     }
     navigate(s);
@@ -186,13 +178,11 @@ function SkillSnapRouter() {
           [
             { icon: Home,          label: "Feed",     s: "home"        },
             { icon: Compass,       label: "Discover", s: "discover"    },
-            { icon: PlusCircle,    label: "Post",     s: "upload"      },
             { icon: MessageCircle, label: "Messages", s: "messages"    },
             { icon: User,          label: "Profile",  s: "own-profile" },
           ] as { icon: React.ElementType; label: string; s: Screen }[]
         ).map(({ icon: Icon, label, s }) => {
           const active = screen === s;
-          const isPost = s === "upload";
           return (
             <button
               key={s}
@@ -202,14 +192,14 @@ function SkillSnapRouter() {
               style={{
                 width: "40px", height: "40px", borderRadius: "8px",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                background: isPost ? "#6c63ff" : active ? "#eef0ff" : "transparent",
-                color: isPost ? "white" : active ? "#6c47ff" : "#7a7570",
+                background: active ? "#eef0ff" : "transparent",
+                color: active ? "#6c47ff" : "#7a7570",
                 border: "none", cursor: "pointer", transition: "background 0.15s", flexShrink: 0,
               }}
-              onMouseEnter={e => { if (!isPost && !active) (e.currentTarget as HTMLButtonElement).style.background = "#f5f3ff"; }}
-              onMouseLeave={e => { if (!isPost && !active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+              onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "#f5f3ff"; }}
+              onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
             >
-              <Icon size={22} strokeWidth={isPost ? 2.2 : active ? 2.4 : 1.8} />
+              <Icon size={22} strokeWidth={active ? 2.4 : 1.8} />
             </button>
           );
         })}
@@ -316,7 +306,6 @@ function SkillSnapRouter() {
               {screen === "discover"       && <DiscoverScreen    onNavigate={navigate} />}
               {screen === "own-profile"    && <ProfileScreen     variant="own"    onNavigate={navigate} />}
               {screen === "client-profile" && <ProfileScreen     variant="client" onNavigate={navigate} />}
-              {screen === "upload"         && <UploadScreen      onNavigate={navigate} />}
               {screen === "messages"       && <MessagesScreen    onNavigate={navigate} />}
               {screen === "chat"           && <ChatScreen        onNavigate={navigate} />}
               {screen === "edit-profile"   && <EditProfileScreen onNavigate={navigate} />}
@@ -374,7 +363,6 @@ function SkillSnapRouter() {
             {screen === "discover"       && <DiscoverScreen    onNavigate={navigate} />}
             {screen === "own-profile"    && <ProfileScreen     variant="own"    onNavigate={navigate} />}
             {screen === "client-profile" && <ProfileScreen     variant="client" onNavigate={navigate} />}
-            {screen === "upload"         && <UploadScreen      onNavigate={navigate} />}
             {screen === "messages"       && <MessagesScreen    onNavigate={navigate} />}
             {screen === "chat"           && <ChatScreen        onNavigate={navigate} />}
             {screen === "edit-profile"   && <EditProfileScreen onNavigate={navigate} />}
@@ -394,39 +382,6 @@ function SkillSnapRouter() {
       </div>
 
       {/* Dev screen switcher — Orchids preview only, never shown on real domain */}
-      {/* ── Post Restriction Modal — only Pro users can post ── */}
-      {showPostRestriction && (
-        <div
-          style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center", background: "rgba(0,0,0,0.45)", padding: "0 0 0 0" }}
-          className="md:items-center"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowPostRestriction(false); }}
-        >
-          <div
-            style={{ background: "white", borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 480, padding: "28px 24px 40px", boxShadow: "0 -8px 40px rgba(0,0,0,0.18)" }}
-            className="md:rounded-[16px] md:mb-0"
-          >
-            <div style={{ width: 36, height: 4, background: "#e8e4df", borderRadius: 99, margin: "0 auto 24px" }} className="md:hidden" />
-            <div style={{ fontSize: 36, marginBottom: 12, textAlign: "center" }}>🚀</div>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#1a1a1a", textAlign: "center", marginBottom: 10 }}>Start getting clients — it&apos;s free!</h2>
-            <p style={{ fontSize: 14, color: "#7a7570", textAlign: "center", lineHeight: 1.55, marginBottom: 28 }}>
-              Create your Pro profile to showcase your work and get discovered by clients near you.
-            </p>
-            <button
-              onClick={() => { setShowPostRestriction(false); navigate("edit-profile"); }}
-              style={{ width: "100%", padding: "14px 0", borderRadius: 14, background: "linear-gradient(135deg, #6c47ff, #8b6af5)", color: "white", fontWeight: 700, fontSize: 15, border: "none", cursor: "pointer", marginBottom: 10, boxShadow: "0 4px 16px rgba(108,71,255,0.28)" }}
-            >
-              Set Up Pro Profile — Free
-            </button>
-            <button
-              onClick={() => setShowPostRestriction(false)}
-              style={{ width: "100%", padding: "12px 0", borderRadius: 14, background: "none", color: "#7a7570", fontWeight: 600, fontSize: 14, border: "1.5px solid #e8e4df", cursor: "pointer" }}
-            >
-              Maybe later
-            </button>
-          </div>
-        </div>
-      )}
-
       {isOrchidsPreview && (
         <div
           className="hidden sm:flex fixed right-0 top-1/2 z-50 flex-col items-stretch gap-1 bg-white/90 backdrop-blur-sm rounded-l-2xl px-2 py-3 shadow-lg border border-r-0 border-[#e8e4df]"
@@ -442,7 +397,6 @@ function SkillSnapRouter() {
               ["discover",       "Discover"],
               ["own-profile",    "My Profile"],
               ["client-profile", "Client"],
-              ["upload",         "Upload"],
               ["messages",       "Messages"],
               ["chat",           "Chat"],
               ["edit-profile",   "Edit Profile"],

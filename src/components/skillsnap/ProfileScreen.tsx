@@ -8,7 +8,7 @@ import { MapPin, ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, Chevro
 import { useState, useEffect, useRef } from "react";
 import type { Screen, ProfileVariant, Post, SkillCategory } from "@/types";
 import { MOCK_WORK_GRID } from "@/mock-data/posts";
-import { SKILL_CATEGORIES } from "@/constants/config";
+import { SKILL_CATEGORIES, APP_STORE_URL } from "@/constants/config";
 import { useProfile } from "@/hooks/useProfile";
 import { useMessages } from "@/hooks/useMessages";
 import { useAppState } from "@/state/AppState";
@@ -232,27 +232,32 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                     {isOwn
                       ? (state.currentUser?.role === "client" || !state.currentUser?.role)
                         ? "Set up your Pro profile to showcase your work and start getting hired"
-                        : "Upload your first job to showcase your skill and start getting clients"
+                        : "Post your first job from the SkillSnap app to showcase your skill and start getting clients"
                       : "This person is new to SkillSnap and hasn't posted yet. Connect directly to ask about their work."}
                   </p>
-                  <button
-                    onClick={() => {
-                      if (!isOwn) { requireAuth(() => connectTo(user.id)); return; }
-                      if (state.currentUser?.role === "client" || !state.currentUser?.role) {
+                  {/* Web is browse-only — pros post from the mobile app */}
+                  {isOwn && state.currentUser?.role === "pro" ? (
+                    <a
+                      href={APP_STORE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 px-5 py-2.5 rounded-xl font-bold text-sm text-white"
+                      style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+                    >
+                      Get the App to Post
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (!isOwn) { requireAuth(() => connectTo(user.id)); return; }
                         onNavigate("edit-profile");
-                      } else {
-                        onNavigate("upload");
-                      }
-                    }}
-                    className="mt-1 px-5 py-2.5 rounded-xl font-bold text-sm text-white"
-                    style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
-                  >
-                    {isOwn
-                      ? (state.currentUser?.role === "client" || !state.currentUser?.role)
-                        ? "Set Up Pro Profile — Free"
-                        : "Upload First Post"
-                      : "Connect with them"}
-                  </button>
+                      }}
+                      className="mt-1 px-5 py-2.5 rounded-xl font-bold text-sm text-white"
+                      style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+                    >
+                      {isOwn ? "Set Up Pro Profile — Free" : "Connect with them"}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
