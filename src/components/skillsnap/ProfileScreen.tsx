@@ -125,12 +125,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <h2 className="font-bold text-base text-[#ffffff]">{user.displayName}</h2>
               {user.skill && user.role !== "client" ? (
-                <>
-                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: "#6c47ff" }}>Pro</span>
-                  {(user as any).isEarlyBird && (
-                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "linear-gradient(135deg, #f59e0b, #fbbf24)", color: "#ffffff" }}>🔥 Early Bird</span>
-                  )}
-                </>
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: "#6c47ff" }}>Pro</span>
               ) : user.role === "client" ? (
                 <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "#f0f0f0", color: "#9d97b5" }}>Client</span>
               ) : isOwn ? (
@@ -500,7 +495,7 @@ function ProTab({ notified, onNotify, expanded, onToggleExpand }: { notified: bo
       </div>
       <div className="px-4 mt-4">
         {notified ? (
-          <div className="flex flex-col items-center gap-2 py-4"><div className="w-12 h-12 rounded-full bg-[rgba(16,185,129,0.14)] flex items-center justify-center"><span className="text-xl">✓</span></div><p className="font-bold text-[#ffffff] text-sm">You're on the list!</p><p className="text-xs text-[#9d97b5] text-center">We'll notify you when Pro launches. Early bird window secured.</p></div>
+          <div className="flex flex-col items-center gap-2 py-4"><div className="w-12 h-12 rounded-full bg-[rgba(16,185,129,0.14)] flex items-center justify-center"><span className="text-xl">✓</span></div><p className="font-bold text-[#ffffff] text-sm">You're on the list!</p><p className="text-xs text-[#9d97b5] text-center">We&apos;ll notify you when Pro launches.</p></div>
         ) : (
           <button onClick={onNotify} className="w-full h-13 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 active:scale-[0.98] transition-transform py-3.5" style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 20px rgba(108,71,255,0.3)" }}><Zap size={17} fill="white" color="white" /> Notify Me at Launch</button>
         )}
