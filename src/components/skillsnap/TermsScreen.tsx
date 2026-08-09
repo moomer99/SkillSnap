@@ -26,7 +26,7 @@ export default function TermsScreen({ onNavigate }: TermsScreenProps) {
       </header>
 
       <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-6">
-        <p className="text-xs text-[#b0aaa5] mb-6">Last updated: May 2025</p>
+        <p className="text-xs text-[#b0aaa5] mb-6">Last updated: August 2026</p>
 
         <Section title="1. About SkillSnap">
           <p>SkillSnap is an Australian platform operated by SkillSnap Australia ("we", "us", "our") that connects skilled professionals with local clients through video portfolios. By creating an account or using SkillSnap, you agree to these Terms and our Privacy Policy.</p>
