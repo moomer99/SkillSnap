@@ -654,11 +654,18 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
       </section>
 
       {/* ── 1F. FOOTER CTA ────────────────────────────────────────── */}
-      <section id="download" className="relative overflow-hidden py-16 sm:py-20" style={{ background: "var(--ss-purple)" }}>
+      <section
+        id="download"
+        className="relative overflow-hidden py-16 sm:py-20"
+        style={{
+          background: "linear-gradient(135deg, #1a1035 0%, #2a1060 100%)",
+          borderTop: "1px solid rgba(108,71,255,0.3)",
+        }}
+      >
         <div
           aria-hidden
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.16) 0%, transparent 60%)" }}
+          style={{ background: "radial-gradient(circle at 50% 0%, rgba(108,71,255,0.22) 0%, transparent 60%)" }}
         />
         <div className={`${CONTAINER} relative flex flex-col items-center text-center`}>
           <FadeIn className="w-full flex flex-col items-center">
