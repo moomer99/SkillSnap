@@ -39,8 +39,10 @@ interface HomeFeedProps {
 
 const RADIUS_OPTIONS = [5, 10, 25, 50];
 
-// Media narrower than 9:16 or wider than 16:9 is letterboxed rather than cropped
-const MIN_ASPECT = 9 / 16;
+// Media keeps its own ratio between these bounds. 4:5 is the tallest a card
+// gets — 750px at the 600px column — so portrait phone video is cropped to it
+// with object-cover rather than making a card taller than the viewport.
+const MIN_ASPECT = 4 / 5;
 const MAX_ASPECT = 16 / 9;
 const DEFAULT_ASPECT = 4 / 5;
 
@@ -609,6 +611,10 @@ function FeedCard({
   const [captionExpanded, setCaptionExpanded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLElement>(null);
+  // The media itself has been measured, so a late thumbnail probe must not
+  // overwrite it. A value check can't tell us this: portrait media clamps to
+  // exactly DEFAULT_ASPECT, which is also the unmeasured starting value.
+  const aspectMeasured = useRef(false);
 
   // Multi-media carousel
   const mediaItems = post.mediaItems && post.mediaItems.length > 1 ? post.mediaItems : null;
@@ -630,9 +636,8 @@ function FeedCard({
     if (!url) return;
     const probe = new window.Image();
     probe.onload = () => {
-      setAspect((current) =>
-        current === DEFAULT_ASPECT ? clampAspect(probe.naturalWidth, probe.naturalHeight) : current
-      );
+      if (aspectMeasured.current) return;
+      setAspect(clampAspect(probe.naturalWidth, probe.naturalHeight));
     };
     probe.src = url;
   }, [post.thumbnailUrl]);
@@ -785,6 +790,7 @@ function FeedCard({
             poster={post.thumbnailUrl}
             onLoadedMetadata={(e) => {
               const v = e.currentTarget;
+              aspectMeasured.current = true;
               setAspect(clampAspect(v.videoWidth, v.videoHeight));
             }}
             onPlay={() => setPlaying(true)}
@@ -798,6 +804,7 @@ function FeedCard({
             loading="lazy"
             onLoad={(e) => {
               const img = e.currentTarget;
+              aspectMeasured.current = true;
               setAspect(clampAspect(img.naturalWidth, img.naturalHeight));
             }}
           />
