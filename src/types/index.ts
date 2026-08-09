@@ -67,6 +67,8 @@ export interface Post {
   skill?: SkillCategory | null;  // post-level skill tag
   location?: string | null;      // post-level location (overrides author location in UI)
   likes: number;
+  commentsCount: number;   // from visible_posts.comments_count
+  recommendCount: number;  // from visible_posts.recommend_count
   likedByMe: boolean;
   savedByMe: boolean;
   createdAt: string; // ISO date string

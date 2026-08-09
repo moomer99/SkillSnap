@@ -62,6 +62,8 @@ function mapPost(row: Record<string, unknown>, likedIds: Set<string>, savedIds: 
     skill: (row.skill as Post["skill"]) ?? null,
     location: (row.location as string | null) ?? null,
     likes: Number(row.likes_count ?? 0),
+    commentsCount: Number(row.comments_count ?? 0),
+    recommendCount: Number(row.recommend_count ?? 0),
     likedByMe: likedIds.has(row.id as string),
     savedByMe: savedIds.has(row.id as string),
     viewCount: Number(row.view_count ?? 0) || undefined,
@@ -87,9 +89,11 @@ async function getUserInteractionSets(postIds: string[]): Promise<{ likedIds: Se
 
 export const postService = {
   async getFeed(limit = 10, offset = 0): Promise<{ posts: Post[]; likedIds: Set<string>; savedIds: Set<string> }> {
+    // visible_posts is the moderated view over posts; it also carries the
+    // comments_count / recommend_count counters the feed cards display.
     const { data, error } = await getSupabase()
-      .from("posts")
-      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*), post_media(url, type, order_index)")
+      .from("visible_posts")
+      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, comments_count, recommend_count, created_at, profiles!posts_author_id_fkey(*), post_media(url, type, order_index)")
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -104,8 +108,8 @@ export const postService = {
 
   async getUserPosts(userId: string): Promise<Post[]> {
     const { data } = await getSupabase()
-      .from("posts")
-      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*), post_media(url, type, order_index)")
+      .from("visible_posts")
+      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, comments_count, recommend_count, created_at, profiles!posts_author_id_fkey(*), post_media(url, type, order_index)")
       .eq("author_id", userId)
       .order("created_at", { ascending: false });
 

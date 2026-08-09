@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { Heart, Share2, Bookmark, MapPin, Volume2, VolumeX, Navigation, X, Play, MoreVertical } from "lucide-react";
+import { Heart, Bookmark, MessageCircle, Send, MapPin, Volume2, VolumeX, Navigation, X, Play, MoreVertical } from "lucide-react";
 import type { Post } from "@/types";
 import type { Screen } from "@/types";
 import { formatLikes } from "@/mock-data/posts";
@@ -18,6 +18,7 @@ import { useToast } from "./shared/Toast";
 import { postService } from "@/services/postService";
 import { SKILL_CATEGORIES } from "@/constants/config";
 import { shareProfile } from "@/lib/share";
+import AppStoreButtons from "./shared/AppStoreButtons";
 
 interface HomeFeedProps {
   onNavigate: (s: Screen) => void;
@@ -81,6 +82,8 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   const { location, status, error, radiusKm, requestGPS, setManualLocation, setRadiusKm } = useLocation();
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [fullscreenPost, setFullscreenPost] = useState<Post | null>(null);
+  // Commenting is app-only for now — tapping Comment explains where to do it.
+  const [commentPrompt, setCommentPrompt] = useState<Post | null>(null);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
   const feedScrollRef = useRef<HTMLDivElement>(null);
@@ -355,6 +358,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
                     if (result === "copied") showToast("Profile link copied");
                   });
                 }}
+                onComment={() => setCommentPrompt(post)}
                 onFullscreen={() => setFullscreenPost(post)}
                 connecting={connecting === post.authorId}
                 isOwnPost={post.authorId === state.currentUser?.id}
@@ -398,6 +402,37 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
           isLiked={likedPosts.has(fullscreenPost.id)}
           isOwnPost={fullscreenPost.authorId === state.currentUser?.id}
         />
+      )}
+
+      {/* Comment sheet — reading and writing comments lives in the mobile app */}
+      {commentPrompt && (
+        <div
+          className="fixed inset-0 z-[200] flex items-end justify-center bg-black/50"
+          onClick={(e) => { if (e.target === e.currentTarget) setCommentPrompt(null); }}
+        >
+          <div className="w-full max-w-[600px] bg-white rounded-t-3xl px-6 pt-5 pb-9">
+            <div className="w-10 h-1 rounded-full bg-[#e8e4df] mx-auto mb-5" />
+            <div className="flex items-center gap-2 mb-2">
+              <MessageCircle size={18} className="text-[#6c47ff]" />
+              <h3 className="font-bold text-[#1a1a1a] text-base">
+                {(commentPrompt.commentsCount ?? 0) === 1
+                  ? "1 comment"
+                  : `${commentPrompt.commentsCount ?? 0} comments`}
+              </h3>
+            </div>
+            <p className="text-sm text-[#7a7570] leading-relaxed mb-5">
+              Comments live in the SkillSnap app. Get it to join the conversation on{" "}
+              {commentPrompt.author.displayName}&apos;s work.
+            </p>
+            <AppStoreButtons theme="light" />
+            <button
+              onClick={() => setCommentPrompt(null)}
+              className="w-full mt-3 py-3 text-sm font-semibold text-[#7a7570]"
+            >
+              Not now
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -522,11 +557,11 @@ function FullscreenViewer({
 
 // ── Feed card ──────────────────────────────────────────────────────
 function FeedCard({
-  post, isLiked, isSaved, isFollowed, onLike, onSave, onProfileClick, onConnectClick, onShare, onFullscreen, onFollow, connecting, isOwnPost, headerH, headerVisible, viewerLat, viewerLng, dispatch,
+  post, isLiked, isSaved, isFollowed, onLike, onSave, onProfileClick, onConnectClick, onShare, onComment, onFullscreen, onFollow, connecting, isOwnPost, headerH, headerVisible, viewerLat, viewerLng, dispatch,
 }: {
   post: Post; isLiked: boolean; isSaved: boolean; isFollowed: boolean;
   onLike: () => void; onSave: () => void; onProfileClick: () => void;
-  onConnectClick: () => void; onShare: () => void; onFullscreen: () => void;
+  onConnectClick: () => void; onShare: () => void; onComment: () => void; onFullscreen: () => void;
   onFollow: () => void;
   connecting: boolean; isOwnPost: boolean; headerH: number; headerVisible: boolean;
   viewerLat?: number; viewerLng?: number;
@@ -735,13 +770,22 @@ function FeedCard({
         </div>
       )}
 
-      {/* Right actions */}
+      {/* Right actions — mirrors the mobile app: Like, Comment, Recommend, Save */}
       <div className="absolute right-3 z-10 flex flex-col items-center gap-5" style={{ bottom: 234 }}>
         <RightAction
           icon={<Heart size={26} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "white"} strokeWidth={1.8} />}
           label={formatLikes(post.likes)} onClick={onLike}
         />
-        <RightAction icon={<Share2 size={24} stroke="white" strokeWidth={1.8} />} label="Share" onClick={onShare} />
+        <RightAction
+          icon={<MessageCircle size={25} stroke="white" strokeWidth={1.8} />}
+          label={formatLikes(post.commentsCount ?? 0)}
+          onClick={onComment}
+        />
+        <RightAction
+          icon={<Send size={24} stroke="white" strokeWidth={1.8} />}
+          label={(post.recommendCount ?? 0) > 0 ? formatLikes(post.recommendCount ?? 0) : "Recommend"}
+          onClick={onShare}
+        />
         <RightAction
           icon={<Bookmark size={24} fill={isSaved ? "white" : "none"} stroke="white" strokeWidth={1.8} />}
           label={isSaved ? "Saved" : "Save"} onClick={onSave} active={isSaved}

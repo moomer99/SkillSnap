@@ -98,6 +98,8 @@ export const uploadService = {
         skill: (payload.skill as SkillCategory) || undefined,
         location: payload.location || undefined,
         likes: 0,
+        commentsCount: 0,
+        recommendCount: 0,
         likedByMe: false,
         savedByMe: false,
         createdAt: new Date().toISOString(),
