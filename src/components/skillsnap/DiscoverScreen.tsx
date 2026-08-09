@@ -9,11 +9,12 @@
 // with real coordinates (`mappablePros`), so a pro who has not set a location
 // is still discoverable — they just have no pin.
 //
-// The map panel itself is a placeholder: no provider is configured (MAP_CONFIG
-// .PROVIDER is empty, no SDK dependency, no key). Everything around it is the
-// final layout — dropping a real map into <MapPanel> is the remaining step.
+// The map is Mapbox, loaded only when NEXT_PUBLIC_MAPBOX_TOKEN is set. Without
+// a token the deploy still works: <MapPanel> takes the same slot and says the
+// map is coming.
 // ─────────────────────────────────────────────
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { MapPin, ChevronRight, Search, X, SlidersHorizontal } from "lucide-react";
 import type { DiscoveryPin, Screen } from "@/types";
 import { DISCOVERY_FILTER_CHIPS, type DiscoveryFilter } from "@/mock-data/discovery";
@@ -23,6 +24,14 @@ import { useMessages } from "@/hooks/useMessages";
 import SearchBar from "./shared/SearchBar";
 import FilterChips from "./shared/FilterChips";
 import ConnectButton from "./shared/ConnectButton";
+
+// mapbox-gl touches window at import time, so the map is client-only.
+const DiscoverMap = dynamic(() => import("./DiscoverMap"), {
+  ssr: false,
+  loading: () => <MapFrame><span className="text-[13px]" style={{ color: "var(--ss-text-dim)" }}>Loading map…</span></MapFrame>,
+});
+
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 interface DiscoverScreenProps {
   onNavigate: (s: Screen) => void;
@@ -166,7 +175,16 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
           </aside>
 
           <div className="min-w-0">
-            <MapPanel mappable={mappablePros.length} total={allPros.length} />
+            {MAPBOX_TOKEN ? (
+              <DiscoverMap
+                pins={mappablePros}
+                connectingUserId={connecting}
+                onConnect={(userId) => requireFullAuth(() => connectTo(userId))}
+                onProfile={handleProfileClick}
+              />
+            ) : (
+              <MapPanel mappable={mappablePros.length} total={allPros.length} />
+            )}
 
             <div className="flex items-end justify-between mt-6 mb-3">
               <div>
@@ -289,23 +307,13 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
   );
 }
 
-/**
- * Map slot. Renders the frame the real map will live in and says plainly that
- * a provider still has to be wired up — see the note at the top of this file.
- * Also reports how many of the listed pros actually have a position, since the
- * map will only ever be able to show those.
- */
-function MapPanel({ mappable, total }: { mappable: number; total: number }) {
-  const coverage =
-    mappable === total
-      ? `all ${total} pro${total !== 1 ? "s" : ""}`
-      : `${mappable} of ${total} pros`;
-
+/** Shared shell so the placeholder and the map's loading state look alike. */
+function MapFrame({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="relative w-full rounded-3xl overflow-hidden flex items-center justify-center text-center px-6"
       style={{
-        height: "clamp(220px, 34vh, 380px)",
+        height: "clamp(260px, 42vh, 460px)",
         background: "linear-gradient(150deg, #16122a, #1c1733)",
         border: "1px dashed var(--ss-purple-border)",
       }}
@@ -325,20 +333,35 @@ function MapPanel({ mappable, total }: { mappable: number; total: number }) {
         className="absolute pointer-events-none"
         style={{ width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.22) 0%, transparent 68%)" }}
       />
-      <div className="relative flex flex-col items-center">
-        <div
-          className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
-          style={{ background: "var(--ss-purple-soft)", border: "1px solid var(--ss-purple-border)" }}
-        >
-          <MapPin size={22} style={{ color: "var(--ss-purple-light)" }} />
-        </div>
-        <p className="text-[15px] font-bold text-white">Map view</p>
-        <p className="text-[13px] leading-relaxed mt-1.5 max-w-[440px]" style={{ color: "var(--ss-text-muted)" }}>
-          {coverage} have set a location. Plotting them needs a map provider — no Mapbox or
-          Google Maps key is configured yet. Every pro below is listed either way.
-        </p>
-      </div>
+      <div className="relative flex flex-col items-center">{children}</div>
     </div>
+  );
+}
+
+/**
+ * Shown when NEXT_PUBLIC_MAPBOX_TOKEN is absent. Also reports how many of the
+ * listed pros have a position, since the map can only ever show those.
+ */
+function MapPanel({ mappable, total }: { mappable: number; total: number }) {
+  const coverage =
+    mappable === total
+      ? `all ${total} pro${total !== 1 ? "s" : ""}`
+      : `${mappable} of ${total} pros`;
+
+  return (
+    <MapFrame>
+      <div
+        className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
+        style={{ background: "var(--ss-purple-soft)", border: "1px solid var(--ss-purple-border)" }}
+      >
+        <MapPin size={22} style={{ color: "var(--ss-purple-light)" }} />
+      </div>
+      <p className="text-[15px] font-bold text-white">Map coming soon</p>
+      <p className="text-[13px] leading-relaxed mt-1.5 max-w-[440px]" style={{ color: "var(--ss-text-muted)" }}>
+        {coverage} have set a location. Set NEXT_PUBLIC_MAPBOX_TOKEN to plot them.
+        Every pro below is listed either way.
+      </p>
+    </MapFrame>
   );
 }
 
