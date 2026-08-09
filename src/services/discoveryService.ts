@@ -5,9 +5,9 @@
 // ─────────────────────────────────────────────
 import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
-import type { DiscoveryPin, SkillCategory } from "@/types";
+import type { DiscoveryPin, DiscoveryResults, MappableDiscoveryPin, SkillCategory } from "@/types";
 import type { DiscoveryFilter } from "@/mock-data/discovery";
-import { MOCK_DISCOVERY_PINS } from "@/mock-data/discovery";
+import { MOCK_DISCOVERY_RESULTS } from "@/mock-data/discovery";
 
 export interface LocationCoords {
   lat: number;
@@ -17,8 +17,11 @@ export interface LocationCoords {
 // Pin positions come from profiles.lat_public / lng_public — the coarse,
 // anon-readable coordinate pair. (The precise lat/lng columns are granted to
 // authenticated roles only, so they are not usable for logged-out discovery.)
-// A profile without both values has no known position and is left out of the
-// results entirely; it is never given a stand-in position.
+//
+// Queries return every skilled pro. Those with coordinates are split out as
+// `mappablePros` for the map; the rest still come back in `allPros` so they
+// remain discoverable in the results grid. A pin is never given a stand-in
+// position to get it onto the map.
 const PIN_COLORS: Record<string, string> = {
   Barber: "#6c47ff",
   "Makeup Artist": "#f5576c",
@@ -40,11 +43,9 @@ function coord(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-/** Returns null when the profile has no usable coordinates — see note above. */
-function profileToPin(row: Record<string, unknown>): DiscoveryPin | null {
+function profileToPin(row: Record<string, unknown>): DiscoveryPin {
   const lat = coord(row.lat_public);
   const lng = coord(row.lng_public);
-  if (lat === null || lng === null) return null;
 
   return {
     id: row.id as string,
@@ -58,16 +59,19 @@ function profileToPin(row: Record<string, unknown>): DiscoveryPin | null {
     avatarInitial: row.avatar_initial as string ?? (row.display_name as string)?.charAt(0) ?? '?',
     avatarGradient: row.avatar_gradient as string ?? null,
     location: (row.location as string) ?? null,
-    lat,
-    lng,
+    // Omitted rather than nulled, so `lat`/`lng` are either a real number or absent
+    ...(lat !== null && lng !== null ? { lat, lng } : {}),
   };
 }
 
-/** Maps rows to pins, dropping any profile that has no coordinates. */
-function rowsToPins(rows: unknown[]): DiscoveryPin[] {
-  return rows
-    .map((row) => profileToPin(row as Record<string, unknown>))
-    .filter((pin): pin is DiscoveryPin => pin !== null);
+/** Narrows to pins that carry a real position. */
+export function isMappable(pin: DiscoveryPin): pin is MappableDiscoveryPin {
+  return typeof pin.lat === "number" && typeof pin.lng === "number";
+}
+
+function rowsToResults(rows: unknown[]): DiscoveryResults {
+  const allPros = rows.map((row) => profileToPin(row as Record<string, unknown>));
+  return { allPros, mappablePros: allPros.filter(isMappable) };
 }
 
 // `profiles` has column-level grants — the anon role may not read `*` — so
@@ -76,7 +80,11 @@ const PIN_COLUMNS =
   "id, display_name, skill, jobs_done, is_client, location, " +
   "avatar_url, avatar_initial, avatar_gradient, lat_public, lng_public";
 
-async function queryProfiles(filter: DiscoveryFilter, limit = 12): Promise<DiscoveryPin[]> {
+// Every skilled pro is listed, so the cap needs headroom over the roster size
+// rather than the 12 that used to silently truncate the grid.
+const PIN_LIMIT = 60;
+
+async function queryProfiles(filter: DiscoveryFilter, limit = PIN_LIMIT): Promise<DiscoveryResults> {
   const sb = getSupabase();
   let query = sb
     .from("profiles")
@@ -84,9 +92,6 @@ async function queryProfiles(filter: DiscoveryFilter, limit = 12): Promise<Disco
     .eq("role", "pro")
     .not("skill", "is", null)
     .neq("skill", "")
-    // Only profiles with a known position can appear on the map
-    .not("lat_public", "is", null)
-    .not("lng_public", "is", null)
     .limit(limit);
 
   if (filter !== "All" && filter !== "Nearby" && filter !== "Top Rated") {
@@ -99,21 +104,21 @@ async function queryProfiles(filter: DiscoveryFilter, limit = 12): Promise<Disco
 
   const { data, error } = await query;
   if (error) throw error;
-  // Return empty array if no results — callers decide whether to show mock fallback
-  if (!data?.length) return [];
-  return rowsToPins(data);
+  // Empty result is valid — callers decide whether to show the mock fallback
+  if (!data?.length) return { allPros: [], mappablePros: [] };
+  return rowsToResults(data);
 }
 
 export const discoveryService = {
-  async getNearbyUsers(_coords: LocationCoords, _radiusKm = 10): Promise<DiscoveryPin[]> {
+  async getNearbyUsers(_coords: LocationCoords, _radiusKm = 10): Promise<DiscoveryResults> {
     return queryProfiles("All");
   },
 
-  async filterUsers(filter: DiscoveryFilter): Promise<DiscoveryPin[]> {
+  async filterUsers(filter: DiscoveryFilter): Promise<DiscoveryResults> {
     return queryProfiles(filter);
   },
 
-  async searchBySkillAndLocation(skill: SkillCategory | "", location: string): Promise<DiscoveryPin[]> {
+  async searchBySkillAndLocation(skill: SkillCategory | "", location: string): Promise<DiscoveryResults> {
     const sb = getSupabase();
     let query = sb
       .from("profiles")
@@ -121,14 +126,12 @@ export const discoveryService = {
       .eq("role", "pro")
       .not("skill", "is", null)
       .neq("skill", "")
-      .not("lat_public", "is", null)
-      .not("lng_public", "is", null)
       .limit(20);
     if (skill) query = query.eq("skill", skill);
     if (location) query = query.ilike("location", `%${location}%`);
     const { data } = await query;
-    if (!data?.length) return MOCK_DISCOVERY_PINS;
-    return rowsToPins(data);
+    if (!data?.length) return MOCK_DISCOVERY_RESULTS;
+    return rowsToResults(data);
   },
 
   async getUserLocation(): Promise<LocationCoords | null> {

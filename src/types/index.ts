@@ -115,15 +115,28 @@ export interface DiscoveryPin {
   color: string;
   rating: number;
   jobsDone: number;
-  // Real coordinates from profiles.lat_public / lng_public. A pin only exists
-  // for a profile that has both — there is no placeholder position.
-  lat: number;
-  lng: number;
+  // Real coordinates from profiles.lat_public / lng_public, absent when the
+  // profile has no known position. Never a placeholder: a pro without
+  // coordinates still appears in the results grid, just not on the map.
+  lat?: number;
+  lng?: number;
   // Hydrated from the profile row for rendering the pin/card
   avatarUrl?: string | null;
   avatarInitial?: string | null;
   avatarGradient?: string | null;
   location?: string | null;
+}
+
+/** A pin known to have real coordinates — the only kind the map accepts. */
+export type MappableDiscoveryPin = DiscoveryPin & { lat: number; lng: number };
+
+/**
+ * Every skilled pro, plus the subset that can be placed on a map.
+ * The results grid renders `allPros`; the map renders `mappablePros`.
+ */
+export interface DiscoveryResults {
+  allPros: DiscoveryPin[];
+  mappablePros: MappableDiscoveryPin[];
 }
 
 // ── Jobs Done ────────────────────────────────

@@ -5,12 +5,13 @@
 // Desktop: sticky filter sidebar beside a full-width map panel + results.
 // Mobile: filter pills at the top, map panel filling the width, results below.
 //
-// The map panel is a placeholder. No map provider is configured — MAP_CONFIG
-// .PROVIDER is empty, there is no SDK dependency and no key — and discovery
-// pins carry no real coordinates (discoveryService recycles fixed mock x/y
-// positions). Drawing pins on a decorative map would be inventing locations,
-// so the slot states what it needs instead. Everything around it is the final
-// layout: dropping a real map into <MapPanel> is the only remaining step.
+// The grid lists every skilled pro (`allPros`); the map is limited to those
+// with real coordinates (`mappablePros`), so a pro who has not set a location
+// is still discoverable — they just have no pin.
+//
+// The map panel itself is a placeholder: no provider is configured (MAP_CONFIG
+// .PROVIDER is empty, no SDK dependency, no key). Everything around it is the
+// final layout — dropping a real map into <MapPanel> is the remaining step.
 // ─────────────────────────────────────────────
 import { useEffect, useMemo, useState } from "react";
 import { MapPin, ChevronRight, Search, X, SlidersHorizontal } from "lucide-react";
@@ -32,7 +33,7 @@ const SORT_FILTERS = DISCOVERY_FILTER_CHIPS.slice(0, 3) as readonly DiscoveryFil
 const SKILL_FILTERS = DISCOVERY_FILTER_CHIPS.slice(3) as readonly DiscoveryFilter[];
 
 export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
-  const { pins, loading, activeFilter, setFilter } = useDiscovery();
+  const { allPros, mappablePros, loading, activeFilter, setFilter } = useDiscovery();
   const { state, dispatch } = useAppState();
   const { connectTo, connecting } = useMessages();
   const [skillQuery, setSkillQuery] = useState("");
@@ -127,7 +128,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
               className="text-xs font-semibold px-2.5 py-1 rounded-full"
               style={{ background: "var(--ss-surface-2)", color: "var(--ss-text-muted)" }}
             >
-              {pins.length} {state.currentUser?.location ? "nearby" : "pros"}
+              {allPros.length} {state.currentUser?.location ? "nearby" : "pros"}
             </span>
             {/* Filters live in the sidebar from lg up */}
             <button
@@ -165,13 +166,13 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
           </aside>
 
           <div className="min-w-0">
-            <MapPanel count={pins.length} />
+            <MapPanel mappable={mappablePros.length} total={allPros.length} />
 
             <div className="flex items-end justify-between mt-6 mb-3">
               <div>
                 <p className="text-[15px] font-bold text-white">{filteredLabel}</p>
                 <p className="text-[12px] mt-0.5" style={{ color: "var(--ss-text-muted)" }}>
-                  {pins.length} skilled pro{pins.length !== 1 ? "s" : ""}
+                  {allPros.length} skilled pro{allPros.length !== 1 ? "s" : ""}
                   {state.currentUser?.location ? " near you" : ""}
                 </p>
               </div>
@@ -187,7 +188,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
                   />
                 ))}
               </div>
-            ) : pins.length === 0 ? (
+            ) : allPros.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
                 <div
                   className="w-16 h-16 rounded-3xl mb-4 flex items-center justify-center"
@@ -203,7 +204,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
             ) : (
               <>
                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-                  {pins.map((pin) => (
+                  {allPros.map((pin) => (
                     <ProCard
                       key={pin.id}
                       pin={pin}
@@ -291,8 +292,15 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
 /**
  * Map slot. Renders the frame the real map will live in and says plainly that
  * a provider still has to be wired up — see the note at the top of this file.
+ * Also reports how many of the listed pros actually have a position, since the
+ * map will only ever be able to show those.
  */
-function MapPanel({ count }: { count: number }) {
+function MapPanel({ mappable, total }: { mappable: number; total: number }) {
+  const coverage =
+    mappable === total
+      ? `all ${total} pro${total !== 1 ? "s" : ""}`
+      : `${mappable} of ${total} pros`;
+
   return (
     <div
       className="relative w-full rounded-3xl overflow-hidden flex items-center justify-center text-center px-6"
@@ -325,9 +333,9 @@ function MapPanel({ count }: { count: number }) {
           <MapPin size={22} style={{ color: "var(--ss-purple-light)" }} />
         </div>
         <p className="text-[15px] font-bold text-white">Map view</p>
-        <p className="text-[13px] leading-relaxed mt-1.5 max-w-[420px]" style={{ color: "var(--ss-text-muted)" }}>
-          Plotting {count} pro{count !== 1 ? "s" : ""} on a map needs a map provider — no Mapbox or
-          Google Maps key is configured yet. Browse the list below in the meantime.
+        <p className="text-[13px] leading-relaxed mt-1.5 max-w-[440px]" style={{ color: "var(--ss-text-muted)" }}>
+          {coverage} have set a location. Plotting them needs a map provider — no Mapbox or
+          Google Maps key is configured yet. Every pro below is listed either way.
         </p>
       </div>
     </div>

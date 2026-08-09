@@ -2,7 +2,7 @@
 // SkillSnap — Mock Discovery / Map Data
 // Replace with discoveryService.getNearbyUsers()
 // ─────────────────────────────────────────────
-import type { DiscoveryPin } from "@/types";
+import type { DiscoveryPin, DiscoveryResults, MappableDiscoveryPin } from "@/types";
 
 // Coordinates are real Western Sydney suburbs so the fallback behaves like live
 // data (a map can plot it, distances compute) rather than needing special cases.
@@ -14,6 +14,12 @@ export const MOCK_DISCOVERY_PINS: DiscoveryPin[] = [
   { id: "pin_5", userId: "user_ana",    name: "Ana M.",    skill: "Cleaning",     color: "#fdcb6e", rating: 4.6, jobsDone: 38, lat: -33.8983, lng: 150.8600 }, // Cecil Hills
   { id: "pin_6", userId: "user_leo",    name: "Leo P.",    skill: "Barber",       color: "#6c47ff", rating: 4.5, jobsDone: 12, lat: -33.9600, lng: 150.9700 }, // Glenfield
 ];
+
+// Every mock pin has coordinates, so the offline fallback maps one-to-one.
+export const MOCK_DISCOVERY_RESULTS: DiscoveryResults = {
+  allPros: MOCK_DISCOVERY_PINS,
+  mappablePros: MOCK_DISCOVERY_PINS as MappableDiscoveryPin[],
+};
 
 export const DISCOVERY_FILTER_CHIPS = [
   "All", "Nearby", "Top Rated",
