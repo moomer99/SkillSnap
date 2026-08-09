@@ -64,6 +64,10 @@ const FULL_BLEED: Screen[] = ["landing", "auth", "onboarding", "role-setup", "us
 // Screens a signed-out visitor can't reach
 const AUTH_REQUIRED: Screen[] = ["messages", "own-profile", "client-profile", "chat", "edit-profile", "settings"];
 
+// Screens that use the full content width (their own internal columns) rather
+// than the 600px feed column, and so drop the right rail
+const WIDE_SCREENS: Screen[] = ["discover"];
+
 function SkillSnapRouter() {
   const { state, navigate, dispatch } = useAppState();
   const { screen, authLoading } = state;
@@ -73,6 +77,7 @@ function SkillSnapRouter() {
   useGlobalMessages();
 
   const fullBleed = FULL_BLEED.includes(screen);
+  const wide = WIDE_SCREENS.includes(screen);
   const showBottomNav = NAV_SCREENS.includes(screen);
   const unreadCount = state.threads.reduce((sum, t) => sum + (t.unreadCount ?? 0), 0);
 
@@ -180,10 +185,10 @@ function SkillSnapRouter() {
 
       {/* Content area — offset by the rail from md up */}
       <div className="md:pl-[60px] lg:pl-[240px]">
-        <div className="mx-auto flex items-start justify-center gap-6 xl:gap-8 lg:px-6">
+        <div className={`mx-auto flex items-start justify-center gap-6 xl:gap-8 ${wide ? "" : "lg:px-6"}`}>
           {/* Centre column */}
           <main
-            className="w-full max-w-[600px] min-h-screen pb-24 md:pb-0"
+            className={`w-full min-h-screen pb-24 md:pb-0 ${wide ? "" : "max-w-[600px]"}`}
             style={{ opacity, transition: "opacity 150ms ease" }}
           >
             {screenContent}
@@ -192,11 +197,13 @@ function SkillSnapRouter() {
           {/* Right rail — suggested pros + download nudge, hidden below 1200px.
               The rail itself is the sticky element: a sticky child would be
               pinned inside a container only as tall as its own content. */}
-          <aside className="ss-right-rail w-[300px] flex-shrink-0 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6">
-            <Suspense fallback={null}>
-              <RightSidebar onNavigate={navigate} />
-            </Suspense>
-          </aside>
+          {!wide && (
+            <aside className="ss-right-rail w-[300px] flex-shrink-0 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6">
+              <Suspense fallback={null}>
+                <RightSidebar onNavigate={navigate} />
+              </Suspense>
+            </aside>
+          )}
         </div>
       </div>
 

@@ -18,7 +18,8 @@ export default function DiscoverClientPage() {
   return (
     <AppProvider>
       <ToastProvider>
-        <div className="w-full max-w-[600px] mx-auto min-h-screen bg-[#0d0a1a]">
+        {/* Full width — Discover lays out its own sidebar + map columns */}
+        <div className="w-full mx-auto min-h-screen bg-[#0d0a1a]">
           <DiscoverInner />
         </div>
       </ToastProvider>
