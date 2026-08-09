@@ -115,8 +115,15 @@ export interface DiscoveryPin {
   color: string;
   rating: number;
   jobsDone: number;
-  x: string; // map % position
-  y: string;
+  // Real coordinates from profiles.lat_public / lng_public. A pin only exists
+  // for a profile that has both — there is no placeholder position.
+  lat: number;
+  lng: number;
+  // Hydrated from the profile row for rendering the pin/card
+  avatarUrl?: string | null;
+  avatarInitial?: string | null;
+  avatarGradient?: string | null;
+  location?: string | null;
 }
 
 // ── Jobs Done ────────────────────────────────

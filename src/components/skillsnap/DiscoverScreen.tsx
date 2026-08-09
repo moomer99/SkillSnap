@@ -355,13 +355,8 @@ function skillColor(skill: string): string {
 }
 
 // ── Pro card ───────────────────────────────────────────────────────
-// discoveryService hydrates pins with profile fields beyond DiscoveryPin, and
-// which ones are present depends on the query — hence the optional extras.
+// distance and happy % are computed per-view rather than stored on the pin
 type DiscoveryPinLike = DiscoveryPin & {
-  avatarUrl?: string | null;
-  avatarInitial?: string | null;
-  avatarGradient?: string | null;
-  location?: string | null;
   distanceKm?: number;
   happyPct?: number;
 };
