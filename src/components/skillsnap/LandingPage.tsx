@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Screen } from "@/types";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
+import AppStoreButtons from "./shared/AppStoreButtons";
 import { getAuthSupabase } from "@/lib/supabase";
 import { useEarlyBirdCount } from '@/hooks/useEarlyBirdCount';
 import { useAppState } from "@/state/AppState";
@@ -291,7 +292,18 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         </FadeIn>
 
         <FadeIn delay={240}>
-          <div className="flex flex-col gap-3 w-full max-w-[300px]">
+          <div className="flex flex-col gap-3 w-full max-w-[340px]">
+            {/* App download — the primary conversion for the mobile product */}
+            <AppStoreButtons />
+
+            <div className="flex items-center gap-3 my-1">
+              <span className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.10)" }} />
+              <span className="text-[11px] font-semibold" style={{ color: "rgba(255,255,255,0.35)" }}>
+                or use the web app
+              </span>
+              <span className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.10)" }} />
+            </div>
+
             <button
               onClick={goToAuth}
               className="w-full h-14 rounded-2xl font-extrabold text-base text-white flex items-center justify-center gap-2.5 transition-all active:scale-[0.97]"
@@ -564,6 +576,13 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
             </svg>
           </button>
           <p className="text-[11px] mt-3" style={{ color: "rgba(255,255,255,0.25)" }}>No credit card required · Takes 30 seconds</p>
+
+          <p className="text-[12px] font-semibold mt-8 mb-3" style={{ color: "rgba(255,255,255,0.45)" }}>
+            Get the free app
+          </p>
+          <div className="w-full max-w-[340px]">
+            <AppStoreButtons />
+          </div>
         </FadeIn>
       </section>
 

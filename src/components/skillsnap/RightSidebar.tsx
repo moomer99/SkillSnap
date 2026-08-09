@@ -4,6 +4,7 @@ import { Edit3, MapPin } from "lucide-react";
 import type { Screen } from "@/types";
 import { useAppState } from "@/state/AppState";
 import { getSupabase } from "@/lib/supabase";
+import { APP_STORE_URL, PLAY_STORE_URL } from "@/constants/config";
 
 interface RightSidebarProps {
   onNavigate: (s: Screen) => void;
@@ -198,19 +199,28 @@ export default function RightSidebar({ onNavigate }: RightSidebarProps) {
         );
       })()}
 
-      {/* QR / mobile card */}
+      {/* QR / mobile card — scans straight to the App Store listing */}
       <div className="rounded-2xl bg-white shadow-sm p-4 flex flex-col items-center gap-3 text-center">
-        <p className="text-sm font-semibold text-[#1a1a1a]">📱 Best on mobile</p>
+        <p className="text-sm font-semibold text-[#1a1a1a]">📱 Get the app</p>
         <p className="text-xs text-[#7a7570] leading-relaxed">
-          For the best experience, open SkillSnap on your phone.
+          Scan to download SkillSnap and get the full experience on your phone.
         </p>
         <img
-          src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://skillsnap.com.au"
-          alt="Scan to open SkillSnap on mobile"
+          src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(APP_STORE_URL)}`}
+          alt="Scan to download SkillSnap from the App Store"
           width={120}
           height={120}
           className="rounded-xl border border-[#e8e4df]"
         />
+        <div className="flex items-center gap-3 text-[11px] font-semibold">
+          <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" className="text-[#6c47ff]">
+            App Store
+          </a>
+          <span className="text-[#e8e4df]">·</span>
+          <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="text-[#6c47ff]">
+            Google Play
+          </a>
+        </div>
       </div>
 
       <p className="text-[11px] text-[#b0aaa5] px-1">
