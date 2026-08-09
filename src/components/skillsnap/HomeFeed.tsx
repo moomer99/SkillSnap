@@ -17,6 +17,7 @@ import LocationPickerSheet from "./shared/LocationPickerSheet";
 import { useToast } from "./shared/Toast";
 import { postService } from "@/services/postService";
 import { SKILL_CATEGORIES } from "@/constants/config";
+import { shareProfile } from "@/lib/share";
 
 interface HomeFeedProps {
   onNavigate: (s: Screen) => void;
@@ -346,11 +347,13 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
                 onProfileClick={() => handleProfileClick(post.authorId)}
                 onConnectClick={() => requireFullAuth(() => connectTo(post.authorId))}
                 onShare={() => {
-                  if (navigator.share) {
-                    navigator.share({ title: "SkillSnap", text: "Check out this work on SkillSnap!", url: "https://skillsnap.com.au" }).catch(() => {});
-                  } else {
-                    navigator.clipboard?.writeText("https://skillsnap.com.au").catch(() => {});
-                  }
+                  shareProfile({
+                    username: post.author.username,
+                    displayName: post.author.displayName,
+                    text: `Check out ${post.author.displayName}'s work on SkillSnap!`,
+                  }).then((result) => {
+                    if (result === "copied") showToast("Profile link copied");
+                  });
                 }}
                 onFullscreen={() => setFullscreenPost(post)}
                 connecting={connecting === post.authorId}

@@ -15,6 +15,7 @@ import { useAppState } from "@/state/AppState";
 import UserAvatar from "./shared/UserAvatar";
 import ConnectButton from "./shared/ConnectButton";
 import { useToast } from "./shared/Toast";
+import { shareProfile } from "@/lib/share";
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -161,7 +162,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 <button onClick={() => onNavigate("edit-profile")} className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
                   <Edit3 size={14} /> Edit Profile
                 </button>
-                <button onClick={() => { const url = "https://skillsnap.com.au"; if (navigator.share) navigator.share({ title: "SkillSnap", text: `Check out ${user.displayName} on SkillSnap — Sydney's skills platform!`, url }).catch(() => {}); else navigator.clipboard?.writeText(url).catch(() => {}); }} className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
+                <button onClick={() => { shareProfile({ username: user.username, displayName: user.displayName, text: `Check out ${user.displayName} on SkillSnap — Sydney's skills platform!` }).then((r) => { if (r === "copied") showToast("Profile link copied"); }); }} className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#1a1a1a] border border-[#e8e4df] bg-white flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]">
                   <Share2 size={14} /> Share
                 </button>
               </>
