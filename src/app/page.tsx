@@ -123,12 +123,15 @@ function SkillSnapRouter() {
       {/* ── REVIEW MODE BANNER ── */}
       <ReviewBanner />
 
-      {/* ── LEFT SIDEBAR — three fixed floating cards, desktop only ── */}
+      {/* ── LEFT SIDEBAR — three fixed floating cards, desktop only ──
+           Must stay in lockstep with Tailwind's lg breakpoint (1024px): below it
+           the single-column layout runs full width with no left offset, so a
+           visible sidebar would overlay the content. */}
       <style>{`
-        @media (min-width: 768px) {
+        @media (min-width: 1024px) {
           .ss-sidebar-card { display: flex; }
         }
-        @media (max-width: 767px) {
+        @media (max-width: 1023px) {
           .ss-sidebar-card { display: none !important; }
         }
         .ss-nav-btn { position: relative; }
@@ -337,9 +340,11 @@ function SkillSnapRouter() {
 
       </div>
 
-      {/* ── Mobile / tablet fallback (< lg) — single column ─────── */}
+      {/* ── Mobile / tablet fallback (< lg) — single column ───────
+           Phones get the full viewport width; tablets get the same column
+           centred and capped at 600px rather than stretched edge to edge. */}
       <div
-        className="lg:hidden relative w-full bg-[#f8f7f5]"
+        className="lg:hidden relative w-full max-w-[600px] mx-auto bg-[#f8f7f5] md:shadow-[0_4px_40px_rgba(0,0,0,0.10)]"
         style={{
           height: screen === "landing" || screen === "auth" ? "auto" : "100dvh",
           minHeight: "100dvh",
