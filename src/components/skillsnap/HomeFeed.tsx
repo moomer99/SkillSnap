@@ -424,7 +424,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
               Comments live in the SkillSnap app. Get it to join the conversation on{" "}
               {commentPrompt.author.displayName}&apos;s work.
             </p>
-            <AppStoreButtons theme="light" />
+            <AppStoreButtons variant="black" />
             <button
               onClick={() => setCommentPrompt(null)}
               className="w-full mt-3 py-3 text-sm font-semibold text-[#7a7570]"

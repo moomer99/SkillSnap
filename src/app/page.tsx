@@ -117,8 +117,21 @@ function SkillSnapRouter() {
     navigate("landing");
   }
 
+  // ── Landing renders full-bleed ──
+  // It is the marketing surface, not an app screen: it owns the whole viewport
+  // at every breakpoint rather than sitting inside the centred app column.
+  if (screen === "landing") {
+    return (
+      <div style={{ minHeight: "100vh", background: "var(--ss-bg)", fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif" }}>
+        <ReviewBanner />
+        <LandingPage onNavigate={navigate} />
+        <AuthPromptModal />
+      </div>
+    );
+  }
+
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#f0eff7", fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "var(--ss-bg)", fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif" }}>
 
       {/* ── REVIEW MODE BANNER ── */}
       <ReviewBanner />

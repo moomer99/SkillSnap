@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────
 // SkillSnap — App Store / Google Play download buttons
-// Shared by the landing page and the public profile page.
+// Shared by the landing page, the feed and the public profile page.
 // ─────────────────────────────────────────────
 import { APP_STORE_URL, PLAY_STORE_URL } from "@/constants/config";
 
@@ -23,29 +23,54 @@ function PlayIcon({ size = 20 }: { size?: number }) {
   );
 }
 
+/**
+ * outline — translucent white on a dark surface (default)
+ * black   — solid black pill, for light or brand-coloured surfaces
+ * white   — solid white pill with dark ink, for the purple CTA band
+ */
+export type AppStoreButtonVariant = "outline" | "black" | "white";
+
 interface AppStoreButtonsProps {
-  /** "dark" renders light buttons for dark backgrounds (default). */
-  theme?: "dark" | "light";
+  variant?: AppStoreButtonVariant;
+  /** Stack vertically at every width instead of going side by side from `sm`. */
+  stacked?: boolean;
   className?: string;
 }
 
-export default function AppStoreButtons({ theme = "dark", className = "" }: AppStoreButtonsProps) {
-  const onDark = theme === "dark";
+const VARIANT_STYLES: Record<AppStoreButtonVariant, React.CSSProperties> = {
+  outline: {
+    background: "rgba(255,255,255,0.06)",
+    border: "1px solid rgba(255,255,255,0.14)",
+    color: "#ffffff",
+  },
+  black: {
+    background: "#0b0715",
+    border: "1px solid rgba(255,255,255,0.12)",
+    color: "#ffffff",
+  },
+  white: {
+    background: "#ffffff",
+    border: "1px solid rgba(255,255,255,0.9)",
+    color: "#12091f",
+  },
+};
 
-  const baseStyle: React.CSSProperties = {
-    background: onDark ? "rgba(255,255,255,0.06)" : "#1a1a1a",
-    border: onDark ? "1px solid rgba(255,255,255,0.14)" : "1px solid #1a1a1a",
-    color: onDark ? "white" : "white",
-  };
+export default function AppStoreButtons({
+  variant = "outline",
+  stacked = false,
+  className = "",
+}: AppStoreButtonsProps) {
+  const style = VARIANT_STYLES[variant];
+  const row = stacked ? "flex-col" : "flex-col sm:flex-row";
 
   return (
-    <div className={`flex flex-col sm:flex-row gap-2.5 w-full ${className}`}>
+    <div className={`flex ${row} gap-2.5 w-full ${className}`}>
       <a
         href={APP_STORE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-3 px-5 transition-all active:scale-[0.97] hover:brightness-125"
-        style={baseStyle}
+        className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-3 px-5 transition-transform active:scale-[0.97] hover:-translate-y-0.5"
+        style={style}
       >
         <AppleIcon size={24} />
         <span className="flex flex-col items-start leading-none">
@@ -58,8 +83,8 @@ export default function AppStoreButtons({ theme = "dark", className = "" }: AppS
         href={PLAY_STORE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-3 px-5 transition-all active:scale-[0.97] hover:brightness-125"
-        style={baseStyle}
+        className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-3 px-5 transition-transform active:scale-[0.97] hover:-translate-y-0.5"
+        style={style}
       >
         <PlayIcon size={22} />
         <span className="flex flex-col items-start leading-none">
