@@ -141,6 +141,8 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const jobsDone = profile.jobs_done ?? 0;
   const happy = profile.happy_percent ?? 0;
   const followers = profile.followers_count ?? 0;
+  // "Liverpool, NSW" → "Liverpool": the stats cell only has room for the suburb
+  const suburb = profile.location?.split(",")[0].trim() || null;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -258,6 +260,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
                 </p>
               )}
 
+              {/* Full location lives here; the stats row below shows the suburb */}
               {profile.location && (
                 <p className="flex items-center gap-1.5 text-sm mt-3" style={{ color: "#a78bfa" }}>
                   <MapPin size={14} />
@@ -271,14 +274,13 @@ export default async function PublicProfilePage({ params }: PageProps) {
               className="mt-6 rounded-2xl flex items-stretch"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
-              <Stat value={jobsDone >= 1000 ? `${(jobsDone / 1000).toFixed(1)}k` : String(jobsDone)} label="Jobs Done" highlight />
+              <Stat label="Jobs Done" value={compact(jobsDone)} highlight />
               <Divider />
-              <Stat value={happy > 0 ? `${happy}%` : "—"} label="😊 Happy" />
+              <Stat label="Happy" value={happy > 0 ? `${happy}%` : "—"} />
               <Divider />
-              <Stat
-                value={followers >= 1000 ? `${(followers / 1000).toFixed(1)}k` : String(followers)}
-                label="Followers"
-              />
+              <Stat label="Location" value={suburb ?? "—"} small />
+              <Divider />
+              <Stat label="Followers" value={compact(followers)} />
             </section>
 
             {/* ── Connect ── */}
@@ -351,14 +353,35 @@ export default async function PublicProfilePage({ params }: PageProps) {
   );
 }
 
-function Stat({ value, label, highlight = false }: { value: string; label: string; highlight?: boolean }) {
+/** 1200 → "1.2k"; anything under a thousand is shown as-is. */
+function compact(n: number): string {
+  return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+}
+
+/**
+ * One cell of the stats row. Label sits above the value, matching the mobile
+ * app. `small` is for text values like a suburb, which need to wrap-proof
+ * themselves rather than render at full number size.
+ */
+function Stat({
+  label, value, highlight = false, small = false,
+}: {
+  label: string; value: string; highlight?: boolean; small?: boolean;
+}) {
   return (
-    <div className="flex-1 py-4 flex flex-col items-center gap-0.5">
-      <span className="text-[19px] font-extrabold" style={{ color: highlight ? "#a78bfa" : "white" }}>
-        {value}
-      </span>
-      <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.45)" }}>
+    <div className="flex-1 min-w-0 py-3.5 px-1 flex flex-col items-center gap-1">
+      <span
+        className="text-[10px] font-semibold uppercase tracking-wider leading-none"
+        style={{ color: "rgba(255,255,255,0.45)" }}
+      >
         {label}
+      </span>
+      <span
+        className={`${small ? "text-[13px]" : "text-[19px]"} font-extrabold leading-tight max-w-full truncate`}
+        style={{ color: highlight ? "#a78bfa" : "white" }}
+        title={value}
+      >
+        {value}
       </span>
     </div>
   );
