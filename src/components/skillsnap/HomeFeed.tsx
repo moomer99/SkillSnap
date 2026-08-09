@@ -5,6 +5,9 @@
 // Instagram-style card column: the document scrolls, cards are capped at 600px
 // and centred, and each card keeps its media's own aspect ratio instead of
 // being stretched to fill the viewport.
+//
+// From `sm` up the column has no horizontal padding, so a card measures the
+// full 600px. Phones keep a 12px gutter so cards don't touch the screen edge.
 // ─────────────────────────────────────────────
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import Image from "next/image";
@@ -172,7 +175,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
     <div className="flex flex-col w-full">
       {/* ── Sticky header ── */}
       <header
-        className="sticky top-0 z-30 px-4 pt-3 pb-3"
+        className="sticky top-0 z-30 px-4 sm:px-0 pt-3 pb-3"
         style={{
           background: "rgba(13,10,26,0.90)",
           backdropFilter: "blur(12px)",
@@ -236,7 +239,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
       </header>
 
       {/* ── Feed column ── */}
-      <div className="flex flex-col gap-5 px-3 sm:px-4 py-4">
+      <div className="flex flex-col gap-5 px-3 sm:px-0 py-4">
         {showRoleBanner && (
           <div
             className="rounded-2xl flex items-center gap-3 px-4 py-3"
