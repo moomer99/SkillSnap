@@ -6,6 +6,7 @@ import { useAppState } from "@/state/AppState";
 import { getNotifPermission, requestNotifPermission } from "@/hooks/useNotifications";
 import UserAvatar from "./shared/UserAvatar";
 import { useToast } from "./shared/Toast";
+import { isResetEmailLikelySent, RESET_EMAIL_SENT_MESSAGE } from "@/lib/authErrors";
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -322,7 +323,9 @@ function ChangePasswordSheet({ onClose, userEmail }: { onClose: () => void; user
         const { error: err } = await getSupabase().auth.resetPasswordForEmail(email, {
           redirectTo: "https://skillsnap.com.au",
         });
-        if (err) { setError(err.message); setSending(false); return; }
+        // See isResetEmailLikelySent — a 5xx generally means the mail is
+        // already on its way and only GoTrue's bookkeeping failed.
+        if (err && !isResetEmailLikelySent(err)) { setError(err.message); setSending(false); return; }
       } else {
         await new Promise((r) => setTimeout(r, 800));
       }
@@ -342,7 +345,7 @@ function ChangePasswordSheet({ onClose, userEmail }: { onClose: () => void; user
             <CheckCircle size={28} className="text-green-500" />
           </div>
           <p className="font-bold text-[#ffffff] text-base mb-1">Reset link sent!</p>
-          <p className="text-sm text-[#9d97b5]">Check your email to reset your password.</p>
+          <p className="text-sm text-[#9d97b5]">{RESET_EMAIL_SENT_MESSAGE}</p>
         </div>
       ) : (
         <>

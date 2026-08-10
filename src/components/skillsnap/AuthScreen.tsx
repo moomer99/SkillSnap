@@ -14,6 +14,7 @@ import { authService } from "@/services/authService";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
 import PasswordRequirements from "./shared/PasswordRequirements";
 import { checkPassword, PASSWORD_ERROR } from "@/lib/password";
+import { isResetEmailLikelySent, RESET_EMAIL_SENT_MESSAGE } from "@/lib/authErrors";
 import { useAppState } from "@/state/AppState";
 import { useToast } from "./shared/Toast";
 
@@ -108,7 +109,10 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
       const { getSupabase } = await import("@/lib/supabase");
       const redirectTo = `${window.location.origin}/reset-password`;
       const { error: err } = await getSupabase().auth.resetPasswordForEmail(forgotEmail.trim(), { redirectTo });
-      if (err) { setForgotError(err.message); return; }
+      // A 5xx here usually means the mail already went out and GoTrue tripped
+      // afterwards — showing an error would tell the user the opposite of what
+      // just landed in their inbox.
+      if (err && !isResetEmailLikelySent(err)) { setForgotError(err.message); return; }
       setForgotSent(true);
     } catch {
       setForgotError("Something went wrong. Please try again.");
@@ -381,7 +385,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                   <div className="w-12 h-12 rounded-full bg-[rgba(16,185,129,0.14)] flex items-center justify-center">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                   </div>
-                  <p className="text-sm font-semibold text-[#ffffff]">Check your email for a reset link</p>
+                  <p className="text-sm font-semibold text-[#ffffff]">{RESET_EMAIL_SENT_MESSAGE}</p>
                   <button
                     type="button"
                     className="mt-2 text-sm font-semibold text-[#6c47ff]"
