@@ -9,7 +9,15 @@ export interface AuthResult {
   success: boolean;
   user?: User;
   error?: string;
+  /**
+   * Set when the password didn't match. `error` is already a friendly string
+   * by then, so callers can't sniff the reason out of the message — the auth
+   * screen needs this to decide whether to offer the Google-account hint.
+   */
+  invalidCredentials?: boolean;
 }
+
+export const INVALID_CREDENTIALS_MESSAGE = "Incorrect email or password. Please try again.";
 
 function mapProfile(profile: Record<string, unknown>): User {
   try {
@@ -191,7 +199,15 @@ export const authService = {
       return { success: false, error: "Please use your email address to log in." };
     }
     const { data, error } = await sb.auth.signInWithPassword({ email: loginEmail, password });
-    if (error) return { success: false, error: error.message };
+    if (error) {
+      // Supabase says "Invalid login credentials", which reads like a system
+      // fault rather than a typo. Translate here rather than at the call site
+      // so the raw string can't reach a screen that forgets to map it.
+      if ((error.message ?? "").toLowerCase().includes("invalid login credentials")) {
+        return { success: false, error: INVALID_CREDENTIALS_MESSAGE, invalidCredentials: true };
+      }
+      return { success: false, error: error.message };
+    }
     if (!data.user) return { success: false, error: "No user returned" };
     // Fetch existing profile only — never overwrite user-edited fields on login
     const user = await fetchProfile(data.user.id);

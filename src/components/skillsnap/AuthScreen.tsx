@@ -165,16 +165,13 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
       clearTimeout(loadingTimeout);
 
       if (!result.success) {
-        const msg = result.error ?? "Something went wrong. Please try again.";
-        // Detect invalid credentials on login — may be a Google-only account
-        if (mode === "login" && msg.toLowerCase().includes("invalid login credentials")) {
+        // authService has already turned Supabase's wording into something a
+        // person can act on, so this just decides whether to add the
+        // Google-only-account hint on top.
+        if (mode === "login" && result.invalidCredentials) {
           setShowGoogleHint(true);
-          setError("Incorrect email or password. Please try again.");
-        } else if (msg.toLowerCase().includes("invalid login credentials")) {
-          setError("Incorrect email or password. Please try again.");
-        } else {
-          setError(msg);
         }
+        setError(result.error ?? "Something went wrong. Please try again.");
       } else {
         if (rememberMe) {
           localStorage.setItem(SAVED_EMAIL_KEY, email);
