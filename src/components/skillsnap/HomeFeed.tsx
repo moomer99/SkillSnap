@@ -2,9 +2,12 @@
 // ─────────────────────────────────────────────
 // SkillSnap — Home feed
 //
-// Instagram-style card column: the document scrolls, cards are capped at 600px
-// and centred, and each card keeps its media's own aspect ratio instead of
-// being stretched to fill the viewport.
+// Mirrors the mobile app's VideoCard: media runs the full card width with the
+// author block, action rail and Connect button overlaid on it, and the caption
+// plus a Jobs Done / Happy / Location / Followers stats row sitting underneath.
+//
+// The document scrolls, cards are capped at 600px and centred, and each card
+// keeps its media's own aspect ratio instead of being stretched to the viewport.
 //
 // From `sm` up the column has no horizontal padding, so a card measures the
 // full 600px. Phones keep a 12px gutter so cards don't touch the screen edge.
@@ -78,19 +81,29 @@ function computeDistance(
 function SkeletonCard() {
   return (
     <article
-      className="w-full rounded-3xl overflow-hidden animate-pulse"
-      style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}
+      className="w-full animate-pulse"
+      style={{ background: "#0d0a1a", borderBottom: "1px solid #ffffff10" }}
     >
-      <div className="w-full" style={{ aspectRatio: "4 / 5", background: "rgba(255,255,255,0.05)" }} />
-      <div className="p-4 flex flex-col gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }} />
-          <div className="flex flex-col gap-2">
-            <div className="w-32 h-3 rounded" style={{ background: "rgba(255,255,255,0.08)" }} />
-            <div className="w-20 h-2.5 rounded" style={{ background: "rgba(255,255,255,0.06)" }} />
+      {/* Media, with the author block and Connect button shaped where they'll land */}
+      <div className="relative w-full" style={{ aspectRatio: "4 / 5", background: "rgba(255,255,255,0.05)" }}>
+        <div className="absolute inset-x-0 bottom-0 px-3 pb-3 flex items-end justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-full" style={{ background: "rgba(255,255,255,0.10)" }} />
+            <div className="flex flex-col gap-1.5">
+              <div className="w-32 h-3 rounded" style={{ background: "rgba(255,255,255,0.10)" }} />
+              <div className="w-20 h-2.5 rounded" style={{ background: "rgba(255,255,255,0.07)" }} />
+            </div>
           </div>
+          <div className="w-24 h-9 rounded-2xl" style={{ background: "rgba(255,255,255,0.10)" }} />
         </div>
-        <div className="w-full h-11 rounded-2xl" style={{ background: "rgba(255,255,255,0.06)" }} />
+      </div>
+      <div className="flex items-center gap-6 px-4 py-4">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+            <div className="w-12 h-2 rounded" style={{ background: "rgba(255,255,255,0.06)" }} />
+            <div className="w-8 h-3 rounded" style={{ background: "rgba(255,255,255,0.09)" }} />
+          </div>
+        ))}
       </div>
     </article>
   );
@@ -622,6 +635,7 @@ function FeedCard({
   const activeMedia = mediaItems ? mediaItems[activeMediaIndex] : null;
   const activeMediaUrl = activeMedia ? activeMedia.url : post.mediaUrl;
   const activeMediaType = activeMedia ? activeMedia.type : post.type;
+  const isVideo = activeMediaType === "video" && !!activeMediaUrl;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [editMode, setEditMode] = useState<"caption" | "skill" | "location" | "delete" | null>(null);
@@ -711,186 +725,201 @@ function FeedCard({
       className="relative w-full"
       style={{ background: "#0d0a1a", borderBottom: "1px solid #ffffff10" }}
     >
-      {/* ── Author row ── */}
-      <div className="flex items-center gap-3 px-4 py-3">
-        <button onClick={onProfileClick} className="flex-shrink-0" aria-label={`View ${author.displayName}'s profile`}>
-          <UserAvatar user={author} size="sm" showVerified />
-        </button>
-
-        <div className="flex-1 min-w-0">
-          <button onClick={onProfileClick} className="block text-left max-w-full">
-            <span className="text-[14px] font-bold text-white leading-tight truncate block">
-              {author.displayName}
-            </span>
-          </button>
-
-          <div className="flex items-center gap-2 flex-wrap mt-0.5">
-            {author.skill && (
-              <span
-                className="text-[11px] font-bold px-2 py-0.5 rounded-full"
-                style={{ background: "var(--ss-purple-soft)", border: "1px solid var(--ss-purple-border)", color: "var(--ss-purple-light)" }}
-              >
-                {author.skill}
-              </span>
-            )}
-            {displayLocation && (
-              <span className="flex items-center gap-1 text-[12px] truncate" style={{ color: "var(--ss-text-dim)" }}>
-                <MapPin size={11} className="flex-shrink-0" />
-                {displayDistance !== undefined ? `${displayDistance < 1 ? "<1" : displayDistance}km · ` : ""}
-                {displayLocation.split(",")[0]}
-              </span>
-            )}
-            {/* The separator only earns its place when something precedes it */}
-            <span className="text-[12px]" style={{ color: "var(--ss-text-dim)" }}>
-              {author.skill || displayLocation ? "· " : ""}{timeAgo(post.createdAt)}
-            </span>
-          </div>
-        </div>
-
-        {!isOwnPost && (
-          <button
-            onClick={onFollow}
-            className="flex-shrink-0 text-[12px] font-bold px-3.5 py-1.5 rounded-full transition-colors"
-            style={
-              isFollowed
-                ? { color: "var(--ss-text-muted)", background: "var(--ss-surface-2)", border: "1px solid var(--ss-line)" }
-                : { color: "white", background: "var(--ss-purple)", border: "1px solid var(--ss-purple)" }
-            }
-          >
-            {isFollowed ? "Following" : "Follow"}
-          </button>
-        )}
-
-        {isOwnPost && (
-          <button
-            aria-label="Post options"
-            className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-white/[0.06]"
-            style={{ color: "var(--ss-text-muted)" }}
-            onClick={() => setMenuOpen(true)}
-          >
-            <MoreHorizontal size={20} />
-          </button>
-        )}
-      </div>
-
-      {/* ── Media — full card width, own aspect ratio, nothing overlaid ── */}
+      {/* ── Media — full card width, everything else rides on top of it ── */}
       <div
-        className="relative w-full bg-black cursor-pointer select-none"
+        className="relative w-full bg-black select-none overflow-hidden"
         style={{ aspectRatio: String(aspect) }}
-        onClick={handleMediaClick}
       >
-        {activeMediaType === "video" && activeMediaUrl ? (
-          <video
-            ref={videoRef}
-            src={activeMediaUrl}
-            className="w-full h-full object-cover"
-            loop playsInline
-            preload="metadata"
-            muted={muted}
-            poster={post.thumbnailUrl}
-            onLoadedMetadata={(e) => {
-              const v = e.currentTarget;
-              aspectMeasured.current = true;
-              setAspect(clampAspect(v.videoWidth, v.videoHeight));
-            }}
-            onPlay={() => setPlaying(true)}
-            onPause={() => setPlaying(false)}
-          />
-        ) : activeMediaUrl ? (
-          <img
-            src={activeMediaUrl}
-            alt={caption || `Work by ${author.displayName}`}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            onLoad={(e) => {
-              const img = e.currentTarget;
-              aspectMeasured.current = true;
-              setAspect(clampAspect(img.naturalWidth, img.naturalHeight));
-            }}
-          />
-        ) : (
-          <div className="w-full h-full" style={{ background: post.thumbnailGradient }} />
-        )}
-
-        {/* Carousel dots — the one exception, since multi-media posts are
-            otherwise indistinguishable from single ones */}
-        {mediaItems && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
-            {mediaItems.map((_, i) => (
-              <button
-                key={i}
-                aria-label={`Go to media ${i + 1}`}
-                onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i); }}
-                className="transition-all"
-                style={{
-                  width: i === activeMediaIndex ? 18 : 6,
-                  height: 6,
-                  borderRadius: 99,
-                  background: i === activeMediaIndex ? "white" : "rgba(255,255,255,0.45)",
-                }}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ── Action row ── */}
-      <div className="flex items-center justify-between gap-3 px-2 pt-2.5">
-        <div className="flex items-center gap-0.5 min-w-0">
-          <ActionButton
-            title="Like"
-            label={formatLikes(post.likes)}
-            active={isLiked}
-            onClick={onLike}
-            icon={<Heart size={22} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "currentColor"} strokeWidth={1.9} />}
-          />
-          <ActionButton
-            title="Comments"
-            label={formatLikes(post.commentsCount ?? 0)}
-            onClick={onComment}
-            icon={<MessageCircle size={22} strokeWidth={1.9} />}
-          />
-          <ActionButton
-            title="Save"
-            active={isSaved}
-            onClick={onSave}
-            icon={<Bookmark size={21} fill={isSaved ? "currentColor" : "none"} strokeWidth={1.9} />}
-          />
-          <ActionButton
-            title="Recommend"
-            label={(post.recommendCount ?? 0) > 0 ? formatLikes(post.recommendCount ?? 0) : undefined}
-            onClick={onShare}
-            icon={<Send size={21} strokeWidth={1.9} />}
-          />
-          {/* Sound lives here rather than over the video, which the layout keeps clear */}
-          {activeMediaType === "video" && activeMediaUrl && (
-            <ActionButton
-              title={muted ? "Unmute" : "Mute"}
-              active={!muted}
-              onClick={() => setMuted((m) => !m)}
-              icon={muted ? <VolumeX size={20} strokeWidth={1.9} /> : <Volume2 size={20} strokeWidth={1.9} />}
+        <div className="absolute inset-0 cursor-pointer" onClick={handleMediaClick}>
+          {isVideo ? (
+            <video
+              ref={videoRef}
+              src={activeMediaUrl}
+              className="w-full h-full object-cover"
+              loop playsInline
+              preload="metadata"
+              muted={muted}
+              poster={post.thumbnailUrl}
+              onLoadedMetadata={(e) => {
+                const v = e.currentTarget;
+                aspectMeasured.current = true;
+                setAspect(clampAspect(v.videoWidth, v.videoHeight));
+              }}
+              onPlay={() => setPlaying(true)}
+              onPause={() => setPlaying(false)}
             />
+          ) : activeMediaUrl ? (
+            <img
+              src={activeMediaUrl}
+              alt={caption || `Work by ${author.displayName}`}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              onLoad={(e) => {
+                const img = e.currentTarget;
+                aspectMeasured.current = true;
+                setAspect(clampAspect(img.naturalWidth, img.naturalHeight));
+              }}
+            />
+          ) : (
+            <div className="w-full h-full" style={{ background: post.thumbnailGradient }} />
           )}
         </div>
 
-        <div className="flex-shrink-0">
-          {isOwnPost ? (
-            <button
-              onClick={onShare}
-              className="h-9 px-4 rounded-full font-semibold text-[13px] text-white flex items-center justify-center gap-1.5 transition-colors"
-              style={{ border: "1px solid var(--ss-line-strong)", background: "var(--ss-surface-2)" }}
+        {/* Scrim — keeps the overlaid text legible over bright media */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(0,0,0,0.42) 0%, transparent 20%, transparent 42%, rgba(0,0,0,0.78) 100%)",
+          }}
+        />
+
+        {/* Paused video shows its play glyph; a photo has no play state */}
+        {isVideo && !playing && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div
+              className="rounded-full flex items-center justify-center"
+              style={{
+                background: "rgba(255,255,255,0.16)",
+                backdropFilter: "blur(8px)",
+                border: "2px solid rgba(255,255,255,0.3)",
+                width: 60, height: 60,
+              }}
             >
-              <Share2 size={15} /> Share
-            </button>
-          ) : (
-            <ConnectButton onClick={onConnectClick} size="sm" loading={connecting} />
+              <Play size={24} fill="white" color="white" />
+            </div>
+          </div>
+        )}
+
+        {/* ── Sound toggle — top right ── */}
+        {isVideo && (
+          <button
+            onClick={(e) => { e.stopPropagation(); setMuted((m) => !m); }}
+            aria-label={muted ? "Unmute" : "Mute"}
+            title={muted ? "Unmute" : "Mute"}
+            className="absolute top-3 right-3 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-transform active:scale-90"
+            style={{ background: "rgba(0,0,0,0.42)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.16)" }}
+          >
+            {muted ? <VolumeX size={17} color="white" /> : <Volume2 size={17} color="white" />}
+          </button>
+        )}
+
+        {/* ── Overlay stack — rail sits directly above the author/Connect row ──
+            The wrapper spans the card width, so it stays click-through except
+            where an actual control is. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2.5 px-3 pb-3">
+          {/* Right-side action rail */}
+          <div className="flex justify-end">
+            <div className="pointer-events-auto flex flex-col items-center gap-0.5">
+              <RailButton
+                title="Like"
+                label={formatLikes(post.likes)}
+                onClick={onLike}
+                icon={<Heart size={26} fill={isLiked ? "#ef4444" : "none"} stroke={isLiked ? "#ef4444" : "white"} strokeWidth={1.9} />}
+              />
+              <RailButton
+                title="Comments"
+                label={formatLikes(post.commentsCount ?? 0)}
+                onClick={onComment}
+                icon={<MessageCircle size={25} color="white" strokeWidth={1.9} />}
+              />
+              <RailButton
+                title="Save"
+                onClick={onSave}
+                icon={<Bookmark size={24} fill={isSaved ? "white" : "none"} color="white" strokeWidth={1.9} />}
+              />
+              <RailButton
+                title="Recommend"
+                label={(post.recommendCount ?? 0) > 0 ? formatLikes(post.recommendCount ?? 0) : undefined}
+                onClick={onShare}
+                icon={<Send size={24} color="white" strokeWidth={1.9} />}
+              />
+              <RailButton
+                title="More"
+                onClick={() => setMenuOpen(true)}
+                icon={<MoreHorizontal size={24} color="white" strokeWidth={2} />}
+              />
+            </div>
+          </div>
+
+          {/* Carousel dots — multi-media posts are otherwise indistinguishable */}
+          {mediaItems && (
+            <div className="flex items-center justify-center gap-1.5">
+              {mediaItems.map((_, i) => (
+                <button
+                  key={i}
+                  aria-label={`Go to media ${i + 1}`}
+                  onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i); }}
+                  className="pointer-events-auto transition-all"
+                  style={{
+                    width: i === activeMediaIndex ? 18 : 6,
+                    height: 6,
+                    borderRadius: 99,
+                    background: i === activeMediaIndex ? "white" : "rgba(255,255,255,0.45)",
+                  }}
+                />
+              ))}
+            </div>
           )}
+
+          {/* Author block bottom left, Connect bottom right */}
+          <div className="flex items-end justify-between gap-3">
+            <button
+              onClick={onProfileClick}
+              aria-label={`View ${author.displayName}'s profile`}
+              className="pointer-events-auto flex items-center gap-2.5 min-w-0 text-left"
+            >
+              <UserAvatar user={author} size="sm" showVerified ring />
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span
+                    className="text-[14px] font-bold text-white leading-tight truncate"
+                    style={{ textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}
+                  >
+                    {author.displayName}
+                  </span>
+                  {author.skill && (
+                    <span
+                      className="flex-shrink-0 text-[10.5px] font-bold px-2 py-0.5 rounded-full text-white"
+                      style={{ background: "rgba(108,71,255,0.88)", border: "1px solid rgba(255,255,255,0.18)" }}
+                    >
+                      {author.skill}
+                    </span>
+                  )}
+                </div>
+                {displayLocation && (
+                  <span
+                    className="flex items-center gap-1 text-[11.5px] font-medium text-white/80 truncate mt-0.5"
+                    style={{ textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}
+                  >
+                    <MapPin size={11} className="flex-shrink-0" />
+                    {displayDistance !== undefined ? `${displayDistance < 1 ? "<1" : displayDistance}km · ` : ""}
+                    {displayLocation.split(",")[0]}
+                  </span>
+                )}
+              </div>
+            </button>
+
+            <div className="pointer-events-auto flex-shrink-0">
+              {isOwnPost ? (
+                <button
+                  onClick={onShare}
+                  className="h-9 px-4 rounded-2xl font-semibold text-[13px] text-white flex items-center justify-center gap-1.5"
+                  style={{ background: "rgba(0,0,0,0.42)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.22)" }}
+                >
+                  <Share2 size={15} /> Share
+                </button>
+              ) : (
+                <ConnectButton onClick={onConnectClick} size="sm" loading={connecting} />
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* ── Caption ── */}
       {caption && (
-        <div className="px-4 pt-2 pb-4">
+        <div className="px-4 pt-3">
           <p
             className={`text-[14px] leading-relaxed ${captionIsLong && !captionExpanded ? "ss-clamp-2" : ""}`}
             style={{ color: "rgba(255,255,255,0.82)" }}
@@ -908,9 +937,23 @@ function FeedCard({
           )}
         </div>
       )}
-      {!caption && <div className="pb-4" />}
 
-      {/* ── Own-post menu ── */}
+      <p className="px-4 pt-2 text-[11px]" style={{ color: "var(--ss-text-dim)" }}>
+        {timeAgo(post.createdAt)}
+      </p>
+
+      {/* ── Stats row ── */}
+      <div className="flex items-center px-3 pt-2.5 pb-4">
+        <StatCell label="Jobs Done" value={fmtNum(author.jobsDone)} />
+        <StatDivider />
+        <StatCell label="Happy" value={happyPct ?? "—"} />
+        <StatDivider />
+        <StatCell label="Location" value={displayLocation ? displayLocation.split(",")[0] : "—"} />
+        <StatDivider />
+        <StatCell label="Followers" value={fmtNum(author.followers)} />
+      </div>
+
+      {/* ── Post menu ── */}
       {menuOpen && (
         <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60" onClick={() => setMenuOpen(false)}>
           <div
@@ -919,25 +962,58 @@ function FeedCard({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-1 rounded-full mx-auto mb-4 sm:hidden" style={{ background: "var(--ss-line-strong)" }} />
-            {[
-              { label: "Edit Caption", mode: "caption" as const },
-              { label: "Edit Skill", mode: "skill" as const },
-              { label: "Edit Location", mode: "location" as const },
-            ].map(({ label, mode }) => (
-              <button
-                key={mode}
-                className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-white rounded-xl hover:bg-white/[0.05]"
-                onClick={() => { setMenuOpen(false); setEditMode(mode); }}
-              >
-                {label}
-              </button>
-            ))}
-            <button
-              className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-red-400 rounded-xl hover:bg-red-500/10"
-              onClick={() => { setMenuOpen(false); setEditMode("delete"); }}
-            >
-              Delete Post
-            </button>
+            {isOwnPost ? (
+              <>
+                {[
+                  { label: "Edit Caption", mode: "caption" as const },
+                  { label: "Edit Skill", mode: "skill" as const },
+                  { label: "Edit Location", mode: "location" as const },
+                ].map(({ label, mode }) => (
+                  <button
+                    key={mode}
+                    className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-white rounded-xl hover:bg-white/[0.05]"
+                    onClick={() => { setMenuOpen(false); setEditMode(mode); }}
+                  >
+                    {label}
+                  </button>
+                ))}
+                <button
+                  className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-red-400 rounded-xl hover:bg-red-500/10"
+                  onClick={() => { setMenuOpen(false); setEditMode("delete"); }}
+                >
+                  Delete Post
+                </button>
+              </>
+            ) : (
+              /* Follow moved in here when the author row came off the card —
+                 More is now the only place these actions can live. */
+              <>
+                <button
+                  className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-white rounded-xl hover:bg-white/[0.05]"
+                  onClick={() => { setMenuOpen(false); onFollow(); }}
+                >
+                  {isFollowed ? `Unfollow ${author.displayName}` : `Follow ${author.displayName}`}
+                </button>
+                <button
+                  className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-white rounded-xl hover:bg-white/[0.05]"
+                  onClick={() => { setMenuOpen(false); onProfileClick(); }}
+                >
+                  View profile
+                </button>
+                <button
+                  className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-white rounded-xl hover:bg-white/[0.05]"
+                  onClick={() => { setMenuOpen(false); onFullscreen(); }}
+                >
+                  View full screen
+                </button>
+                <button
+                  className="w-full text-left px-4 py-3.5 text-[15px] font-medium text-white rounded-xl hover:bg-white/[0.05]"
+                  onClick={() => { setMenuOpen(false); onShare(); }}
+                >
+                  Share profile
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -1036,23 +1112,48 @@ function FeedCard({
 }
 
 /**
- * One action-row control. Icons are outline at rest and filled once active
- * (the fill is supplied by the caller, which knows the semantic colour).
- * `label` is omitted for the controls that have no count to show.
+ * One control on the rail overlaid down the right of the media. Icons are
+ * outline at rest and filled once active — the fill is supplied by the caller,
+ * which knows the semantic colour. `label` is omitted for controls with no
+ * count to show. The drop shadow is what keeps white icons readable over pale
+ * media, so it applies to the icon and its count alike.
  */
-function ActionButton({ icon, label, onClick, active, title }: {
-  icon: React.ReactNode; label?: string; onClick: () => void; active?: boolean; title: string;
+function RailButton({ icon, label, onClick, title }: {
+  icon: React.ReactNode; label?: string; onClick: () => void; title: string;
 }) {
   return (
     <button
-      onClick={onClick}
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
       title={title}
       aria-label={title}
-      className="flex items-center gap-1.5 px-2 py-2 rounded-xl transition-colors hover:bg-white/[0.06]"
-      style={{ color: active ? "white" : "var(--ss-text-muted)" }}
+      className="flex flex-col items-center gap-0.5 w-12 py-1.5 transition-transform active:scale-90"
+      style={{ filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.55))" }}
     >
       {icon}
-      {label !== undefined && <span className="text-[13px] font-semibold">{label}</span>}
+      {label !== undefined && (
+        <span className="text-[11px] font-semibold text-white leading-none">{label}</span>
+      )}
     </button>
   );
+}
+
+/** One cell of the below-media stats row: small label above, value beneath. */
+function StatCell({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex-1 min-w-0 flex flex-col items-center gap-1">
+      <span
+        className="text-[9px] font-bold uppercase tracking-[0.07em] leading-none"
+        style={{ color: "var(--ss-text-dim)" }}
+      >
+        {label}
+      </span>
+      <span className="text-[13px] font-bold text-white leading-none truncate max-w-full">
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function StatDivider() {
+  return <div className="w-px h-7 flex-shrink-0" style={{ background: "var(--ss-line)" }} />;
 }
