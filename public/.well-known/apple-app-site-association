@@ -1,1 +1,20 @@
-{"applinks":{"details":[{"appIDs":["83SXH4F442.au.com.skillsnap.app"],"components":[{"/":"/@*"}]}]}}
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["83SXH4F442.au.com.skillsnap.app"],
+        "components": [
+          {
+            "/": "/@*",
+            "comment": "Profile links. skillsnap.com.au/@username opens that profile in the app."
+          },
+          {
+            "/": "/auth/callback*",
+            "?": { "type": "recovery" },
+            "comment": "Password reset links only. The query constraint is the point of this entry: Google's OAuth callback uses the same path with ?code= and no type, and it has to stay in Safari or the web app's own sign-in cannot finish. iOS 13+ honours ?; older versions match on path alone and will claim both."
+          }
+        ]
+      }
+    ]
+  }
+}
