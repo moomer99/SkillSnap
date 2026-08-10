@@ -219,14 +219,6 @@ html.light {
 }
 .leaflet-bar a:hover { background: var(--ss-surface-2); }
 
-/* Caption clamp used by feed cards */
-.ss-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 /* No .dark override — :root is already the dark palette and the web app
    ships dark-only. Keeping the block would make `dark:` variants diverge
    from the base theme for no benefit. */

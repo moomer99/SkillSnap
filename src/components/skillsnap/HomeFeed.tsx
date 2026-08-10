@@ -12,11 +12,11 @@
 // From `sm` up the column has no horizontal padding, so a card measures the
 // full 600px. Phones keep a 12px gutter so cards don't touch the screen edge.
 // ─────────────────────────────────────────────
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useCallback, useEffect, useLayoutEffect, useMemo } from "react";
 import Image from "next/image";
 import {
   Heart, Bookmark, MessageCircle, Send, MapPin, Volume2, VolumeX,
-  Navigation, X, Play, MoreHorizontal, Share2,
+  Navigation, X, Play, MoreHorizontal,
 } from "lucide-react";
 import type { Post, Screen } from "@/types";
 import { formatLikes } from "@/mock-data/posts";
@@ -604,6 +604,126 @@ function FullscreenViewer({
   );
 }
 
+// ── Caption ────────────────────────────────────────────────────────────────
+// "…more" has to sit inline at the end of line two, which means the cut point
+// is a layout question, not a text-length one: it depends on the card width and
+// on how much room the "more" label itself takes on that last line. So the text
+// is measured against a hidden clamped clone and cut where the suffix still fits.
+//
+// Cutting on grapheme clusters (not string indices) is what keeps emoji intact —
+// "👩‍🚒" is one glyph but 7 UTF-16 units, and slicing mid-sequence yields either a
+// replacement box or an unrelated emoji, both of which change the rendered width
+// the measurement just settled on.
+const CAPTION_LINES = 2;
+const CAPTION_CLASS = "text-[14px] leading-relaxed";
+const MORE_CLASS = "text-[13px] font-semibold align-baseline";
+const ELLIPSIS = "… ";
+
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+function splitGraphemes(text: string): string[] {
+  if (typeof Intl !== "undefined" && typeof Intl.Segmenter === "function") {
+    const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+    return Array.from(segmenter.segment(text), (s) => s.segment);
+  }
+  // Code points at worst split a ZWJ sequence into its component emoji — never a
+  // lone surrogate, which is the case that actually renders as a broken box.
+  return Array.from(text);
+}
+
+function FeedCaption({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  // null once measured as fitting; otherwise the grapheme count to keep.
+  const [cut, setCut] = useState<number | null>(null);
+  const pRef = useRef<HTMLParagraphElement>(null);
+  const graphemes = useMemo(() => splitGraphemes(text), [text]);
+
+  useIsomorphicLayoutEffect(() => {
+    const host = pRef.current?.parentElement;
+    if (!pRef.current || !host) return;
+    // Bound to its own const so the closures below keep the non-null type.
+    const para: HTMLParagraphElement = pRef.current;
+
+    const probe = para.cloneNode(false) as HTMLParagraphElement;
+    probe.setAttribute("aria-hidden", "true");
+    probe.style.position = "absolute";
+    probe.style.visibility = "hidden";
+    probe.style.pointerEvents = "none";
+    probe.style.top = "0";
+    probe.style.left = "0";
+    probe.style.overflow = "hidden";
+    probe.style.setProperty("display", "-webkit-box");
+    probe.style.setProperty("-webkit-box-orient", "vertical");
+    probe.style.setProperty("-webkit-line-clamp", String(CAPTION_LINES));
+    host.appendChild(probe);
+
+    const suffix = document.createElement("span");
+    suffix.className = MORE_CLASS;
+    suffix.textContent = "more";
+
+    // The browser's own clamp decides how tall two lines are, so a line that an
+    // emoji has made taller is still compared against the right height.
+    function fits(body: string, withSuffix: boolean) {
+      probe.textContent = body;
+      if (withSuffix) probe.appendChild(suffix);
+      return probe.scrollHeight <= probe.clientHeight + 1;
+    }
+
+    function measure() {
+      probe.style.width = `${para.clientWidth}px`;
+      if (probe.clientWidth === 0) return;
+
+      if (fits(text, false)) { setCut(null); return; }
+
+      // Longest prefix that still leaves room for "… more" on line two.
+      let lo = 0, hi = graphemes.length - 1, best = 0;
+      while (lo <= hi) {
+        const mid = (lo + hi) >> 1;
+        if (fits(graphemes.slice(0, mid).join("").trimEnd() + ELLIPSIS, true)) {
+          best = mid;
+          lo = mid + 1;
+        } else {
+          hi = mid - 1;
+        }
+      }
+      setCut(best);
+    }
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(host);
+
+    // A web font swapping in re-flows the text without changing the card width,
+    // so the resize observer never hears about it — measure again once it lands.
+    let live = true;
+    document.fonts?.ready.then(() => { if (live) measure(); }).catch(() => {});
+
+    return () => { live = false; observer.disconnect(); probe.remove(); };
+  }, [text, graphemes]);
+
+  const clipped = cut === null ? text : graphemes.slice(0, cut).join("").trimEnd();
+
+  return (
+    <div className="px-4 pt-3">
+      <p ref={pRef} className={CAPTION_CLASS} style={{ color: "rgba(255,255,255,0.82)" }}>
+        {expanded || cut === null ? text : clipped + ELLIPSIS}
+        {cut !== null && (
+          <>
+            {expanded && " "}
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className={MORE_CLASS}
+              style={{ color: "var(--ss-text-dim)" }}
+            >
+              {expanded ? "less" : "more"}
+            </button>
+          </>
+        )}
+      </p>
+    </div>
+  );
+}
+
 // ── Feed card ──────────────────────────────────────────────────────────────
 function FeedCard({
   post, isLiked, isSaved, isFollowed, onLike, onSave, onProfileClick, onConnectClick,
@@ -621,7 +741,6 @@ function FeedCard({
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
   const [aspect, setAspect] = useState(DEFAULT_ASPECT);
-  const [captionExpanded, setCaptionExpanded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLElement>(null);
   // The media itself has been measured, so a late thumbnail probe must not
@@ -704,7 +823,6 @@ function FeedCard({
 
   const happyPct = author.happyPercent && author.happyPercent > 0 ? `${author.happyPercent}%` : null;
   const caption = post.caption ?? "";
-  const captionIsLong = caption.length > 140;
 
   async function handleSaveEdit() {
     const patch = { caption: editCaption, skill: editSkill || null, location: editLocation };
@@ -900,43 +1018,19 @@ function FeedCard({
               </div>
             </button>
 
-            <div className="pointer-events-auto flex-shrink-0">
-              {isOwnPost ? (
-                <button
-                  onClick={onShare}
-                  className="h-9 px-4 rounded-2xl font-semibold text-[13px] text-white flex items-center justify-center gap-1.5"
-                  style={{ background: "rgba(0,0,0,0.42)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.22)" }}
-                >
-                  <Share2 size={15} /> Share
-                </button>
-              ) : (
+            {/* Own posts get nothing in this slot — same as the mobile app.
+                Sharing still lives on the rail's Recommend button. */}
+            {!isOwnPost && (
+              <div className="pointer-events-auto flex-shrink-0">
                 <ConnectButton onClick={onConnectClick} size="sm" loading={connecting} />
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* ── Caption ── */}
-      {caption && (
-        <div className="px-4 pt-3">
-          <p
-            className={`text-[14px] leading-relaxed ${captionIsLong && !captionExpanded ? "ss-clamp-2" : ""}`}
-            style={{ color: "rgba(255,255,255,0.82)" }}
-          >
-            {caption}
-          </p>
-          {captionIsLong && (
-            <button
-              onClick={() => setCaptionExpanded((v) => !v)}
-              className="text-[13px] font-semibold mt-1"
-              style={{ color: "var(--ss-text-dim)" }}
-            >
-              {captionExpanded ? "less" : "more"}
-            </button>
-          )}
-        </div>
-      )}
+      {caption && <FeedCaption text={caption} />}
 
       <p className="px-4 pt-2 text-[11px]" style={{ color: "var(--ss-text-dim)" }}>
         {timeAgo(post.createdAt)}
