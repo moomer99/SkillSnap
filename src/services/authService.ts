@@ -154,6 +154,81 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
   return mapProfile(data as Record<string, unknown>);
 }
 
+// ── Username login ────────────────────────────────────────────────────────
+// Resolving a username to its email can't happen in the browser: the anon
+// role has column-level grants on `profiles` that exclude `email`, so
+// select("email") comes back 42501. The username-login Edge Function does the
+// resolution server-side and hands back a session, which keeps email
+// addresses out of reach of the client — the same model the mobile app uses.
+interface UsernameLoginResponse {
+  ok?: boolean;
+  reason?: string;
+  error?: string;
+  session?: { access_token?: string; refresh_token?: string };
+  access_token?: string;
+  refresh_token?: string;
+}
+
+async function logInWithUsername(username: string, password: string): Promise<AuthResult> {
+  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!baseUrl || !anonKey) {
+    return { success: false, error: "Sign-in is unavailable right now. Please try again." };
+  }
+
+  let payload: UsernameLoginResponse;
+  try {
+    const res = await fetch(`${baseUrl}/functions/v1/username-login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`,
+      },
+      body: JSON.stringify({ username, password }),
+    });
+    payload = (await res.json().catch(() => ({}))) as UsernameLoginResponse;
+    // The function answers 200 with ok:false for a refused login, so a bad
+    // status here means the request itself was malformed or the function is
+    // down — not that the credentials were wrong.
+    if (!res.ok) {
+      return { success: false, error: payload.error ?? "Couldn't sign you in. Please try again." };
+    }
+  } catch {
+    return { success: false, error: "Connection error. Please try again." };
+  }
+
+  if (!payload.ok) {
+    if (payload.reason === "username_not_found") {
+      return { success: false, error: "No account found with that username" };
+    }
+    // Every other refusal means the password didn't match, whatever the
+    // function chose to call it. Falling through to this rather than
+    // enumerating reason strings keeps us correct if the function adds one.
+    return { success: false, error: INVALID_CREDENTIALS_MESSAGE, invalidCredentials: true };
+  }
+
+  const accessToken = payload.session?.access_token ?? payload.access_token;
+  const refreshToken = payload.session?.refresh_token ?? payload.refresh_token;
+  if (!accessToken || !refreshToken) {
+    return { success: false, error: "Couldn't sign you in. Please try again." };
+  }
+
+  // Adopt the session the function minted, so the rest of the app sees a
+  // normal Supabase login from here on.
+  const sb = getSupabase();
+  const { data, error } = await sb.auth.setSession({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  });
+  if (error || !data.user) {
+    return { success: false, error: "Couldn't sign you in. Please try again." };
+  }
+
+  const user = await fetchProfile(data.user.id);
+  return { success: true, user: user ?? undefined };
+}
+
 export const authService = {
   // ── Google OAuth ────────────────────────────────────────────────────────
   // Starts the Google OAuth flow. Supabase redirects back to /auth/callback,
@@ -199,13 +274,21 @@ export const authService = {
     return { success: true, user: user ?? undefined };
   },
 
+  // Accepts an email address or a username, matching the mobile app. A leading
+  // "@" is optional and stripped, so the presence of "@" alone can't decide
+  // which one it is — "@jo_smith" contains one and is still a username.
   async logIn(emailOrUsername: string, password: string): Promise<AuthResult> {
     const sb = getSupabase();
-    const loginEmail = emailOrUsername.trim();
-    // Require email — username-based login removed for security (exposes emails)
-    if (!loginEmail.includes("@") || loginEmail.startsWith("@")) {
-      return { success: false, error: "Please use your email address to log in." };
+    const raw = emailOrUsername.trim();
+    if (!raw) return { success: false, error: "Please enter your email or username." };
+
+    if (!(raw.includes("@") && !raw.startsWith("@"))) {
+      const username = raw.replace(/^@/, "").toLowerCase();
+      if (!username) return { success: false, error: "Please enter your email or username." };
+      return logInWithUsername(username, password);
     }
+
+    const loginEmail = raw;
     const { data, error } = await sb.auth.signInWithPassword({ email: loginEmail, password });
     if (error) {
       // Supabase says "Invalid login credentials", which reads like a system
