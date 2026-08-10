@@ -249,7 +249,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                 type={mode === "login" ? "text" : "email"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={mode === "login" ? "you@email.com or @username" : "you@email.com"}
+                placeholder={mode === "login" ? "Email or username" : "you@email.com"}
                 autoComplete={mode === "signup" ? "email" : "username"}
                 required
                 className="h-12 rounded-xl border border-[#26203f] px-4 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
