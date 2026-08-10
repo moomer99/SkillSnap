@@ -4,6 +4,8 @@ import { Eye, EyeOff, CheckCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import SkillSnapLogo from "@/components/skillsnap/shared/SkillSnapLogo";
+import PasswordRequirements from "@/components/skillsnap/shared/PasswordRequirements";
+import { checkPassword, PASSWORD_ERROR } from "@/lib/password";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -73,7 +75,7 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError("");
     if (!password || !confirm) { setError("Please fill in both fields."); return; }
-    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    if (!checkPassword(password).valid) { setError(PASSWORD_ERROR); return; }
     if (password !== confirm) { setError("Passwords do not match."); return; }
 
     setSaving(true);
@@ -152,6 +154,7 @@ export default function ResetPasswordPage() {
                     {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
+                <PasswordRequirements password={password} dark />
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -186,7 +189,7 @@ export default function ResetPasswordPage() {
 
               <button
                 type="submit"
-                disabled={saving || !sessionReady}
+                disabled={saving || !sessionReady || !checkPassword(password).valid || !confirm}
                 className="w-full h-14 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 mt-2"
                 style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 20px rgba(108,71,255,0.40)" }}
               >

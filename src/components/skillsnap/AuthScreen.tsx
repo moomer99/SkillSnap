@@ -12,6 +12,8 @@ import type { Screen } from "@/types";
 import { APP_CONFIG } from "@/constants/config";
 import { authService } from "@/services/authService";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
+import PasswordRequirements from "./shared/PasswordRequirements";
+import { checkPassword, PASSWORD_ERROR } from "@/lib/password";
 import { useAppState } from "@/state/AppState";
 import { useToast } from "./shared/Toast";
 
@@ -138,6 +140,12 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
     setError(null);
     if (mode === "signup" && !displayName.trim()) {
       setError("Full name is required.");
+      return;
+    }
+    // Belt-and-braces: the submit button is already disabled below, but a
+    // form can still be submitted by pressing Enter in a text field.
+    if (mode === "signup" && !checkPassword(password).valid) {
+      setError(PASSWORD_ERROR);
       return;
     }
     setLoading(true);
@@ -269,6 +277,9 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              {/* Requirements only apply when choosing a password, not when
+                  typing an existing one at login */}
+              {mode === "signup" && <PasswordRequirements password={password} />}
             </div>
 
             {/* Forgot password link — login only */}
@@ -331,7 +342,10 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
             {/* Submit */}
             <button
               type="submit"
-              disabled={loading || !email || !password}
+              disabled={
+                loading || !email || !password ||
+                (mode === "signup" && !checkPassword(password).valid)
+              }
               className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
               style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
             >
