@@ -84,6 +84,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   const [forgotSent, setForgotSent] = useState(false);
   const [forgotError, setForgotError] = useState<string | null>(null);
   const [showGoogleHint, setShowGoogleHint] = useState(false);
+  const [showGoogleSuggestion, setShowGoogleSuggestion] = useState(false);
 
   const { dispatch, state } = useAppState();
   const { showToast } = useToast();
@@ -169,11 +170,17 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
       clearTimeout(loadingTimeout);
 
       if (!result.success) {
-        // authService has already turned Supabase's wording into something a
-        // person can act on, so this just decides whether to add the
-        // Google-only-account hint on top.
-        if (mode === "login" && result.invalidCredentials) {
+        // The provider notice is only for errors Supabase actually attributes
+        // to a provider. A wrong password is not one of those — see
+        // PROVIDER_ERROR_CODES — so it now gets the plain credential error.
+        if (mode === "login" && result.providerMismatch) {
           setShowGoogleHint(true);
+        }
+        // Offered as a question rather than a diagnosis: a failed password
+        // login genuinely might be a Google-only account, and nothing in the
+        // response can tell us either way.
+        if (mode === "login" && result.invalidCredentials) {
+          setShowGoogleSuggestion(true);
         }
         setError(result.error ?? "Something went wrong. Please try again.");
       } else {
@@ -206,7 +213,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         {/* Header */}
         <div className="flex items-center gap-3 px-5 pt-5 pb-2">
           <button
-            onClick={() => { setMode("landing"); setError(null); setShowGoogleHint(false); }}
+            onClick={() => { setMode("landing"); setError(null); setShowGoogleHint(false); setShowGoogleSuggestion(false); }}
             className="w-9 h-9 flex items-center justify-center rounded-full bg-[#1c1733] text-[#9d97b5]"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -333,10 +340,17 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
               </div>
             )}
 
-            {/* Error */}
+            {/* Error — always shown. It used to be suppressed whenever the
+                Google notice appeared, so a mistyped password reported only
+                the Google message and never what had actually gone wrong. */}
             {error && !showGoogleHint && (
               <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
                 <p className="text-sm text-red-400">{error}</p>
+                {showGoogleSuggestion && (
+                  <p className="text-xs mt-1.5" style={{ color: "var(--ss-text-muted)" }}>
+                    Signed up with Google? Use <strong>Continue with Google</strong> above.
+                  </p>
+                )}
               </div>
             )}
 
@@ -362,7 +376,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
               {mode === "signup" ? "Already have an account? " : "Don't have an account? "}
               <button
                 type="button"
-                onClick={() => { setMode(mode === "signup" ? "login" : "signup"); setError(null); setShowGoogleHint(false); }}
+                onClick={() => { setMode(mode === "signup" ? "login" : "signup"); setError(null); setShowGoogleHint(false); setShowGoogleSuggestion(false); }}
                 className="text-[#6c47ff] font-semibold"
               >
                 {mode === "signup" ? "Log in" : "Sign up"}

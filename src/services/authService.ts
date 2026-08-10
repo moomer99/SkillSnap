@@ -10,14 +10,36 @@ export interface AuthResult {
   user?: User;
   error?: string;
   /**
-   * Set when the password didn't match. `error` is already a friendly string
-   * by then, so callers can't sniff the reason out of the message — the auth
-   * screen needs this to decide whether to offer the Google-account hint.
+   * Set when sign-in was refused as a credential problem. Deliberately says
+   * nothing about *why*: see PROVIDER_ERROR_CODES below.
    */
   invalidCredentials?: boolean;
+  /**
+   * Set only when Supabase names an actual provider/SSO problem. This is not
+   * the same as "the account signed up with Google" — nothing tells us that.
+   */
+  providerMismatch?: boolean;
 }
 
 export const INVALID_CREDENTIALS_MESSAGE = "Incorrect email or password. Please try again.";
+
+/**
+ * Codes that genuinely mean "this account can't authenticate this way".
+ *
+ * Notably absent is any code for "signed up with Google, has no password".
+ * GoTrue answers `invalid_credentials` for a wrong password, an unknown
+ * email, and a passwordless OAuth account alike — collapsing all three on
+ * purpose, so the response can't be used to enumerate accounts or discover
+ * how someone registered. Any UI that claims to know the account used Google
+ * is therefore guessing, and will be wrong for every user who simply typed
+ * their password wrong.
+ */
+const PROVIDER_ERROR_CODES = new Set([
+  "provider_disabled",
+  "email_provider_disabled",
+  "oauth_provider_not_supported",
+  "user_sso_managed",
+]);
 
 function mapProfile(profile: Record<string, unknown>): User {
   try {
@@ -283,10 +305,16 @@ export const authService = {
     const loginEmail = raw;
     const { data, error } = await sb.auth.signInWithPassword({ email: loginEmail, password });
     if (error) {
-      // Supabase says "Invalid login credentials", which reads like a system
-      // fault rather than a typo. Translate here rather than at the call site
-      // so the raw string can't reach a screen that forgets to map it.
-      if ((error.message ?? "").toLowerCase().includes("invalid login credentials")) {
+      // Prefer error.code — Supabase's own guidance is to branch on the code
+      // rather than match the message, which is free to be reworded.
+      const code = error.code ?? "";
+      if (PROVIDER_ERROR_CODES.has(code)) {
+        return { success: false, error: error.message, providerMismatch: true };
+      }
+      // The message check is a fallback: auth-js did not always populate
+      // `code` on this error, so an older server would otherwise slip past.
+      if (code === "invalid_credentials" ||
+          (error.message ?? "").toLowerCase().includes("invalid login credentials")) {
         return { success: false, error: INVALID_CREDENTIALS_MESSAGE, invalidCredentials: true };
       }
       return { success: false, error: error.message };
