@@ -8,6 +8,31 @@ export async function GET(request: Request) {
   const error = searchParams.get("error");
   const errorDescription = searchParams.get("error_description");
 
+  /**
+   * Password recovery is forwarded whole, params and all.
+   *
+   * A recovery link that arrives in the verify form (?token_hash=, or ?token=
+   * from an older template) carried nothing this route reads, so it fell
+   * through to the redirect at the bottom and was dropped on the home page -
+   * or, when it did reach /reset-password, arrived stripped of the one thing
+   * that page needed. Hence "No reset token found" on a link that had a
+   * perfectly good token in it.
+   *
+   * Not exchanged here: the token has to be redeemed by the client that will
+   * set the password, so that the session it opens is the one the form writes
+   * against. This route hands it over untouched instead.
+   */
+  const isRecovery =
+    searchParams.get("type") === "recovery" ||
+    searchParams.has("token_hash") ||
+    searchParams.has("token");
+
+  if (isRecovery) {
+    const target = new URL("/reset-password", origin);
+    target.search = searchParams.toString();
+    return NextResponse.redirect(target);
+  }
+
   if (error) {
     console.error("[auth/callback] OAuth error:", error, errorDescription);
     return NextResponse.redirect(

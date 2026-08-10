@@ -52,12 +52,45 @@ export default function ResetPasswordPage() {
         return;
       }
 
+      const query = new URLSearchParams(window.location.search);
+
+      // Supabase reports a dead link in the URL rather than in the body: an
+      // expired or already-used one arrives as ?error=access_denied with a
+      // description. Read before the token branches, because there is no token
+      // on those and the reader would otherwise be told nothing was found.
+      const linkError = query.get("error_description") ?? query.get("error");
+      if (linkError) {
+        setError(`${linkError}. Please request a new reset link.`);
+        return;
+      }
+
       // ?code= landed directly on this page
-      const code = new URLSearchParams(window.location.search).get("code");
+      const code = query.get("code");
       if (code) {
         window.history.replaceState({}, "", window.location.pathname);
         const { error: exchErr } = await sb.auth.exchangeCodeForSession(code);
         if (exchErr) {
+          setError("Invalid or expired reset link. Please request a new one.");
+          return;
+        }
+        setSessionReady(true);
+        return;
+      }
+
+      // ?token_hash= (or ?token=) is the verify form, which templates built on
+      // {{ .TokenHash }} produce and which /auth/callback forwards here
+      // untouched. It was the one shape this page did not know: no hash, no
+      // session, no code, so a perfectly good link reported "No reset token
+      // found". Unlike a PKCE code it carries no verifier, so any browser can
+      // redeem it.
+      const tokenHash = query.get("token_hash") ?? query.get("token");
+      if (tokenHash) {
+        window.history.replaceState({}, "", window.location.pathname);
+        const { error: verifyErr } = await sb.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "recovery",
+        });
+        if (verifyErr) {
           setError("Invalid or expired reset link. Please request a new one.");
           return;
         }
