@@ -93,7 +93,10 @@ export default function LegalPage({
       <header className="sticky top-0 z-40 bg-[var(--ss-nav-bg)] backdrop-blur-sm border-b border-[color:var(--ss-line)]">
         <div className="max-w-2xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
           <Link href="/" aria-label="SkillSnap home" className="flex items-center">
-            <SkillSnapLogo variant="full" size="xs" />
+            {/* Legal pages inherit the theme-aware --ss-* surface (dark-first),
+                so use the theme-proof brand-purple mark rather than a fixed
+                dark/light fill that would vanish on one of the two themes. */}
+            <SkillSnapLogo variant="full" size="xs" anySurface />
           </Link>
           <nav className="flex items-center gap-4">
             {LINKS.map((link) => (

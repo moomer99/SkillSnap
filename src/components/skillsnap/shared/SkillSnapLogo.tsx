@@ -1,85 +1,169 @@
 "use client";
+import { useId } from "react";
 
 interface LogoProps {
   variant?: "full" | "icon";
   size?: "xs" | "sm" | "md" | "lg" | "xl";
+  /** true on dark surfaces (white letters + gradient K), false on light (solid #0d0a1a). */
   dark?: boolean;
+  /**
+   * Render the brand-purple "any-surface" artwork instead of the dark/light
+   * pair. #6c47ff passes WCAG on both #0d0a1a (3.70) and #f8f7f5 (4.92), so it
+   * stays legible without knowing the surface — use it on theme-aware surfaces
+   * (e.g. the legal pages) where `dark` can't be pinned. Takes precedence over `dark`.
+   */
+  anySurface?: boolean;
 }
 
-// Design-system colours
-const BRAND      = "#6c47ff";
-const SLASH      = "#1a1a1a";
-const SLASH_DARK = "rgba(255,255,255,0.75)";
+type Tone = "onDark" | "onLight" | "brand";
 
-// Full wordmark: height → width derived from viewBox aspect ratio ~4.66:1
-const FULL_HEIGHTS = { xs: 16, sm: 20, md: 26, lg: 36, xl: 50 };
-// Icon sizes (square)
-const ICON_SIZES   = { xs: 28, sm: 36, md: 44, lg: 64, xl: 88 };
+// Artwork inlined from public/{wordmark,mark}-{dark,light}-surface.svg.
+// Kept inline (not <img>) so the SVGs paint with the first render — no flash —
+// and so fills follow the `dark` prop. Gradient/mask ids are suffixed with a
+// per-instance useId() because several logos render on one page and SVG ids
+// are document-global; without this, later instances inherit the first one's
+// gradient (and mask).
 
-function Wordmark({ height, dark: onDark }: { height: number; dark: boolean }) {
-  const fill  = onDark ? "#ffffff" : BRAND;
-  const slash = onDark ? SLASH_DARK : SLASH;
-  const w = Math.round(height * (1315 / 282));
+// Full wordmark viewBox 2416.07 × 468.13 → aspect 5.1611. Size by HEIGHT and
+// let width follow, or the wider new mark renders shorter than the old one.
+const FULL_HEIGHTS = { xs: 16, sm: 20, md: 26, lg: 36, xl: 50 } as const;
+const WORDMARK_RATIO = 2416.07 / 468.13; // 5.1611
+
+// Icon mark viewBox 863 × 907 → aspect 0.9515 (slightly taller than wide).
+const ICON_HEIGHTS = { xs: 28, sm: 36, md: 44, lg: 64, xl: 88 } as const;
+const ICON_RATIO = 863 / 907; // 0.9515
+
+const INK = "#0d0a1a"; // solid ink: whole wordmark on light, the S on light marks
+const WHITE = "#ffffff";
+const BRAND = "#6c47ff"; // any-surface: theme-proof, passes on both backgrounds
+
+/** Solid fill for the letters (wordmark) / the S (mark) per tone. */
+function inkFor(tone: Tone) {
+  return tone === "onDark" ? WHITE : tone === "brand" ? BRAND : INK;
+}
+
+function Wordmark({ uid, height, tone }: { uid: string; height: number; tone: Tone }) {
+  const letter = inkFor(tone);
+  // K is the gradient only on dark surfaces; solid (ink or brand) otherwise.
+  const kFill = tone === "onDark" ? `url(#${uid}-k)` : letter;
   return (
     <svg
-      width={w}
       height={height}
-      viewBox="240 488 1315 282"
-      fill="none"
+      width={Math.round(height * WORDMARK_RATIO)}
+      viewBox="169.86 406.3 2416.07 468.13"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="SkillSnap"
       style={{ display: "block", flexShrink: 0 }}
     >
-      {/* S */}
-      <path fill={fill} d="M281.27,704.81c-24.18-11.12-33.91-32.8-34.19-64.21v-.28h53.09v.83c.28,18.9,9.45,28.91,31.41,28.91,18.62,0,26.41-8.34,26.41-20.01,0-5.28-1.67-9.17-5.84-12.23-8.06-5.84-21.96-8.62-37.25-11.95-15.01-3.34-30.58-7.78-42.81-15.84-12.79-8.62-20.57-21.68-20.57-43.37,0-11.95,2.78-22.24,8.62-31.41,11.12-18.35,33.91-29.47,67.83-29.47,51.15,0,77.56,22.79,77.84,65.33v.28h-50.87v-.28c-.83-16.68-8.62-24.46-28.08-24.46-17.51,0-23.91,8.34-23.91,18.07,0,4.73,1.67,8.9,5.84,11.4,7.51,5.28,20.85,7.78,35.86,11.12,15.29,3.34,30.86,7.78,43.64,16.68,12.79,8.62,21.13,22.24,21.13,44.2,0,39.2-26.69,65.33-79.23,65.33-20.57,0-36.97-2.78-48.93-8.62Z"/>
-      {/* SK icon — left stroke */}
-      <polygon fill={fill} points="481.56 495.03 428.93 495.02 428.93 603.58 481.56 544.78 481.56 495.03"/>
-      {/* SK icon — right lower */}
-      <polygon fill={fill} points="625.31 709.52 556.97 598.14 520.89 638.46 562.01 709.52 625.31 709.52"/>
-      {/* SK icon — diagonal slash */}
-      <polygon fill={slash} points="552.38 495.17 428.84 633.4 428.89 709.26 625.53 495.17 552.38 495.17"/>
-      {/* i */}
-      <path fill={fill} d="M640.9,513.84c0-18.9,9.73-25.3,30.3-25.3s30.3,6.39,30.3,25.3-9.45,25.02-30.3,25.02c-22.24,0-30.3-6.12-30.3-25.02ZM650.91,550.81c6.39.83,14.73,1.39,20.29,1.39,3.06,0,6.12-.28,9.73-.56,7.51-.28,14.46-1.67,16.4-2.78v160.4h-52.54v-160.12c1.11.83,2.78,1.39,6.12,1.67Z"/>
-      {/* l */}
-      <path fill={fill} d="M716.76,495.21h51.15v214.05h-51.15v-214.05Z"/>
-      {/* l */}
-      <path fill={fill} d="M787.31,495.21h51.15v214.05h-51.15v-214.05Z"/>
-      {/* S */}
-      <path fill={fill} d="M892,704.81c-24.18-11.12-33.91-32.8-34.19-64.21v-.28h53.09v.83c.28,18.9,9.45,28.91,31.41,28.91,18.62,0,26.41-8.34,26.41-20.01,0-5.28-1.67-9.17-5.84-12.23-8.06-5.84-21.96-8.62-37.25-11.95-15.01-3.34-30.58-7.78-42.81-15.84-12.79-8.62-20.57-21.68-20.57-43.37,0-11.95,2.78-22.24,8.62-31.41,11.12-18.35,33.91-29.47,67.83-29.47,51.15,0,77.56,22.79,77.84,65.33v.28h-50.87v-.28c-.83-16.68-8.62-24.46-28.08-24.46-17.51,0-23.91,8.34-23.91,18.07,0,4.73,1.67,8.9,5.84,11.4,7.51,5.28,20.85,7.78,35.86,11.12,15.29,3.34,30.86,7.78,43.64,16.68,12.79,8.62,21.13,22.24,21.13,44.2,0,39.2-26.69,65.33-79.23,65.33-20.57,0-36.97-2.78-48.93-8.62Z"/>
-      {/* n */}
-      <path fill={fill} d="M1039.81,709.26v-161.23h43.09l4.73,27.24c8.62-18.62,25.02-30.58,50.04-30.58,36.14,0,54.76,22.79,54.76,61.99v102.58h-51.15v-88.12c0-20.01-5-32.8-23.63-32.8s-26.41,14.46-26.41,36.69v84.23h-51.43Z"/>
-      {/* a */}
-      <path fill={fill} d="M1263.94,713.43c-35.03,0-51.98-16.68-51.98-43.37,0-19.74,8.06-31.97,21.13-40.03,4.45-2.5,8.62-5,13.07-6.39,8.9-3.34,20.01-5.56,37.53-8.06,24.46-3.34,34.47-5.84,34.47-16.4,0-9.45-5.28-15.57-22.79-15.57s-26.13,7.78-26.96,23.35h-51.43c2.5-37.53,27.8-62.27,78.39-62.27,17.79,0,31.97,2.5,42.53,7.78,21.68,10.01,30.02,28.91,30.02,53.93v102.85h-41.7l-5.56-26.96c-9.17,18.35-26.41,31.13-56.71,31.13ZM1302.3,671.73c10.01-6.39,16.12-16.68,16.12-27.24v-9.73c-4.73,3.61-11.95,5.56-21.68,7.51-13.9,2.5-18.9,3.89-24.18,7.23-4.45,3.34-6.67,7.51-6.67,12.79,0,9.17,6.39,14.18,18.62,14.18,6.67,0,12.51-1.39,17.79-4.73Z"/>
-      {/* p */}
-      <path fill={fill} d="M1437.25,685.91v78.39h-49.76v-216.27h43.09l4.73,27.8c8.06-18.9,24.18-31.13,48.65-31.13,39.75,0,63.66,28.08,63.66,83.67v4.73c0,18.35-2.78,32.8-8.34,44.76-10.84,23.35-30.58,34.47-55.04,34.47s-38.92-9.73-46.98-26.41ZM1497.57,632.26v-3.89c0-28.63-12.79-40.86-30.3-40.86s-30.58,13.34-30.58,40.58v3.61c0,25.02,11.95,38.36,30.3,38.36s30.58-12.51,30.58-37.81Z"/>
+      {tone === "onDark" && (
+        <defs>
+          <linearGradient id={`${uid}-k`} x1="637.5" y1="781.61" x2="637.5" y2="401.57" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor="#511dec" />
+            <stop offset=".17" stopColor="#5520ec" />
+            <stop offset=".35" stopColor="#612cee" />
+            <stop offset=".54" stopColor="#763ff0" />
+            <stop offset=".72" stopColor="#935af3" />
+            <stop offset=".91" stopColor="#b87cf8" />
+            <stop offset="1" stopColor="#ce90fb" />
+          </linearGradient>
+        </defs>
+      )}
+      <path fill={letter} d="M474.56,406.32v79.2h-181.84c-8.92,0-21.14,14.6-22.63,23.47-4.13,24.5,3.31,43.83,30.04,46.51,44.09,4.42,87.08-7.53,130.61,9.67,94.04,37.15,76.27,218.75-38.33,218.75h-211.38v-79.2h187.38c9.75,0,21.6-15.49,22.91-25.03,2.88-20.85-2.85-42.31-26.6-44.97-64.93-7.27-157.8,20.99-186.38-62.69-23.66-69.25,1.09-165.7,88.54-165.7h207.68Z" />
+      <path fill={letter} d="M1552.69,406.32v79.2h-181.84c-8.92,0-21.14,14.6-22.63,23.47-4.13,24.5,3.31,43.83,30.04,46.51,44.09,4.42,87.08-7.53,130.61,9.67,94.04,37.15,76.27,218.75-38.33,218.75h-211.38v-79.2h187.38c9.75,0,21.6-15.49,22.91-25.03,2.88-20.85-2.85-42.31-26.6-44.97-64.93-7.27-157.8,20.99-186.38-62.69-23.66-69.25,1.09-165.7,88.54-165.7h207.68Z" />
+      <path fill={letter} d="M2377.61,783.91v90.25h-92.3v-368.39c56.56,2.74,116.51-3.64,172.69-.08,107.32,6.8,148.43,101.26,117.67,196.77-28.51,88.51-121.13,83.49-198.05,81.44ZM2377.61,715.76h54.46c69.72,0,76.55-118.58,19.33-137.17-4.09-1.33-17.75-4.66-21.18-4.66h-52.61v141.83Z" />
+      <path fill={letter} d="M1947.67,702.47c-30.76-95.5,10.35-189.96,117.67-196.77,56.17-3.56,116.13,2.82,172.69.08v278.13h-92.3s0,0,0,0c-76.93,2.05-169.55,7.07-198.05-81.44ZM2145.72,573.93h-52.61c-3.43,0-17.09,3.33-21.18,4.66-57.21,18.59-50.39,137.17,19.33,137.17h54.46s0-141.83,0-141.83Z" />
+      <path fill={letter} d="M1902.12,783.91h-92.3v-174.06c0-1.29-4.68-14.34-5.81-16.31-3.87-6.7-13.01-12.52-20.36-14.68-2.2-.65-13.99-3.09-15.36-3.09h-61.84v208.14h-92.3v-278.13h191.07c50.56,0,96.92,41.24,96.92,93.02v185.11Z" />
+      <rect fill={letter} x="971.1" y="406.32" width="92.3" height="377.6" />
+      <rect fill={letter} x="1111.07" y="406.32" width="92.3" height="377.6" />
+      <rect fill={letter} x="831.14" y="505.78" width="92.3" height="278.13" />
+      <rect fill={letter} x="831.14" y="406.32" width="92.3" height="71.84" />
+      <polygon fill={kFill} points="654.69 783.89 783.78 783.89 616.44 595.63 783.19 406.34 655.71 406.34 491.22 595.63 654.69 783.89" />
     </svg>
   );
 }
 
-function IconMark({ size: px, dark: onDark }: { size: number; dark: boolean }) {
-  const fill   = onDark ? "#ffffff" : BRAND;
-  const slash  = onDark ? SLASH_DARK : SLASH;
-  const bg     = onDark ? "rgba(255,255,255,0.08)" : "#eeebff";
-  const border = onDark ? "rgba(108,71,255,0.6)"   : "#c4b5fd";
+function Mark({ uid, height, tone }: { uid: string; height: number; tone: Tone }) {
+  const sFill = inkFor(tone); // arcs + K stay gradients in every tone; only the S changes
   return (
     <svg
-      width={px}
-      height={px}
-      viewBox="424 490 206 224"
-      fill="none"
+      height={height}
+      width={Math.round(height * ICON_RATIO)}
+      viewBox="190 187 863 907"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="SkillSnap"
       style={{ display: "block", flexShrink: 0 }}
     >
-      <rect x="424" y="490" width="206" height="224" rx="36" fill={bg} stroke={border} strokeWidth="4"/>
-      <polygon fill={fill}  points="481.56 495.03 428.93 495.02 428.93 603.58 481.56 544.78 481.56 495.03"/>
-      <polygon fill={fill}  points="625.31 709.52 556.97 598.14 520.89 638.46 562.01 709.52 625.31 709.52"/>
-      <polygon fill={slash} points="552.38 495.17 428.84 633.4 428.89 709.26 625.53 495.17 552.38 495.17"/>
+      <defs>
+        {/* grayscale gradient that fades the upper arc through the mask */}
+        <linearGradient id={`${uid}-mg`} x1="210.72" y1="350.99" x2="1053.94" y2="350.99" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#000" />
+          <stop offset=".06" stopColor="#151515" />
+          <stop offset=".26" stopColor="#5b5b5b" />
+          <stop offset=".45" stopColor="#959595" />
+          <stop offset=".63" stopColor="#c3c3c3" />
+          <stop offset=".78" stopColor="#e3e3e3" />
+          <stop offset=".91" stopColor="#f7f7f7" />
+          <stop offset="1" stopColor="#fff" />
+        </linearGradient>
+        <mask id={`${uid}-mask`} x="210.72" y="186.38" width="843.22" height="329.22" maskUnits="userSpaceOnUse">
+          <path fill={`url(#${uid}-mg)`} d="M1029.1,515.6c-9.99,0-19.4-6.06-23.2-15.94-60.55-157.66-214.73-263.59-383.66-263.59-153.81,0-293.53,84.82-364.64,221.37-6.34,12.17-21.34,16.9-33.51,10.56-12.17-6.34-16.9-21.34-10.56-33.51,38.31-73.57,95.87-135.58,166.47-179.32,72.63-45,156.39-68.79,242.24-68.79,94.98,0,186.17,28.68,263.72,82.94,37.34,26.13,70.56,57.57,98.71,93.44,28.42,36.21,51.17,76.27,67.61,119.08,4.92,12.81-1.48,27.18-14.29,32.1-2.93,1.13-5.94,1.66-8.9,1.66Z" />
+        </mask>
+        <linearGradient id={`${uid}-a2`} x1="632.33" y1="509.65" x2="632.33" y2="192.33" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#ce90fb" />
+          <stop offset=".14" stopColor="#c789fa" />
+          <stop offset=".35" stopColor="#b478f7" />
+          <stop offset=".59" stopColor="#965cf4" />
+          <stop offset=".85" stopColor="#6c36ef" />
+          <stop offset="1" stopColor="#511dec" />
+        </linearGradient>
+        <linearGradient id={`${uid}-a3`} x1="465.61" y1="1088.48" x2="465.61" y2="709.78" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#511dec" />
+          <stop offset=".33" stopColor="#7740f0" />
+          <stop offset="1" stopColor="#ce90fb" />
+        </linearGradient>
+        <linearGradient id={`${uid}-k`} x1="776.82" y1="806.97" x2="776.82" y2="457.06" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#511dec" />
+          <stop offset=".17" stopColor="#5520ec" />
+          <stop offset=".35" stopColor="#612cee" />
+          <stop offset=".54" stopColor="#763ff0" />
+          <stop offset=".72" stopColor="#935af3" />
+          <stop offset=".91" stopColor="#b87cf8" />
+          <stop offset="1" stopColor="#ce90fb" />
+        </linearGradient>
+      </defs>
+      <g mask={`url(#${uid}-mask)`}>
+        <path
+          fill="none"
+          stroke={`url(#${uid}-a2)`}
+          strokeWidth={37.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M235.57,445.97c72.63-139.49,218.53-234.74,386.67-234.74,185.59,0,344.07,116.04,406.85,279.53"
+        />
+      </g>
+      <path
+        fill="none"
+        stroke={`url(#${uid}-a3)`}
+        strokeWidth={41}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M715.24,1059.94c-26.77,5.28-54.44,8.04-82.76,8.04-204.91,0-376-144.82-416.49-337.7"
+      />
+      <path fill={sFill} d="M624.89,450.96v73.85h-169.55c-8.31,0-19.71,13.61-21.1,21.88-3.85,22.84,3.08,40.87,28.01,43.36,41.11,4.12,81.2-7.02,121.79,9.01,87.69,34.64,71.11,203.98-35.74,203.98h-197.1v-73.85h174.72c9.09,0,20.14-14.45,21.37-23.34,2.68-19.44-2.65-39.45-24.8-41.93-60.55-6.78-147.14,19.57-173.79-58.46-22.06-64.57,1.02-154.51,82.56-154.51h193.65Z" />
+      <polygon fill={`url(#${uid}-k)`} points="792.86 803.02 913.22 803.02 757.19 627.48 912.67 450.98 793.81 450.98 640.43 627.48 792.86 803.02" />
     </svg>
   );
 }
 
-export default function SkillSnapLogo({ variant = "full", size = "md", dark = false }: LogoProps) {
-  if (variant === "icon") return <IconMark size={ICON_SIZES[size]} dark={dark} />;
-  return <Wordmark height={FULL_HEIGHTS[size]} dark={dark} />;
+export default function SkillSnapLogo({
+  variant = "full",
+  size = "md",
+  dark = false,
+  anySurface = false,
+}: LogoProps) {
+  // useId() can contain ":" which is awkward inside url(#…) refs — strip it.
+  const uid = useId().replace(/:/g, "");
+  const tone: Tone = anySurface ? "brand" : dark ? "onDark" : "onLight";
+  if (variant === "icon") return <Mark uid={uid} height={ICON_HEIGHTS[size]} tone={tone} />;
+  return <Wordmark uid={uid} height={FULL_HEIGHTS[size]} tone={tone} />;
 }
