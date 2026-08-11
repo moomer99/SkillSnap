@@ -6,6 +6,7 @@
 // desktop (1280px+). Dark-first, matching the mobile app.
 // ─────────────────────────────────────────────
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Menu, X, ArrowRight, Play, Sparkles } from "lucide-react";
 import type { Screen } from "@/types";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
@@ -730,21 +731,35 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
 
             <nav className="flex flex-wrap gap-x-8 gap-y-3" aria-label="Footer">
               {([
-                ["About", "about"],
-                ["Terms", "terms"],
-                ["Privacy", "terms"],
-                ["Help", "help"],
-                ["Contact", "contact"],
-              ] as [string, Screen][]).map(([label, screen], i) => (
-                <button
-                  key={`${label}-${i}`}
-                  onClick={() => onNavigate(screen)}
-                  className="text-[14px] font-medium transition-opacity hover:opacity-70"
-                  style={{ color: "var(--ss-text-muted)" }}
-                >
-                  {label}
-                </button>
-              ))}
+                // Real Next.js routes (server-rendered legal/help pages) use
+                // <Link>; the marketing screens stay on the in-app router.
+                { label: "About", screen: "about" },
+                { label: "Terms", href: "/terms" },
+                { label: "Privacy", href: "/privacy" },
+                { label: "Help", href: "/help" },
+                { label: "Delete account", href: "/delete-account" },
+                { label: "Contact", screen: "contact" },
+              ] as { label: string; href?: string; screen?: Screen }[]).map((item) =>
+                item.href ? (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="text-[14px] font-medium transition-opacity hover:opacity-70"
+                    style={{ color: "var(--ss-text-muted)" }}
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <button
+                    key={item.label}
+                    onClick={() => onNavigate(item.screen!)}
+                    className="text-[14px] font-medium transition-opacity hover:opacity-70"
+                    style={{ color: "var(--ss-text-muted)" }}
+                  >
+                    {item.label}
+                  </button>
+                )
+              )}
             </nav>
           </div>
 
