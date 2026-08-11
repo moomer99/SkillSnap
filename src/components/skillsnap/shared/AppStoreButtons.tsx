@@ -69,11 +69,11 @@ export default function AppStoreButtons({
         href={APP_STORE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-3 px-5 transition-transform active:scale-[0.97] hover:-translate-y-0.5"
+        className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-2.5 sm:gap-3 px-3 sm:px-5 transition-transform active:scale-[0.97] hover:-translate-y-0.5"
         style={style}
       >
         <AppleIcon size={24} />
-        <span className="flex flex-col items-start leading-none">
+        <span className="flex flex-col items-start leading-none whitespace-nowrap">
           <span className="text-[10px] opacity-70">Download on the</span>
           <span className="text-[15px] font-bold">App Store</span>
         </span>
@@ -83,11 +83,11 @@ export default function AppStoreButtons({
         href={PLAY_STORE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-3 px-5 transition-transform active:scale-[0.97] hover:-translate-y-0.5"
+        className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-2.5 sm:gap-3 px-3 sm:px-5 transition-transform active:scale-[0.97] hover:-translate-y-0.5"
         style={style}
       >
         <PlayIcon size={22} />
-        <span className="flex flex-col items-start leading-none">
+        <span className="flex flex-col items-start leading-none whitespace-nowrap">
           <span className="text-[10px] opacity-70">GET IT ON</span>
           <span className="text-[15px] font-bold">Google Play</span>
         </span>
