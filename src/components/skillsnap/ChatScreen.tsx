@@ -40,6 +40,38 @@ const QUICK_REPLIES_CLIENT = [
   "Thanks! 🙌",
 ];
 
+/**
+ * Openers offered on a thread nobody has said anything in yet, in the order
+ * they appear.
+ *
+ * Client side only. A skiller's half of a new conversation is a reply, and
+ * "How much do you charge?" is not a question they would be the one asking.
+ */
+const SUGGESTED_OPENERS = [
+  "Hi, are you available? 👋",
+  "How much do you charge?",
+  "Can I see more of your work?",
+  "When can you start?",
+  "Are you based nearby?",
+];
+
+/**
+ * The one trade-specific opener for a skill, appended after the general ones,
+ * or null for a trade that has none.
+ *
+ * Matched on containment rather than equality: profiles.skill is close enough
+ * to free text that "Mobile Barber" should get the barber question too.
+ */
+function skillOpener(skill: string | null): string | null {
+  if (!skill) return null;
+  const normalised = skill.toLowerCase();
+  if (normalised.includes("barber")) return "How much for a skin fade?";
+  if (normalised.includes("cleaner")) return "Do you do deep cleans?";
+  if (normalised.includes("tiler")) return "Can you do bathroom tiling?";
+  if (normalised.includes("electrician")) return "Do you do residential work?";
+  return null;
+}
+
 
 function QuickReplies({ onSelect, hasMessages, isSkiller }: {
   onSelect: (text: string) => void;
@@ -85,6 +117,11 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
   const [showDeleteConvConfirm, setShowDeleteConvConfirm] = useState(false);
   const [pressedMsgId, setPressedMsgId] = useState<string | null>(null);
   const [msgMenuPos, setMsgMenuPos] = useState<"left" | "right">("left");
+  /**
+   * Set once an opener has been tapped, so the row does not come back if the
+   * text it filled in is then edited away to nothing.
+   */
+  const [openersDismissed, setOpenersDismissed] = useState(false);
   const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Job-done flow
@@ -199,6 +236,35 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
 
   const canRequestJobDone = hasMessages && hoursIn >= minHours;
   const lockedLabel = `Available in ~${hoursRemaining}h · conversation must be ${minHours}h old`;
+
+  // Their trade adds the one trade-specific opener; a null skill just means the
+  // general openers stand alone. Read off `participant` rather than the mock
+  // fallback, so an unresolved profile offers no trade question at all.
+  const openers = useMemo(() => {
+    const trade = skillOpener(participant?.skill ?? null);
+    return trade ? [...SUGGESTED_OPENERS, trade] : SUGGESTED_OPENERS;
+  }, [participant?.skill]);
+
+  /**
+   * Openers are for opening: they appear once, on a thread with nothing in it,
+   * and never again. Gated on currentUser being loaded because a skiller must
+   * never see them — without that they would flash up while the profile lands
+   * and then vanish.
+   */
+  const showOpeners =
+    !loading &&
+    !hasMessages &&
+    !!currentUser &&
+    !isSkiller &&
+    !openersDismissed &&
+    inputText === "";
+
+  /** Fills the composer and leaves it there — the user sends, not the tap. */
+  function handleUseOpener(text: string) {
+    setInputText(text);
+    setOpenersDismissed(true);
+    inputRef.current?.focus();
+  }
 
   // Scroll job card into view whenever it appears
   useEffect(() => {
@@ -829,8 +895,39 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         </div>
       )}
 
-      {/* Quick replies */}
-      <QuickReplies onSelect={(text) => { setInputText(text); inputRef.current?.focus(); }} hasMessages={hasMessages} isSkiller={isSkiller} />
+      {/* ── Suggested openers — sit directly on the composer they fill ── */}
+      {showOpeners && (
+        <div
+          className="flex-shrink-0 flex flex-nowrap gap-2 overflow-x-auto no-scrollbar px-3 pt-2"
+          style={{ flexWrap: "nowrap", overflowX: "auto" }}
+        >
+          {openers.map((opener) => (
+            <button
+              key={opener}
+              type="button"
+              onClick={() => handleUseOpener(opener)}
+              aria-label={`Use suggested message: ${opener}`}
+              className="flex-shrink-0 whitespace-nowrap"
+              style={{
+                borderRadius: 10,
+                border: "1px solid #6c47ff",
+                background: "transparent",
+                padding: "8px 14px",
+                fontSize: 13,
+                color: "#6c47ff",
+              }}
+            >
+              {opener}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Quick replies — stand down while the openers row is up, so an empty
+          thread does not offer two rows of overlapping pills */}
+      {!showOpeners && (
+        <QuickReplies onSelect={(text) => { setInputText(text); inputRef.current?.focus(); }} hasMessages={hasMessages} isSkiller={isSkiller} />
+      )}
 
       {/* Input bar */}
       <div
