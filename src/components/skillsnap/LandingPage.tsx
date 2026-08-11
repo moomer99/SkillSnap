@@ -729,7 +729,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         id="download"
         className="relative overflow-hidden py-16 sm:py-20"
         style={{
-          background: "linear-gradient(135deg, #1a1035 0%, #2a1060 100%)",
+          background: "linear-gradient(135deg, #0d0a1a 0%, #1a1035 100%)",
           borderTop: "1px solid rgba(108,71,255,0.3)",
         }}
       >
