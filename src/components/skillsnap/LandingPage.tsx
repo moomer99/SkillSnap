@@ -492,7 +492,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                   style={{ background: "var(--ss-purple-soft)", border: "1px solid var(--ss-purple-border)" }}
                 >
                   <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--ss-purple-light)" }} />
-                  <SectionLabel>Western Sydney&apos;s Skill Marketplace</SectionLabel>
+                  <SectionLabel>Sydney&apos;s Skill Marketplace</SectionLabel>
                 </div>
               </FadeIn>
 
@@ -760,7 +760,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
             <div className="flex flex-col items-start gap-3">
               <SkillSnapLogo variant="full" size="md" dark={theme === "dark"} />
               <p className="text-[14px] max-w-[280px]" style={{ color: "var(--ss-text-muted)" }}>
-                Watch. Trust. Connect. Western Sydney&apos;s skill marketplace.
+                Watch. Trust. Connect. Sydney&apos;s skill marketplace.
               </p>
             </div>
 
