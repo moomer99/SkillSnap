@@ -24,12 +24,19 @@ export const metadata: Metadata = {
   title: "SkillSnap — Watch. Trust. Connect. | Find Skilled Pros in Western Sydney",
   description: "SkillSnap lets barbers, tradies and cleaners in Western Sydney show real work on video. Watch. Trust. Connect. Free to join.",
   icons: {
+    // SVG first — it stays crisp at every size and modern browsers prefer it —
+    // then the .ico fallback, then raster sizes for everything else.
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-96.png", sizes: "96x96", type: "image/png" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    shortcut: "/favicon.svg",
+    shortcut: "/favicon.ico",
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
@@ -83,10 +90,6 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('skillsnap-theme');var r=document.documentElement;r.classList.remove('dark','light');r.classList.add(t==='light'?'light':'dark');}catch(e){}})();`,
           }}
         />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
-
       </head>
       <body
         className={`${geistSans.variable} ${poppins.variable} antialiased`}
