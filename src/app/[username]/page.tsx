@@ -6,7 +6,7 @@
 // Data is read with the anonymous client (no cookies) to keep the page cacheable.
 // ─────────────────────────────────────────────
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
 import { MapPin, BadgeCheck } from "lucide-react";
 import {
@@ -29,14 +29,19 @@ interface PageProps {
   params: Promise<{ username: string }>;
 }
 
-/** Strips the leading "@" (or "%40") from the route segment. */
-function parseHandle(segment: string): string | null {
-  const decoded = decodeURIComponent(segment);
-  if (!decoded.startsWith("@")) return null;
-  const handle = decoded.slice(1).trim().toLowerCase();
-  // usernames are [a-z0-9_] in this app
+/**
+ * Classifies a route segment against the canonical "@handle" form.
+ *  - "@handle" (valid shape)  → { handle, canonical: true }  — serve the page
+ *  - "handle"  (valid shape)  → { handle, canonical: false } — redirect to /@handle
+ *  - anything else            → null                         — 404
+ * The "@" is stripped and the handle lower-cased; usernames are [a-z0-9_.].
+ */
+function parseHandle(segment: string): { handle: string; canonical: boolean } | null {
+  const decoded = decodeURIComponent(segment).trim();
+  const canonical = decoded.startsWith("@");
+  const handle = (canonical ? decoded.slice(1) : decoded).trim().toLowerCase();
   if (!handle || !/^[a-z0-9_.]+$/.test(handle)) return null;
-  return handle;
+  return { handle, canonical };
 }
 
 const getProfile = cache(async (handle: string): Promise<PublicProfile | null> => {
@@ -74,10 +79,10 @@ const getPosts = cache(async (authorId: string): Promise<PublicPost[]> => {
 // ── Metadata — per-profile OpenGraph ───────────
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
-  const handle = parseHandle(username);
-  if (!handle) return { title: "Profile not found | SkillSnap" };
+  const parsed = parseHandle(username);
+  if (!parsed) return { title: "Profile not found | SkillSnap" };
 
-  const profile = await getProfile(handle);
+  const profile = await getProfile(parsed.handle);
   if (!profile) {
     return {
       title: "Profile not found | SkillSnap",
@@ -127,10 +132,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 // ── Page ───────────────────────────────────────
 export default async function PublicProfilePage({ params }: PageProps) {
   const { username } = await params;
-  const handle = parseHandle(username);
-  if (!handle) notFound();
+  const parsed = parseHandle(username);
+  if (!parsed) notFound();
+  // Bare "/handle" → 308 to the canonical "/@handle" (one URL per profile).
+  if (!parsed.canonical) permanentRedirect(`/@${parsed.handle}`);
 
-  const profile = await getProfile(handle);
+  const profile = await getProfile(parsed.handle);
   if (!profile) notFound();
 
   const posts = await getPosts(profile.id);

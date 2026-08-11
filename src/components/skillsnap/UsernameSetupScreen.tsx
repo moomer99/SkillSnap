@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { useAppState } from "@/state/AppState";
+import { isReservedUsername } from "@/constants/reservedUsernames";
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -27,6 +28,10 @@ export default function UsernameSetupScreen({ onDone }: { onDone: () => void }) 
     const username = value.trim().toLowerCase();
     if (!/^[a-z0-9_]{3,20}$/.test(username)) {
       setError("3–20 characters: letters, numbers, underscores only.");
+      return;
+    }
+    if (isReservedUsername(username)) {
+      setError("That username is reserved. Please choose another.");
       return;
     }
     setError(null);
