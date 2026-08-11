@@ -42,3 +42,5 @@ app.json
 .expo/
 .vscode/
 supabase/.temp/
+# local env files (contain secrets - never commit)
+.env*.local
