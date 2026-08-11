@@ -10,6 +10,7 @@ import Link from "next/link";
 import { Menu, X, ArrowRight, Play, Sparkles } from "lucide-react";
 import type { Screen } from "@/types";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
+import ContactModal from "./shared/ContactModal";
 import AppStoreButtons from "./shared/AppStoreButtons";
 import ThemeToggle from "./shared/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
@@ -434,6 +435,40 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
     document.getElementById("download")?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, []);
 
+  // Footer "Contact" / "Feedback" open the same modal with different copy.
+  const [footerModal, setFooterModal] = useState<"contact" | "feedback" | null>(null);
+
+  const footerColumns: {
+    title: string;
+    items: { label: string; href?: string; onClick?: () => void }[];
+  }[] = [
+    {
+      title: "Legal",
+      items: [
+        { label: "Terms of Service", href: "/terms" },
+        { label: "Privacy Policy", href: "/privacy" },
+      ],
+    },
+    {
+      title: "Company",
+      items: [
+        {
+          label: "About",
+          onClick: () =>
+            document.getElementById("who-its-for")?.scrollIntoView({ behavior: "smooth", block: "start" }),
+        },
+        { label: "Contact", onClick: () => setFooterModal("contact") },
+      ],
+    },
+    {
+      title: "Support",
+      items: [
+        { label: "Help", href: "/help" },
+        { label: "Feedback", onClick: () => setFooterModal("feedback") },
+      ],
+    },
+  ];
+
   return (
     <div className="w-full min-h-screen" style={{ background: "var(--ss-bg)", color: "var(--ss-text)" }}>
       <LandingNav onBrowse={goToFeed} onDownload={scrollToDownload} />
@@ -592,7 +627,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
       </section>
 
       {/* ── 1D. WHO IT'S FOR ──────────────────────────────────────── */}
-      <section className="py-16 sm:py-24" style={{ borderTop: "1px solid var(--ss-line)" }}>
+      <section id="who-its-for" className="py-16 sm:py-24" style={{ borderTop: "1px solid var(--ss-line)" }}>
         <div className={CONTAINER}>
           <FadeIn>
             <div className="text-center mb-12">
@@ -729,37 +764,38 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
               </p>
             </div>
 
-            <nav className="flex flex-wrap gap-x-8 gap-y-3" aria-label="Footer">
-              {([
-                // Real Next.js routes (server-rendered legal/help pages) use
-                // <Link>; the marketing screens stay on the in-app router.
-                { label: "About", screen: "about" },
-                { label: "Terms", href: "/terms" },
-                { label: "Privacy", href: "/privacy" },
-                { label: "Help", href: "/help" },
-                { label: "Delete account", href: "/delete-account" },
-                { label: "Contact", screen: "contact" },
-              ] as { label: string; href?: string; screen?: Screen }[]).map((item) =>
-                item.href ? (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className="text-[14px] font-medium transition-opacity hover:opacity-70"
-                    style={{ color: "var(--ss-text-muted)" }}
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <button
-                    key={item.label}
-                    onClick={() => onNavigate(item.screen!)}
-                    className="text-[14px] font-medium transition-opacity hover:opacity-70"
-                    style={{ color: "var(--ss-text-muted)" }}
-                  >
-                    {item.label}
-                  </button>
-                )
-              )}
+            <nav
+              className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12 lg:gap-16"
+              aria-label="Footer"
+            >
+              {footerColumns.map((col) => (
+                <div key={col.title} className="flex flex-col gap-3">
+                  <p className="text-[14px] font-bold" style={{ color: "var(--ss-text)" }}>
+                    {col.title}
+                  </p>
+                  {col.items.map((item) =>
+                    item.href ? (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        className="text-[13px] font-medium transition-opacity hover:opacity-70 text-left"
+                        style={{ color: "var(--ss-text-muted)" }}
+                      >
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <button
+                        key={item.label}
+                        onClick={item.onClick}
+                        className="text-[13px] font-medium transition-opacity hover:opacity-70 text-left"
+                        style={{ color: "var(--ss-text-muted)" }}
+                      >
+                        {item.label}
+                      </button>
+                    )
+                  )}
+                </div>
+              ))}
             </nav>
           </div>
 
@@ -770,6 +806,13 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           </div>
         </div>
       </footer>
+
+      <ContactModal
+        open={footerModal !== null}
+        onClose={() => setFooterModal(null)}
+        title={footerModal === "feedback" ? "Send Feedback" : "Contact Us"}
+        subject={footerModal === "feedback" ? "SkillSnap Feedback" : undefined}
+      />
     </div>
   );
 }
