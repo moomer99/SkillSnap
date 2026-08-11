@@ -273,18 +273,22 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
             </div>
             <h3 className="font-bold text-[#ffffff] text-lg mb-1">Delete account?</h3>
             <p className="text-sm text-[#9d97b5] mb-2 leading-relaxed">
-              This will permanently delete your profile, posts, and all messages.
+              You&apos;ll be taken to the account deletion page to confirm.
             </p>
-            <p className="text-xs font-semibold text-red-500 mb-6">This action cannot be undone.</p>
+            <p className="text-xs font-semibold text-red-500 mb-6">
+              Deleting your account is permanent and cannot be undone.
+            </p>
             <button
               className="w-full h-13 rounded-2xl font-bold text-base text-white mb-3 bg-red-500 flex items-center justify-center"
               style={{ height: 52 }}
               onClick={() => {
-                // TODO: call userService.deleteAccount() then CLEAR_AUTH
                 setShowDeleteConfirm(false);
+                // Account deletion is handled by the standalone /delete-account
+                // page — the URL given to Apple and Google — which works end to end.
+                window.location.href = "/delete-account";
               }}
             >
-              Yes, Delete My Account
+              Continue
             </button>
             <button
               onClick={() => setShowDeleteConfirm(false)}
@@ -307,6 +311,11 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
 
 // ── Change Password Sheet ──────────────────────────────────────────────────
 function ChangePasswordSheet({ onClose, userEmail }: { onClose: () => void; userEmail: string }) {
+  // These were referenced in handleSend() but never obtained here, so the
+  // "Send reset email" button threw ReferenceError before sending. The parent
+  // gets them the same way.
+  const { state } = useAppState();
+  const { showToast } = useToast();
   const [email, setEmail]   = useState(userEmail);
   const [sending, setSending] = useState(false);
   const [done, setDone]       = useState(false);

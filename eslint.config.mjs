@@ -6,6 +6,10 @@ const compat = new FlatCompat({
 })
  
 const eslintConfig = [
+  // Generated build output and Deno edge functions — neither is app source;
+  // linting them with Next's config only produces noise (.next bundles, and
+  // jsr:/Deno "unresolved" imports).
+  { ignores: ['.next/**', 'supabase/functions/**'] },
   ...compat.config({
     extends: ['next'],
     plugins: ['import'],
