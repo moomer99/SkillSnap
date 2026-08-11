@@ -759,8 +759,12 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-10">
             <div className="flex flex-col items-start gap-3">
               <SkillSnapLogo variant="full" size="md" dark={theme === "dark"} />
-              <p className="text-[14px] max-w-[280px]" style={{ color: "var(--ss-text-muted)" }}>
-                Watch. Trust. Connect. Sydney&apos;s skill marketplace.
+              <p
+                className="text-[13px] max-w-[280px]"
+                style={{ color: "var(--ss-text-muted)", lineHeight: 1.6 }}
+              >
+                SkillSnap connects skilled pros with local clients through short work videos.
+                Watch real work, trust real pros, and connect locally.
               </p>
             </div>
 
