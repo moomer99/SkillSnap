@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import { CheckCircle, Info, X } from "lucide-react";
 
 type ToastType = "info" | "success" | "coming-soon";
@@ -35,6 +35,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       feature ? `${feature} is coming soon!` : "This feature is coming soon!",
       "coming-soon"
     );
+  }, [showToast]);
+
+  // Bridge so code that can't reach this context (e.g. AppProvider, which sits
+  // above ToastProvider) can still raise a toast via a window CustomEvent.
+  useEffect(() => {
+    function onToast(e: Event) {
+      const detail = (e as CustomEvent).detail as { message?: string; type?: ToastType } | null;
+      if (detail?.message) showToast(detail.message, detail.type);
+    }
+    window.addEventListener("skillsnap:toast", onToast);
+    return () => window.removeEventListener("skillsnap:toast", onToast);
   }, [showToast]);
 
   return (

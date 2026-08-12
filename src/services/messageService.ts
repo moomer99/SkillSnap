@@ -297,19 +297,32 @@ export const messageService = {
     const { data: convId, error: convError } = await sb
       .rpc("create_conversation");
 
-    if (convError || !convId) throw new Error("Failed to create conversation");
+    if (convError || !convId) {
+      console.error("[messageService] create_conversation failed:", convError);
+      throw new Error("Failed to create conversation");
+    }
 
     const { error: senderErr } = await sb.rpc("add_conversation_member", {
       p_conversation_id: convId,
       p_user_id: userId,
     });
 
-    if (senderErr) throw new Error("Failed to join conversation");
+    if (senderErr) {
+      console.error("[messageService] add_conversation_member (sender) failed:", senderErr);
+      throw new Error("Failed to join conversation");
+    }
 
-    await sb.rpc("add_conversation_member", {
+    // The participant's membership was previously fire-and-forget; a failure
+    // here left a one-member conversation. Check it and fail loudly instead.
+    const { error: participantErr } = await sb.rpc("add_conversation_member", {
       p_conversation_id: convId,
       p_user_id: participantId,
     });
+
+    if (participantErr) {
+      console.error("[messageService] add_conversation_member (participant) failed:", participantErr);
+      throw new Error("Failed to add participant to conversation");
+    }
 
     console.log("[messageService] getOrCreateConversation: created", convId);
     return convId as string;

@@ -460,17 +460,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     setPendingConnect(null);
     dispatch({ type: "HIDE_AUTH_PROMPT" });
-    // Navigate optimistically with a placeholder thread, then resolve the real one.
-    dispatch({ type: "SET_ACTIVE_THREAD", threadId: "", participantId: pendingConnect });
-    dispatch({ type: "NAVIGATE", screen: "chat" });
 
+    // Resolve the conversation first and only navigate on success — mirrors
+    // connectTo, so a failed deep link never lands the user in a blank chat.
     const participantId = pendingConnect;
     import("@/services/messageService")
       .then(({ messageService }) => messageService.getOrCreateConversation(participantId))
       .then((conversationId) => {
         dispatch({ type: "SET_ACTIVE_THREAD", threadId: conversationId, participantId });
+        dispatch({ type: "NAVIGATE", screen: "chat" });
       })
-      .catch((e) => console.error("[AppState] connect deep link failed:", e));
+      .catch((e) => {
+        console.error("[AppState] connect deep link failed:", e);
+        // AppProvider sits above ToastProvider, so raise the error through the
+        // window-event toast bridge (see ToastProvider) rather than useToast.
+        window.dispatchEvent(
+          new CustomEvent("skillsnap:toast", {
+            detail: { message: "Couldn't start the conversation. Please try again." },
+          }),
+        );
+      });
   }, [pendingConnect, state.authLoading, state.isAuthenticated]);
 
   // Listen for review mode custom event from /review page

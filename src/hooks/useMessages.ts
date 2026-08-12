@@ -9,6 +9,7 @@ import { useEffect, useCallback, useState } from "react";
 import { useAppState } from "@/state/AppState";
 import { messageService } from "@/services/messageService";
 import { MOCK_THREADS } from "@/mock-data/messages";
+import { useToast } from "@/components/skillsnap/shared/Toast";
 
 const SUPABASE_CONFIGURED =
   typeof process !== "undefined" &&
@@ -17,6 +18,7 @@ const SUPABASE_CONFIGURED =
 
 export function useMessages() {
   const { state, dispatch, navigate } = useAppState();
+  const { showToast } = useToast();
   const [connectingId, setConnectingId] = useState<string | null>(null);
   const [threadsLoading, setThreadsLoading] = useState(true);
 
@@ -73,24 +75,24 @@ export function useMessages() {
         setConnectingId(null);
         return;
       }
-      // Navigate immediately with a placeholder thread — feels instant to the user.
-      // The real conversation ID resolves in the background and updates the state.
-      dispatch({ type: "SET_ACTIVE_THREAD", threadId: "", participantId });
-      navigate("chat");
       try {
+        // Resolve the conversation BEFORE navigating — only open the chat on
+        // success, so a failure never strands the user in a blank thread.
         const conversationId = await messageService.getOrCreateConversation(participantId);
         dispatch({ type: "SET_ACTIVE_THREAD", threadId: conversationId, participantId });
+        navigate("chat");
         // Refresh threads in background so Messages screen stays up to date
         messageService.getThreads().then((threads) => {
           dispatch({ type: "SET_THREADS", threads });
         }).catch(() => {});
       } catch (err) {
         console.error("[useMessages] connectTo error:", err);
+        showToast("Couldn't start the conversation. Please try again.");
       } finally {
         setConnectingId(null);
       }
     },
-    [dispatch, navigate]
+    [dispatch, navigate, showToast]
   );
 
   return {
