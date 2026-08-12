@@ -29,7 +29,7 @@ export default function HelpPage() {
   return (
     <LegalPage
       title="Help & Support"
-      lastUpdated="1 August 2026"
+      lastUpdated="12 August 2026"
       intro="How SkillSnap works, and how to do the things people ask about most. If you cannot find what you need here, email us — a real person reads it."
     >
       <Section title="What SkillSnap is">
@@ -43,6 +43,7 @@ export default function HelpPage() {
           It is free for everyone, and there are no booking fees. SkillSnap introduces people; any
           job you agree is directly between you and the other person.
         </p>
+        <p>You must be 18 or over to use SkillSnap.</p>
       </Section>
 
       <Section title="Getting around the app">

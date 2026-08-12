@@ -39,7 +39,7 @@ export default function DeleteAccountPage() {
   return (
     <LegalPage
       title="Delete your account"
-      lastUpdated="1 August 2026"
+      lastUpdated="12 August 2026"
       intro="You can delete your SkillSnap account and everything in it at any time. There are two ways to do it, and both are permanent."
     >
       <Section title="Option 1 — In the app (fastest)">
@@ -114,8 +114,11 @@ export default function DeleteAccountPage() {
         </p>
         <p>
           Our service providers may hold their own backups or server logs for their own
-          periods, which we do not control. Where the law requires us to keep a record, we
-          keep only what we must.
+          periods, which we do not control.
+        </p>
+        <p>
+          Where the law requires us to keep a record — for example a report of unlawful content —
+          we keep only that record, and only for as long as the law requires.
         </p>
       </Section>
 

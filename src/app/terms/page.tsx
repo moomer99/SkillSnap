@@ -27,7 +27,7 @@ export default function TermsPage() {
   return (
     <LegalPage
       title="Terms of Service"
-      lastUpdated="9 August 2026"
+      lastUpdated="12 August 2026"
       intro="These are the rules for using SkillSnap. By creating an account or using the app or website, you agree to them. If you do not agree, please do not use SkillSnap."
     >
       <Section title="1. About SkillSnap">
@@ -92,6 +92,11 @@ export default function TermsPage() {
         </p>
         <p>Repeated violations may result in account suspension or permanent removal.</p>
         <p>SkillSnap reserves the right to make removal decisions at its sole discretion.</p>
+        <p>
+          We have no tolerance for objectionable content or abusive behaviour. We review every
+          report and act within 24 hours — removing the content, or suspending or removing the
+          account responsible.
+        </p>
       </Section>
 
       <Section title="5. Your content">

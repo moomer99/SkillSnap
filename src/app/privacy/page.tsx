@@ -74,7 +74,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Privacy Policy"
-      lastUpdated="1 August 2026"
+      lastUpdated="12 August 2026"
       intro="This policy explains what SkillSnap collects, why, who can see it, and how to get it back or delete it. It covers both the SkillSnap mobile app and the skillsnap.com.au website. We have tried to describe exactly what the product actually does, in plain language."
     >
       <Section title="The short version">
@@ -275,6 +275,24 @@ export default function PrivacyPage() {
         <p>
           We may also disclose information where we are required to by law, or where it is
           necessary to investigate a report of harm or abuse.
+        </p>
+      </Section>
+
+      <Section title="Automated checks on your content">
+        <p>
+          Photos and videos you upload, including images sent in chat, are automatically checked
+          for nudity and explicit material before they are published. This check is carried out by
+          Google Cloud Vision, which means the image is sent to Google for that purpose and is not
+          kept by them. Content that does not pass is held for a person to review. We do this to
+          keep SkillSnap safe.
+        </p>
+      </Section>
+
+      <Section title="Cookies">
+        <p>
+          Our website uses cookies set by Google Analytics and Vercel Analytics to measure traffic.
+          You can block or delete cookies in your browser settings. The SkillSnap app does not use
+          cookies.
         </p>
       </Section>
 
