@@ -79,8 +79,10 @@ export const JOBS_DONE_CONFIG = {
   TOOLTIP_TEXT:
     "Jobs Done are confirmed after users complete work and verify it through chat. This reflects real work done, not ratings.",
   TRUST_NOTE: "Verified by both parties — no self-reporting",
-  // Must stay in sync with the mobile app's config (SkillSnapApp).
-  MIN_CONVERSATION_HOURS: 24,
+  // Must stay in sync with the mobile app's config (SkillSnapApp). The database
+  // enforces no time window, so both clients must agree or they will disagree
+  // about when a job can be marked done.
+  MIN_CONVERSATION_HOURS: 4,
 } as const;
 
 // Brand colors (used in dynamic styles)
