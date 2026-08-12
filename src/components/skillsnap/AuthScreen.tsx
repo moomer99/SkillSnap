@@ -547,9 +547,12 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
           </div>
         </div>
 
-        {/* Bottom fade */}
+        {/* Dissolve the hero's gradient into the CTA panel colour. The 175deg
+            gradient reaches its lightest stop (#2d1b69) right at this seam, so a
+            hard cut to the darker #16122a panel reads as a line; fading to the
+            panel colour hides it. (Was a fade to white, from the white-card era.) */}
         <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
-          style={{ background: "linear-gradient(to bottom, transparent, white)" }} />
+          style={{ background: "linear-gradient(to bottom, transparent, #16122a)" }} />
       </div>
 
       {/* CTA section */}
