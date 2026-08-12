@@ -744,7 +744,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             <div className="flex border-t border-[#26203f]">
               <button className="flex-1 py-3 text-sm font-semibold text-[#9d97b5] active:bg-white/10 transition-colors" onClick={handleClientDecline}>Decline</button>
               <div className="w-px bg-[#26203f]" />
-              <button className="flex-1 py-3 text-sm font-bold text-[#6c47ff] active:bg-[#1c1733] transition-colors" onClick={handleClientConfirm}>Yes, Confirm ✓</button>
+              <button className="flex-1 py-3 text-sm font-bold text-[#6c47ff] active:bg-[#1c1733] transition-colors" onClick={handleClientConfirm}>Confirm job done</button>
             </div>
           </div>
         )}
@@ -884,7 +884,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
               className="w-full h-10 rounded-2xl font-semibold text-xs border-2 border-[#6c47ff]/30 text-[#6c47ff] flex items-center justify-center gap-2 bg-[#1c1733] transition-all active:scale-[0.98]"
             >
               <CheckCircle size={14} />
-              Mark Job as Done
+              Mark job done
             </button>
           ) : (
             <div className="w-full h-10 rounded-2xl flex items-center justify-center gap-2 bg-[#1c1733] border border-[#26203f]">
