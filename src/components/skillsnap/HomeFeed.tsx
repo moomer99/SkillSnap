@@ -199,7 +199,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
       >
         <div className="flex items-center justify-between gap-3 mb-2.5">
           {/* The rail already shows the logo from md up */}
-          <span className="md:hidden"><SkillSnapLogo size="sm" dark /></span>
+          <span className="md:hidden"><SkillSnapLogo size="md" dark /></span>
           <h1 className="hidden md:block text-[20px] font-bold text-white">Feed</h1>
 
           <button
@@ -741,6 +741,9 @@ function FeedCard({
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
   const [aspect, setAspect] = useState(DEFAULT_ASPECT);
+  // Photos letterbox (contain) onto the flat card colour rather than crop,
+  // unless their aspect is within 10% of the framed aspect — then they fill.
+  const [photoContain, setPhotoContain] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLElement>(null);
   // The media itself has been measured, so a late thumbnail probe must not
@@ -822,6 +825,10 @@ function FeedCard({
   }, [isOwnPost, viewerLat, viewerLng, author.lat, author.lng]);
 
   const happyPct = author.happyPercent && author.happyPercent > 0 ? `${author.happyPercent}%` : null;
+  // Hide the whole stats row when all four values are empty — four zeros read
+  // as an abandoned marketplace. Any single non-empty value brings it back.
+  const hasStats =
+    !!author.jobsDone || !!author.happyPercent || !!displayLocation || !!author.followers;
   const caption = post.caption ?? "";
 
   async function handleSaveEdit() {
@@ -845,8 +852,8 @@ function FeedCard({
     >
       {/* ── Media — full card width, everything else rides on top of it ── */}
       <div
-        className="relative w-full bg-black select-none overflow-hidden"
-        style={{ aspectRatio: String(aspect) }}
+        className="relative w-full select-none overflow-hidden"
+        style={{ aspectRatio: String(aspect), background: isVideo ? "#000000" : "#0d0a1a" }}
       >
         <div className="absolute inset-0 cursor-pointer" onClick={handleMediaClick}>
           {isVideo ? (
@@ -870,12 +877,17 @@ function FeedCard({
             <img
               src={activeMediaUrl}
               alt={caption || `Work by ${author.displayName}`}
-              className="w-full h-full object-cover"
+              className={`w-full h-full ${photoContain ? "object-contain" : "object-cover"}`}
               loading="lazy"
               onLoad={(e) => {
                 const img = e.currentTarget;
                 aspectMeasured.current = true;
-                setAspect(clampAspect(img.naturalWidth, img.naturalHeight));
+                const framed = clampAspect(img.naturalWidth, img.naturalHeight);
+                setAspect(framed);
+                // Fill only when the photo's own aspect is within 10% of the
+                // framed aspect; otherwise letterbox so nothing is cropped.
+                const natural = img.naturalWidth / img.naturalHeight;
+                setPhotoContain(Math.abs(natural / framed - 1) > 0.1);
               }}
             />
           ) : (
@@ -1036,16 +1048,18 @@ function FeedCard({
         {timeAgo(post.createdAt)}
       </p>
 
-      {/* ── Stats row ── */}
-      <div className="flex items-center px-3 pt-2.5 pb-4">
-        <StatCell label="Jobs Done" value={fmtNum(author.jobsDone)} />
-        <StatDivider />
-        <StatCell label="Happy" value={happyPct ?? "—"} />
-        <StatDivider />
-        <StatCell label="Location" value={displayLocation ? displayLocation.split(",")[0] : "—"} />
-        <StatDivider />
-        <StatCell label="Followers" value={fmtNum(author.followers)} />
-      </div>
+      {/* ── Stats row — hidden entirely when all four values are empty ── */}
+      {hasStats && (
+        <div className="flex items-center px-3 pt-2.5 pb-4">
+          <StatCell label="Jobs Done" value={fmtNum(author.jobsDone)} />
+          <StatDivider />
+          <StatCell label="Happy" value={happyPct ?? "—"} />
+          <StatDivider />
+          <StatCell label="Location" value={displayLocation ? displayLocation.split(",")[0] : "—"} />
+          <StatDivider />
+          <StatCell label="Followers" value={fmtNum(author.followers)} />
+        </div>
+      )}
 
       {/* ── Post menu ── */}
       {menuOpen && (
@@ -1221,7 +1235,7 @@ function RailButton({ icon, label, onClick, title }: {
       title={title}
       aria-label={title}
       className="flex flex-col items-center gap-0.5 w-12 py-1.5 transition-transform active:scale-90"
-      style={{ filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.55))" }}
+      style={{ filter: "drop-shadow(0 1px 6px rgba(0,0,0,0.75))" }}
     >
       {icon}
       {label !== undefined && (
