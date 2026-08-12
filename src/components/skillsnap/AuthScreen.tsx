@@ -520,7 +520,16 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
             with a CSS animation at ~31px/s (see <style jsx> below). */}
         <div
           className="relative z-10 w-full mx-auto overflow-hidden"
-          style={{ maxWidth: AUTH_CONTENT_MAX, marginTop: 24 }}
+          style={{
+            maxWidth: AUTH_CONTENT_MAX,
+            marginTop: 24,
+            // Soft edges so chips fade out at both ends instead of hard-clipping
+            // mid-chip. Web-only; the mobile row is untouched.
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%)",
+            maskImage:
+              "linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%)",
+          }}
         >
           <div
             ref={pillsTrackRef}
@@ -546,13 +555,6 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
             )}
           </div>
         </div>
-
-        {/* Dissolve the hero's gradient into the CTA panel colour. The 175deg
-            gradient reaches its lightest stop (#2d1b69) right at this seam, so a
-            hard cut to the darker #16122a panel reads as a line; fading to the
-            panel colour hides it. (Was a fade to white, from the white-card era.) */}
-        <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
-          style={{ background: "linear-gradient(to bottom, transparent, #16122a)" }} />
       </div>
 
       {/* CTA section */}
