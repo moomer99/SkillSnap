@@ -514,18 +514,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Handle password reset callback — check both hash and query string.
-    // Supabase implicit flow puts tokens in the hash; PKCE flow uses query params.
+    // Handle a password-reset link that lands on the root URL. Supabase's implicit
+    // flow puts the token in the hash (#access_token=…&type=recovery); the verify
+    // form uses query params (?token_hash=…, or a ?code=…&type=recovery). Any of
+    // these can arrive at root when redirect_to falls back to the Site URL, so we
+    // forward them on to /reset-password to be redeemed there.
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const queryParams = new URLSearchParams(window.location.search);
-    const recoveryType =
+    const isRecovery =
       (hashParams.get("access_token") && hashParams.get("type") === "recovery") ||
       queryParams.get("type") === "recovery";
-    if (recoveryType) {
-      window.history.replaceState({}, "", window.location.pathname);
+    // A bare ?code with no type=recovery is an OAuth / Site-URL fallback (Google
+    // sign-in targets /auth/callback), not a recovery — excluding it keeps that
+    // code from being misrouted onto the reset form.
+    if (isRecovery) {
+      // Forward the token INTACT — the reset page redeems it (fragment for implicit,
+      // ?code / ?token_hash for the verify form) and scrubs the URL itself. The old
+      // code stripped the URL to its pathname *before* redirecting, so /reset-password
+      // arrived with nothing to open a session against and the user was stuck.
       clearTimeout(authTimeout);
       dispatch({ type: "SET_AUTH_LOADING", loading: false });
-      window.location.replace("/reset-password");
+      window.location.replace(
+        `/reset-password${window.location.search}${window.location.hash}`,
+      );
       return;
     }
 

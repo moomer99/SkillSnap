@@ -330,7 +330,7 @@ function ChangePasswordSheet({ onClose, userEmail }: { onClose: () => void; user
       if (SUPABASE_CONFIGURED) {
         const { getSupabase } = await import("@/lib/supabase");
         const { error: err } = await getSupabase().auth.resetPasswordForEmail(email, {
-          redirectTo: "https://skillsnap.com.au",
+          redirectTo: `${window.location.origin}/reset-password`,
         });
         // See isResetEmailLikelySent — a 5xx generally means the mail is
         // already on its way and only GoTrue's bookkeeping failed.
