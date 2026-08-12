@@ -51,6 +51,24 @@ function GoogleButton({ onClick, loading }: { onClick: () => void; loading: bool
   );
 }
 
+// Trade chips shown in the hero marquee (kept from the web set).
+const SKILL_PILLS = [
+  { label: "✂️ Barbers" },
+  { label: "🔧 Tradies" },
+  { label: "💄 Makeup" },
+  { label: "🧹 Cleaning" },
+  { label: "💅 Nails" },
+  { label: "💪 Fitness" },
+];
+
+// Content column width. The mobile is phone-width (no max-width); on web we cap
+// the centred content here so it stays full-width on phones but stops stretching
+// on desktop. Shared by the chip marquee and the button group.
+const AUTH_CONTENT_MAX = 400;
+
+// Mobile marquee speed: 1px every 32ms ≈ 31.25 px/s.
+const MARQUEE_PX_PER_SEC = 31.25;
+
 // ── "or" divider ─────────────────────────────
 function OrDivider() {
   return (
@@ -88,6 +106,18 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
   const { dispatch, state } = useAppState();
   const { showToast } = useToast();
+
+  // Chip marquee: measure one copy's width once and derive the animation
+  // duration so the CSS scroll runs at the mobile's ~31px/s. A one-time read,
+  // not an interval — the animation itself is pure CSS.
+  const pillsTrackRef = useRef<HTMLDivElement>(null);
+  const [pillsDur, setPillsDur] = useState(0);
+  useEffect(() => {
+    const el = pillsTrackRef.current;
+    if (!el) return;
+    const oneCopy = el.scrollWidth / 2; // two copies rendered end to end
+    if (oneCopy > 0) setPillsDur(oneCopy / MARQUEE_PX_PER_SEC);
+  }, []);
 
   // Auto-fill saved email on mount
   useEffect(() => {
@@ -462,36 +492,59 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
           <div style={{ position: "absolute", top: "10%", left: "50%", transform: "translateX(-50%)", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.30) 0%, transparent 70%)" }} />
         </div>
 
-        {/* Brand */}
-        <div className="relative z-10 mb-4">
-          <SkillSnapLogo variant="full" size="xl" dark />
+        {/* Brand — icon above wordmark, ported from mobile (mark 108px, 14px gap) */}
+        <div className="relative z-10 flex flex-col items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/skillsnap-icon.svg"
+            alt=""
+            aria-hidden="true"
+            style={{ height: 108, width: "auto", display: "block" }}
+          />
+          <div style={{ marginTop: 14 }}>
+            <SkillSnapLogo variant="full" size="xl" dark />
+          </div>
         </div>
 
-        <p className="relative z-10 text-base font-semibold mb-2" style={{ color: "#a78bfa" }}>
+        {/* Headline — ported from mobile: 22px / 800 / #ffffff */}
+        <p className="relative z-10" style={{ color: "#ffffff", fontSize: 22, fontWeight: 800, marginTop: 16 }}>
           {APP_CONFIG.tagline}
         </p>
-        <p className="relative z-10 text-sm leading-relaxed max-w-[260px]" style={{ color: "rgba(255,255,255,0.50)" }}>
+        {/* Subtitle — ported from mobile: 13px / rgba(255,255,255,0.5) */}
+        <p className="relative z-10 max-w-[260px]" style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 6 }}>
           {APP_CONFIG.subtitle}
         </p>
 
-        {/* Skill pills — consistent, clean social proof */}
-        <div className="relative z-10 mt-8 flex flex-wrap gap-2 justify-center max-w-[300px]">
-          {[
-            { label: "✂️ Barbers", color: "#667eea" },
-            { label: "🔧 Tradies", color: "#4facfe" },
-            { label: "💄 Makeup", color: "#f093fb" },
-            { label: "🧹 Cleaning", color: "#43e97b" },
-            { label: "💅 Nails", color: "#fa709a" },
-            { label: "💪 Fitness", color: "#a78bfa" },
-          ].map(({ label, color }) => (
-            <span
-              key={label}
-              className="px-3 py-1.5 rounded-full text-[12px] font-semibold text-white"
-              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
-            >
-              {label}
-            </span>
-          ))}
+        {/* Skill pills — single-row marquee, ported from mobile. Centred and
+            capped to the shared content width; two duplicated copies scrolled
+            with a CSS animation at ~31px/s (see <style jsx> below). */}
+        <div
+          className="relative z-10 w-full mx-auto overflow-hidden"
+          style={{ maxWidth: AUTH_CONTENT_MAX, marginTop: 24 }}
+        >
+          <div
+            ref={pillsTrackRef}
+            className="ss-auth-marquee flex items-center w-max"
+            style={{ gap: 8, ...(pillsDur ? { ["--marquee-dur" as string]: `${pillsDur}s` } : {}) }}
+          >
+            {["a", "b"].map((copy) =>
+              SKILL_PILLS.map(({ label }) => (
+                <span
+                  key={`${label}-${copy}`}
+                  className="whitespace-nowrap text-white"
+                  style={{
+                    fontSize: 12,
+                    padding: "8px 16px",
+                    borderRadius: 999,
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    background: "rgba(255,255,255,0.08)",
+                  }}
+                >
+                  {label}
+                </span>
+              ))
+            )}
+          </div>
         </div>
 
         {/* Bottom fade */}
@@ -500,7 +553,10 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
       </div>
 
       {/* CTA section */}
-      <div className="px-5 pt-5 pb-10 flex flex-col gap-3 bg-[#16122a]">
+      <div className="px-5 pt-5 pb-10 bg-[#16122a]">
+        {/* Button group + CTA text capped to the shared content width and centred
+            — full-width on phones, no longer stretching on desktop. */}
+        <div className="w-full mx-auto flex flex-col gap-3" style={{ maxWidth: AUTH_CONTENT_MAX }}>
         {/* Google — primary */}
         <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} />
         <OrDivider />
@@ -548,7 +604,25 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         >
           Need help? Contact us
         </button>
+        </div>
       </div>
+
+      <style jsx>{`
+        .ss-auth-marquee {
+          animation: ss-auth-marquee var(--marquee-dur, 20s) linear infinite;
+          will-change: transform;
+        }
+        @keyframes ss-auth-marquee {
+          to {
+            transform: translateX(-50%);
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ss-auth-marquee {
+            animation: none;
+          }
+        }
+      `}</style>
     </div>
   );
 }
