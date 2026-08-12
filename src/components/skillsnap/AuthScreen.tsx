@@ -4,6 +4,7 @@
 // Supports: Google OAuth + email/password (Supabase Auth)
 // ─────────────────────────────────────────────
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import type { User } from "@/types";
 
 const SAVED_EMAIL_KEY = "skillsnap_saved_email";
@@ -93,6 +94,8 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   const [displayName, setDisplayName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  // Signup consent — matches mobile: unchecked by default, required to submit.
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -387,12 +390,48 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
               </div>
             )}
 
+            {/* Terms & Privacy consent — signup only, required. Matches mobile:
+                unchecked by default, submit stays disabled until ticked. Terms and
+                Privacy Policy are real links, opened in a new tab so the in-progress
+                form isn't lost. */}
+            {mode === "signup" && (
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked={agreedToTerms}
+                  aria-label="I agree to the Terms and Privacy Policy"
+                  onClick={() => setAgreedToTerms((a) => !a)}
+                  className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                    agreedToTerms ? "bg-[#6c47ff] border-[#6c47ff]" : "bg-[#16122a] border-[#d0ccc8]"
+                  }`}
+                >
+                  {agreedToTerms && (
+                    <svg width="11" height="8" viewBox="0 0 11 8" fill="none">
+                      <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </button>
+                <span className="text-sm text-[#b8b2cc] font-medium">
+                  I agree to the{" "}
+                  <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#6c47ff] font-semibold underline">
+                    Terms
+                  </Link>
+                  {" & "}
+                  <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#6c47ff] font-semibold underline">
+                    Privacy Policy
+                  </Link>
+                </span>
+              </div>
+            )}
+
             {/* Submit */}
             <button
               type="submit"
               disabled={
                 loading || !email || !password ||
-                (mode === "signup" && !checkPassword(password).valid)
+                (mode === "signup" && !checkPassword(password).valid) ||
+                (mode === "signup" && !agreedToTerms)
               }
               className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
               style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
