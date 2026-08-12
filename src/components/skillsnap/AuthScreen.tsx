@@ -240,8 +240,9 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
   if (mode !== "landing") {
     return (
       <div className="flex flex-col min-h-screen bg-[#16122a]">
-        {/* Header */}
-        <div className="flex items-center gap-3 px-5 pt-5 pb-2">
+        {/* Header — capped and centred to the shared content width so it lines
+            up with the form below instead of hugging the viewport edge. */}
+        <div className="flex items-center gap-3 px-5 pt-5 pb-2 w-full mx-auto" style={{ maxWidth: AUTH_CONTENT_MAX }}>
           <button
             onClick={() => { setMode("landing"); setError(null); setShowGoogleHint(false); setShowGoogleSuggestion(false); }}
             className="w-9 h-9 flex items-center justify-center rounded-full bg-[#1c1733] text-[#9d97b5]"
@@ -255,7 +256,9 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
           </h2>
         </div>
 
-        <div className="flex-1 flex flex-col px-6 pt-4 gap-4">
+        {/* Form body — capped to the shared content width and centred, matching
+            the landing view; full-width on phones. */}
+        <div className="flex-1 flex flex-col px-6 pt-4 gap-4 w-full mx-auto" style={{ maxWidth: AUTH_CONTENT_MAX }}>
           {/* Google button — top of form */}
           <GoogleButton onClick={handleGoogleSignIn} loading={googleLoading} />
           <OrDivider />
@@ -418,8 +421,9 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
         {/* Forgot Password modal */}
         {showForgotPassword && (
-          <div className="fixed inset-0 z-[200] flex items-end bg-black/40" onClick={() => setShowForgotPassword(false)}>
-            <div className="w-full bg-[#16122a] rounded-t-3xl px-6 pt-6 pb-10 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/40" onClick={() => setShowForgotPassword(false)}>
+            {/* Sheet capped and centred to the shared content width — full-width on phones. */}
+            <div className="w-full bg-[#16122a] rounded-t-3xl px-6 pt-6 pb-10 shadow-2xl mx-auto" style={{ maxWidth: AUTH_CONTENT_MAX }} onClick={(e) => e.stopPropagation()}>
               <div className="w-10 h-1 rounded-full bg-[#26203f] mx-auto mb-5" />
               <h3 className="font-bold text-[#ffffff] text-lg mb-1">Reset your password</h3>
               <p className="text-sm text-[#9d97b5] mb-5">We&apos;ll send a reset link to your email.</p>
