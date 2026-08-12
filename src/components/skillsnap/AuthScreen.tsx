@@ -421,10 +421,13 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
 
         {/* Forgot Password modal */}
         {showForgotPassword && (
-          <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/40" onClick={() => setShowForgotPassword(false)}>
-            {/* Sheet capped and centred to the shared content width — full-width on phones. */}
-            <div className="w-full bg-[#16122a] rounded-t-3xl px-6 pt-6 pb-10 shadow-2xl mx-auto" style={{ maxWidth: AUTH_CONTENT_MAX }} onClick={(e) => e.stopPropagation()}>
-              <div className="w-10 h-1 rounded-full bg-[#26203f] mx-auto mb-5" />
+          <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/40" onClick={() => setShowForgotPassword(false)}>
+            {/* Bottom sheet on phones (anchored to the bottom), a centred dialog on
+                desktop — the shared bottom-sheet→dialog pattern. Capped to the shared
+                content width; full-width on phones. */}
+            <div className="w-full bg-[#16122a] rounded-t-3xl sm:rounded-3xl px-6 pt-6 pb-10 shadow-2xl mx-auto" style={{ maxWidth: AUTH_CONTENT_MAX }} onClick={(e) => e.stopPropagation()}>
+              {/* Drag grabber — a bottom-sheet affordance, hidden in the desktop dialog. */}
+              <div className="w-10 h-1 rounded-full bg-[#26203f] mx-auto mb-5 sm:hidden" />
               <h3 className="font-bold text-[#ffffff] text-lg mb-1">Reset your password</h3>
               <p className="text-sm text-[#9d97b5] mb-5">We&apos;ll send a reset link to your email.</p>
 
