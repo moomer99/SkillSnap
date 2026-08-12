@@ -805,7 +805,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
 
           <div
             className="mt-8"
-            style={{ borderTop: "1px solid var(--ss-line)", paddingTop: 16, paddingBottom: 16 }}
+            style={{ borderTop: "1px solid var(--ss-line)", paddingTop: 10, paddingBottom: 10 }}
           >
             <p className="text-[13px]" style={{ color: "var(--ss-text-dim)" }}>
               © 2026 SkillSnap Australia
