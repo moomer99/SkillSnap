@@ -30,9 +30,9 @@ export default function AuthPromptModal() {
   const content = (isMobile: boolean) => (
     <div className={`flex flex-col items-center text-center gap-3 ${isMobile ? "px-5 pt-2" : "px-8 pt-4"}`}>
       {logo}
-      <h3 className="text-lg font-bold text-[#ffffff]">Join to unlock the full experience</h3>
+      <h3 className="text-lg font-bold text-[#ffffff]">Join SkillSnap</h3>
       <p className="text-sm text-[#9d97b5] leading-relaxed max-w-[280px]">
-        Like, connect and post your work — free forever
+        Sign up to connect with skilled pros near you
       </p>
       <div className="w-full flex flex-col gap-2.5 mt-3 pb-2">
         <button
