@@ -44,6 +44,18 @@ app.json
 supabase/.temp/
 # local env files (contain secrets - never commit)
 .env*.local
+# also ignore bare .env / .env.<stage>, but keep committed *.example templates
+.env
+.env.*
+!.env*.example
+
+# secrets & credentials (added by security audit)
+*.keystore
+*.jks
+google-services.json
+GoogleService-Info.plist
+credentials*.json
+*service-account*.json
 
 # generated promo assets (BytePlus)
 promo-output/
