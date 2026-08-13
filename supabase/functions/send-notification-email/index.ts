@@ -18,7 +18,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
  */
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const FROM_EMAIL = "SkillSnap <mo@skillsnap.com.au>";
+const FROM_EMAIL = "SkillSnap <hello@skillsnap.com.au>";
 const APP_URL = "https://skillsnap.com.au";
 
 /** Maps a logical type to the recipient's email preference column. */
