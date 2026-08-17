@@ -4,15 +4,13 @@
   "description": "Don't read reviews. Watch the work.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0d0a1a",
+  "background_color": "#f8f7f5",
   "theme_color": "#6c47ff",
   "orientation": "portrait",
   "icons": [
-    {
-      "src": "/skillsnap-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
