@@ -24,6 +24,7 @@ import { useFeed } from "@/hooks/useFeed";
 import { useMessages } from "@/hooks/useMessages";
 import { useAppState } from "@/state/AppState";
 import { useLocation, distanceKm } from "@/hooks/useLocation";
+import { useHideOnScroll } from "@/hooks/useHideOnScroll";
 import SearchBar from "./shared/SearchBar";
 import UserAvatar from "./shared/UserAvatar";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
@@ -186,15 +187,24 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
   const [roleBannerDismissed, setRoleBannerDismissed] = useState(false);
   const showRoleBanner = state.isAuthenticated && !state.currentUser?.role && !state.currentUser?.skill && !roleBannerDismissed;
 
+  // Header hides on scroll down, returns on scroll up (see useHideOnScroll).
+  // Any open overlay locks body scroll, so the header is held visible while
+  // one is up rather than left wherever the last scroll put it.
+  const overlayOpen = showLocationPicker || fullscreenPost !== null || commentPrompt !== null;
+  const header = useHideOnScroll<HTMLElement>(overlayOpen);
+
   return (
     <div className="flex flex-col w-full">
-      {/* ── Sticky header ── */}
+      {/* ── Sticky header — slides out on scroll down, back on scroll up ── */}
       <header
-        className="sticky top-0 z-30 px-4 sm:px-0 pt-3 pb-3"
+        ref={header.ref}
+        onFocus={header.reveal}
+        className="sticky top-0 z-30 px-4 sm:px-0 pt-3 pb-3 transition-transform duration-200 ease-out motion-reduce:transition-none"
         style={{
           background: "rgba(13,10,26,0.90)",
           backdropFilter: "blur(12px)",
           borderBottom: "1px solid var(--ss-line)",
+          transform: header.hidden ? `translateY(-${header.height}px)` : "translateY(0)",
         }}
       >
         <div className="flex items-center justify-between gap-3 mb-2.5">
