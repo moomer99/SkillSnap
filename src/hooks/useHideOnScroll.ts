@@ -31,6 +31,8 @@ export function useHideOnScroll<T extends HTMLElement>(disabled = false) {
   const heightRef = useRef(0);
   const lastY = useRef(0);
   const frame = useRef<number | null>(null);
+  // Diagnostics only: how many scroll events the listener has actually received.
+  const scrollEvents = useRef(0);
 
   // Measure — offsetHeight ignores the translate transform.
   useLayoutEffect(() => {
@@ -55,6 +57,7 @@ export function useHideOnScroll<T extends HTMLElement>(disabled = false) {
     lastY.current = window.scrollY;
 
     const onScroll = () => {
+      scrollEvents.current += 1;
       if (frame.current !== null) return;
       frame.current = requestAnimationFrame(() => {
         frame.current = null;
@@ -81,5 +84,5 @@ export function useHideOnScroll<T extends HTMLElement>(disabled = false) {
   // For focus: a tab stop inside a hidden header must bring it back.
   const reveal = useCallback(() => setHidden(false), []);
 
-  return { ref, hidden, height, reveal };
+  return { ref, hidden, height, reveal, scrollEvents };
 }

@@ -25,6 +25,7 @@ import { useMessages } from "@/hooks/useMessages";
 import { useAppState } from "@/state/AppState";
 import { useLocation, distanceKm } from "@/hooks/useLocation";
 import { useHideOnScroll } from "@/hooks/useHideOnScroll";
+import ScrollDebugReadout from "./ScrollDebugReadout"; // TEMP: ?debug=scroll diagnostic
 import SearchBar from "./shared/SearchBar";
 import UserAvatar from "./shared/UserAvatar";
 import SkillSnapLogo from "./shared/SkillSnapLogo";
@@ -432,6 +433,14 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
           </>
         )}
       </div>
+
+      {/* TEMP diagnostic — only renders with ?debug=scroll in the URL */}
+      <ScrollDebugReadout
+        headerRef={header.ref}
+        height={header.height}
+        hidden={header.hidden}
+        scrollEvents={header.scrollEvents}
+      />
 
       {showLocationPicker && (
         <LocationPickerSheet
