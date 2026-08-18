@@ -2,14 +2,17 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // Only hosts we actually serve images from. A wildcard here turns
+    // /_next/image into an open proxy anyone can point at any URL.
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "dnraeyxjzdmpdvrkzyfd.supabase.co",
       },
       {
-        protocol: "http",
-        hostname: "**",
+        // Google sign-in avatars.
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
       },
     ],
   },

@@ -1,10 +1,8 @@
 import type { Metadata, Viewport } from "next"; // v2
 import { Geist, Poppins } from "next/font/google";
 import "./globals.css";
-import { VisualEditsMessenger } from "orchids-visual-edits";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import ErrorReporter from "@/components/ErrorReporter";
 import Script from "next/script";
 
 const geistSans = Geist({
@@ -94,19 +92,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${poppins.variable} antialiased`}
       >
-        <ErrorReporter />
-        <Script
-          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts//route-messenger.js"
-          strategy="afterInteractive"
-          data-target-origin="*"
-          data-message-type="ROUTE_CHANGE"
-          data-include-search-params="true"
-          data-only-in-iframe="true"
-          data-debug="true"
-          data-custom-data='{"appName": "YourApp", "version": "1.0.0", "greeting": "hi"}'
-        />
         {children}
-        <VisualEditsMessenger />
         <Script id="sw-unregister" strategy="afterInteractive">{`
           if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
