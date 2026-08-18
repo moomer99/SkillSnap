@@ -10,6 +10,9 @@
 
 const GET_APP_HREF = "/get";
 
+// 200px at h-14 (56px) is ~3.6:1 — close to the official badges' proportions.
+const BUTTON_MAX_W = "max-w-[200px]";
+
 function AppleIcon({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -69,13 +72,20 @@ export default function AppStoreButtons({
   const style = VARIANT_STYLES[variant];
   const row = stacked ? "flex-col" : "flex-col sm:flex-row";
 
+  // Sizing only. Each button is capped at BUTTON_MAX_W so a phone-width column
+  // doesn't stretch a 56px-tall pill to 340px wide; side by side they share the
+  // row equally (flex-1, basis 0) up to the same cap, so the pair always reads
+  // as two identical badges, centred in whatever the parent gives them.
+  //
+  // These are hand-drawn SVG buttons, not Apple's or Google's official badge
+  // artwork. Both companies' guidelines require their own assets at fixed
+  // proportions; swapping these for the official badges is a follow-up.
+  const grow = stacked ? "" : "sm:flex-1 sm:basis-0";
+  const button = `w-full ${BUTTON_MAX_W} ${grow} h-14 rounded-2xl flex items-center justify-center gap-2.5 sm:gap-3 px-3 sm:px-5 transition-transform active:scale-[0.97] hover:-translate-y-0.5`;
+
   return (
-    <div className={`flex ${row} gap-2.5 w-full ${className}`}>
-      <a
-        href={GET_APP_HREF}
-        className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-2.5 sm:gap-3 px-3 sm:px-5 transition-transform active:scale-[0.97] hover:-translate-y-0.5"
-        style={style}
-      >
+    <div className={`flex ${row} items-center justify-center gap-2.5 w-full ${className}`}>
+      <a href={GET_APP_HREF} className={button} style={style}>
         <AppleIcon size={24} />
         <span className="flex flex-col items-start leading-none whitespace-nowrap">
           <span className="text-[10px] opacity-70">Download on the</span>
@@ -83,11 +93,7 @@ export default function AppStoreButtons({
         </span>
       </a>
 
-      <a
-        href={GET_APP_HREF}
-        className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-2.5 sm:gap-3 px-3 sm:px-5 transition-transform active:scale-[0.97] hover:-translate-y-0.5"
-        style={style}
-      >
+      <a href={GET_APP_HREF} className={button} style={style}>
         <PlayIcon size={22} />
         <span className="flex flex-col items-start leading-none whitespace-nowrap">
           <span className="text-[10px] opacity-70">GET IT ON</span>
