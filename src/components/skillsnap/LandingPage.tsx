@@ -725,29 +725,50 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
       </section>
 
       {/* ── 1F. FOOTER CTA ────────────────────────────────────────── */}
+      {/* Dark: the deep purple band (unchanged). Light: a soft purple tint from
+          the theme tokens so it reads as a section of the page, not a hole in
+          it; text and buttons switch to their on-light variants. */}
       <section
         id="download"
         className="relative overflow-hidden py-16 sm:py-20"
-        style={{
-          background: "linear-gradient(135deg, #0d0a1a 0%, #1a1035 100%)",
-          borderTop: "1px solid rgba(108,71,255,0.3)",
-        }}
+        style={
+          theme === "dark"
+            ? {
+                background: "linear-gradient(135deg, #0d0a1a 0%, #1a1035 100%)",
+                borderTop: "1px solid rgba(108,71,255,0.3)",
+              }
+            : {
+                background: "var(--ss-surface-3)",
+                borderTop: "1px solid var(--ss-purple-border)",
+              }
+        }
       >
         <div
           aria-hidden
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(circle at 50% 0%, rgba(108,71,255,0.22) 0%, transparent 60%)" }}
+          style={{
+            background:
+              theme === "dark"
+                ? "radial-gradient(circle at 50% 0%, rgba(108,71,255,0.22) 0%, transparent 60%)"
+                : "radial-gradient(circle at 50% 0%, var(--ss-purple-soft) 0%, transparent 60%)",
+          }}
         />
         <div className={`${CONTAINER} relative flex flex-col items-center text-center`}>
           <FadeIn className="w-full flex flex-col items-center">
-            <h2 className="text-[28px] sm:text-[40px] font-extrabold leading-tight text-white max-w-[620px]">
+            <h2
+              className="text-[28px] sm:text-[40px] font-extrabold leading-tight max-w-[620px]"
+              style={{ color: theme === "dark" ? "#ffffff" : "var(--ss-text)" }}
+            >
               Ready to find a skilled pro?
             </h2>
-            <p className="text-[15px] sm:text-[17px] mt-4 mb-9 max-w-[480px]" style={{ color: "rgba(255,255,255,0.82)" }}>
+            <p
+              className="text-[15px] sm:text-[17px] mt-4 mb-9 max-w-[480px]"
+              style={{ color: theme === "dark" ? "rgba(255,255,255,0.82)" : "var(--ss-text-soft)" }}
+            >
               Download SkillSnap — available on iOS and Android
             </p>
             <div className="w-full max-w-[460px]">
-              <AppStoreButtons variant="white" />
+              <AppStoreButtons variant={theme === "dark" ? "white" : "black"} />
             </div>
           </FadeIn>
         </div>
