@@ -4,7 +4,7 @@ import { useId } from "react";
 interface LogoProps {
   variant?: "full" | "icon";
   size?: "xs" | "sm" | "md" | "lg" | "xl";
-  /** true on dark surfaces (white letters + gradient K), false on light (solid #0d0a1a). */
+  /** true on dark surfaces (white letters + gradient K), false on light (wordmark in brand purple, mark S in #0d0a1a). */
   dark?: boolean;
   /**
    * Render the brand-purple "any-surface" artwork instead of the dark/light
@@ -43,7 +43,10 @@ function inkFor(tone: Tone) {
 }
 
 function Wordmark({ uid, height, tone }: { uid: string; height: number; tone: Tone }) {
-  const letter = inkFor(tone);
+  // Light surfaces: brand purple letterforms, via the theme token rather than a
+  // literal so the wordmark tracks --ss-purple. Dark (white + gradient K) and
+  // any-surface tones are unchanged.
+  const letter = tone === "onLight" ? "var(--ss-purple)" : inkFor(tone);
   // K is the gradient only on dark surfaces; solid (ink or brand) otherwise.
   const kFill = tone === "onDark" ? `url(#${uid}-k)` : letter;
   return (
