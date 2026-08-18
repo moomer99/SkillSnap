@@ -1,8 +1,14 @@
 // ─────────────────────────────────────────────
 // SkillSnap — App Store / Google Play download buttons
 // Shared by the landing page, the feed and the public profile page.
+//
+// Both buttons go through /get (src/app/get/route.ts), which sends iOS to the
+// App Store and Android to Google Play once ANDROID_STORE_LIVE is flipped —
+// until then Android falls back to the landing page. Linking the Play listing
+// directly served a 404 while the app had no production access.
 // ─────────────────────────────────────────────
-import { APP_STORE_URL, PLAY_STORE_URL } from "@/constants/config";
+
+const GET_APP_HREF = "/get";
 
 function AppleIcon({ size = 20 }: { size?: number }) {
   return (
@@ -66,9 +72,7 @@ export default function AppStoreButtons({
   return (
     <div className={`flex ${row} gap-2.5 w-full ${className}`}>
       <a
-        href={APP_STORE_URL}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={GET_APP_HREF}
         className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-2.5 sm:gap-3 px-3 sm:px-5 transition-transform active:scale-[0.97] hover:-translate-y-0.5"
         style={style}
       >
@@ -80,9 +84,7 @@ export default function AppStoreButtons({
       </a>
 
       <a
-        href={PLAY_STORE_URL}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={GET_APP_HREF}
         className="flex-1 h-14 rounded-2xl flex items-center justify-center gap-2.5 sm:gap-3 px-3 sm:px-5 transition-transform active:scale-[0.97] hover:-translate-y-0.5"
         style={style}
       >
