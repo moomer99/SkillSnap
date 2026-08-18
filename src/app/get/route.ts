@@ -1,6 +1,11 @@
 // /get — the single link behind the QR code and the store badges.
 // Sends iOS to the App Store, Android to Google Play (once live), everyone
 // else to the landing page. Redirect only: no analytics, no UI.
+//
+// An explicit ?store= wins over user-agent sniffing, so a badge can say what
+// it means: ?store=ios goes to the App Store on every platform (Apple's web
+// listing is a fine desktop destination); ?store=android goes to Play once
+// live and to the landing page until then. A bare /get (the QR code) sniffs.
 
 // LAUNCH DAY (Play production access granted, ~21–27 Aug 2026):
 // flip this to `true`. Change nothing else in this file.
@@ -16,11 +21,18 @@ const PLAY_STORE_URL =
 export const dynamic = "force-dynamic";
 
 export function GET(request: Request) {
+  const url = new URL(request.url);
+  const store = url.searchParams.get("store");
   const ua = request.headers.get("user-agent") ?? "";
   const landing = new URL("/", request.url);
 
   let target: URL;
-  if (/iPhone|iPad|iPod/i.test(ua)) {
+  if (store === "ios") {
+    target = new URL(APP_STORE_URL);
+  } else if (store === "android") {
+    // Never link the listing while it 404s.
+    target = ANDROID_STORE_LIVE ? new URL(PLAY_STORE_URL) : landing;
+  } else if (/iPhone|iPad|iPod/i.test(ua)) {
     target = new URL(APP_STORE_URL);
   } else if (/Android/i.test(ua) && ANDROID_STORE_LIVE) {
     target = new URL(PLAY_STORE_URL);

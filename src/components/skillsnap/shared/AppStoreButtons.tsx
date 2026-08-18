@@ -2,13 +2,15 @@
 // SkillSnap — App Store / Google Play download buttons
 // Shared by the landing page, the feed and the public profile page.
 //
-// Both buttons go through /get (src/app/get/route.ts), which sends iOS to the
-// App Store and Android to Google Play once ANDROID_STORE_LIVE is flipped —
-// until then Android falls back to the landing page. Linking the Play listing
-// directly served a 404 while the app had no production access.
+// Both buttons go through /get (src/app/get/route.ts) with an explicit
+// ?store= so the badge means what it says on every platform: ios -> the App
+// Store (Apple's web listing on desktop), android -> Google Play once
+// ANDROID_STORE_LIVE is flipped, the landing page until then. Linking the
+// Play listing directly served a 404 while the app had no production access.
 // ─────────────────────────────────────────────
 
-const GET_APP_HREF = "/get";
+const IOS_HREF = "/get?store=ios";
+const ANDROID_HREF = "/get?store=android";
 
 // 200px at h-14 (56px) is ~3.6:1 — close to the official badges' proportions.
 const BUTTON_MAX_W = "max-w-[200px]";
@@ -85,7 +87,9 @@ export default function AppStoreButtons({
 
   return (
     <div className={`flex ${row} items-center justify-center gap-2.5 w-full ${className}`}>
-      <a href={GET_APP_HREF} className={button} style={style}>
+      {/* Always lands off-site (the App Store), so open it in a new tab and
+          keep the feed / landing page where the visitor left it. */}
+      <a href={IOS_HREF} target="_blank" rel="noopener noreferrer" className={button} style={style}>
         <AppleIcon size={24} />
         <span className="flex flex-col items-start leading-none whitespace-nowrap">
           <span className="text-[10px] opacity-70">Download on the</span>
@@ -93,7 +97,9 @@ export default function AppStoreButtons({
         </span>
       </a>
 
-      <a href={GET_APP_HREF} className={button} style={style}>
+      {/* Same tab: until Play is live this lands on our own landing page, and a
+          new tab that just shows the same site again would be a dead end. */}
+      <a href={ANDROID_HREF} className={button} style={style}>
         <PlayIcon size={22} />
         <span className="flex flex-col items-start leading-none whitespace-nowrap">
           <span className="text-[10px] opacity-70">GET IT ON</span>
