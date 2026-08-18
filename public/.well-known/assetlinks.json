@@ -1,1 +1,17 @@
-[{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"android_app","package_name":"au.com.skillsnap.app","sha256_cert_fingerprints":["58:6C:5C:31:6A:7C:F0:CD:14:DA:D9:A5:49:4D:0F:4E:45:23:A2:EC:D8:F6:8B:86:2E:C6:89:2F:10:BB:FF:B9"]}}]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "au.com.skillsnap.app",
+      "sha256_cert_fingerprints": [
+        "58:6C:5C:31:6A:7C:F0:CD:14:DA:D9:A5:49:4D:0F:4E:45:23:A2:EC:D8:F6:8B:86:2E:C6:89:2F:10:BB:FF:B9",
+        "41:91:46:86:15:5B:35:3F:45:4C:6B:E9:2F:BF:AA:59:1E:32:CA:52:4A:28:82:A2:A1:C9:41:A7:54:1B:41:DB",
+        "19:46:4E:1D:01:FF:54:29:A2:EA:CC:D8:6A:97:2B:19:A0:34:3B:3B:94:82:78:B3:A0:46:EE:3A:E4:52:D5:8C",
+        "29:AB:FA:DE:BE:46:4F:29:EB:60:A1:92:4E:A2:9B:BE:17:E8:D0:86:96:40:1E:4D:BB:59:DF:E1:7A:D2:20:AC"
+      ]
+    }
+  }
+]
