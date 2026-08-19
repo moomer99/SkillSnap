@@ -1070,12 +1070,15 @@ function FeedCard({
         </div>
         )}
 
-        {/* Scrim — keeps the overlaid text legible over bright media */}
+        {/* Scrim — the author text has moved off the media, so the bottom no
+            longer has to carry type. It stays for what is still overlaid there
+            (rail icons and counts, carousel dots) at the app's strength: its
+            top and bottom gradients both run transparent → rgba(0,0,0,0.45). */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.42) 0%, transparent 20%, transparent 42%, rgba(0,0,0,0.78) 100%)",
+              "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 20%, transparent 55%, rgba(0,0,0,0.45) 100%)",
           }}
         />
 
@@ -1109,9 +1112,9 @@ function FeedCard({
           </button>
         )}
 
-        {/* ── Overlay stack — rail sits directly above the author/Connect row ──
-            The wrapper spans the card width, so it stays click-through except
-            where an actual control is. */}
+        {/* ── Overlay stack — the rail, then the carousel dots at the bottom
+            centre (the app's photoDots: 12px up). The wrapper spans the card
+            width, so it stays click-through except where an actual control is. */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2.5 px-3 pb-3">
           {/* Right-side action rail */}
           <div className="flex justify-end">
@@ -1166,56 +1169,62 @@ function FeedCard({
               ))}
             </div>
           )}
-
-          {/* Author block bottom left */}
-          <div className="flex items-end justify-between gap-3">
-            <button
-              onClick={onProfileClick}
-              aria-label={`View ${author.displayName}'s profile`}
-              className="pointer-events-auto flex items-center gap-2.5 min-w-0 text-left"
-            >
-              <UserAvatar user={author} size="sm" showVerified ring />
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span
-                    className="text-[14px] font-bold text-white leading-tight truncate"
-                    style={{ textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}
-                  >
-                    {author.displayName}
-                  </span>
-                  {author.skill && (
-                    <span
-                      className="flex-shrink-0 text-[10.5px] font-bold px-2 py-0.5 rounded-full text-white"
-                      style={{ background: "rgba(108,71,255,0.88)", border: "1px solid rgba(255,255,255,0.18)" }}
-                    >
-                      {author.skill}
-                    </span>
-                  )}
-                </div>
-                {displayLocation && (
-                  <span
-                    className="flex items-center gap-1 text-[11.5px] font-medium text-white/80 truncate mt-0.5"
-                    style={{ textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}
-                  >
-                    <MapPin size={11} className="flex-shrink-0" />
-                    {displayDistance !== undefined ? `${displayDistance < 1 ? "<1" : displayDistance}km · ` : ""}
-                    {displayLocation.split(",")[0]}
-                  </span>
-                )}
-              </div>
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* ── Connect — below the media at the right, where the app puts it (the
-          right end of the row directly under the media). Own posts get nothing
-          in this slot, same as the app; sharing lives on the rail's Recommend. ── */}
-      {!isOwnPost && (
-        <div className="flex justify-end px-4 pt-3">
-          <ConnectButton onClick={onConnectClick} size="sm" loading={connecting} />
-        </div>
-      )}
+      {/* ── Author row — below the media, as in the app: avatar lifted over
+          the media's bottom edge, name + skill + location on the left, Connect
+          at the right end. `relative z-10` so the lifted avatar paints over
+          the positioned media track. Own posts get nothing in the Connect
+          slot, same as the app; sharing lives on the rail's Recommend. ── */}
+      <div className="relative z-10 flex items-center justify-between gap-3 px-4 pt-2">
+        <button
+          onClick={onProfileClick}
+          aria-label={`View ${author.displayName}'s profile`}
+          className="flex items-center gap-2.5 min-w-0 text-left"
+        >
+          {/* Lifted over the media's bottom edge: the row has 8px top padding
+              and the avatar starts 24px above that, so 16px of the 36px avatar
+              overlaps the media - the app's ratio (28 of 48). */}
+          <span className="flex-shrink-0 self-start -mt-6">
+            <UserAvatar user={author} size="sm" showVerified ring />
+          </span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span
+                className="text-[14px] font-bold text-white leading-tight truncate"
+                style={{ textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}
+              >
+                {author.displayName}
+              </span>
+              {author.skill && (
+                <span
+                  className="flex-shrink-0 text-[10.5px] font-bold px-2 py-0.5 rounded-full text-white"
+                  style={{ background: "rgba(108,71,255,0.88)", border: "1px solid rgba(255,255,255,0.18)" }}
+                >
+                  {author.skill}
+                </span>
+              )}
+            </div>
+            {displayLocation && (
+              <span
+                className="flex items-center gap-1 text-[11.5px] font-medium text-white/80 truncate mt-0.5"
+                style={{ textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}
+              >
+                <MapPin size={11} className="flex-shrink-0" />
+                {displayDistance !== undefined ? `${displayDistance < 1 ? "<1" : displayDistance}km · ` : ""}
+                {displayLocation.split(",")[0]}
+              </span>
+            )}
+          </div>
+        </button>
+
+        {!isOwnPost && (
+          <div className="flex-shrink-0">
+            <ConnectButton onClick={onConnectClick} size="sm" loading={connecting} />
+          </div>
+        )}
+      </div>
 
       {/* ── Caption ── */}
       {caption && <FeedCaption text={caption} />}
