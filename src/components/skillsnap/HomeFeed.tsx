@@ -723,7 +723,7 @@ function FeedCaption({ text }: { text: string }) {
             <button
               onClick={() => setExpanded((v) => !v)}
               className={MORE_CLASS}
-              style={{ color: "var(--ss-text-dim)" }}
+              style={{ color: "rgba(255,255,255,0.40)" }}
             >
               {expanded ? "less" : "more"}
             </button>
@@ -1238,7 +1238,10 @@ function FeedCard({
       {/* ── Caption ── */}
       {caption && <FeedCaption text={caption} />}
 
-      <p className="px-4 pt-2 text-[11px]" style={{ color: "var(--ss-text-dim)" }}>
+      {/* The card is fixed dark (#0d0a1a), so its text uses fixed
+          light-on-dark values, not page-theme tokens that invert in light
+          mode. 0.40 is what --ss-text-dim resolves to in the dark theme. */}
+      <p className="px-4 pt-2 text-[11px]" style={{ color: "rgba(255,255,255,0.40)" }}>
         {timeAgo(post.createdAt)}
       </p>
 
@@ -1445,7 +1448,7 @@ function StatCell({ label, value }: { label: string; value: string }) {
     <div className="flex-1 min-w-0 flex flex-col items-center gap-1">
       <span
         className="text-[9px] font-bold uppercase tracking-[0.07em] leading-none"
-        style={{ color: "var(--ss-text-dim)" }}
+        style={{ color: "rgba(255,255,255,0.40)" }}
       >
         {label}
       </span>
@@ -1457,5 +1460,5 @@ function StatCell({ label, value }: { label: string; value: string }) {
 }
 
 function StatDivider() {
-  return <div className="w-px h-7 flex-shrink-0" style={{ background: "var(--ss-line)" }} />;
+  return <div className="w-px h-7 flex-shrink-0" style={{ background: "rgba(255,255,255,0.10)" }} />;
 }
