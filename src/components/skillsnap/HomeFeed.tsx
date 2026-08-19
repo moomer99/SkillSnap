@@ -33,6 +33,7 @@ import LocationPickerSheet from "./shared/LocationPickerSheet";
 import { useToast } from "./shared/Toast";
 import { postService } from "@/services/postService";
 import { SKILL_CATEGORIES } from "@/constants/config";
+import { skillColor, skillEmoji } from "@/constants/skillColors";
 import { shareProfile } from "@/lib/share";
 import AppStoreButtons from "./shared/AppStoreButtons";
 
@@ -907,6 +908,10 @@ function FeedCard({
     handleMediaClick();
   }, [handleMediaClick]);
 
+  /** The post's own skill wins over the author's, as in the app's VideoCard. */
+  const cardSkill = post.skill ?? author.skill ?? null;
+  const cardSkillEmoji = skillEmoji(cardSkill);
+
   const displayLocation = post.location ?? author.location;
   const displayDistance = useMemo(() => {
     if (isOwnPost) return undefined;
@@ -1100,6 +1105,21 @@ function FeedCard({
           </div>
         )}
 
+        {/* ── Skill chip — top left over the media, as the app's topLeftStack:
+            12px in, at most 55% of the media width, one truncating line, the
+            skill's own colour (white clears 4.5:1 on all of them). z-20 with
+            the sound toggle (top right) and carousel arrows (mid-height), so
+            it sits above the scrim and never overlaps either. ── */}
+        {cardSkill && (
+          <div
+            className="pointer-events-none absolute top-3 left-3 z-20 max-w-[55%] flex items-center rounded-full text-white"
+            style={{ background: skillColor(cardSkill), padding: "5px 10px", gap: 5 }}
+          >
+            {cardSkillEmoji && <span className="text-[12px] leading-none flex-shrink-0">{cardSkillEmoji}</span>}
+            <span className="text-[12px] font-bold leading-tight truncate">{cardSkill}</span>
+          </div>
+        )}
+
         {/* ── Sound toggle — top right ── */}
         {isVideo && (
           <button
@@ -1195,14 +1215,6 @@ function FeedCard({
               <span className="text-[14px] font-bold text-white leading-tight truncate">
                 {author.displayName}
               </span>
-              {author.skill && (
-                <span
-                  className="flex-shrink-0 text-[10.5px] font-bold px-2 py-0.5 rounded-full text-white"
-                  style={{ background: "rgba(108,71,255,0.88)", border: "1px solid rgba(255,255,255,0.18)" }}
-                >
-                  {author.skill}
-                </span>
-              )}
             </div>
             {displayLocation && (
               <span className="flex items-center gap-1 text-[11.5px] font-medium text-white/80 truncate mt-0.5">
