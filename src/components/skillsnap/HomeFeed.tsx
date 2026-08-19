@@ -1200,10 +1200,7 @@ function FeedCard({
           </span>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span
-                className="text-[14px] font-bold text-white leading-tight truncate"
-                style={{ textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}
-              >
+              <span className="text-[14px] font-bold text-white leading-tight truncate">
                 {author.displayName}
               </span>
               {author.skill && (
@@ -1216,10 +1213,7 @@ function FeedCard({
               )}
             </div>
             {displayLocation && (
-              <span
-                className="flex items-center gap-1 text-[11.5px] font-medium text-white/80 truncate mt-0.5"
-                style={{ textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}
-              >
+              <span className="flex items-center gap-1 text-[11.5px] font-medium text-white/80 truncate mt-0.5">
                 <MapPin size={11} className="flex-shrink-0" />
                 {displayDistance !== undefined ? `${displayDistance < 1 ? "<1" : displayDistance}km · ` : ""}
                 {displayLocation.split(",")[0]}
