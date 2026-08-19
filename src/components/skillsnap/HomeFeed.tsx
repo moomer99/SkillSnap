@@ -769,9 +769,11 @@ function FeedCard({
   const trackRef = useRef<HTMLDivElement>(null);
   const trackFrame = useRef<number | null>(null);
   const drag = useRef<{ startX: number; startLeft: number; moved: boolean } | null>(null);
-  // Every page reports its aspect as it loads; only the visible page's is
-  // applied, and re-applied when the page changes.
-  const pageAspects = useRef<Map<number, { w: number; h: number }>>(new Map());
+  // The frame takes the FIRST page's aspect and keeps it, as the app's fixed
+  // media box does - a card that changed height mid-swipe would drag the feed
+  // with it. Later pages report their own size so each can letterbox or fill
+  // inside that frame on its own.
+  const [pageDims, setPageDims] = useState<Record<number, { w: number; h: number }>>({});
   const activeMedia = mediaItems ? mediaItems[activeMediaIndex] : null;
   const activeMediaUrl = activeMedia ? activeMedia.url : post.mediaUrl;
   const activeMediaType = activeMedia ? activeMedia.type : post.type;
@@ -843,11 +845,12 @@ function FeedCard({
     setPhotoContain(Math.abs(w / h / framed - 1) > 0.1);
   }, []);
 
-  useEffect(() => {
-    if (!mediaItems) return;
-    const dims = pageAspects.current.get(activeMediaIndex);
-    if (dims) applyPhotoAspect(dims.w, dims.h);
-  }, [mediaItems, activeMediaIndex, applyPhotoAspect]);
+  // Letterbox a carousel page whose own aspect is more than 10% away from the
+  // frame's; otherwise let it fill. Unmeasured pages fill until they report.
+  const pageContain = (i: number) => {
+    const d = pageDims[i];
+    return d ? Math.abs(d.w / d.h / aspect - 1) > 0.1 : false;
+  };
 
   const scrollToPage = useCallback((i: number, behavior: ScrollBehavior = "smooth") => {
     const track = trackRef.current;
@@ -982,8 +985,7 @@ function FeedCard({
                       poster={i === 0 ? post.thumbnailUrl : undefined}
                       onLoadedMetadata={(e) => {
                         const v = e.currentTarget;
-                        pageAspects.current.set(i, { w: v.videoWidth, h: v.videoHeight });
-                        if (i === activeMediaIndex) {
+                        if (i === 0) {
                           aspectMeasured.current = true;
                           setAspect(clampAspect(v.videoWidth, v.videoHeight));
                         }
@@ -995,16 +997,16 @@ function FeedCard({
                     <img
                       src={item.url}
                       alt={caption ? `${caption} (${i + 1} of ${mediaItems.length})` : `Work by ${author.displayName}, ${i + 1} of ${mediaItems.length}`}
-                      className={`w-full h-full ${photoContain ? "object-contain" : "object-cover"}`}
+                      className={`w-full h-full ${pageContain(i) ? "object-contain" : "object-cover"}`}
                       // Pages after the first sit outside the viewport horizontally,
                       // where lazy loading may never fire; a swipe must not land on
                       // an empty page.
                       loading={i === 0 ? "lazy" : "eager"}
                       draggable={false}
                       onLoad={(e) => {
-                        const img = e.currentTarget;
-                        pageAspects.current.set(i, { w: img.naturalWidth, h: img.naturalHeight });
-                        if (i === activeMediaIndex) applyPhotoAspect(img.naturalWidth, img.naturalHeight);
+                        const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+                        setPageDims((prev) => ({ ...prev, [i]: { w, h } }));
+                        if (i === 0) applyPhotoAspect(w, h);
                       }}
                     />
                   )}
