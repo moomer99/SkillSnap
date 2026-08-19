@@ -1,7 +1,7 @@
 # Feed card structure diff — app vs web — 19 Aug 2026
 
 > **Scope:** observed structure only, read from code. App = `SkillSnapApp/src/components/VideoCard.tsx` (2011 lines, render at 952–1620). Web = `SkillSnap/src/components/skillsnap/HomeFeed.tsx` `FeedCard` (738–1237, before today's fixes). Not a judgement about which is right.
-> **Fixed today (commits on `master`):** A) multi-photo pager, B) Connect position. Everything else here is unchanged and is for Mo to choose from.
+> **Fixed today (commits on `master`):** A) multi-photo pager (`5900c04`, `beb3244`), B) Connect position (`1fddc35`), then C) author row moved below the media with Connect back on it (`f7a4f96`), D) stats row: Happy "New", zero Jobs Done/Followers hidden, short row centred (`995ba79`). Everything else here is unchanged and is for Mo to choose from.
 
 ## Vertical order, top to bottom
 
@@ -26,7 +26,7 @@
 |---|---|---|
 | Skill chip | overlaid, top-left | (beside name; overlaid, bottom-left) |
 | Sound toggle | overlaid, top-right, with label | overlaid, top-right, icon only |
-| Author row (avatar/name/location) | **stacked below media** | **overlaid on media, bottom-left** |
+| Author row (avatar/name/location) | **stacked below media** | **overlaid on media, bottom-left** → **moved today** below the media (`f7a4f96`) |
 | Connect | **stacked below media**, right end of author row | **overlaid on media**, bottom-right, right end of the overlaid author row → **moved today** to sit right-aligned in a row directly under the media |
 | Caption | stacked | stacked |
 | Timestamp | absent | stacked, under caption |
@@ -42,9 +42,21 @@
 
 **Verified 19 Aug** on skillsnap-beta (Chrome, 439 px window, mobile layout) with the real post: scrollLeft 0 → 439 → 879 → 439 by mouse drag, dots 1→2→3→2, frame 549 px throughout, Connect below the media. Desktop (600 px card, arrows + drag + dot click) verified on the local dev server with a temporary 3-photo mock post.
 
+## Round 2 (f7a4f96, 995ba79) — measured on skillsnap-beta, before → after
+
+| | Driver-on-call (zero stats) | Adam S (6 / 100% / 8) |
+|---|---|---|
+| desktop 600 px card | 935 → 935, media 750 → 750 | 912 → 912, media 750 → 750 |
+| 375 | 650 → 650, media 465 → 465 | 650 → 650, media 465 → 465 |
+| stats after | Happy=New · Location=Casula, centred | Jobs Done=6 · Happy=100% · Location=Bankstown · Followers=8 |
+
+Avatar top sits 16 px above the media's bottom edge; name and Connect start 10 px below it, at both widths. Scrim: bottom softened 0.78 → 0.45 (the app's) — kept for the overlaid rail and dots. Dots at bottom centre of the media.
+
 ## Left for Mo to choose from (not changed)
 
-- Author row overlaid on media (web) vs stacked below the media (app).
+- Name truncates at 375 when the skill pill and Connect crowd it ("Marcus Thomp…") — same rule as the app's `numberOfLines={1}`, but the app has no skill pill on that row.
+- Name/location still carry the overlay-era text-shadow now that they sit on the flat card (position-only was the brief).
+- **Pre-existing, light theme only:** stat labels (JOBS DONE etc.) and the timestamp use `var(--ss-text-dim)`, which is a light-theme dim colour on the hard-coded dark card — near-invisible in light theme, fine in dark.
 - Skill chip: top-left over media (app) vs pill beside the name (web).
 - Rail order: Save/Recommend swapped; Like glyph heart vs thumbs-up; sound-toggle label.
 - Stats box styling (icons, border, "Away" column with Maps tap) vs plain row.
