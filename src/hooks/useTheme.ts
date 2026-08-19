@@ -17,7 +17,7 @@ export type Theme = "dark" | "light";
 /** Shared with the pre-paint script in layout.tsx — keep the two in sync. */
 export const THEME_STORAGE_KEY = "skillsnap-theme";
 
-/** Light mode is unfinished — see claude/web-light-theme-debt.md.
+/** Light mode is unfinished — see docs/light-theme-debt.md.
     Flip to true to bring it back; nothing else needs changing.
     While false: the store reports "dark", the stored preference is neither
     adopted nor touched, and setTheme/toggleTheme are inert. The pre-paint
