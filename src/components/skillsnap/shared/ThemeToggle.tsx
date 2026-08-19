@@ -4,12 +4,16 @@
 // Shows the theme you'd switch *to*: a sun while dark, a moon while light.
 // ─────────────────────────────────────────────
 import { Sun, Moon } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme, LIGHT_THEME_ENABLED } from "@/hooks/useTheme";
 
 export default function ThemeToggle({ className = "" }: { className?: string }) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
   const label = isDark ? "Switch to light mode" : "Switch to dark mode";
+
+  // Dark-only for launch: the toggle renders nothing while the flag is off,
+  // so every call site keeps compiling and comes back with the flag.
+  if (!LIGHT_THEME_ENABLED) return null;
 
   return (
     <button

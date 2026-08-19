@@ -17,6 +17,13 @@ export type Theme = "dark" | "light";
 /** Shared with the pre-paint script in layout.tsx — keep the two in sync. */
 export const THEME_STORAGE_KEY = "skillsnap-theme";
 
+/** Light mode is unfinished — see claude/web-light-theme-debt.md.
+    Flip to true to bring it back; nothing else needs changing.
+    While false: the store reports "dark", the stored preference is neither
+    adopted nor touched, and setTheme/toggleTheme are inert. The pre-paint
+    script in layout.tsx and ThemeToggle both key off this flag. */
+export const LIGHT_THEME_ENABLED = false;
+
 let currentTheme: Theme = "dark";
 let hydrated = false;
 const listeners = new Set<() => void>();
@@ -26,7 +33,7 @@ function subscribe(listener: () => void) {
   return () => { listeners.delete(listener); };
 }
 
-const getSnapshot = () => currentTheme;
+const getSnapshot = (): Theme => (LIGHT_THEME_ENABLED ? currentTheme : "dark");
 // Server and first client render must agree, so both start on the default.
 // The stored preference is adopted in the effect below.
 const getServerSnapshot = (): Theme => "dark";
@@ -49,6 +56,7 @@ export function useTheme() {
 
   // Adopt the stored preference once, after the first render has matched the server
   useEffect(() => {
+    if (!LIGHT_THEME_ENABLED) return; // dark-only for launch; leave storage alone
     if (hydrated) return;
     hydrated = true;
     let stored: Theme = "dark";
@@ -61,6 +69,7 @@ export function useTheme() {
   }, []);
 
   const setTheme = useCallback((next: Theme) => {
+    if (!LIGHT_THEME_ENABLED) return; // inert: no class change, no re-render, storage untouched
     commit(next);
     try {
       localStorage.setItem(THEME_STORAGE_KEY, next);

@@ -83,9 +83,15 @@ export default function RootLayout({
         {/* Applies the saved theme before first paint. Inline and synchronous
             on purpose: deferring it to React would flash the default theme.
             The storage key matches THEME_STORAGE_KEY in hooks/useTheme.ts. */}
+        {/* Dark-only for launch (LIGHT_THEME_ENABLED = false in hooks/useTheme.ts):
+            applies 'dark' unconditionally and leaves the stored preference in
+            place. To restore light mode, swap back to the original line kept
+            below and flip the flag.
+            Original:
+            __html: `(function(){try{var t=localStorage.getItem('skillsnap-theme');var r=document.documentElement;r.classList.remove('dark','light');r.classList.add(t==='light'?'light':'dark');}catch(e){}})();` */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('skillsnap-theme');var r=document.documentElement;r.classList.remove('dark','light');r.classList.add(t==='light'?'light':'dark');}catch(e){}})();`,
+            __html: `(function(){try{var r=document.documentElement;r.classList.remove('light');r.classList.add('dark');}catch(e){}})();`,
           }}
         />
       </head>
