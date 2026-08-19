@@ -14,6 +14,7 @@ import ContactModal from "./shared/ContactModal";
 import AppStoreButtons from "./shared/AppStoreButtons";
 import ThemeToggle from "./shared/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
+import { useHideOnScroll } from "@/hooks/useHideOnScroll";
 import { getSupabase } from "@/lib/supabase";
 
 interface LandingPageProps {
@@ -186,6 +187,9 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
   const [open, setOpen] = useState(false);
   const { theme } = useTheme();
   const onDark = theme === "dark";
+  // Hides on scroll down, returns on scroll up — same hook as the feed header.
+  // Disabled while the drawer is open so the nav stays put under the scrim.
+  const header = useHideOnScroll<HTMLElement>(open);
 
   // Lock body scroll while the mobile drawer is open
   useEffect(() => {
@@ -198,11 +202,14 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
   return (
     <>
       <nav
-        className="sticky top-0 z-50 w-full"
+        ref={header.ref}
+        onFocus={header.reveal}
+        className="sticky top-0 z-50 w-full transition-transform duration-200 ease-out motion-reduce:transition-none"
         style={{
           background: "var(--ss-nav-bg)",
           backdropFilter: "blur(12px)",
           borderBottom: "1px solid var(--ss-line)",
+          transform: header.hidden ? `translateY(-${header.height}px)` : "translateY(0)",
         }}
       >
         <div className={`${CONTAINER} h-16 flex items-center justify-between`}>
