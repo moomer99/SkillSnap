@@ -12,7 +12,7 @@
 // From `sm` up the column has no horizontal padding, so a card measures the
 // full 600px. Phones keep a 12px gutter so cards don't touch the screen edge.
 // ─────────────────────────────────────────────
-import { useState, useRef, useCallback, useEffect, useLayoutEffect, useMemo } from "react";
+import { Fragment, useState, useRef, useCallback, useEffect, useLayoutEffect, useMemo } from "react";
 import Image from "next/image";
 import {
   Heart, Bookmark, MessageCircle, Send, MapPin, Volume2, VolumeX,
@@ -928,6 +928,12 @@ function FeedCard({
   // as an abandoned marketplace. Any single non-empty value brings it back.
   const hasStats =
     !!author.jobsDone || !!author.happyPercent || !!displayLocation || !!author.followers;
+  const statCells: { label: string; value: string }[] = [
+    ...(author.jobsDone ? [{ label: "Jobs Done", value: fmtNum(author.jobsDone) }] : []),
+    { label: "Happy", value: happyPct ?? "New" },
+    { label: "Location", value: displayLocation ? displayLocation.split(",")[0] : "—" },
+    ...(author.followers ? [{ label: "Followers", value: fmtNum(author.followers) }] : []),
+  ];
   const caption = post.caption ?? "";
 
   async function handleSaveEdit() {
@@ -1233,16 +1239,19 @@ function FeedCard({
         {timeAgo(post.createdAt)}
       </p>
 
-      {/* ── Stats row — hidden entirely when all four values are empty ── */}
+      {/* ── Stats row — hidden entirely when all four values are empty.
+          Wording and emptiness follow the app's statColumns: Happy reads
+          "New" until there is a score; Jobs Done and Followers drop out at
+          zero rather than printing 0; Location always stays. With fewer than
+          four cells the survivors centre instead of holding empty columns. ── */}
       {hasStats && (
-        <div className="flex items-center px-3 pt-2.5 pb-4">
-          <StatCell label="Jobs Done" value={fmtNum(author.jobsDone)} />
-          <StatDivider />
-          <StatCell label="Happy" value={happyPct ?? "—"} />
-          <StatDivider />
-          <StatCell label="Location" value={displayLocation ? displayLocation.split(",")[0] : "—"} />
-          <StatDivider />
-          <StatCell label="Followers" value={fmtNum(author.followers)} />
+        <div className={`flex items-center px-3 pt-2.5 pb-4 ${statCells.length < 4 ? "justify-center gap-2" : ""}`}>
+          {statCells.map((cell, i) => (
+            <Fragment key={cell.label}>
+              {i > 0 && <StatDivider />}
+              <StatCell label={cell.label} value={cell.value} grow={statCells.length === 4} />
+            </Fragment>
+          ))}
         </div>
       )}
 
@@ -1430,10 +1439,12 @@ function RailButton({ icon, label, onClick, title }: {
   );
 }
 
-/** One cell of the below-media stats row: small label above, value beneath. */
-function StatCell({ label, value }: { label: string; value: string }) {
+/** One cell of the below-media stats row: small label above, value beneath.
+ *  `grow` shares the row equally (a full set of four); otherwise the cell is
+ *  its own width so a short row centres. */
+function StatCell({ label, value, grow }: { label: string; value: string; grow: boolean }) {
   return (
-    <div className="flex-1 min-w-0 flex flex-col items-center gap-1">
+    <div className={`${grow ? "flex-1 min-w-0" : "min-w-[84px]"} flex flex-col items-center gap-1`}>
       <span
         className="text-[9px] font-bold uppercase tracking-[0.07em] leading-none"
         style={{ color: "var(--ss-text-dim)" }}
