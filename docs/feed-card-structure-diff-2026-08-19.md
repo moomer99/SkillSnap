@@ -38,7 +38,9 @@
 
 ## Cause of the multi-photo bug (measured from code)
 
-`FeedCard` never had a pager: it rendered **one** `<img>` for `mediaItems[activeMediaIndex]` (`activeMediaUrl`), and the dots were buttons that changed the index. Nothing to scroll, no `overflow`, no `scroll-snap`, and nothing swallowing touch — the track simply did not exist. Fixed by rendering all items in a horizontal scroll-snap track (touch native, mouse drag + arrows on desktop) with dots driven from `scrollLeft`.
+`FeedCard` never had a pager: it rendered **one** `<img>` for `mediaItems[activeMediaIndex]` (`activeMediaUrl`), and the dots were buttons that changed the index. Nothing to scroll, no `overflow`, no `scroll-snap`, and nothing swallowing touch — the track simply did not exist. Fixed by rendering all items in a horizontal scroll-snap track (touch native, mouse drag + arrows on desktop) with dots driven from `scrollLeft`. The frame keeps page 1's aspect across pages (like the app's fixed media box); each later page letterboxes or fills inside it — an earlier revision re-framed per page and shrank the card 549→247 px mid-swipe on driveroncall9's portrait+landscape set (`beb3244` fixed it).
+
+**Verified 19 Aug** on skillsnap-beta (Chrome, 439 px window, mobile layout) with the real post: scrollLeft 0 → 439 → 879 → 439 by mouse drag, dots 1→2→3→2, frame 549 px throughout, Connect below the media. Desktop (600 px card, arrows + drag + dot click) verified on the local dev server with a temporary 3-photo mock post.
 
 ## Left for Mo to choose from (not changed)
 
