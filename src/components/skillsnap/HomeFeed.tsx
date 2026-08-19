@@ -55,14 +55,6 @@ function clampAspect(w: number, h: number): number {
   return Math.min(MAX_ASPECT, Math.max(MIN_ASPECT, w / h));
 }
 
-function timeAgo(iso: string): string {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return `${Math.floor(diff)}s ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
-
 function fmtNum(n: number | undefined): string {
   if (n === undefined || n === null) return "—";
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -1231,13 +1223,6 @@ function FeedCard({
 
       {/* ── Caption ── */}
       {caption && <FeedCaption text={caption} />}
-
-      {/* The card is fixed dark (#0d0a1a), so its text uses fixed
-          light-on-dark values, not page-theme tokens that invert in light
-          mode. 0.40 is what --ss-text-dim resolves to in the dark theme. */}
-      <p className="px-4 pt-2 text-[11px]" style={{ color: "rgba(255,255,255,0.40)" }}>
-        {timeAgo(post.createdAt)}
-      </p>
 
       {/* ── Stats row — four cells always, hidden as a whole only when all
           four are empty, exactly as the app's statColumns / allStatsEmpty. ── */}
