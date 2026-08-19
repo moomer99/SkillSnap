@@ -16,7 +16,7 @@ import { useState, useRef, useCallback, useEffect, useLayoutEffect, useMemo } fr
 import Image from "next/image";
 import {
   Heart, Bookmark, MessageCircle, Send, MapPin, Volume2, VolumeX,
-  Navigation, X, Play, MoreHorizontal,
+  Navigation, X, Play, MoreHorizontal, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import type { Post, Screen } from "@/types";
 import { formatLikes } from "@/mock-data/posts";
@@ -764,6 +764,14 @@ function FeedCard({
   // Multi-media carousel
   const mediaItems = post.mediaItems && post.mediaItems.length > 1 ? post.mediaItems : null;
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
+  // Horizontal scroll-snap track for multi-media posts. Touch scrolls it
+  // natively; a mouse drags it (see the pointer handlers) or uses the arrows.
+  const trackRef = useRef<HTMLDivElement>(null);
+  const trackFrame = useRef<number | null>(null);
+  const drag = useRef<{ startX: number; startLeft: number; moved: boolean } | null>(null);
+  // Every page reports its aspect as it loads; only the visible page's is
+  // applied, and re-applied when the page changes.
+  const pageAspects = useRef<Map<number, { w: number; h: number }>>(new Map());
   const activeMedia = mediaItems ? mediaItems[activeMediaIndex] : null;
   const activeMediaUrl = activeMedia ? activeMedia.url : post.mediaUrl;
   const activeMediaType = activeMedia ? activeMedia.type : post.type;
@@ -826,6 +834,84 @@ function FeedCard({
     if (video.paused) { video.play().catch(() => {}); } else { video.pause(); }
   }, [onFullscreen]);
 
+  // Frame a photo: card aspect from the photo, letterbox only when the photo's
+  // own aspect is more than 10% away from the framed one.
+  const applyPhotoAspect = useCallback((w: number, h: number) => {
+    aspectMeasured.current = true;
+    const framed = clampAspect(w, h);
+    setAspect(framed);
+    setPhotoContain(Math.abs(w / h / framed - 1) > 0.1);
+  }, []);
+
+  useEffect(() => {
+    if (!mediaItems) return;
+    const dims = pageAspects.current.get(activeMediaIndex);
+    if (dims) applyPhotoAspect(dims.w, dims.h);
+  }, [mediaItems, activeMediaIndex, applyPhotoAspect]);
+
+  const scrollToPage = useCallback((i: number, behavior: ScrollBehavior = "smooth") => {
+    const track = trackRef.current;
+    if (!track) return;
+    track.scrollTo({ left: i * track.clientWidth, behavior });
+  }, []);
+
+  // Dots follow scrollLeft, coalesced to one read per frame, so a slow drag
+  // that settles without momentum still lands on the right dot.
+  const handleTrackScroll = useCallback(() => {
+    if (trackFrame.current !== null) return;
+    trackFrame.current = requestAnimationFrame(() => {
+      trackFrame.current = null;
+      const track = trackRef.current;
+      if (!track || track.clientWidth === 0) return;
+      const i = Math.round(track.scrollLeft / track.clientWidth);
+      setActiveMediaIndex((prev) => (prev === i ? prev : i));
+    });
+  }, []);
+
+  // Mouse drag. Touch and trackpad scroll the track natively; a mouse cannot,
+  // so a press-and-drag moves scrollLeft by hand with snapping suspended, then
+  // snaps to the nearest page on release. A drag over 6px suppresses the click
+  // that would otherwise open the fullscreen viewer.
+  const onTrackPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    const track = e.currentTarget;
+    drag.current = { startX: e.clientX, startLeft: track.scrollLeft, moved: false };
+    track.setPointerCapture(e.pointerId);
+    track.style.scrollSnapType = "none";
+    track.style.scrollBehavior = "auto";
+  }, []);
+  const onTrackPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.startX;
+    if (Math.abs(dx) > 6) d.moved = true;
+    e.currentTarget.scrollLeft = d.startLeft - dx;
+  }, []);
+  const onTrackPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    const track = e.currentTarget;
+    if (track.hasPointerCapture(e.pointerId)) track.releasePointerCapture(e.pointerId);
+    track.style.scrollSnapType = "";
+    track.style.scrollBehavior = "";
+    const w = track.clientWidth || 1;
+    // A short flick advances one page in its direction; otherwise nearest.
+    const dx = e.clientX - d.startX;
+    let target = Math.round(track.scrollLeft / w);
+    if (Math.abs(dx) > 40 && target === Math.round(d.startLeft / w)) {
+      target += dx < 0 ? 1 : -1;
+    }
+    scrollToPage(Math.max(0, Math.min(mediaItems ? mediaItems.length - 1 : 0, target)));
+    // The click event fires after this release; keep `moved` visible to it
+    // for one frame so a drag never opens the viewer.
+    if (d.moved) requestAnimationFrame(() => { drag.current = null; });
+    else drag.current = null;
+  }, [mediaItems, scrollToPage]);
+  const onPageClick = useCallback(() => {
+    if (drag.current?.moved) return;
+    handleMediaClick();
+  }, [handleMediaClick]);
+
   const displayLocation = post.location ?? author.location;
   const displayDistance = useMemo(() => {
     if (isOwnPost) return undefined;
@@ -865,6 +951,91 @@ function FeedCard({
         className="relative w-full select-none overflow-hidden"
         style={{ aspectRatio: String(aspect), background: isVideo ? "#000000" : "#0d0a1a" }}
       >
+        {mediaItems ? (
+          <>
+            <div
+              ref={trackRef}
+              className="absolute inset-0 flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory cursor-grab active:cursor-grabbing"
+              style={{ scrollbarWidth: "none", overscrollBehaviorX: "contain" }}
+              onScroll={handleTrackScroll}
+              onPointerDown={onTrackPointerDown}
+              onPointerMove={onTrackPointerMove}
+              onPointerUp={onTrackPointerUp}
+              onPointerCancel={onTrackPointerUp}
+              aria-roledescription="carousel"
+              aria-label={`${mediaItems.length} photos`}
+            >
+              {mediaItems.map((item, i) => (
+                <div
+                  key={`${item.url}-${i}`}
+                  className="w-full h-full flex-shrink-0 snap-start snap-always"
+                  onClick={onPageClick}
+                  aria-label={`${i + 1} of ${mediaItems.length}`}
+                >
+                  {item.type === "video" ? (
+                    <video
+                      ref={i === activeMediaIndex ? videoRef : undefined}
+                      src={item.url}
+                      className="w-full h-full object-cover"
+                      loop playsInline preload="metadata"
+                      muted={muted}
+                      poster={i === 0 ? post.thumbnailUrl : undefined}
+                      onLoadedMetadata={(e) => {
+                        const v = e.currentTarget;
+                        pageAspects.current.set(i, { w: v.videoWidth, h: v.videoHeight });
+                        if (i === activeMediaIndex) {
+                          aspectMeasured.current = true;
+                          setAspect(clampAspect(v.videoWidth, v.videoHeight));
+                        }
+                      }}
+                      onPlay={() => setPlaying(true)}
+                      onPause={() => setPlaying(false)}
+                    />
+                  ) : (
+                    <img
+                      src={item.url}
+                      alt={caption ? `${caption} (${i + 1} of ${mediaItems.length})` : `Work by ${author.displayName}, ${i + 1} of ${mediaItems.length}`}
+                      className={`w-full h-full ${photoContain ? "object-contain" : "object-cover"}`}
+                      // Pages after the first sit outside the viewport horizontally,
+                      // where lazy loading may never fire; a swipe must not land on
+                      // an empty page.
+                      loading={i === 0 ? "lazy" : "eager"}
+                      draggable={false}
+                      onLoad={(e) => {
+                        const img = e.currentTarget;
+                        pageAspects.current.set(i, { w: img.naturalWidth, h: img.naturalHeight });
+                        if (i === activeMediaIndex) applyPhotoAspect(img.naturalWidth, img.naturalHeight);
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop arrows — the web has no touch there. Hidden below md,
+                where a swipe is the affordance. */}
+            {activeMediaIndex > 0 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); scrollToPage(activeMediaIndex - 1); }}
+                aria-label="Previous photo"
+                className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full items-center justify-center transition-transform active:scale-90"
+                style={{ background: "rgba(0,0,0,0.42)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.16)" }}
+              >
+                <ChevronLeft size={20} color="white" />
+              </button>
+            )}
+            {activeMediaIndex < mediaItems.length - 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); scrollToPage(activeMediaIndex + 1); }}
+                aria-label="Next photo"
+                className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full items-center justify-center transition-transform active:scale-90"
+                style={{ background: "rgba(0,0,0,0.42)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.16)" }}
+              >
+                <ChevronRight size={20} color="white" />
+              </button>
+            )}
+          </>
+        ) : (
         <div className="absolute inset-0 cursor-pointer" onClick={handleMediaClick}>
           {isVideo ? (
             <video
@@ -889,21 +1060,13 @@ function FeedCard({
               alt={caption || `Work by ${author.displayName}`}
               className={`w-full h-full ${photoContain ? "object-contain" : "object-cover"}`}
               loading="lazy"
-              onLoad={(e) => {
-                const img = e.currentTarget;
-                aspectMeasured.current = true;
-                const framed = clampAspect(img.naturalWidth, img.naturalHeight);
-                setAspect(framed);
-                // Fill only when the photo's own aspect is within 10% of the
-                // framed aspect; otherwise letterbox so nothing is cropped.
-                const natural = img.naturalWidth / img.naturalHeight;
-                setPhotoContain(Math.abs(natural / framed - 1) > 0.1);
-              }}
+              onLoad={(e) => applyPhotoAspect(e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)}
             />
           ) : (
             <div className="w-full h-full" style={{ background: post.thumbnailGradient }} />
           )}
         </div>
+        )}
 
         {/* Scrim — keeps the overlaid text legible over bright media */}
         <div
@@ -989,7 +1152,7 @@ function FeedCard({
                 <button
                   key={i}
                   aria-label={`Go to media ${i + 1}`}
-                  onClick={(e) => { e.stopPropagation(); setActiveMediaIndex(i); }}
+                  onClick={(e) => { e.stopPropagation(); scrollToPage(i); }}
                   className="pointer-events-auto transition-all"
                   style={{
                     width: i === activeMediaIndex ? 18 : 6,
