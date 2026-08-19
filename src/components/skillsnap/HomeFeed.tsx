@@ -1165,7 +1165,7 @@ function FeedCard({
             </div>
           )}
 
-          {/* Author block bottom left, Connect bottom right */}
+          {/* Author block bottom left */}
           <div className="flex items-end justify-between gap-3">
             <button
               onClick={onProfileClick}
@@ -1202,17 +1202,18 @@ function FeedCard({
                 )}
               </div>
             </button>
-
-            {/* Own posts get nothing in this slot — same as the mobile app.
-                Sharing still lives on the rail's Recommend button. */}
-            {!isOwnPost && (
-              <div className="pointer-events-auto flex-shrink-0">
-                <ConnectButton onClick={onConnectClick} size="sm" loading={connecting} />
-              </div>
-            )}
           </div>
         </div>
       </div>
+
+      {/* ── Connect — below the media at the right, where the app puts it (the
+          right end of the row directly under the media). Own posts get nothing
+          in this slot, same as the app; sharing lives on the rail's Recommend. ── */}
+      {!isOwnPost && (
+        <div className="flex justify-end px-4 pt-3">
+          <ConnectButton onClick={onConnectClick} size="sm" loading={connecting} />
+        </div>
+      )}
 
       {/* ── Caption ── */}
       {caption && <FeedCaption text={caption} />}
