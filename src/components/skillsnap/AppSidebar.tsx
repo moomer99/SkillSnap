@@ -31,8 +31,7 @@ export default function AppSidebar({
 }: AppSidebarProps) {
   return (
     <aside
-      className="hidden md:flex fixed left-0 top-0 bottom-0 z-40 flex-col w-[60px] lg:w-[240px] py-5 px-2 lg:px-4"
-      style={{ background: "var(--ss-surface)", borderRight: "1px solid var(--ss-line)" }}
+      className="hidden md:flex sticky top-0 h-screen flex-shrink-0 flex-col w-[60px] lg:w-[240px] py-5 px-2 lg:px-4"
     >
       {/* Logo — wordmark on desktop, mark only on the collapsed tablet rail */}
       <button

@@ -3,7 +3,7 @@
 // SkillSnap — App Shell & Screen Router
 //
 // Navigation is driven by AppState.screen. The shell is a single tree at every
-// breakpoint: a left rail (240px desktop / 60px tablet / hidden on phones),
+// breakpoint: a sticky left rail (240px desktop / 60px tablet / hidden on phones) in one centred row,
 // a centred 600px content column, and a 300px right rail above 1200px.
 // Phones fall back to the bottom nav.
 // ─────────────────────────────────────────────
@@ -174,36 +174,39 @@ function SkillSnapRouter() {
       <ReviewBanner />
       {loadingOverlay}
 
-      <AppSidebar
-        active={screen}
-        isAuthenticated={state.isAuthenticated}
-        unreadCount={unreadCount}
-        onNavigate={handleNavClick}
-        onLogOut={handleLogOut}
-      />
+      {/* One centred row, X-style: rail, centre column, right rail. The rail
+          is a sticky flex child (not fixed), so the three centre together as
+          a block capped at 1180px of content (240 + 600 + 32 + 300; box-content
+          keeps the lg:px-6 gutters outside the cap) when there is a right
+          rail; wide screens (Discover) drop the cap and the right rail. */}
+      <div className={`mx-auto flex items-start justify-center ${wide ? "" : "max-w-[1180px] box-content lg:px-6"}`}>
+        <AppSidebar
+          active={screen}
+          isAuthenticated={state.isAuthenticated}
+          unreadCount={unreadCount}
+          onNavigate={handleNavClick}
+          onLogOut={handleLogOut}
+        />
 
-      {/* Content area — offset by the rail from md up */}
-      <div className="md:pl-[60px] lg:pl-[240px]">
-        <div className={`mx-auto flex items-start justify-center gap-6 xl:gap-8 ${wide ? "" : "lg:px-6"}`}>
-          {/* Centre column */}
-          <main
-            className={`w-full min-h-screen pb-24 md:pb-0 ${wide ? "" : "max-w-[600px]"}`}
-            style={{ opacity, transition: "opacity 150ms ease" }}
-          >
-            {screenContent}
-          </main>
+        {/* Centre column — sits directly against the rail's own padding */}
+        <main
+          className={`w-full min-h-screen pb-24 md:pb-0 ${wide ? "" : "max-w-[600px]"}`}
+          style={{ opacity, transition: "opacity 150ms ease" }}
+        >
+          {screenContent}
+        </main>
 
-          {/* Right rail — suggested pros + download nudge, hidden below 1200px.
-              The rail itself is the sticky element: a sticky child would be
-              pinned inside a container only as tall as its own content. */}
-          {!wide && (
-            <aside className="ss-right-rail w-[300px] flex-shrink-0 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6">
-              <Suspense fallback={null}>
-                <RightSidebar onNavigate={navigate} />
-              </Suspense>
-            </aside>
-          )}
-        </div>
+        {/* Right rail — suggested pros + download nudge, hidden below 1200px.
+            Carries the gap to the centre column itself. The rail is the
+            sticky element: a sticky child would be pinned inside a container
+            only as tall as its own content. */}
+        {!wide && (
+          <aside className="ss-right-rail ml-6 xl:ml-8 w-[300px] flex-shrink-0 sticky top-0 h-screen overflow-y-auto no-scrollbar py-6">
+            <Suspense fallback={null}>
+              <RightSidebar onNavigate={navigate} />
+            </Suspense>
+          </aside>
+        )}
       </div>
 
       {showBottomNav && (
