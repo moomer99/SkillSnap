@@ -21,6 +21,9 @@ export type SkillCategory =
   | 'Food & Hospitality'
   | 'Technology'
   | 'Creative & Media'
+  | 'Education & Training'
+  | 'Events'
+  | 'Pets'
   | 'Health & Wellness'
   | 'Other Professional'
 
@@ -39,6 +42,9 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
   'Food & Hospitality',
   'Technology',
   'Creative & Media',
+  'Education & Training',
+  'Events',
+  'Pets',
   'Health & Wellness',
   'Other Professional',
 ]
@@ -51,6 +57,11 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
  */
 export const LEGACY_SKILLS = new Set(['Tradie', 'Driver', 'Cook'])
 
+/**
+ * Titles that cannot legally be used without registration are deliberately
+ * absent - AHPRA-protected health titles and Lawyer. Licensed TRADES stay: the
+ * label is a category, not a claim that the person is licensed.
+ */
 export const PRO_SKILLS: SkillOption[] = [
   // Trades
   { name: 'Electrician', emoji: '⚡', category: 'Trades' },
@@ -74,6 +85,9 @@ export const PRO_SKILLS: SkillOption[] = [
   { name: 'Demolition Worker', emoji: '💥', category: 'Trades' },
   { name: 'Excavator Operator', emoji: '🚜', category: 'Trades' },
   { name: 'Tradie', emoji: '🔨', category: 'Trades' },
+  { name: 'Air Conditioning Technician', emoji: '❄️', category: 'Trades' },
+  { name: 'Stonemason', emoji: '🗿', category: 'Trades' },
+  { name: 'Scaffolder', emoji: '🪜', category: 'Trades' },
 
   // Home Services
   { name: 'Cleaner', emoji: '🧹', category: 'Home Services' },
@@ -91,6 +105,10 @@ export const PRO_SKILLS: SkillOption[] = [
   { name: 'Carpet Cleaner', emoji: '🧼', category: 'Home Services' },
   { name: 'Upholstery Cleaner', emoji: '🛋️', category: 'Home Services' },
   { name: 'Curtain Installer', emoji: '🧵', category: 'Home Services' },
+  { name: 'Ironing and Laundry', emoji: '👔', category: 'Home Services' },
+  { name: 'Gutter Cleaner', emoji: '🌧️', category: 'Home Services' },
+  { name: 'Antenna Installer', emoji: '📡', category: 'Home Services' },
+  { name: 'House Sitter', emoji: '🗝️', category: 'Home Services' },
 
   // Beauty & Personal Care
   { name: 'Barber', emoji: '✂️', category: 'Beauty & Personal Care' },
@@ -115,6 +133,9 @@ export const PRO_SKILLS: SkillOption[] = [
   { name: 'Windscreen Repairer', emoji: '🚘', category: 'Automotive' },
   { name: 'Signwriter', emoji: '🪧', category: 'Automotive' },
   { name: 'Driver', emoji: '🚗', category: 'Automotive' },
+  { name: 'Mobile Mechanic', emoji: '🚐', category: 'Automotive' },
+  { name: 'Tyre Fitter', emoji: '🛞', category: 'Automotive' },
+  { name: 'Car Wash', emoji: '🚿', category: 'Automotive' },
 
   // Food & Hospitality
   { name: 'Chef', emoji: '👨‍🍳', category: 'Food & Hospitality' },
@@ -123,6 +144,9 @@ export const PRO_SKILLS: SkillOption[] = [
   { name: 'Barista', emoji: '☕', category: 'Food & Hospitality' },
   { name: 'Private Cook', emoji: '🍳', category: 'Food & Hospitality' },
   { name: 'Meal Prep Specialist', emoji: '🥗', category: 'Food & Hospitality' },
+  { name: 'Bartender', emoji: '🍸', category: 'Food & Hospitality' },
+  { name: 'Waiter', emoji: '🍷', category: 'Food & Hospitality' },
+  { name: 'Food Truck Operator', emoji: '🌮', category: 'Food & Hospitality' },
   // Legacy: held by a live profile. Chef and Private Cook are what new pros see.
   { name: 'Cook', emoji: '🍲', category: 'Food & Hospitality' },
 
@@ -134,6 +158,10 @@ export const PRO_SKILLS: SkillOption[] = [
   { name: 'CCTV Installer', emoji: '📹', category: 'Technology' },
   { name: 'Home Automation Specialist', emoji: '🏡', category: 'Technology' },
   { name: 'Solar Installer', emoji: '☀️', category: 'Technology' },
+  { name: 'Phone Repair Technician', emoji: '🔋', category: 'Technology' },
+  { name: 'Computer Repair Technician', emoji: '🖱️', category: 'Technology' },
+  { name: 'Drone Operator', emoji: '🛸', category: 'Technology' },
+  { name: 'Data Analyst', emoji: '📉', category: 'Technology' },
 
   // Creative & Media
   { name: 'Photographer', emoji: '📷', category: 'Creative & Media' },
@@ -141,13 +169,37 @@ export const PRO_SKILLS: SkillOption[] = [
   { name: 'Graphic Designer', emoji: '🖌️', category: 'Creative & Media' },
   { name: 'Copywriter', emoji: '✍️', category: 'Creative & Media' },
   { name: 'Social Media Manager', emoji: '📣', category: 'Creative & Media' },
-  { name: 'DJ', emoji: '🎧', category: 'Creative & Media' },
-  { name: 'Music Teacher', emoji: '🎵', category: 'Creative & Media' },
   { name: 'Content Creator', emoji: '🎬', category: 'Creative & Media' },
+  { name: 'Video Editor', emoji: '🎞️', category: 'Creative & Media' },
+  { name: 'Illustrator', emoji: '🖍️', category: 'Creative & Media' },
+  { name: 'Animator', emoji: '🌀', category: 'Creative & Media' },
+  { name: 'Voice Over Artist', emoji: '🎙️', category: 'Creative & Media' },
+  { name: 'Web Designer', emoji: '🧩', category: 'Creative & Media' },
+  { name: 'UX Designer', emoji: '📐', category: 'Creative & Media' },
+
+  // Education & Training
+  { name: 'Music Teacher', emoji: '🎵', category: 'Education & Training' },
+  { name: 'Tutor', emoji: '📚', category: 'Education & Training' },
+  { name: 'Driving Instructor', emoji: '🚦', category: 'Education & Training' },
+  { name: 'Swim Instructor', emoji: '🥽', category: 'Education & Training' },
+  { name: 'Language Teacher', emoji: '🔤', category: 'Education & Training' },
+  { name: 'Dance Teacher', emoji: '💃', category: 'Education & Training' },
+  { name: 'Sports Coach', emoji: '🏅', category: 'Education & Training' },
+
+  // Events
+  { name: 'DJ', emoji: '🎧', category: 'Events' },
+  { name: 'Event Planner', emoji: '📅', category: 'Events' },
+  { name: 'Wedding Planner', emoji: '💍', category: 'Events' },
+  { name: 'MC and Host', emoji: '🪩', category: 'Events' },
+  { name: 'Balloon and Decor Stylist', emoji: '🎈', category: 'Events' },
+
+  // Pets
+  { name: 'Dog Groomer', emoji: '🐩', category: 'Pets' },
+  { name: 'Dog Walker', emoji: '🦮', category: 'Pets' },
+  { name: 'Pet Sitter', emoji: '🐾', category: 'Pets' },
+  { name: 'Dog Trainer', emoji: '🐕', category: 'Pets' },
 
   // Health & Wellness
-  { name: 'Physiotherapist', emoji: '🦴', category: 'Health & Wellness' },
-  { name: 'Chiropractor', emoji: '🦵', category: 'Health & Wellness' },
   { name: 'Nutritionist', emoji: '🥑', category: 'Health & Wellness' },
   { name: 'Yoga Instructor', emoji: '🧘', category: 'Health & Wellness' },
   { name: 'Life Coach', emoji: '🌟', category: 'Health & Wellness' },
@@ -156,21 +208,22 @@ export const PRO_SKILLS: SkillOption[] = [
   { name: 'Disability Support Worker', emoji: '♿', category: 'Health & Wellness' },
   { name: 'Spiritual Coach', emoji: '🕊️', category: 'Health & Wellness' },
   { name: 'Meditation Teacher', emoji: '☯️', category: 'Health & Wellness' },
-  { name: 'Counsellor', emoji: '💬', category: 'Health & Wellness' },
 
   // Other Professional
   { name: 'Accountant', emoji: '📊', category: 'Other Professional' },
   { name: 'Bookkeeper', emoji: '📒', category: 'Other Professional' },
-  { name: 'Lawyer', emoji: '⚖️', category: 'Other Professional' },
   { name: 'Mortgage Broker', emoji: '🏦', category: 'Other Professional' },
   { name: 'Real Estate Agent', emoji: '🏘️', category: 'Other Professional' },
   { name: 'Financial Advisor', emoji: '💰', category: 'Other Professional' },
   { name: 'Translator', emoji: '🗣️', category: 'Other Professional' },
-  { name: 'Tutor', emoji: '📚', category: 'Other Professional' },
   { name: 'Career Coach', emoji: '🎯', category: 'Other Professional' },
   { name: 'Business Coach', emoji: '📈', category: 'Other Professional' },
   { name: 'Mentor', emoji: '🤝', category: 'Other Professional' },
   { name: 'Public Speaker', emoji: '🎤', category: 'Other Professional' },
+  { name: 'Migration Agent', emoji: '🛂', category: 'Other Professional' },
+  { name: 'Virtual Assistant', emoji: '🗂️', category: 'Other Professional' },
+  { name: 'Recruiter', emoji: '🧑‍💼', category: 'Other Professional' },
+  { name: 'Insurance Broker', emoji: '🛡️', category: 'Other Professional' },
   // Lowercase d is deliberate: it matches the live profile exactly, and the
   // lookup is exact. Correcting the spelling means correcting the profile row first.
   { name: 'Instructional designer', emoji: '🧑‍🏫', category: 'Other Professional' },

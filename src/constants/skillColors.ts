@@ -44,6 +44,9 @@ const CATEGORY_COLORS: Record<SkillCategory, string> = {
   'Food & Hospitality': '#b45309',
   Technology: '#1d4ed8',
   'Creative & Media': '#7c3aed',
+  'Education & Training': '#a21caf',
+  Events: '#b91c1c',
+  Pets: '#4d7c0f',
   'Health & Wellness': '#15803d',
   'Other Professional': '#0f766e',
 }
