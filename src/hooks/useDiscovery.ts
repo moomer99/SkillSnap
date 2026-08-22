@@ -11,7 +11,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useAppState } from "@/state/AppState";
 import { discoveryService } from "@/services/discoveryService";
 import type { DiscoveryResults } from "@/types";
-import type { DiscoveryFilter } from "@/mock-data/discovery";
+import type { DiscoveryFilter } from "@/constants/skillLookup";
 import { MOCK_DISCOVERY_RESULTS } from "@/mock-data/discovery";
 
 const EMPTY: DiscoveryResults = { allPros: [], mappablePros: [] };

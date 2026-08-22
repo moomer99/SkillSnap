@@ -21,15 +21,6 @@ export const MOCK_DISCOVERY_RESULTS: DiscoveryResults = {
   mappablePros: MOCK_DISCOVERY_PINS as MappableDiscoveryPin[],
 };
 
-export const DISCOVERY_FILTER_CHIPS = [
-  "All", "Nearby", "Top Rated",
-  "Automotive", "Barber", "Carpenter", "Chef", "Cleaner", "Concreter",
-  "Driving Instructor", "Electrician", "Event Planner", "Florist",
-  "Graphic Designer", "Interior Designer", "Landscaper", "Life Coach",
-  "Makeup Artist", "Mechanic", "Mover", "Musician", "Nail Tech", "Painter",
-  "Personal Trainer", "Pet Groomer", "DJ", "Photographer", "Plasterer",
-  "Plumber", "Roofer", "Singer", "Tattoo Artist", "Tiler", "Tutor",
-  "Videographer", "Web Developer", "Wedding Stylist", "Welder",
-  "Yoga Instructor", "Other",
-] as const;
-export type DiscoveryFilter = (typeof DISCOVERY_FILTER_CHIPS)[number];
+// The filter chips used to be a copy of the old config.ts skill list kept
+// here; they are now derived from the shared vocabulary in
+// constants/skillLookup.ts (DISCOVERY_FILTER_CHIPS / DiscoveryFilter).

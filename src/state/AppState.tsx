@@ -7,7 +7,7 @@
 import { createContext, useContext, useReducer, useEffect, useRef, useState, type ReactNode } from "react";
 import { usePresence } from "@/hooks/usePresence";
 import type { User, Post, MessageThread, Message, Screen } from "@/types";
-import type { DiscoveryFilter } from "@/mock-data/discovery";
+import type { DiscoveryFilter } from "@/constants/skillLookup";
 import { getAuthSupabase } from "@/lib/supabase";
 import { mapProfile, ensureProfile } from "@/services/authService";
 

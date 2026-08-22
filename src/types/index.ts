@@ -5,8 +5,17 @@
 
 export type ProfileVariant = "own" | "client";
 
-import type { SKILL_CATEGORIES } from "@/constants/config";
-export type SkillCategory = (typeof SKILL_CATEGORIES)[number] | (string & {});
+import type { SkillOption } from "@/constants/skills";
+/** The category union from the shared vocabulary (Trades, Home Services, …). */
+export type { SkillCategory as SkillGroup } from "@/constants/skills";
+/**
+ * A profile's / post's skill NAME. The vocabulary is src/constants/skills.ts
+ * (shared byte-for-byte with the mobile repo), whose names are typed as
+ * plain strings rather than literals, so this is string-shaped by design:
+ * custom skills ("Visionary") are legal values. Test membership with
+ * isKnownSkill() from constants/skillLookup, never with a type.
+ */
+export type SkillCategory = SkillOption["name"] | (string & {});
 
 // ── User / Profile ──────────────────────────
 export interface User {

@@ -5,7 +5,7 @@
 import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
 import type { DiscoveryPin, DiscoveryResults, MappableDiscoveryPin, SkillCategory } from "@/types";
-import type { DiscoveryFilter } from "@/mock-data/discovery";
+import type { DiscoveryFilter } from "@/constants/skillLookup";
 import { MOCK_DISCOVERY_RESULTS } from "@/mock-data/discovery";
 
 export interface LocationCoords {

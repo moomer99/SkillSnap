@@ -17,7 +17,8 @@ import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { MapPin, ChevronRight, Search, X, SlidersHorizontal } from "lucide-react";
 import type { DiscoveryPin, Screen } from "@/types";
-import { DISCOVERY_FILTER_CHIPS, type DiscoveryFilter } from "@/mock-data/discovery";
+import { DISCOVERY_FILTER_CHIPS, DISCOVERY_SORT_FILTERS, isDiscoverySort, type DiscoveryFilter } from "@/constants/skillLookup";
+import { skillColor } from "@/constants/skillColors";
 import { useDiscovery } from "@/hooks/useDiscovery";
 import { useAppState } from "@/state/AppState";
 import { useMessages } from "@/hooks/useMessages";
@@ -36,8 +37,8 @@ interface DiscoverScreenProps {
 }
 
 // "All" / "Nearby" / "Top Rated" are sorts; the rest are skills
-const SORT_FILTERS = DISCOVERY_FILTER_CHIPS.slice(0, 3) as readonly DiscoveryFilter[];
-const SKILL_FILTERS = DISCOVERY_FILTER_CHIPS.slice(3) as readonly DiscoveryFilter[];
+const SORT_FILTERS: readonly DiscoveryFilter[] = DISCOVERY_SORT_FILTERS;
+const SKILL_FILTERS: readonly DiscoveryFilter[] = DISCOVERY_FILTER_CHIPS.filter((chip) => !isDiscoverySort(chip));
 
 export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
   const { allPros, mappablePros, loading, activeFilter, setFilter } = useDiscovery();
@@ -360,25 +361,6 @@ function MapPanel({ total }: { total: number }) {
   );
 }
 
-function skillColor(skill: string): string {
-  const colors: Record<string, string> = {
-    Barber: "#6c47ff",
-    Driver: "#0ea5e9",
-    Tiler: "#f59e0b",
-    Cleaner: "#10b981",
-    Plumber: "#3b82f6",
-    Electrician: "#f97316",
-    Carpenter: "#84cc16",
-    "Makeup Artist": "#ec4899",
-    "Nail Tech": "#f43f5e",
-    Chef: "#ef4444",
-    Mover: "#8b5cf6",
-    Mechanic: "#64748b",
-    "Fitness / PT": "#06b6d4",
-    "Homemade Kooking & Baking": "#d97706",
-  };
-  return colors[skill] ?? "#6c47ff";
-}
 
 // ── Pro card ───────────────────────────────────────────────────────
 // distance and happy % are computed per-view rather than stored on the pin
