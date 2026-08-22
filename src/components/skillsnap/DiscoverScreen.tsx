@@ -450,8 +450,8 @@ function ProCard({
         </div>
       )}
 
-      <div className="px-3 pb-3 mt-auto pt-2">
-        <ConnectButton onClick={onConnect} fullWidth size="sm" loading={connecting} />
+      <div className="px-3 pb-3 mt-auto pt-2 flex justify-center">
+        <ConnectButton onClick={onConnect} size="sm" loading={connecting} />
       </div>
     </div>
   );
