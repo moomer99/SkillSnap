@@ -49,7 +49,7 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
  * The picker filters these out; everything else that reads PRO_SKILLS - emoji,
  * colour, the Discover filter - still resolves them.
  */
-export const LEGACY_SKILLS = new Set(['Tradie', 'Driver'])
+export const LEGACY_SKILLS = new Set(['Tradie', 'Driver', 'Cook'])
 
 export const PRO_SKILLS: SkillOption[] = [
   // Trades
@@ -123,6 +123,8 @@ export const PRO_SKILLS: SkillOption[] = [
   { name: 'Barista', emoji: '☕', category: 'Food & Hospitality' },
   { name: 'Private Cook', emoji: '🍳', category: 'Food & Hospitality' },
   { name: 'Meal Prep Specialist', emoji: '🥗', category: 'Food & Hospitality' },
+  // Legacy: held by a live profile. Chef and Private Cook are what new pros see.
+  { name: 'Cook', emoji: '🍲', category: 'Food & Hospitality' },
 
   // Technology
   { name: 'Web Developer', emoji: '💻', category: 'Technology' },
@@ -141,6 +143,7 @@ export const PRO_SKILLS: SkillOption[] = [
   { name: 'Social Media Manager', emoji: '📣', category: 'Creative & Media' },
   { name: 'DJ', emoji: '🎧', category: 'Creative & Media' },
   { name: 'Music Teacher', emoji: '🎵', category: 'Creative & Media' },
+  { name: 'Content Creator', emoji: '🎬', category: 'Creative & Media' },
 
   // Health & Wellness
   { name: 'Physiotherapist', emoji: '🦴', category: 'Health & Wellness' },
@@ -151,6 +154,9 @@ export const PRO_SKILLS: SkillOption[] = [
   { name: 'Childcare Worker', emoji: '🧸', category: 'Health & Wellness' },
   { name: 'Aged Care Worker', emoji: '👵', category: 'Health & Wellness' },
   { name: 'Disability Support Worker', emoji: '♿', category: 'Health & Wellness' },
+  { name: 'Spiritual Coach', emoji: '🕊️', category: 'Health & Wellness' },
+  { name: 'Meditation Teacher', emoji: '☯️', category: 'Health & Wellness' },
+  { name: 'Counsellor', emoji: '💬', category: 'Health & Wellness' },
 
   // Other Professional
   { name: 'Accountant', emoji: '📊', category: 'Other Professional' },
@@ -161,6 +167,13 @@ export const PRO_SKILLS: SkillOption[] = [
   { name: 'Financial Advisor', emoji: '💰', category: 'Other Professional' },
   { name: 'Translator', emoji: '🗣️', category: 'Other Professional' },
   { name: 'Tutor', emoji: '📚', category: 'Other Professional' },
+  { name: 'Career Coach', emoji: '🎯', category: 'Other Professional' },
+  { name: 'Business Coach', emoji: '📈', category: 'Other Professional' },
+  { name: 'Mentor', emoji: '🤝', category: 'Other Professional' },
+  { name: 'Public Speaker', emoji: '🎤', category: 'Other Professional' },
+  // Lowercase d is deliberate: it matches the live profile exactly, and the
+  // lookup is exact. Correcting the spelling means correcting the profile row first.
+  { name: 'Instructional designer', emoji: '🧑‍🏫', category: 'Other Professional' },
 ]
 
 /** What the picker offers: everything except the grandfathered names. */
