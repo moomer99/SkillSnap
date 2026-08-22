@@ -78,9 +78,8 @@ export default function AppSidebar({
             </button>
           );
         })}
-      </nav>
 
-      <div className="mt-auto">
+        {/* Last item of the list: Sign in / Log out, styled as a nav row */}
         <button
           onClick={isAuthenticated ? onLogOut : () => onNavigate("auth")}
           title={isAuthenticated ? "Log out" : "Sign in"}
@@ -98,7 +97,7 @@ export default function AppSidebar({
             {isAuthenticated ? "Log out" : "Sign in"}
           </span>
         </button>
-      </div>
+      </nav>
     </aside>
   );
 }
