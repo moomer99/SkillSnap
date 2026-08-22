@@ -7,15 +7,19 @@
  * with no entry still renders.
  *
  * The chip sits on top of video, not on the app surface, so these are chosen to
- * hold up against arbitrary footage rather than against the theme. White text on
- * each of them clears 4.5:1.
+ * hold up against arbitrary footage rather than against the theme. Every colour
+ * in this file - SKILL_COLORS, CATEGORY_COLORS and FALLBACK_COLORS - is checked
+ * to clear 4.5:1 for white text (WCAG relative luminance), verified 22 August
+ * 2026. It did not always: Barber (#e0457b, 3.96:1) and the teal #0d9488 used
+ * for Cleaner, Home Services and a fallback (3.74:1) were below it, and this
+ * header asserted otherwise. Re-measure before adding or changing a value.
  */
 
 import { PRO_SKILLS, type SkillCategory } from './skills'
 
 const SKILL_COLORS: Record<string, string> = {
-  Barber: '#e0457b',
-  Cleaner: '#0d9488',
+  Barber: '#c2185b',
+  Cleaner: '#0f6f68',
   Tradie: '#c2410c',
   Driver: '#1d4ed8',
   Carpenter: '#92400e',
@@ -34,11 +38,12 @@ const SKILL_COLORS: Record<string, string> = {
  * The twelve above predate the full list. Rather than invent eighty more hand
  * -picked colours, a skill inherits its category's - so the whole of Trades
  * reads as one family and Beauty as another, which is more useful on a feed
- * card than eighty unrelated hues would be. All clear 4.5:1 against white.
+ * card than eighty unrelated hues would be. All checked to clear 4.5:1 against
+ * white - see the header.
  */
 const CATEGORY_COLORS: Record<SkillCategory, string> = {
   Trades: '#c2410c',
-  'Home Services': '#0d9488',
+  'Home Services': '#0f6f68',
   'Beauty & Personal Care': '#be185d',
   Automotive: '#475569',
   'Food & Hospitality': '#b45309',
@@ -54,7 +59,7 @@ const CATEGORY_COLORS: Record<SkillCategory, string> = {
 /** The fallback set, for the custom skills EditProfile allows. */
 const FALLBACK_COLORS = [
   '#6c47ff',
-  '#0d9488',
+  '#0f6f68',
   '#be185d',
   '#c2410c',
   '#1d4ed8',

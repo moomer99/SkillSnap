@@ -32,7 +32,7 @@ import ConnectButton from "./shared/ConnectButton";
 import LocationPickerSheet from "./shared/LocationPickerSheet";
 import { useToast } from "./shared/Toast";
 import { postService } from "@/services/postService";
-import { SKILL_CATEGORIES } from "@/constants/config";
+import { skillsByCategory } from "@/constants/skills";
 import { skillColor, skillEmoji } from "@/constants/skillColors";
 import { shareProfile } from "@/lib/share";
 import AppStoreButtons from "./shared/AppStoreButtons";
@@ -1334,20 +1334,29 @@ function FeedCard({
               />
             )}
             {editMode === "skill" && (
-              <div className="flex flex-wrap gap-2 mb-2 max-h-[240px] overflow-y-auto">
-                {SKILL_CATEGORIES.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setEditSkill(cat)}
-                    className="px-3 py-1.5 rounded-full text-[13px] font-semibold transition-colors"
-                    style={
-                      editSkill === cat
-                        ? { background: "var(--ss-purple)", color: "white", border: "1px solid var(--ss-purple)" }
-                        : { background: "var(--ss-surface-2)", color: "var(--ss-text-muted)", border: "1px solid var(--ss-line)" }
-                    }
-                  >
-                    {cat}
-                  </button>
+              <div className="mb-2 max-h-[320px] overflow-y-auto">
+                {skillsByCategory().map((section) => (
+                  <div key={section.category} className="mb-3">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.06em] mb-1.5" style={{ color: "var(--ss-text-dim)" }}>
+                      {section.category}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {section.data.map((item) => (
+                        <button
+                          key={item.name}
+                          onClick={() => setEditSkill(item.name)}
+                          className="px-3 py-1.5 rounded-full text-[13px] font-semibold transition-colors"
+                          style={
+                            editSkill === item.name
+                              ? { background: "var(--ss-purple)", color: "white", border: "1px solid var(--ss-purple)" }
+                              : { background: "var(--ss-surface-2)", color: "var(--ss-text-muted)", border: "1px solid var(--ss-line)" }
+                          }
+                        >
+                          {item.emoji} {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             )}

@@ -8,7 +8,9 @@ import { MapPin, ArrowLeft, Play, Share2, Edit3, X, MoreVertical, Trash2, Chevro
 import { useState, useEffect, useRef } from "react";
 import type { Screen, ProfileVariant, Post, SkillCategory } from "@/types";
 import { MOCK_WORK_GRID } from "@/mock-data/posts";
-import { SKILL_CATEGORIES, APP_STORE_URL } from "@/constants/config";
+import { APP_STORE_URL } from "@/constants/config";
+import { skillsByCategory, SELECTABLE_SKILLS } from "@/constants/skills";
+import { skillGroup } from "@/constants/skillLookup";
 import { useProfile } from "@/hooks/useProfile";
 import { useMessages } from "@/hooks/useMessages";
 import { useAppState } from "@/state/AppState";
@@ -329,6 +331,15 @@ function MediaViewer({ post, isOwn, onClose, onDelete, onUpdate }: { post: Post;
   const [location, setLocation] = useState(post.location ?? "");
   const [saving, setSaving] = useState(false);
 
+  // The six quick chips under the select. Not the first six of the list:
+  // the author's own skill first, then the rest of its category, so a pro
+  // tagging a post sees their trade and its siblings. Without a listed
+  // skill (custom, or a client) the vocabulary's first six stand in.
+  const ownSkill = post.author?.skill ?? post.skill ?? null;
+  const ownGroup = skillGroup(ownSkill);
+  const quickPool = (ownGroup ? SELECTABLE_SKILLS.filter((s) => s.category === ownGroup) : SELECTABLE_SKILLS).map((s) => s.name);
+  const quickSkills = (ownSkill && quickPool.includes(ownSkill) ? [ownSkill, ...quickPool.filter((n) => n !== ownSkill)] : quickPool).slice(0, 6);
+
   function handlePlayToggle() {
     if (!videoRef.current) return;
     if (playing) { videoRef.current.pause(); setPlaying(false); }
@@ -401,11 +412,11 @@ function MediaViewer({ post, isOwn, onClose, onDelete, onUpdate }: { post: Post;
             <div className="px-5 mb-4">
               <label className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2 block">Skill Category</label>
               <div className="bg-white/10 rounded-xl border border-white/10 px-4 h-12 flex items-center justify-between relative">
-                <select value={skill} onChange={(e) => setSkill(e.target.value as SkillCategory | "")} className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"><option value="">Select skill...</option>{SKILL_CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}</select>
+                <select value={skill} onChange={(e) => setSkill(e.target.value as SkillCategory | "")} className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"><option value="">Select skill...</option>{skillsByCategory().map((section) => <optgroup key={section.category} label={section.category}>{section.data.map((item) => <option key={item.name} value={item.name}>{item.emoji} {item.name}</option>)}</optgroup>)}</select>
                 <span className={`text-sm ${skill ? "text-white" : "text-white/30"}`}>{skill || "Select skill..."}</span>
                 <ChevronDown size={16} className="text-white/30" />
               </div>
-              <div className="flex flex-wrap gap-2 mt-2.5">{SKILL_CATEGORIES.slice(0, 6).map((cat) => <button key={cat} onClick={() => setSkill(skill === cat ? "" : cat)} className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${skill === cat ? "bg-[#6c47ff] text-white border-[#6c47ff]" : "bg-white/10 text-white/60 border-white/10"}`}>{cat}</button>)}</div>
+              <div className="flex flex-wrap gap-2 mt-2.5">{quickSkills.map((cat) => <button key={cat} onClick={() => setSkill(skill === cat ? "" : cat)} className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${skill === cat ? "bg-[#6c47ff] text-white border-[#6c47ff]" : "bg-white/10 text-white/60 border-white/10"}`}>{cat}</button>)}</div>
             </div>
             <div className="px-5 mb-6">
               <label className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2 block">Location</label>
