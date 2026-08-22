@@ -2,7 +2,9 @@
 import { useState, useRef } from "react";
 import { ArrowLeft, Camera, Loader2, CheckCircle, MapPin, X, Navigation, Eye, EyeOff, AlertCircle } from "lucide-react";
 import type { Screen, SkillCategory } from "@/types";
-import { SKILL_CATEGORIES } from "@/constants/config";
+import { skillsByCategory, LEGACY_SKILLS } from "@/constants/skills";
+import { isKnownSkill, CLIENT_OPTION, OTHER_OPTION } from "@/constants/skillLookup";
+import { skillEmoji } from "@/constants/skillColors";
 import { useAppState } from "@/state/AppState";
 import { useLocation } from "@/hooks/useLocation";
 import { useToast } from "./shared/Toast";
@@ -34,9 +36,14 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
   // useLocation for GPS + geocoding in edit profile
   const { requestGPS: hookRequestGPS, setManualLocation, status: locStatus, error: locHookError } = useLocation();
 
-  const knownSkills = SKILL_CATEGORIES as readonly string[];
   const stored = user?.skill ?? "";
-  const isCustom = !!stored && !knownSkills.includes(stored);
+  // "Known" is PRO_SKILLS including the grandfathered names (Tradie, Driver,
+  // Cook): a profile holding one of those keeps it rather than being
+  // reclassified as a custom skill. Only an unlisted name is custom.
+  const isCustom = !!stored && !isKnownSkill(stored);
+  // A legacy skill is known but never offered, so it gets one chip of its
+  // own at the top - selected - that the picker would otherwise not show.
+  const legacyCurrent = LEGACY_SKILLS.has(stored) ? stored : null;
 
   const [skill, setSkill] = useState<string>(isCustom ? "Other" : stored);
   const [customSkill, setCustomSkill] = useState(isCustom ? stored : "");
@@ -291,10 +298,11 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
               <p className="text-right text-xs text-[#6f6889] mt-1">{bio.length} / 200</p>
             </Field>
 
-            {/* Skill Category — moved above Location */}
+            {/* Skill Category — the shared vocabulary, grouped by its 12
+                categories; "Client" first and "Other" (custom) last. */}
             <Field label="Skill Category">
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {(SKILL_CATEGORIES as readonly string[]).map((cat) => (
+              {(() => {
+                const chip = (cat: string, label: string = cat) => (
                   <button
                     key={cat}
                     type="button"
@@ -310,10 +318,27 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                       cursor: "pointer",
                     }}
                   >
-                    {cat}
+                    {label}
                   </button>
-                ))}
-              </div>
+                );
+                const heading = (text: string) => (
+                  <p key={`h-${text}`} style={{ width: "100%", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#6f6889", marginTop: 6 }}>
+                    {text}
+                  </p>
+                );
+                return (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {chip(CLIENT_OPTION)}
+                    {legacyCurrent && chip(legacyCurrent, `${skillEmoji(legacyCurrent) ?? ""} ${legacyCurrent}`.trim())}
+                    {skillsByCategory().map((section) => [
+                      heading(section.category),
+                      ...section.data.map((item) => chip(item.name, `${item.emoji} ${item.name}`)),
+                    ])}
+                    {heading("Something else")}
+                    {chip(OTHER_OPTION)}
+                  </div>
+                );
+              })()}
 
               <div style={{ display: skill === "Other" ? "block" : "none", marginTop: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--ss-surface-2)", border: "2px solid #6c47ff", borderRadius: 16, padding: "0 16px", height: 48 }}>
