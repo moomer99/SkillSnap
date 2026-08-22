@@ -2,7 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Search, ArrowLeft, X, MapPin, Briefcase, Users } from "lucide-react";
 import type { Screen, User, SkillCategory } from "@/types";
-import { SKILL_CATEGORIES } from "@/constants/config";
+import { SELECTABLE_SKILL_NAMES, sortSkillsByVocabulary } from "@/constants/skillLookup";
+import { skillColor, skillEmoji } from "@/constants/skillColors";
 import { useAppState } from "@/state/AppState";
 import UserAvatar from "./shared/UserAvatar";
 import { MOCK_USERS } from "@/mock-data/users";
@@ -12,36 +13,10 @@ const SUPABASE_CONFIGURED =
   !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref");
 
-const SKILL_META: Record<string, { emoji: string; color: string; bg: string }> = {
-  "Barber":           { emoji: "✂️",  color: "#6c47ff", bg: "#241d40" },
-  "Makeup Artist":    { emoji: "💄",  color: "#db2777", bg: "#fce7f3" },
-  "Tiler":            { emoji: "🧱",  color: "#0284c7", bg: "#e0f2fe" },
-  "Cleaning":         { emoji: "🧹",  color: "#d97706", bg: "rgba(251,191,36,0.14)" },
-  "Cleaner":          { emoji: "🧹",  color: "#d97706", bg: "rgba(251,191,36,0.14)" },
-  "Fitness / PT":     { emoji: "💪",  color: "#059669", bg: "#d1fae5" },
-  "Plumber":          { emoji: "🔧",  color: "#0369a1", bg: "#dbeafe" },
-  "Electrician":      { emoji: "⚡",  color: "#b45309", bg: "#fef9c3" },
-  "Landscaping":      { emoji: "🌿",  color: "#15803d", bg: "rgba(16,185,129,0.14)" },
-  "Landscaper":       { emoji: "🌿",  color: "#15803d", bg: "rgba(16,185,129,0.14)" },
-  "Nails":            { emoji: "💅",  color: "#be185d", bg: "#fce7f3" },
-  "Driver":           { emoji: "🚗",  color: "#0ea5e9", bg: "#e0f2fe" },
-  "Cook":             { emoji: "👨‍🍳", color: "#ef4444", bg: "rgba(239,68,68,0.14)" },
-  "Chef":             { emoji: "👨‍🍳", color: "#ef4444", bg: "rgba(239,68,68,0.14)" },
-  "Carpenter":        { emoji: "🪚",  color: "#92400e", bg: "rgba(251,191,36,0.14)" },
-  "Mechanic":         { emoji: "🔩",  color: "#374151", bg: "#1c1733" },
-  "Painter":          { emoji: "🖌️",  color: "#7c3aed", bg: "#241d40" },
-  "Mover":            { emoji: "📦",  color: "#d97706", bg: "rgba(251,191,36,0.14)" },
-  "Photographer":     { emoji: "📷",  color: "#0f766e", bg: "#ccfbf1" },
-  "Videographer":     { emoji: "🎥",  color: "#1d4ed8", bg: "#dbeafe" },
-  "Personal Trainer": { emoji: "🏋️",  color: "#059669", bg: "#d1fae5" },
-  "Nail Tech":        { emoji: "💅",  color: "#be185d", bg: "#fce7f3" },
-  "Singer":           { emoji: "🎤",  color: "#7c3aed", bg: "#241d40" },
-  "Musician":         { emoji: "🎸",  color: "#1d4ed8", bg: "#dbeafe" },
-  "DJ":               { emoji: "🎧",  color: "#6c47ff", bg: "#241d40" },
-  "Restaurant":       { emoji: "🍽️",  color: "#dc2626", bg: "rgba(239,68,68,0.14)" },
-  "Tattoo Artist":    { emoji: "🖊️",  color: "#374151", bg: "#1c1733" },
-  "Other":            { emoji: "⭐",  color: "#6b7280", bg: "#1c1733" },
-};
+// Emoji and colour come from the shared vocabulary (constants/skillColors):
+// a listed skill gets its own, a custom one gets a stable hashed colour and
+// the generic star.
+const FALLBACK_EMOJI = "⭐";
 
 type FilterTab = "all" | "pros" | "with_posts";
 
@@ -170,7 +145,10 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
 
   const [liveSkills, setLiveSkills] = useState<string[]>([]);
   useEffect(() => {
-    if (!SUPABASE_CONFIGURED) { setLiveSkills(SKILL_CATEGORIES.filter(s => s !== "Other")); return; }
+    // Offline: the selectable vocabulary. Online: whatever pros actually hold
+    // (custom and legacy names included), ordered the way the vocabulary is
+    // so the two modes read alike; empty falls back to the same static list.
+    if (!SUPABASE_CONFIGURED) { setLiveSkills([...SELECTABLE_SKILL_NAMES]); return; }
     import("@/lib/supabase").then(({ getSupabase }) => {
       getSupabase()
         .from("profiles")
@@ -180,7 +158,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
         .then(({ data }) => {
           if (data) {
             const unique = [...new Set(data.map(r => r.skill).filter(Boolean))] as string[];
-            setLiveSkills(unique.length > 0 ? unique : SKILL_CATEGORIES.filter(s => s !== "Other"));
+            setLiveSkills(unique.length > 0 ? sortSkillsByVocabulary(unique) : [...SELECTABLE_SKILL_NAMES]);
           }
         });
     });
@@ -342,7 +320,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
               <h3 className="text-sm font-bold text-[#ffffff] mb-3">Browse by Skill</h3>
               <div className="grid grid-cols-2 gap-2">
                 {liveSkills.map(skill => {
-                  const meta = SKILL_META[skill] ?? SKILL_META["Other"];
+                  const emoji = skillEmoji(skill) ?? FALLBACK_EMOJI;
                   const isActive = activeSkill === skill;
                   return (
                     <button
@@ -354,7 +332,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
                         borderColor: isActive ? "var(--ss-purple)" : "var(--ss-line)",
                       }}
                     >
-                      <span className="text-xl leading-none">{meta.emoji}</span>
+                      <span className="text-xl leading-none">{emoji}</span>
                       <span
                         className="text-sm font-semibold leading-tight"
                         style={{ color: isActive ? "white" : "#ffffff" }}
@@ -411,7 +389,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
 
 // ── User Result Card ──────────────────────────────────────────
 function UserCard({ user, onPress }: { user: User; onPress: () => void }) {
-  const skillMeta = user.skill ? (SKILL_META[user.skill] ?? SKILL_META["Other"]) : null;
+  const skillBg = user.skill ? skillColor(user.skill) : null;
 
   return (
     <button
@@ -427,10 +405,10 @@ function UserCard({ user, onPress }: { user: User; onPress: () => void }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
           <span className="text-sm font-bold text-[#ffffff] truncate">{user.displayName}</span>
-          {skillMeta && user.skill && (
+          {skillBg && user.skill && (
             <span
               className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
-              style={{ background: skillMeta.bg, color: skillMeta.color }}
+              style={{ background: skillBg, color: "#ffffff" }}
             >
               {user.skill}
             </span>
