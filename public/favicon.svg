@@ -2,18 +2,18 @@
 <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1080 1080">
   <defs>
     <style>
-      .cls-1 { opacity: .06; stroke: url(#linear-gradient-3); stroke-width: 53.22px; }
+      .cls-1 { opacity: .06; stroke: #fff; stroke-width: 53.22px; }
       .cls-1, .cls-2, .cls-3 { fill: none; stroke-linecap: round; stroke-linejoin: round; }
       .cls-4 { mask: url(#mask-1); }
       .cls-5 { fill: #fff; }
       .cls-6 { mask: url(#mask); }
       .cls-7 { fill: url(#linear-gradient-4); }
-      .cls-2 { stroke: url(#linear-gradient-2); }
+      .cls-2 { stroke: #fff; opacity: .35; }
       .cls-2, .cls-3 { stroke-width: 52.58px; }
-      .cls-8 { fill: url(#linear-gradient-6); }
+      .cls-8 { fill: #fff; }
       .cls-9 { fill: url(#linear-gradient); }
-      .cls-3 { stroke: url(#linear-gradient-5); }
-      .cls-10 { fill: #0e0e0e; }
+      .cls-3 { stroke: #fff; opacity: .35; }
+      .cls-10 { fill: #6c47ff; }
     </style>
     <linearGradient id="linear-gradient" x1="115.24" y1="243.85" x2="1007.57" y2="243.85" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#000"/><stop offset=".08" stop-color="#090909"/><stop offset=".23" stop-color="#222"/><stop offset=".4" stop-color="#4b4b4b"/><stop offset=".61" stop-color="#848484"/><stop offset=".85" stop-color="#ccc"/><stop offset="1" stop-color="#fff"/>
