@@ -16,7 +16,7 @@ import {
   type PublicProfile,
   type PublicPost,
 } from "@/lib/supabase/public";
-import { SITE_URL, profileUrl } from "@/constants/config";
+import { profileUrl } from "@/constants/config";
 import SkillSnapLogo from "@/components/skillsnap/shared/SkillSnapLogo";
 import AppStoreButtons from "@/components/skillsnap/shared/AppStoreButtons";
 import ConnectAction from "./ConnectAction";
@@ -105,8 +105,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       : `Watch ${name}'s real work on SkillSnap. Watch. Trust. Connect.`;
 
   const url = profileUrl(profile.username);
-  const image = profile.avatar_url ?? `${SITE_URL}/og-image.png`;
 
+  // og:image / twitter:image come from the generated card in
+  // ./opengraph-image.tsx (file convention) — raw avatars crop badly at 1.91:1.
   return {
     title,
     description,
@@ -118,13 +119,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       siteName: "SkillSnap",
       type: "profile",
       locale: "en_AU",
-      images: [{ url: image, width: 1200, height: 630, alt: name }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [image],
     },
   };
 }
