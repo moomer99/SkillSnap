@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/admin/", "/profile", "/chat", "/messages"],
+      disallow: ["/api/", "/admin/", "/profile", "/chat", "/messages", "/get"],
     },
     sitemap: "https://skillsnap.com.au/sitemap.xml",
   };

@@ -1,3 +1,8 @@
+// Flip to true the moment the Play production release is published.
+// (While false, Android goes to the landing page — the Play listing for an
+// unpublished app shows "item not found".)
+const ANDROID_LIVE = false;
+
 // /get — the single link behind the QR code and the store badges.
 // Sends iOS to the App Store, Android to Google Play (once live), everyone
 // else to the landing page. Redirect only: no analytics, no UI.
@@ -7,17 +12,13 @@
 // listing is a fine desktop destination); ?store=android goes to Play once
 // live and to the landing page until then. A bare /get (the QR code) sniffs.
 
-// LAUNCH DAY (Play production access granted, ~21–27 Aug 2026):
-// flip this to `true`. Change nothing else in this file.
-const ANDROID_STORE_LIVE = false;
-
 const APP_STORE_URL = "https://apps.apple.com/au/app/id6797864031";
 const PLAY_STORE_URL =
   "https://play.google.com/store/apps/details?id=au.com.skillsnap.app";
 
 // The redirect target changes when Android goes live, so this must never be
 // statically optimised or cached as permanent. See Cache-Control below and
-// the temporary (307) status — a cached 301 would be unfixable.
+// the temporary (302) status — a cached 301 would be unfixable.
 export const dynamic = "force-dynamic";
 
 export function GET(request: Request) {
@@ -31,19 +32,20 @@ export function GET(request: Request) {
     target = new URL(APP_STORE_URL);
   } else if (store === "android") {
     // Never link the listing while it 404s.
-    target = ANDROID_STORE_LIVE ? new URL(PLAY_STORE_URL) : landing;
+    target = ANDROID_LIVE ? new URL(PLAY_STORE_URL) : landing;
   } else if (/iPhone|iPad|iPod/i.test(ua)) {
     target = new URL(APP_STORE_URL);
-  } else if (/Android/i.test(ua) && ANDROID_STORE_LIVE) {
+  } else if (/Android/i.test(ua) && ANDROID_LIVE) {
     target = new URL(PLAY_STORE_URL);
   } else {
-    // Desktop, bots, Android before Play is live. Also iPadOS 13+, which
-    // reports itself as Macintosh — accepted, not a bug to solve here.
+    // Desktop, bots, no UA, Android before Play is live. Also iPadOS 13+,
+    // which reports itself as Macintosh — undetectable reliably, so it gets
+    // the landing page rather than a guess.
     target = landing;
   }
 
   return new Response(null, {
-    status: 307,
+    status: 302,
     headers: {
       Location: target.toString(),
       "Cache-Control": "no-store",
