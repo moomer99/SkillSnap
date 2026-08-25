@@ -4,7 +4,7 @@
 import { getSupabase, getAuthSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
 import { OWN_PROFILE_COLUMNS, PROFILE_COLUMNS, PUBLIC_PROFILE_TABLE } from "./profileFields";
-import { withOwnCoordinates } from "./ownCoordinates";
+import { getOwnCoordinates } from "./ownCoordinates";
 import type { User } from "@/types";
 
 // Shared helper — always uses the auth client (real URL) so the session
@@ -33,14 +33,15 @@ export const userService = {
   async getCurrentUser(): Promise<User | null> {
     const userId = await getAuthUserId();
     if (!userId) return null;
-    // Own row: base table without lat/lng, exact pair from the RPC.
-    const { data, error } = await getSupabase()
-      .from("profiles")
-      .select(OWN_PROFILE_COLUMNS)
-      .eq("id", userId)
-      .single();
+    // Own row: base table without lat/lng, exact pair from the RPC. Independent
+    // requests, so they run in parallel; a failed RPC resolves {} and the
+    // profile still comes back.
+    const [{ data, error }, coords] = await Promise.all([
+      getSupabase().from("profiles").select(OWN_PROFILE_COLUMNS).eq("id", userId).single(),
+      getOwnCoordinates(),
+    ]);
     if (error || !data) return null;
-    return withOwnCoordinates(mapProfile(data as unknown as Record<string, unknown>));
+    return { ...mapProfile(data as unknown as Record<string, unknown>), lat: coords.lat, lng: coords.lng };
   },
 
   async searchUsers(query: string): Promise<User[]> {
@@ -111,15 +112,24 @@ export const userService = {
     if (patch.avatarGradient !== undefined) dbPatch.avatar_gradient = patch.avatarGradient;
     if (patch.role !== undefined) dbPatch.role = patch.role;
 
-    const { data, error } = await getAuthSupabase()
-      .from("profiles")
-      .update(dbPatch)
-      .eq("id", userId)
-      // RETURNING comes from the base table, so it uses the own-row list; the
-      // exact coordinates are re-read through the RPC.
-      .select(OWN_PROFILE_COLUMNS)
-      .single();
+    // RETURNING comes from the base table, so it uses the own-row list; the
+    // exact coordinates come from the RPC, fired in parallel. When the patch
+    // itself writes lat/lng the RPC can race the UPDATE and read the old pair,
+    // so the patch's own values win — they are what the row now holds.
+    const [{ data, error }, coords] = await Promise.all([
+      getAuthSupabase()
+        .from("profiles")
+        .update(dbPatch)
+        .eq("id", userId)
+        .select(OWN_PROFILE_COLUMNS)
+        .single(),
+      getOwnCoordinates(),
+    ]);
     if (error || !data) return null;
-    return withOwnCoordinates(mapProfile(data as unknown as Record<string, unknown>));
+    return {
+      ...mapProfile(data as unknown as Record<string, unknown>),
+      lat: patch.lat !== undefined ? patch.lat : coords.lat,
+      lng: patch.lng !== undefined ? patch.lng : coords.lng,
+    };
   },
 };

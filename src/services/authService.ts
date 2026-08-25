@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────
 import { getSupabase, getAuthSupabase } from "@/lib/supabase";
 import { OWN_PROFILE_COLUMNS } from "./profileFields";
-import { withOwnCoordinates } from "./ownCoordinates";
+import { getOwnCoordinates } from "./ownCoordinates";
 import type { User } from "@/types";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -101,14 +101,15 @@ function mapProfile(profile: Record<string, unknown>): User {
 
 async function fetchProfile(userId: string): Promise<User | null> {
   const sb = getAuthSupabase();
-  const { data, error } = await sb
-    // Own row: base table without lat/lng, exact pair from the RPC.
-    .from("profiles")
-    .select(OWN_PROFILE_COLUMNS)
-    .eq("id", userId)
-    .single();
+  // Own row: base table without lat/lng, exact pair from the RPC. The two are
+  // independent, so they go out together; getOwnCoordinates() never throws and
+  // resolves {} on failure, so a failed RPC still returns the profile.
+  const [{ data, error }, coords] = await Promise.all([
+    sb.from("profiles").select(OWN_PROFILE_COLUMNS).eq("id", userId).single(),
+    getOwnCoordinates(),
+  ]);
   if (error || !data) return null;
-  return withOwnCoordinates(mapProfile(data as unknown as Record<string, unknown>));
+  return { ...mapProfile(data as unknown as Record<string, unknown>), lat: coords.lat, lng: coords.lng };
 }
 
 // Upserts a profile row from Supabase auth user data.
