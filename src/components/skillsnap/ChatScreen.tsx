@@ -1090,7 +1090,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                     </button>
                   ))}
                 </div>
-                <div className="mx-5 mb-5 border border-[#26203f] rounded-2xl overflow-hidden bg-[#fafafa]">
+                <div className="mx-5 mb-5 border border-[#26203f] rounded-2xl overflow-hidden bg-[var(--ss-surface-2)]">
                   <div className="px-4 pt-4 pb-1"><span className="text-sm font-semibold text-[#ffffff]">Leave a note: </span></div>
                   <textarea value={comment} onChange={(e) => setComment(e.target.value.slice(0, 200))} rows={3} className="w-full px-4 pb-4 text-sm text-[#b8b2cc] bg-transparent resize-none outline-none leading-relaxed" placeholder="Share your experience…" />
                 </div>

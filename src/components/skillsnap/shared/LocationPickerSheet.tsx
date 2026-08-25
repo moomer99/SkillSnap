@@ -134,7 +134,7 @@ export default function LocationPickerSheet({
           {/* Manual search */}
           <div
             className="flex items-center gap-2 rounded-2xl border px-4 h-12 mb-4 transition-colors"
-            style={{ borderColor: "#26203f", background: "#fafaf9" }}
+            style={{ borderColor: "#26203f", background: "var(--ss-surface-2)" }}
             onClick={() => inputRef.current?.focus()}
           >
             <Search size={16} className="text-[#6f6889] flex-shrink-0" />

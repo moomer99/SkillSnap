@@ -83,7 +83,7 @@ export default function UsernameSetupScreen({ onDone }: { onDone: () => void }) 
         </p>
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="flex items-center gap-2 border-2 border-[#26203f] rounded-2xl px-4 h-14 focus-within:border-[#6c47ff] transition-colors bg-[#fafafa]">
+        <div className="flex items-center gap-2 border-2 border-[#26203f] rounded-2xl px-4 h-14 focus-within:border-[#6c47ff] transition-colors bg-[var(--ss-surface-2)]">
           <span className="text-[#6f6889] font-semibold text-base select-none">@</span>
           <input
             ref={inputRef}
