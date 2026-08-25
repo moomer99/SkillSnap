@@ -2,6 +2,8 @@
 // SkillSnap — Auth Service (Supabase Auth)
 // ─────────────────────────────────────────────
 import { getSupabase, getAuthSupabase } from "@/lib/supabase";
+import { OWN_PROFILE_COLUMNS } from "./profileFields";
+import { withOwnCoordinates } from "./ownCoordinates";
 import type { User } from "@/types";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -59,7 +61,10 @@ function mapProfile(profile: Record<string, unknown>): User {
       isVerified: Boolean(profile.is_verified ?? false),
       jobsDone: Number(profile.jobs_done ?? 0),
       happyPercent: Number(profile.happy_percent ?? 0),
-      ratingCount: Number((profile.ratings as { count: number }[] | null)?.[0]?.count ?? 0),
+      // Was reading profile.ratings[0].count — a PostgREST embedded-count shape
+      // that no query ever asked for, so this was 0 for every user ever loaded.
+      // Migration 014 maintains the count on the profile itself.
+      ratingCount: Number(profile.rating_count ?? 0),
       followers: Number(profile.followers_count ?? 0),
       following: Number(profile.following_count ?? 0),
       postCount: Number(profile.post_count ?? 0),
@@ -97,12 +102,13 @@ function mapProfile(profile: Record<string, unknown>): User {
 async function fetchProfile(userId: string): Promise<User | null> {
   const sb = getAuthSupabase();
   const { data, error } = await sb
+    // Own row: base table without lat/lng, exact pair from the RPC.
     .from("profiles")
-    .select("*")
+    .select(OWN_PROFILE_COLUMNS)
     .eq("id", userId)
     .single();
   if (error || !data) return null;
-  return mapProfile(data as Record<string, unknown>);
+  return withOwnCoordinates(mapProfile(data as unknown as Record<string, unknown>));
 }
 
 // Upserts a profile row from Supabase auth user data.
@@ -157,7 +163,9 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
       avatar_initial: avatarInitial,
       avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
     })
-    .select("*")
+    // INSERT ... RETURNING comes from the base table, so it uses the own-row
+    // list; a brand-new profile has no coordinates to fetch yet.
+    .select(OWN_PROFILE_COLUMNS)
     .single();
 
   if (error || !data) {
@@ -165,7 +173,7 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
     return fetchProfile(authUser.id);
   }
 
-  return mapProfile(data as Record<string, unknown>);
+  return mapProfile(data as unknown as Record<string, unknown>);
 }
 
 // ── Username login ────────────────────────────────────────────────────────

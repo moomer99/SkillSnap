@@ -5,6 +5,7 @@
 import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
 import { mapPost } from "./postService";
+import { POST_AUTHOR_COLUMNS, PROFILE_COLUMNS, PUBLIC_PROFILE_TABLE } from "./profileFields";
 import type { User, Post } from "@/types";
 
 export interface SearchResults {
@@ -21,22 +22,22 @@ export const searchService = {
 
     const [usersRes, postsRes] = await Promise.all([
       sb
-        .from("profiles")
-        .select("*")
+        .from(PUBLIC_PROFILE_TABLE)
+        .select(PROFILE_COLUMNS)
         .or(`username.ilike.%${q}%,display_name.ilike.%${q}%,skill.ilike.%${q}%,location.ilike.%${q}%`)
         .limit(10),
       sb
         .from("posts")
-        .select("*, profiles(*)")
+        .select(`*, ${POST_AUTHOR_COLUMNS}`)
         .or(`caption.ilike.%${q}%,skill.ilike.%${q}%,location.ilike.%${q}%`)
         .limit(10),
     ]);
 
     const users: User[] = (usersRes.data ?? []).map((row) =>
-      mapProfile(row as Record<string, unknown>)
+      mapProfile(row as unknown as Record<string, unknown>)
     );
     const posts: Post[] = (postsRes.data ?? []).map((row) =>
-      mapPost(row as Record<string, unknown>, new Set(), new Set())
+      mapPost(row as unknown as Record<string, unknown>, new Set(), new Set())
     );
 
     return { users, posts };

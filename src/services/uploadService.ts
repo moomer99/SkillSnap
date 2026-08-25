@@ -1,4 +1,5 @@
 import { getSupabase, getAuthSupabase } from "@/lib/supabase";
+import { OWN_PROFILE_COLUMNS, POST_AUTHOR_COLUMNS } from "./profileFields";
 import type { Post, SkillCategory } from "@/types";
 
 const REAL_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
@@ -168,15 +169,15 @@ export const uploadService = {
 
     const { data: fullPost } = await sb
       .from("posts")
-      .select("id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, profiles!posts_author_id_fkey(*)")
+      .select(`id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, created_at, ${POST_AUTHOR_COLUMNS}`)
       .eq("id", inserted.id)
       .single();
 
     if (!fullPost) return null;
 
-    const postRow = fullPost as Record<string, unknown>;
+    const postRow = fullPost as unknown as Record<string, unknown>;
     if (!postRow.profiles) {
-      const { data: profileRow } = await sb.from("profiles").select("*").eq("id", userId).single();
+      const { data: profileRow } = await sb.from("profiles").select(OWN_PROFILE_COLUMNS).eq("id", userId).single();
       if (profileRow) postRow.profiles = profileRow;
     }
 

@@ -3,6 +3,8 @@
 // ─────────────────────────────────────────────
 import { getSupabase, getAuthSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
+import { OWN_PROFILE_COLUMNS, PROFILE_COLUMNS, PUBLIC_PROFILE_TABLE } from "./profileFields";
+import { withOwnCoordinates } from "./ownCoordinates";
 import type { User } from "@/types";
 
 // Shared helper — always uses the auth client (real URL) so the session
@@ -16,8 +18,8 @@ export const userService = {
   async getUser(id: string): Promise<User | null> {
     console.log("[userService.getUser] fetching profile for id:", id);
     const { data, error } = await getSupabase()
-      .from("profiles")
-      .select("*")
+      .from(PUBLIC_PROFILE_TABLE)
+      .select(PROFILE_COLUMNS)
       .eq("id", id)
       .single();
     console.log("[userService.getUser] result:", { data, error });
@@ -25,29 +27,30 @@ export const userService = {
       console.warn("[userService.getUser] query failed or returned null:", error?.message ?? "no data");
       return null;
     }
-    return mapProfile(data as Record<string, unknown>);
+    return mapProfile(data as unknown as Record<string, unknown>);
   },
 
   async getCurrentUser(): Promise<User | null> {
     const userId = await getAuthUserId();
     if (!userId) return null;
+    // Own row: base table without lat/lng, exact pair from the RPC.
     const { data, error } = await getSupabase()
       .from("profiles")
-      .select("*")
+      .select(OWN_PROFILE_COLUMNS)
       .eq("id", userId)
       .single();
     if (error || !data) return null;
-    return mapProfile(data as Record<string, unknown>);
+    return withOwnCoordinates(mapProfile(data as unknown as Record<string, unknown>));
   },
 
   async searchUsers(query: string): Promise<User[]> {
     if (!query.trim()) return [];
     const { data } = await getSupabase()
-      .from("profiles")
-      .select("*")
+      .from(PUBLIC_PROFILE_TABLE)
+      .select(PROFILE_COLUMNS)
       .or(`username.ilike.%${query}%,display_name.ilike.%${query}%,skill.ilike.%${query}%,location.ilike.%${query}%`)
       .limit(20);
-    return (data ?? []).map((row) => mapProfile(row as Record<string, unknown>));
+    return (data ?? []).map((row) => mapProfile(row as unknown as Record<string, unknown>));
   },
 
   async getFollowedUserIds(): Promise<Set<string>> {
@@ -112,9 +115,11 @@ export const userService = {
       .from("profiles")
       .update(dbPatch)
       .eq("id", userId)
-      .select()
+      // RETURNING comes from the base table, so it uses the own-row list; the
+      // exact coordinates are re-read through the RPC.
+      .select(OWN_PROFILE_COLUMNS)
       .single();
     if (error || !data) return null;
-    return mapProfile(data as Record<string, unknown>);
+    return withOwnCoordinates(mapProfile(data as unknown as Record<string, unknown>));
   },
 };

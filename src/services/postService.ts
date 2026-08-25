@@ -3,6 +3,7 @@
 // ─────────────────────────────────────────────
 import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
+import { POST_AUTHOR_COLUMNS } from "./profileFields";
 import type { Post } from "@/types";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
@@ -177,12 +178,12 @@ export const postService = {
   async getSavedPosts(userId: string): Promise<Post[]> {
     const { data } = await getSupabase()
       .from("saved_posts")
-      .select("posts(*, profiles!posts_author_id_fkey(*))")
+      .select(`posts(*, ${POST_AUTHOR_COLUMNS})`)
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
     if (!data?.length) return [];
-    const posts = data.map((row) => (row as Record<string, unknown>).posts as Record<string, unknown>).filter(Boolean);
+    const posts = data.map((row) => (row as unknown as Record<string, unknown>).posts as Record<string, unknown>).filter(Boolean);
     const postIds = posts.map((p) => p.id as string);
     const { likedIds, savedIds } = await getUserInteractionSets(postIds);
     return posts.map((row) => mapPost(row, likedIds, savedIds));

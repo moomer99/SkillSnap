@@ -1,7 +1,7 @@
 // Flip to true the moment the Play production release is published.
 // (While false, Android goes to the landing page — the Play listing for an
 // unpublished app shows "item not found".)
-const ANDROID_LIVE = false;
+const ANDROID_LIVE = true;
 
 // /get — the single link behind the QR code and the store badges.
 // Sends iOS to the App Store, Android to Google Play (once live), everyone
