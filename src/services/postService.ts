@@ -18,22 +18,6 @@ function proxyMediaUrl(url: string | null | undefined): string | undefined {
   return url;
 }
 
-// The `profiles` table has column-level grants: the anon role may not read
-// `*`, so an embedded `profiles(*)` makes the whole query fail with 401 for
-// logged-out and guest visitors. Select explicit columns instead.
-// lat/lng are readable only by authenticated users — they are added on top of
-// the public set once a session exists, so distances still show when signed in.
-const PROFILE_COLUMNS_PUBLIC =
-  "id,username,display_name,avatar_url,avatar_gradient,avatar_initial,location," +
-  "location_private,bio,skill,is_verified,jobs_done,happy_percent," +
-  "followers_count,following_count,post_count,is_client,role";
-const PROFILE_COLUMNS_AUTHED = `${PROFILE_COLUMNS_PUBLIC},lat,lng`;
-
-async function profileEmbed(): Promise<string> {
-  const { data: { user } } = await getSupabase().auth.getUser();
-  return `profiles!posts_author_id_fkey(${user ? PROFILE_COLUMNS_AUTHED : PROFILE_COLUMNS_PUBLIC})`;
-}
-
 const FALLBACK_PROFILE: Record<string, unknown> = {
   id: "",
   username: "unknown",
@@ -110,7 +94,7 @@ export const postService = {
     // comments_count / recommend_count counters the feed cards display.
     const { data, error } = await getSupabase()
       .from("visible_posts")
-      .select(`id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, comments_count, recommend_count, created_at, ${await profileEmbed()}, post_media(url, type, order_index)`)
+      .select(`id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, comments_count, recommend_count, created_at, ${POST_AUTHOR_COLUMNS}, post_media(url, type, order_index)`)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -126,7 +110,7 @@ export const postService = {
   async getUserPosts(userId: string): Promise<Post[]> {
     const { data } = await getSupabase()
       .from("visible_posts")
-      .select(`id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, comments_count, recommend_count, created_at, ${await profileEmbed()}, post_media(url, type, order_index)`)
+      .select(`id, author_id, type, media_url, thumbnail_url, thumbnail_gradient, caption, skill, location, likes_count, comments_count, recommend_count, created_at, ${POST_AUTHOR_COLUMNS}, post_media(url, type, order_index)`)
       .eq("author_id", userId)
       .order("created_at", { ascending: false });
 
