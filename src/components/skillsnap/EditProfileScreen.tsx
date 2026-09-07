@@ -347,7 +347,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                     type="text"
                     value={customSkill}
                     onChange={(e) => setCustomSkill(e.target.value.slice(0, 40))}
-                    placeholder="e.g. Carpenter, Hairdresser, Chef…"
+                    placeholder="e.g. Electrician"
                     style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontSize: 14, color: "#ffffff" }}
                   />
                   {customSkill ? (
@@ -356,8 +356,11 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                     </button>
                   ) : null}
                 </div>
-                <p style={{ fontSize: 12, color: "#6f6889", marginTop: 6, paddingLeft: 4 }}>
-                  This is what clients will see on your profile.
+                {/* Hint, not a rule - same wording as the sign-up field. The
+                    old copy said where the trade shows up but not that it has
+                    to be one job title, which is the half people got wrong. */}
+                <p style={{ fontSize: 12, color: "#6f6889", marginTop: 6, paddingLeft: 4, lineHeight: 1.4 }}>
+                  One job title. This is what people see on your profile and search for.
                 </p>
               </div>
 
