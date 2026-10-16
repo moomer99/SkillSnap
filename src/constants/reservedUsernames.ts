@@ -28,6 +28,7 @@ export const RESERVED_USERNAMES: readonly string[] = [
   "login",
   "signup",
   "support",
+  "join",
 ] as const;
 
 const RESERVED_SET = new Set(RESERVED_USERNAMES);
