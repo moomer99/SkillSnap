@@ -36,7 +36,7 @@ export const revalidate = 300;
  * featured on a recruiting page. null = pick automatically (most jobs done,
  * with at least one post), the same rule the landing page hero uses.
  */
-const FEATURED_USERNAME: string | null = null;
+const FEATURED_USERNAME: string | null = "adams"; // Adam S, Barber
 
 const SIGNUP_HREF = "/get";
 
