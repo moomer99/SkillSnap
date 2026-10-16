@@ -47,7 +47,7 @@ const SETUP_HELP_MAILTO =
 
 const TITLE = "Join SkillSnap — Show your work. Get discovered.";
 const DESCRIPTION =
-  "Skilled pros in Western Sydney: create a free SkillSnap profile and post short videos of your real work so locals can find you.";
+  "Barbers, tattoo artists and skilled pros in Sydney: create a free SkillSnap profile and post short videos of your real work so locals can find you.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -137,7 +137,7 @@ export default async function JoinPage() {
               className="text-[11px] font-bold tracking-[0.18em] uppercase"
               style={{ color: "var(--ss-purple-light)" }}
             >
-              For skilled pros in Western Sydney
+              For skilled pros in Sydney
             </p>
             <h1
               className="font-extrabold tracking-tight leading-[1.06] text-[36px] sm:text-[52px] mt-3 mb-5"
@@ -148,9 +148,9 @@ export default async function JoinPage() {
               <span style={{ color: "var(--ss-purple-light)" }}>Get discovered.</span>
             </h1>
             <p className="text-[16px] sm:text-[18px] leading-relaxed max-w-[520px]" style={{ color: "var(--ss-text-soft)" }}>
-              SkillSnap is where skilled people show their work on video. Barbers, tradies, cleaners,
-              photographers, tutors and everyone in between post short videos of jobs they have
-              actually done — locals watch the work, then message them directly.
+              SkillSnap is where skilled people show their work on video. Barbers, tattoo artists,
+              tradies, cleaners, photographers, tutors and everyone in between post short videos of
+              jobs they have actually done — locals watch the work, then message them directly.
             </p>
 
             {/* Early-member offer — same terms as /help, /terms and the landing page */}
@@ -251,8 +251,9 @@ export default async function JoinPage() {
               message you directly — any job you agree is between you and them.
             </Faq>
             <Faq q="What should I post?">
-              Short videos or photos of work you&apos;ve actually done. Clips you already film for
-              Instagram or TikTok are a good start.
+              Short videos or photos of work you&apos;ve actually done — a fresh fade, a finished
+              tattoo, a job before and after. Clips you already film for Instagram or TikTok are a
+              good start.
             </Faq>
             <Faq q="Who can join?">
               Anyone 18 or over with a skill worth watching — individuals and small businesses.

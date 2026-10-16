@@ -143,7 +143,7 @@ function renderEmail(opts: {
 </td></tr>
 
 <tr><td style="background:#21135f;padding:16px 24px;text-align:center;color:#c9c1e7;font-size:11px;line-height:18px;">
-Watch. Trust. Connect. · Built in Western Sydney 🇦🇺 · © 2026 SkillSnap Australia<br>
+Watch. Trust. Connect. · Built in Sydney 🇦🇺 · © 2026 SkillSnap Australia<br>
 <a href="${APP_URL}/help" style="color:#c9c1e7;">Manage your notification settings in the app</a>
 </td></tr>
 

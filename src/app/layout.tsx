@@ -19,8 +19,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "SkillSnap — Watch. Trust. Connect. | Find Skilled Pros in Western Sydney",
-  description: "SkillSnap lets barbers, tradies and cleaners in Western Sydney show real work on video. Watch. Trust. Connect. Free to join.",
+  title: "SkillSnap — Watch. Trust. Connect. | Find Skilled Pros in Sydney",
+  description: "SkillSnap lets barbers, tradies and cleaners in Sydney show real work on video. Watch. Trust. Connect. Free to join.",
   icons: {
     // SVG first — it stays crisp at every size and modern browsers prefer it —
     // then the .ico fallback, then raster sizes for everything else.
@@ -40,8 +40,8 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "SkillSnap — Watch. Trust. Connect. | Find Skilled Pros in Western Sydney",
-    description: "SkillSnap lets barbers, tradies and cleaners in Western Sydney show real work on video. Watch. Trust. Connect. Free to join.",
+    title: "SkillSnap — Watch. Trust. Connect. | Find Skilled Pros in Sydney",
+    description: "SkillSnap lets barbers, tradies and cleaners in Sydney show real work on video. Watch. Trust. Connect. Free to join.",
     url: "https://skillsnap.com.au",
     siteName: "SkillSnap",
     images: [
@@ -56,8 +56,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "SkillSnap — Watch. Trust. Connect. | Find Skilled Pros in Western Sydney",
-    description: "SkillSnap lets barbers, tradies and cleaners in Western Sydney show real work on video. Watch. Trust. Connect. Free to join.",
+    title: "SkillSnap — Watch. Trust. Connect. | Find Skilled Pros in Sydney",
+    description: "SkillSnap lets barbers, tradies and cleaners in Sydney show real work on video. Watch. Trust. Connect. Free to join.",
     images: ["https://skillsnap.com.au/og-image.png"],
   },
   verification: {

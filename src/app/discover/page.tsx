@@ -4,11 +4,11 @@ import DiscoverClientPage from "./client";
 export const metadata: Metadata = {
   title: "Discover Local Skilled Pros | SkillSnap",
   description:
-    "Browse barbers, tradies and cleaners near you in Western Sydney. Watch real work videos before you connect.",
+    "Browse barbers, tradies and cleaners near you in Sydney. Watch real work videos before you connect.",
   openGraph: {
     title: "Discover Local Skilled Pros | SkillSnap",
     description:
-      "Browse barbers, tradies and cleaners near you in Western Sydney. Watch real work videos before you connect.",
+      "Browse barbers, tradies and cleaners near you in Sydney. Watch real work videos before you connect.",
     url: "https://skillsnap.com.au/discover",
     siteName: "SkillSnap",
     images: [
