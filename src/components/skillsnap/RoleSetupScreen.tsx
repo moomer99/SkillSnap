@@ -128,9 +128,15 @@ export default function RoleSetupScreen() {
               autoFocus
               value={customSkill}
               onChange={(e) => setCustomSkill(e.target.value.slice(0, 40))}
-              placeholder="e.g. Carpenter, Hairdresser, Chef…"
+              placeholder="e.g. Barber"
               className="w-full bg-[#16122a] rounded-2xl border-2 border-[#6c47ff] px-4 h-12 text-sm text-[#ffffff] placeholder-[#6f6889] outline-none"
             />
+            {/* Hint, not a rule. The old placeholder listed three trades and
+                read as an invitation to enter several. Continue is unchanged:
+                a wrong trade is fixable in review, a lost signup is not. */}
+            <p className="text-xs text-[#6f6889] mt-1.5 px-1 leading-relaxed">
+              One job title. This is what people see on your profile and search for.
+            </p>
           </div>
         )}
       </div>
