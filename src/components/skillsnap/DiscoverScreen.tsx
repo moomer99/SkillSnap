@@ -41,7 +41,7 @@ const SORT_FILTERS: readonly DiscoveryFilter[] = DISCOVERY_SORT_FILTERS;
 const SKILL_FILTERS: readonly DiscoveryFilter[] = DISCOVERY_FILTER_CHIPS.filter((chip) => !isDiscoverySort(chip));
 
 export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
-  const { allPros, mappablePros, loading, activeFilter, setFilter } = useDiscovery();
+  const { allPros, mappablePros, loading, error, activeFilter, setFilter } = useDiscovery();
   const { state, dispatch } = useAppState();
   const { connectTo, connecting } = useMessages();
   const [skillQuery, setSkillQuery] = useState("");
@@ -213,9 +213,12 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
                 >
                   <MapPin size={28} style={{ color: "var(--ss-purple-light)" }} />
                 </div>
-                <p className="font-bold text-white text-base mb-2">No pros found</p>
                 <p className="text-sm leading-relaxed" style={{ color: "var(--ss-text-muted)" }}>
-                  Try a different filter or check back soon as more skilled workers join.
+                  {error
+                    ? error
+                    : SKILL_FILTERS.includes(activeFilter)
+                      ? `No pros match “${activeFilter}” nearby yet.`
+                      : "No pros nearby yet."}
                 </p>
               </div>
             ) : (

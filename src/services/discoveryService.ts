@@ -6,7 +6,6 @@ import { getSupabase } from "@/lib/supabase";
 import { mapProfile } from "./authService";
 import type { DiscoveryPin, DiscoveryResults, MappableDiscoveryPin, SkillCategory } from "@/types";
 import type { DiscoveryFilter } from "@/constants/skillLookup";
-import { MOCK_DISCOVERY_RESULTS } from "@/mock-data/discovery";
 
 export interface LocationCoords {
   lat: number;
@@ -103,7 +102,7 @@ async function queryProfiles(filter: DiscoveryFilter, limit = PIN_LIMIT): Promis
 
   const { data, error } = await query;
   if (error) throw error;
-  // Empty result is valid — callers decide whether to show the mock fallback
+  // Empty result is valid and is returned as empty
   if (!data?.length) return { allPros: [], mappablePros: [] };
   return rowsToResults(data);
 }
@@ -128,8 +127,9 @@ export const discoveryService = {
       .limit(20);
     if (skill) query = query.eq("skill", skill);
     if (location) query = query.ilike("location", `%${location}%`);
-    const { data } = await query;
-    if (!data?.length) return MOCK_DISCOVERY_RESULTS;
+    const { data, error } = await query;
+    if (error) throw error;
+    if (!data?.length) return { allPros: [], mappablePros: [] };
     return rowsToResults(data);
   },
 
