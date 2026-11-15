@@ -17,9 +17,10 @@ import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { MapPin, ChevronRight, Search, X, SlidersHorizontal } from "lucide-react";
 import type { DiscoveryPin, Screen } from "@/types";
-import { DISCOVERY_FILTER_CHIPS, DISCOVERY_SORT_FILTERS, isDiscoverySort, type DiscoveryFilter } from "@/constants/skillLookup";
+import { DISCOVERY_SORT_FILTERS, isDiscoverySort, type DiscoveryFilter } from "@/constants/skillLookup";
 import { skillColor } from "@/constants/skillColors";
 import { useDiscovery } from "@/hooks/useDiscovery";
+import { useApprovedSkills } from "@/hooks/useApprovedSkills";
 import { useAppState } from "@/state/AppState";
 import { useMessages } from "@/hooks/useMessages";
 import SearchBar from "./shared/SearchBar";
@@ -38,12 +39,16 @@ interface DiscoverScreenProps {
 
 // "All" / "Nearby" / "Top Rated" are sorts; the rest are skills
 const SORT_FILTERS: readonly DiscoveryFilter[] = DISCOVERY_SORT_FILTERS;
-const SKILL_FILTERS: readonly DiscoveryFilter[] = DISCOVERY_FILTER_CHIPS.filter((chip) => !isDiscoverySort(chip));
 
 export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
   const { allPros, mappablePros, loading, error, activeFilter, setFilter } = useDiscovery();
   const { state, dispatch } = useAppState();
   const { connectTo, connecting } = useMessages();
+  // Skill chips are derived: only skills with at least one approved video.
+  // The three sorts stay fixed.
+  const { skills: approvedSkills } = useApprovedSkills();
+  const skillFilters = useMemo<readonly DiscoveryFilter[]>(() => approvedSkills.map((s) => s.name), [approvedSkills]);
+  const filterChips = useMemo<readonly DiscoveryFilter[]>(() => [...SORT_FILTERS, ...skillFilters], [skillFilters]);
   const [skillQuery, setSkillQuery] = useState("");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -68,9 +73,9 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
 
   const visibleSkills = useMemo(() => {
     const q = skillQuery.trim().toLowerCase();
-    if (!q) return SKILL_FILTERS;
-    return SKILL_FILTERS.filter((s) => s.toLowerCase().includes(q));
-  }, [skillQuery]);
+    if (!q) return skillFilters;
+    return skillFilters.filter((s) => s.toLowerCase().includes(q));
+  }, [skillQuery, skillFilters]);
 
   const filteredLabel = activeFilter === "All" ? "All skills" : activeFilter;
 
@@ -114,7 +119,9 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
             <FilterPill key={chip} label={chip} active={activeFilter === chip} onClick={() => choose(chip)} />
           ))}
           {visibleSkills.length === 0 && (
-            <p className="text-[12px]" style={{ color: "var(--ss-text-dim)" }}>No skills match “{skillQuery}”</p>
+            <p className="text-[12px]" style={{ color: "var(--ss-text-dim)" }}>
+              {skillQuery ? `No skills match “${skillQuery}”` : "No skills to show yet."}
+            </p>
           )}
         </div>
       </div>
@@ -157,7 +164,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
         {/* Filter pills — phones and tablets */}
         <div className="lg:hidden mt-3">
           <FilterChips
-            chips={DISCOVERY_FILTER_CHIPS}
+            chips={filterChips}
             active={activeFilter}
             onSelect={setFilter}
           />
@@ -216,7 +223,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
                 <p className="text-sm leading-relaxed" style={{ color: "var(--ss-text-muted)" }}>
                   {error
                     ? error
-                    : SKILL_FILTERS.includes(activeFilter)
+                    : !isDiscoverySort(activeFilter)
                       ? `No pros match “${activeFilter}” nearby yet.`
                       : "No pros nearby yet."}
                 </p>

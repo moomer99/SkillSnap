@@ -2,8 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Search, ArrowLeft, X, MapPin, Briefcase, Users } from "lucide-react";
 import type { Screen, User, SkillCategory } from "@/types";
-import { SELECTABLE_SKILL_NAMES, sortSkillsByVocabulary } from "@/constants/skillLookup";
-import { skillColor, skillEmoji } from "@/constants/skillColors";
+import { useApprovedSkills } from "@/hooks/useApprovedSkills";
+import { skillColor } from "@/constants/skillColors";
 import { useAppState } from "@/state/AppState";
 import UserAvatar from "./shared/UserAvatar";
 import { MOCK_USERS } from "@/mock-data/users";
@@ -143,26 +143,8 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
     navigate(user.id === state.currentUser?.id ? "own-profile" : "client-profile");
   }
 
-  const [liveSkills, setLiveSkills] = useState<string[]>([]);
-  useEffect(() => {
-    // Offline: the selectable vocabulary. Online: whatever pros actually hold
-    // (custom and legacy names included), ordered the way the vocabulary is
-    // so the two modes read alike; empty falls back to the same static list.
-    if (!SUPABASE_CONFIGURED) { setLiveSkills([...SELECTABLE_SKILL_NAMES]); return; }
-    import("@/lib/supabase").then(({ getSupabase }) => {
-      getSupabase()
-        .from("profiles")
-        .select("skill")
-        .eq("role", "pro")
-        .not("skill", "is", null)
-        .then(({ data }) => {
-          if (data) {
-            const unique = [...new Set(data.map(r => r.skill).filter(Boolean))] as string[];
-            setLiveSkills(unique.length > 0 ? sortSkillsByVocabulary(unique) : [...SELECTABLE_SKILL_NAMES]);
-          }
-        });
-    });
-  }, []);
+  // "Browse by Skill" lists only skills with at least one approved video.
+  const { skills: liveSkills } = useApprovedSkills();
 
   const hasQuery = query.trim() !== "" || activeSkill !== null;
   const showEmpty = !hasQuery;
@@ -315,12 +297,13 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
               </div>
             )}
 
-            {/* Browse by skill */}
+            {/* Browse by skill — hidden until at least one skill has an approved video */}
+            {liveSkills.length > 0 && (
             <div className="px-4 pt-5">
               <h3 className="text-sm font-bold text-[#ffffff] mb-3">Browse by Skill</h3>
               <div className="grid grid-cols-2 gap-2">
-                {liveSkills.map(skill => {
-                  const emoji = skillEmoji(skill) ?? FALLBACK_EMOJI;
+                {liveSkills.map(({ name: skill, emoji: skillEmojiChar }) => {
+                  const emoji = skillEmojiChar ?? FALLBACK_EMOJI;
                   const isActive = activeSkill === skill;
                   return (
                     <button
@@ -344,6 +327,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
                 })}
               </div>
             </div>
+            )}
 
             {/* Suggested pros */}
             {suggestedPros.length > 0 && (
