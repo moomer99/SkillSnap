@@ -347,7 +347,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                     type="text"
                     value={customSkill}
                     onChange={(e) => setCustomSkill(e.target.value.slice(0, 40))}
-                    placeholder="e.g. Electrician"
+                    placeholder="e.g. Barber"
                     style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontSize: 14, color: "#ffffff" }}
                   />
                   {customSkill ? (
