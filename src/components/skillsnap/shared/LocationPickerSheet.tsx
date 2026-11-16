@@ -81,13 +81,13 @@ export default function LocationPickerSheet({
             disabled={isLoading}
             className="w-full flex items-center gap-3 rounded-2xl border-2 p-4 mb-4 transition-all active:scale-[0.98] disabled:opacity-60"
             style={{
-              borderColor: "#6c47ff",
-              background: "linear-gradient(135deg, rgba(108,71,255,0.06), rgba(139,106,245,0.04))",
+              borderColor: "#7c3aed",
+              background: "linear-gradient(135deg, rgba(124, 58, 237,0.06), rgba(139,106,245,0.04))",
             }}
           >
             <div
               className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+              style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
             >
               {isLoading && status === "requesting" ? (
                 <Loader2 size={20} color="white" className="animate-spin" />
@@ -100,7 +100,7 @@ export default function LocationPickerSheet({
               <p className="text-xs text-[#9d97b5] mt-0.5">Automatically detect your suburb</p>
             </div>
             {isSet && status === "set" && (
-              <CheckCircle size={18} className="text-[#6c47ff] flex-shrink-0" />
+              <CheckCircle size={18} className="text-[#7c3aed] flex-shrink-0" />
             )}
           </button>
 
@@ -123,7 +123,7 @@ export default function LocationPickerSheet({
                     const ok = await onManualEntry(suburb);
                     if (ok) setTimeout(onClose, 800);
                   }}
-                  className="text-sm font-semibold px-4 py-2 rounded-full border border-[#26203f] bg-[#16122a] text-[#9d97b5] active:border-[#6c47ff] active:text-[#6c47ff] transition-colors"
+                  className="text-sm font-semibold px-4 py-2 rounded-full border border-[#26203f] bg-[#16122a] text-[#9d97b5] active:border-[#7c3aed] active:text-[#7c3aed] transition-colors"
                 >
                   {suburb}
                 </button>
@@ -160,7 +160,7 @@ export default function LocationPickerSheet({
             onClick={handleSearch}
             disabled={!query.trim() || isLoading}
             className="w-full h-11 rounded-2xl font-bold text-sm text-white mb-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50"
-            style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+            style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
           >
             {status === "resolving" ? (
               <><Loader2 size={16} className="animate-spin" /> Searching…</>

@@ -25,7 +25,7 @@ export default function WorkGrid({ posts }: { posts: PublicPost[] }) {
             key={post.id}
             onClick={() => setActive(post)}
             className="relative aspect-square overflow-hidden rounded-lg sm:rounded-xl group"
-            style={{ background: post.thumbnail_gradient ?? "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
+            style={{ background: post.thumbnail_gradient ?? "linear-gradient(135deg, #7c3aed, #a78bfa)" }}
             aria-label={post.caption || "View work"}
           >
             {post.thumbnail_url && (

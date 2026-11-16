@@ -24,7 +24,7 @@ export function EmptyState({ icon, title, subtitle, action }: EmptyStateProps) {
         <button
           onClick={action.onClick}
           className="mt-5 px-6 h-10 rounded-2xl font-semibold text-sm text-white transition-all active:scale-[0.98]"
-          style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+          style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
         >
           {action.label}
         </button>
@@ -36,7 +36,7 @@ export function EmptyState({ icon, title, subtitle, action }: EmptyStateProps) {
 export function LoadingSpinner({ label = "Loading..." }: { label?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-3">
-      <div className="w-8 h-8 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
+      <div className="w-8 h-8 rounded-full border-2 border-[#7c3aed] border-t-transparent animate-spin" />
       <p className="text-xs text-[#9d97b5] font-medium">{label}</p>
     </div>
   );

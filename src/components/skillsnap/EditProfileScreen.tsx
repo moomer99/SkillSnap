@@ -229,7 +229,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
         <button
           onClick={handleSave}
           disabled={saving}
-          className="text-sm font-bold text-[#6c47ff] disabled:opacity-50"
+          className="text-sm font-bold text-[#7c3aed] disabled:opacity-50"
         >
           {saving ? <Loader2 size={16} className="animate-spin" /> : "Save"}
         </button>
@@ -254,7 +254,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                   {initials}
                 </div>
               )}
-              <button onClick={() => avatarInputRef.current?.click()} className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-[#6c47ff] flex items-center justify-center text-white shadow-md border-2 border-white">
+              <button onClick={() => avatarInputRef.current?.click()} className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-[#7c3aed] flex items-center justify-center text-white shadow-md border-2 border-white">
                 <Camera size={16} />
               </button>
             </div>
@@ -270,12 +270,12 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value.slice(0, 50))}
                 placeholder="Name, business or nickname"
-                className="w-full bg-[#16122a] rounded-2xl border border-[#26203f] px-4 h-12 text-sm text-[#ffffff] placeholder-[#6f6889] outline-none focus:border-[#6c47ff] transition-colors"
+                className="w-full bg-[#16122a] rounded-2xl border border-[#26203f] px-4 h-12 text-sm text-[#ffffff] placeholder-[#6f6889] outline-none focus:border-[#7c3aed] transition-colors"
               />
             </Field>
 
             <Field label="Username">
-              <div className="flex items-center bg-[#16122a] rounded-2xl border border-[#26203f] px-4 h-12 gap-1 focus-within:border-[#6c47ff] transition-colors">
+              <div className="flex items-center bg-[#16122a] rounded-2xl border border-[#26203f] px-4 h-12 gap-1 focus-within:border-[#7c3aed] transition-colors">
                 <span className="text-[#6f6889] text-sm">@</span>
                 <input
                   type="text"
@@ -293,7 +293,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                 onChange={(e) => setBio(e.target.value.slice(0, 200))}
                 rows={3}
                 placeholder="Tell people what you do and what makes you great…"
-                className="w-full bg-[#16122a] rounded-2xl border border-[#26203f] px-4 py-3 text-sm text-[#ffffff] placeholder-[#6f6889] resize-none outline-none focus:border-[#6c47ff] transition-colors leading-relaxed"
+                className="w-full bg-[#16122a] rounded-2xl border border-[#26203f] px-4 py-3 text-sm text-[#ffffff] placeholder-[#6f6889] resize-none outline-none focus:border-[#7c3aed] transition-colors leading-relaxed"
               />
               <p className="text-right text-xs text-[#6f6889] mt-1">{bio.length} / 200</p>
             </Field>
@@ -312,8 +312,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                       fontWeight: 600,
                       padding: "6px 14px",
                       borderRadius: 999,
-                      border: `1.5px solid ${skill === cat ? "#6c47ff" : "#26203f"}`,
-                      background: skill === cat ? "#6c47ff" : "#fff",
+                      border: `1.5px solid ${skill === cat ? "#7c3aed" : "#26203f"}`,
+                      background: skill === cat ? "#7c3aed" : "#fff",
                       color: skill === cat ? "#fff" : "#9d97b5",
                       cursor: "pointer",
                     }}
@@ -341,7 +341,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
               })()}
 
               <div style={{ display: skill === "Other" ? "block" : "none", marginTop: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--ss-surface-2)", border: "2px solid #6c47ff", borderRadius: 16, padding: "0 16px", height: 48 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--ss-surface-2)", border: "2px solid #7c3aed", borderRadius: 16, padding: "0 16px", height: 48 }}>
                   <input
                     ref={customInputRef}
                     type="text"
@@ -376,10 +376,10 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                 onClick={handleGPSLocation}
                 disabled={locGpsLoading}
                 className="w-full flex items-center gap-3 rounded-2xl border px-4 py-3 mb-2.5 transition-all active:bg-[#1c1733] disabled:opacity-60"
-                style={{ borderColor: "#6c47ff", background: "rgba(108,71,255,0.04)" }}
+                style={{ borderColor: "#7c3aed", background: "rgba(124, 58, 237,0.04)" }}
               >
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}>
+                  style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}>
                   {locGpsLoading ? (
                     <Loader2 size={15} color="white" className="animate-spin" />
                   ) : (
@@ -395,8 +395,8 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
               </button>
 
               {/* Manual text input */}
-              <div className="flex items-center bg-[#16122a] rounded-2xl border border-[#26203f] px-4 h-12 gap-2.5 focus-within:border-[#6c47ff] transition-colors">
-                <MapPin size={15} className="text-[#6c47ff] flex-shrink-0" />
+              <div className="flex items-center bg-[#16122a] rounded-2xl border border-[#26203f] px-4 h-12 gap-2.5 focus-within:border-[#7c3aed] transition-colors">
+                <MapPin size={15} className="text-[#7c3aed] flex-shrink-0" />
                 <input
                   type="text"
                   value={locationText}
@@ -425,7 +425,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                   {locationPrivate ? (
                     <EyeOff size={16} className="text-[#9d97b5]" />
                   ) : (
-                    <Eye size={16} className="text-[#6c47ff]" />
+                    <Eye size={16} className="text-[#7c3aed]" />
                   )}
                   <div>
                     <p className="text-sm font-semibold text-[#ffffff]">Show exact location</p>
@@ -437,7 +437,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
                 {/* Toggle switch */}
                 <button
                   onClick={() => setLocationPrivate(v => !v)}
-                  className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${locationPrivate ? "bg-[#26203f]" : "bg-[#6c47ff]"}`}
+                  className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${locationPrivate ? "bg-[#26203f]" : "bg-[#7c3aed]"}`}
                 >
                   <span
                     className={`absolute top-0.5 w-5 h-5 rounded-full bg-[#16122a] shadow transition-transform ${locationPrivate ? "translate-x-0.5" : "translate-x-6"}`}
@@ -455,7 +455,7 @@ export default function EditProfileScreen({ onNavigate }: EditProfileScreenProps
               onClick={handleSave}
               disabled={saving}
               className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2 mt-2"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+              style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
             >
               {saving ? <><Loader2 size={20} className="animate-spin" /> Saving…</> : "Save Changes"}
             </button>

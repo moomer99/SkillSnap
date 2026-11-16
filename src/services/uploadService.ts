@@ -143,7 +143,7 @@ export const uploadService = {
         type: postType,
         media_url: mediaUrl ?? null,
         thumbnail_url: thumbnailUrl ?? null,
-        thumbnail_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+        thumbnail_gradient: "linear-gradient(135deg, #7c3aed, #a78bfa)",
         caption: payload.caption,
         skill: payload.skill || null,
         location: payload.location || null,

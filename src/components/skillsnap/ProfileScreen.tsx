@@ -74,7 +74,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0d0a1a]">
-        <div className="w-8 h-8 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-[#7c3aed] border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -127,7 +127,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <h2 className="font-bold text-base text-[#ffffff]">{user.displayName}</h2>
               {user.skill && user.role !== "client" ? (
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: "#6c47ff" }}>Pro</span>
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: "#7c3aed" }}>Pro</span>
               ) : user.role === "client" ? (
                 <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: "#f0f0f0", color: "#9d97b5" }}>Client</span>
               ) : isOwn ? (
@@ -145,7 +145,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(user.location)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-[#6c47ff] flex items-center gap-1 hover:underline active:opacity-70 mb-2"
+                className="text-sm text-[#7c3aed] flex items-center gap-1 hover:underline active:opacity-70 mb-2"
               >
                 <MapPin size={13} />
                 {user.location}
@@ -168,7 +168,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 <div className="flex-1">
                   <ConnectButton onClick={() => requireAuth(() => connectTo(user.id))} fullWidth loading={connecting === user.id} />
                 </div>
-                <button onClick={() => requireAuth(() => toggleFollow(user.id))} className={`flex-1 h-11 rounded-2xl font-semibold text-sm border-2 transition-all active:scale-[0.98] ${isFollowing ? "text-white bg-[#6c47ff] border-[#6c47ff]" : "text-[#6c47ff] bg-[#16122a] border-[#6c47ff]"}`}>
+                <button onClick={() => requireAuth(() => toggleFollow(user.id))} className={`flex-1 h-11 rounded-2xl font-semibold text-sm border-2 transition-all active:scale-[0.98] ${isFollowing ? "text-white bg-[#7c3aed] border-[#7c3aed]" : "text-[#7c3aed] bg-[#16122a] border-[#7c3aed]"}`}>
                   {isFollowing ? "Following" : "Follow"}
                 </button>
               </>
@@ -183,10 +183,10 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
               {(["work", "saved"] as const).map((tab) => (
                 <button key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${activeTab === tab ? "text-[#6c47ff] border-b-2 border-[#6c47ff]" : "text-[#9d97b5]"}`}>
+                  className={`flex-1 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${activeTab === tab ? "text-[#7c3aed] border-b-2 border-[#7c3aed]" : "text-[#9d97b5]"}`}>
                   {tab === "work" ? (state.currentUser?.role === "client" ? "Hired History" : "My Works") : "Saved"}
-                  {tab === "work" && (() => { const count = gridLoading ? null : (mergedPosts.length || (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)); return count ? <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">{count}</span> : null; })()}
-                  {tab === "saved" && savedPostsList.length > 0 && <span className="text-[10px] font-bold bg-[#6c47ff] text-white px-1.5 py-0.5 rounded-full leading-none">{savedPostsList.length}</span>}
+                  {tab === "work" && (() => { const count = gridLoading ? null : (mergedPosts.length || (!SUPABASE_CONFIGURED ? MOCK_WORK_GRID.length : 0)); return count ? <span className="text-[10px] font-bold bg-[#7c3aed] text-white px-1.5 py-0.5 rounded-full leading-none">{count}</span> : null; })()}
+                  {tab === "saved" && savedPostsList.length > 0 && <span className="text-[10px] font-bold bg-[#7c3aed] text-white px-1.5 py-0.5 rounded-full leading-none">{savedPostsList.length}</span>}
                 </button>
               ))}
             </div>
@@ -211,16 +211,16 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                 <div className="col-span-3 py-14 flex flex-col items-center gap-3 text-center px-8">
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1" style={{ background: "linear-gradient(135deg, #241d40, #1c1733)" }}>
                     {!isOwn ? (
-                      <svg width="26" height="22" viewBox="0 0 24 20" fill="none" stroke="#6c47ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="26" height="22" viewBox="0 0 24 20" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
                         <circle cx="12" cy="12" r="3"/>
                       </svg>
                     ) : (
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="3" width="8" height="8" rx="2" fill="#6c47ff" opacity="0.7"/>
-                        <rect x="13" y="3" width="8" height="8" rx="2" fill="#6c47ff" opacity="0.4"/>
-                        <rect x="3" y="13" width="8" height="8" rx="2" fill="#6c47ff" opacity="0.4"/>
-                        <rect x="13" y="13" width="8" height="8" rx="2" fill="#6c47ff" opacity="0.2"/>
+                        <rect x="3" y="3" width="8" height="8" rx="2" fill="#7c3aed" opacity="0.7"/>
+                        <rect x="13" y="3" width="8" height="8" rx="2" fill="#7c3aed" opacity="0.4"/>
+                        <rect x="3" y="13" width="8" height="8" rx="2" fill="#7c3aed" opacity="0.4"/>
+                        <rect x="13" y="13" width="8" height="8" rx="2" fill="#7c3aed" opacity="0.2"/>
                       </svg>
                     )}
                   </div>
@@ -239,7 +239,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-1 px-5 py-2.5 rounded-xl font-bold text-sm text-white"
-                      style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+                      style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
                     >
                       Get the App to Post
                     </a>
@@ -250,7 +250,7 @@ export default function ProfileScreen({ variant = "client", onNavigate }: Profil
                         onNavigate("edit-profile");
                       }}
                       className="mt-1 px-5 py-2.5 rounded-xl font-bold text-sm text-white"
-                      style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+                      style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
                     >
                       {isOwn ? "Set Up Pro Profile — Free" : "Connect with them"}
                     </button>
@@ -372,7 +372,7 @@ function MediaViewer({ post, isOwn, onClose, onDelete, onUpdate }: { post: Post;
       {post.caption && (
         <div className="px-4 py-3 bg-black/70">
           <p className="text-white text-sm leading-snug">{post.caption}</p>
-          {post.skill && <span className="inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full text-[#c4b5fd]" style={{ background: "rgba(108,71,255,0.25)" }}>{post.skill}</span>}
+          {post.skill && <span className="inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full text-[#c4b5fd]" style={{ background: "rgba(124, 58, 237,0.25)" }}>{post.skill}</span>}
           {post.location && <span className="inline-block ml-2 mt-1 text-xs text-white/60">· {post.location}</span>}
         </div>
       )}
@@ -406,7 +406,7 @@ function MediaViewer({ post, isOwn, onClose, onDelete, onUpdate }: { post: Post;
             <div className="flex items-center justify-between px-5 mb-5"><p className="text-white font-bold text-base">Edit Post</p><button onClick={() => setShowEdit(false)} className="text-white/50"><X size={18} /></button></div>
             <div className="px-5 mb-4">
               <label className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2 block">Caption</label>
-              <textarea value={caption} onChange={(e) => setCaption(e.target.value.slice(0, 150))} rows={3} className="w-full bg-white/10 rounded-xl border border-white/10 p-3.5 text-sm text-white placeholder-white/30 resize-none outline-none focus:border-[#6c47ff] transition-colors leading-relaxed" placeholder="Describe your work..." />
+              <textarea value={caption} onChange={(e) => setCaption(e.target.value.slice(0, 150))} rows={3} className="w-full bg-white/10 rounded-xl border border-white/10 p-3.5 text-sm text-white placeholder-white/30 resize-none outline-none focus:border-[#7c3aed] transition-colors leading-relaxed" placeholder="Describe your work..." />
               <p className="text-right text-xs text-white/30 mt-1">{caption.length} / 150</p>
             </div>
             <div className="px-5 mb-4">
@@ -416,14 +416,14 @@ function MediaViewer({ post, isOwn, onClose, onDelete, onUpdate }: { post: Post;
                 <span className={`text-sm ${skill ? "text-white" : "text-white/30"}`}>{skill || "Select skill..."}</span>
                 <ChevronDown size={16} className="text-white/30" />
               </div>
-              <div className="flex flex-wrap gap-2 mt-2.5">{quickSkills.map((cat) => <button key={cat} onClick={() => setSkill(skill === cat ? "" : cat)} className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${skill === cat ? "bg-[#6c47ff] text-white border-[#6c47ff]" : "bg-white/10 text-white/60 border-white/10"}`}>{cat}</button>)}</div>
+              <div className="flex flex-wrap gap-2 mt-2.5">{quickSkills.map((cat) => <button key={cat} onClick={() => setSkill(skill === cat ? "" : cat)} className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${skill === cat ? "bg-[#7c3aed] text-white border-[#7c3aed]" : "bg-white/10 text-white/60 border-white/10"}`}>{cat}</button>)}</div>
             </div>
             <div className="px-5 mb-6">
               <label className="text-xs font-bold text-white/40 uppercase tracking-wider mb-2 block">Location</label>
-              <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Sydney CBD" className="w-full bg-white/10 rounded-xl border border-white/10 px-4 h-12 text-sm text-white placeholder-white/30 outline-none focus:border-[#6c47ff] transition-colors" />
+              <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Sydney CBD" className="w-full bg-white/10 rounded-xl border border-white/10 px-4 h-12 text-sm text-white placeholder-white/30 outline-none focus:border-[#7c3aed] transition-colors" />
             </div>
             <div className="px-5">
-              <button onClick={handleSave} disabled={saving} className="w-full h-13 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2 py-3.5" style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}>
+              <button onClick={handleSave} disabled={saving} className="w-full h-13 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2 py-3.5" style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}>
                 {saving ? <><Loader2 size={18} className="animate-spin" /> Saving...</> : "Save Changes"}
               </button>
             </div>
@@ -437,7 +437,7 @@ function MediaViewer({ post, isOwn, onClose, onDelete, onUpdate }: { post: Post;
 function Stat({ value, label, highlight }: { value: string; label: string; highlight?: boolean }) {
   return (
     <div className="flex flex-col items-center gap-0.5 py-1">
-      <span className={`font-extrabold text-[15px] leading-tight tracking-tight ${highlight ? "text-[#6c47ff]" : "text-[#ffffff]"}`}>{value}</span>
+      <span className={`font-extrabold text-[15px] leading-tight tracking-tight ${highlight ? "text-[#7c3aed]" : "text-[#ffffff]"}`}>{value}</span>
       <span className="text-[10px] text-[#9d97b5] font-medium leading-tight text-center">{label}</span>
     </div>
   );
@@ -455,14 +455,14 @@ function ProTab({ notified, onNotify, expanded, onToggleExpand }: { notified: bo
   return (
     <div className="bg-[#0d0a1a] pb-6">
       <div className="relative px-5 pt-8 pb-8 overflow-hidden flex flex-col items-center text-center" style={{ background: "linear-gradient(160deg, #0d0a1a 0%, #1a0f3c 100%)" }}>
-        <div style={{ position: "absolute", top: -40, left: -40, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.3) 0%, transparent 70%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: -40, left: -40, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(124, 58, 237,0.3) 0%, transparent 70%)", pointerEvents: "none" }} />
         <div className="relative mb-4">
-          <div style={{ width: 64, height: 64, borderRadius: 20, background: "linear-gradient(135deg, #6c47ff, #a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 32px rgba(108,71,255,0.5)" }}><Zap size={30} fill="white" color="white" /></div>
+          <div style={{ width: 64, height: 64, borderRadius: 20, background: "linear-gradient(135deg, #7c3aed, #a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 32px rgba(124, 58, 237,0.5)" }}><Zap size={30} fill="white" color="white" /></div>
           <div style={{ position: "absolute", top: -5, right: -5, width: 20, height: 20, borderRadius: "50%", background: "linear-gradient(135deg, #fbbf24, #f59e0b)", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #0d0a1a" }}><Star size={9} fill="white" color="white" /></div>
         </div>
-        <h2 className="text-white font-extrabold text-2xl mb-2 tracking-tight">Go <span style={{ background: "linear-gradient(90deg, #a78bfa, #6c47ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Pro</span></h2>
+        <h2 className="text-white font-extrabold text-2xl mb-2 tracking-tight">Go <span style={{ background: "linear-gradient(90deg, #a78bfa, #7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Pro</span></h2>
         <p className="text-white/50 text-xs leading-relaxed max-w-xs">Supercharge your profile, land more clients, and grow your trade business with professional tools built for skilled workers.</p>
-        <div className="flex items-center gap-2 mt-4"><span style={{ width: 7, height: 7, borderRadius: "50%", background: "#6c47ff", display: "inline-block" }} /><span style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa", letterSpacing: 1.2 }}>LAUNCHING SOON</span></div>
+        <div className="flex items-center gap-2 mt-4"><span style={{ width: 7, height: 7, borderRadius: "50%", background: "#7c3aed", display: "inline-block" }} /><span style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa", letterSpacing: 1.2 }}>LAUNCHING SOON</span></div>
       </div>
       <div className="mx-4 mt-4 rounded-2xl overflow-hidden" style={{ background: "linear-gradient(135deg, #1a0f3c, #2d1b69)", border: "1px solid rgba(167,139,250,0.2)" }}>
         <div className="px-4 py-4 flex items-start gap-3">
@@ -490,16 +490,16 @@ function ProTab({ notified, onNotify, expanded, onToggleExpand }: { notified: bo
             </div>
           ))}
         </div>
-        <button onClick={onToggleExpand} className="flex items-center justify-center gap-1.5 w-full py-3 text-[#6c47ff] text-xs font-bold active:opacity-70 transition-opacity">{expanded ? <><ChevronUp size={13} /> Show less</> : <><ChevronDown size={13} /> See all features</>}</button>
+        <button onClick={onToggleExpand} className="flex items-center justify-center gap-1.5 w-full py-3 text-[#7c3aed] text-xs font-bold active:opacity-70 transition-opacity">{expanded ? <><ChevronUp size={13} /> Show less</> : <><ChevronDown size={13} /> See all features</>}</button>
       </div>
       <div className="mx-4 rounded-2xl overflow-hidden" style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)" }}>
         <div className="px-4 py-4">
           <p className="text-[10px] font-bold text-[#6f6889] uppercase tracking-wider mb-3">Pricing</p>
           <div className="flex gap-2.5">
             <div className="flex-1 rounded-xl border border-[#26203f] p-3 text-center"><p className="text-[10px] text-[#6f6889] mb-1.5">Monthly</p><p className="text-xl font-extrabold text-[#ffffff]">$9<span className="text-xs font-medium text-[#6f6889]">/mo</span></p><p className="text-[10px] text-[#6f6889] mt-1">Cancel anytime</p></div>
-            <div className="flex-1 rounded-xl p-3 text-center relative" style={{ background: "linear-gradient(135deg, rgba(108,71,255,0.08), rgba(167,139,250,0.05))", border: "1.5px solid #6c47ff" }}>
-              <div style={{ position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(90deg, #6c47ff, #a78bfa)", color: "#fff", fontSize: 8, fontWeight: 700, padding: "2px 8px", borderRadius: 99, whiteSpace: "nowrap" }}>BEST VALUE</div>
-              <p className="text-[10px] text-[#9d97b5] mb-1.5">Yearly</p><p className="text-xl font-extrabold text-[#ffffff]">$7<span className="text-xs font-medium text-[#6f6889]">/mo</span></p><p className="text-[10px] text-[#6c47ff] font-semibold mt-1">Save $24/year</p>
+            <div className="flex-1 rounded-xl p-3 text-center relative" style={{ background: "linear-gradient(135deg, rgba(124, 58, 237,0.08), rgba(167,139,250,0.05))", border: "1.5px solid #7c3aed" }}>
+              <div style={{ position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(90deg, #7c3aed, #a78bfa)", color: "#fff", fontSize: 8, fontWeight: 700, padding: "2px 8px", borderRadius: 99, whiteSpace: "nowrap" }}>BEST VALUE</div>
+              <p className="text-[10px] text-[#9d97b5] mb-1.5">Yearly</p><p className="text-xl font-extrabold text-[#ffffff]">$7<span className="text-xs font-medium text-[#6f6889]">/mo</span></p><p className="text-[10px] text-[#7c3aed] font-semibold mt-1">Save $24/year</p>
             </div>
           </div>
         </div>
@@ -508,7 +508,7 @@ function ProTab({ notified, onNotify, expanded, onToggleExpand }: { notified: bo
         {notified ? (
           <div className="flex flex-col items-center gap-2 py-4"><div className="w-12 h-12 rounded-full bg-[rgba(16,185,129,0.14)] flex items-center justify-center"><span className="text-xl">✓</span></div><p className="font-bold text-[#ffffff] text-sm">You're on the list!</p><p className="text-xs text-[#9d97b5] text-center">We&apos;ll notify you when Pro launches.</p></div>
         ) : (
-          <button onClick={onNotify} className="w-full h-13 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 active:scale-[0.98] transition-transform py-3.5" style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 20px rgba(108,71,255,0.3)" }}><Zap size={17} fill="white" color="white" /> Notify Me at Launch</button>
+          <button onClick={onNotify} className="w-full h-13 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 active:scale-[0.98] transition-transform py-3.5" style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)", boxShadow: "0 4px 20px rgba(124, 58, 237,0.3)" }}><Zap size={17} fill="white" color="white" /> Notify Me at Launch</button>
         )}
       </div>
     </div>

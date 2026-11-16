@@ -141,7 +141,7 @@ export default function ContactModal({
                 type="submit"
                 disabled={!canSubmit}
                 className="w-full h-12 rounded-2xl font-bold text-[15px] text-white mt-1 flex items-center justify-center gap-2 transition-opacity disabled:opacity-50"
-                style={{ background: "#6c47ff" }}
+                style={{ background: "#7c3aed" }}
               >
                 {status === "sending" ? (
                   <>
@@ -169,7 +169,7 @@ export default function ContactModal({
           transition: border-color 120ms ease;
         }
         :global(.ss-modal-input:focus) {
-          border-color: #6c47ff;
+          border-color: #7c3aed;
         }
         :global(.ss-modal-input::placeholder) {
           color: rgba(255, 255, 255, 0.35);

@@ -278,7 +278,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                   placeholder="Name, business name or nickname"
                   autoComplete="name"
                   required
-                  className="h-12 rounded-xl border border-[#26203f] px-4 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
+                  className="h-12 rounded-xl border border-[#26203f] px-4 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#7c3aed] transition-colors placeholder-[#6f6889]"
                 />
               </div>
             )}
@@ -295,7 +295,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                 placeholder={mode === "login" ? "Email or username" : "you@email.com"}
                 autoComplete={mode === "signup" ? "email" : "username"}
                 required
-                className="h-12 rounded-xl border border-[#26203f] px-4 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
+                className="h-12 rounded-xl border border-[#26203f] px-4 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#7c3aed] transition-colors placeholder-[#6f6889]"
               />
             </div>
 
@@ -311,7 +311,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                   autoComplete={mode === "signup" ? "new-password" : "current-password"}
                   required
                   minLength={8}
-                  className="w-full h-12 rounded-xl border border-[#26203f] px-4 pr-12 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
+                  className="w-full h-12 rounded-xl border border-[#26203f] px-4 pr-12 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#7c3aed] transition-colors placeholder-[#6f6889]"
                 />
                 <button
                   type="button"
@@ -332,7 +332,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                 <button
                   type="button"
                   onClick={() => { setForgotEmail(email); setForgotSent(false); setForgotError(null); setShowForgotPassword(true); }}
-                  className="text-xs font-semibold text-[#6c47ff]"
+                  className="text-xs font-semibold text-[#7c3aed]"
                 >
                   Forgot password?
                 </button>
@@ -345,7 +345,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                 <div
                   onClick={() => setRememberMe(r => !r)}
                   className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                    rememberMe ? "bg-[#6c47ff] border-[#6c47ff]" : "bg-[#16122a] border-[#d0ccc8]"
+                    rememberMe ? "bg-[#7c3aed] border-[#7c3aed]" : "bg-[#16122a] border-[#d0ccc8]"
                   }`}
                 >
                   {rememberMe && (
@@ -403,7 +403,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                   aria-label="I agree to the Terms and Privacy Policy"
                   onClick={() => setAgreedToTerms((a) => !a)}
                   className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                    agreedToTerms ? "bg-[#6c47ff] border-[#6c47ff]" : "bg-[#16122a] border-[#d0ccc8]"
+                    agreedToTerms ? "bg-[#7c3aed] border-[#7c3aed]" : "bg-[#16122a] border-[#d0ccc8]"
                   }`}
                 >
                   {agreedToTerms && (
@@ -414,11 +414,11 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                 </button>
                 <span className="text-sm text-[#b8b2cc] font-medium">
                   I agree to the{" "}
-                  <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#6c47ff] font-semibold underline">
+                  <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#7c3aed] font-semibold underline">
                     Terms
                   </Link>
                   {" & "}
-                  <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#6c47ff] font-semibold underline">
+                  <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#7c3aed] font-semibold underline">
                     Privacy Policy
                   </Link>
                 </span>
@@ -434,7 +434,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                 (mode === "signup" && !agreedToTerms)
               }
               className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+              style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
             >
               {loading ? (
                 <Loader2 size={20} className="animate-spin" />
@@ -449,7 +449,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
               <button
                 type="button"
                 onClick={() => { setMode(mode === "signup" ? "login" : "signup"); setError(null); setShowGoogleHint(false); setShowGoogleSuggestion(false); }}
-                className="text-[#6c47ff] font-semibold"
+                className="text-[#7c3aed] font-semibold"
               >
                 {mode === "signup" ? "Log in" : "Sign up"}
               </button>
@@ -478,7 +478,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                   <p className="text-sm font-semibold text-[#ffffff]">{RESET_EMAIL_SENT_MESSAGE}</p>
                   <button
                     type="button"
-                    className="mt-2 text-sm font-semibold text-[#6c47ff]"
+                    className="mt-2 text-sm font-semibold text-[#7c3aed]"
                     onClick={() => setShowForgotPassword(false)}
                   >
                     Done
@@ -495,7 +495,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                       placeholder="you@email.com"
                       autoComplete="email"
                       required
-                      className="h-12 rounded-xl border border-[#26203f] px-4 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
+                      className="h-12 rounded-xl border border-[#26203f] px-4 text-sm text-[#ffffff] bg-[#16122a] outline-none focus:border-[#7c3aed] transition-colors placeholder-[#6f6889]"
                     />
                   </div>
                   {forgotError && (
@@ -505,7 +505,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
                     type="submit"
                     disabled={forgotLoading}
                     className="w-full h-13 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 disabled:opacity-60"
-                    style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", height: 52 }}
+                    style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)", height: 52 }}
                   >
                     {forgotLoading ? <Loader2 size={18} className="animate-spin" /> : "Send reset link"}
                   </button>
@@ -535,7 +535,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
       >
         {/* Radial glow */}
         <div className="absolute inset-0 pointer-events-none">
-          <div style={{ position: "absolute", top: "10%", left: "50%", transform: "translateX(-50%)", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.30) 0%, transparent 70%)" }} />
+          <div style={{ position: "absolute", top: "10%", left: "50%", transform: "translateX(-50%)", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(124, 58, 237,0.30) 0%, transparent 70%)" }} />
         </div>
 
         {/* Brand — icon above wordmark, ported from mobile (mark 108px, 14px gap) */}
@@ -615,13 +615,13 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         <button
           onClick={() => setMode("signup")}
           className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] shadow-sm"
-          style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 16px rgba(108,71,255,0.30)" }}
+          style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)", boxShadow: "0 4px 16px rgba(124, 58, 237,0.30)" }}
         >
           Create Free Account
         </button>
         <button
           onClick={() => setMode("login")}
-          className="w-full h-14 rounded-2xl font-semibold text-base text-[#6c47ff] border-2 border-[#6c47ff]/30 bg-[#16122a] transition-all active:scale-[0.98]"
+          className="w-full h-14 rounded-2xl font-semibold text-base text-[#7c3aed] border-2 border-[#7c3aed]/30 bg-[#16122a] transition-all active:scale-[0.98]"
         >
           Log in with email
         </button>
@@ -651,7 +651,7 @@ export default function AuthScreen({ onNavigate }: AuthScreenProps) {
         </p>
         <button
           onClick={() => onNavigate("contact")}
-          className="text-center text-[11px] text-[#6c47ff] font-semibold"
+          className="text-center text-[11px] text-[#7c3aed] font-semibold"
         >
           Need help? Contact us
         </button>

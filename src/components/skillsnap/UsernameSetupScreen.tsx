@@ -74,7 +74,7 @@ export default function UsernameSetupScreen({ onDone }: { onDone: () => void }) 
     <div className="flex flex-col min-h-screen bg-[#16122a] px-5 pt-14 pb-10">
       <div className="mb-8">
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
-          style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}>
+          style={{ background: "linear-gradient(135deg, #7c3aed, #a78bfa)" }}>
           <span className="text-2xl">✦</span>
         </div>
         <h1 className="text-2xl font-extrabold text-[#ffffff] mb-2">Choose your username</h1>
@@ -83,7 +83,7 @@ export default function UsernameSetupScreen({ onDone }: { onDone: () => void }) 
         </p>
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="flex items-center gap-2 border-2 border-[#26203f] rounded-2xl px-4 h-14 focus-within:border-[#6c47ff] transition-colors bg-[var(--ss-surface-2)]">
+        <div className="flex items-center gap-2 border-2 border-[#26203f] rounded-2xl px-4 h-14 focus-within:border-[#7c3aed] transition-colors bg-[var(--ss-surface-2)]">
           <span className="text-[#6f6889] font-semibold text-base select-none">@</span>
           <input
             ref={inputRef}
@@ -108,7 +108,7 @@ export default function UsernameSetupScreen({ onDone }: { onDone: () => void }) 
           type="submit"
           disabled={checking || value.length < 3}
           className="w-full h-14 rounded-2xl font-bold text-base text-white mt-2 flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity"
-          style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+          style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
         >
           {checking ? <><Loader2 size={18} className="animate-spin" /> Checking…</> : "Continue →"}
         </button>

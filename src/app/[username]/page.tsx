@@ -142,7 +142,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const posts = await getPosts(profile.id);
 
   const name = profile.display_name || profile.username;
-  const gradient = profile.avatar_gradient ?? "linear-gradient(135deg, #6c47ff, #a78bfa)";
+  const gradient = profile.avatar_gradient ?? "linear-gradient(135deg, #7c3aed, #a78bfa)";
   const isPro = profile.role !== "client" && !!profile.skill;
   const jobsDone = profile.jobs_done ?? 0;
   const happy = profile.happy_percent ?? 0;
@@ -188,7 +188,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
           <a
             href="/"
             className="text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 rounded-full transition-all active:scale-95"
-            style={{ background: "rgba(108,71,255,0.18)", border: "1px solid rgba(108,71,255,0.45)", color: "#a78bfa" }}
+            style={{ background: "rgba(124, 58, 237,0.18)", border: "1px solid rgba(124, 58, 237,0.45)", color: "#a78bfa" }}
           >
             Browse SkillSnap
           </a>
@@ -234,7 +234,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
               <div className="flex items-center gap-2 mt-4">
                 <h1 className="text-[24px] lg:text-[28px] font-extrabold leading-tight">{name}</h1>
-                {profile.is_verified && <BadgeCheck size={20} color="#6c47ff" fill="rgba(108,71,255,0.2)" />}
+                {profile.is_verified && <BadgeCheck size={20} color="#7c3aed" fill="rgba(124, 58, 237,0.2)" />}
               </div>
 
               <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.45)" }}>
@@ -245,7 +245,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
                 {profile.skill && (
                   <span
                     className="text-xs font-bold px-3 py-1.5 rounded-full"
-                    style={{ background: "rgba(108,71,255,0.18)", border: "1px solid rgba(108,71,255,0.45)", color: "#a78bfa" }}
+                    style={{ background: "rgba(124, 58, 237,0.18)", border: "1px solid rgba(124, 58, 237,0.45)", color: "#a78bfa" }}
                   >
                     {profile.skill}
                   </span>
@@ -253,7 +253,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
                 {isPro && (
                   <span
                     className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
-                    style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+                    style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
                   >
                     Pro
                   </span>
@@ -301,13 +301,13 @@ export default async function PublicProfilePage({ params }: PageProps) {
             <section
               className="mt-6 rounded-3xl p-6 text-center relative overflow-hidden"
               style={{
-                background: "linear-gradient(135deg, rgba(108,71,255,0.28), rgba(167,139,250,0.10))",
-                border: "1px solid rgba(108,71,255,0.45)",
+                background: "linear-gradient(135deg, rgba(124, 58, 237,0.28), rgba(167,139,250,0.10))",
+                border: "1px solid rgba(124, 58, 237,0.45)",
               }}
             >
               <div
                 className="absolute pointer-events-none"
-                style={{ top: "-40%", left: "50%", transform: "translateX(-50%)", width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.30) 0%, transparent 65%)" }}
+                style={{ top: "-40%", left: "50%", transform: "translateX(-50%)", width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle, rgba(124, 58, 237,0.30) 0%, transparent 65%)" }}
               />
               <div className="relative">
                 <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#a78bfa" }}>

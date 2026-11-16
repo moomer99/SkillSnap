@@ -21,13 +21,13 @@ export interface LocationCoords {
 // remain discoverable in the results grid. A pin is never given a stand-in
 // position to get it onto the map.
 const PIN_COLORS: Record<string, string> = {
-  Barber: "#6c47ff",
+  Barber: "#7c3aed",
   "Makeup Artist": "#f5576c",
   Tiler: "#4facfe",
   Cleaning: "#43e97b",
   "Fitness / PT": "#fa709a",
   Plumber: "#a18cd1",
-  default: "#6c47ff",
+  default: "#7c3aed",
 };
 
 function pinColor(skill: string): string {

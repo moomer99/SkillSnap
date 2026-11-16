@@ -85,7 +85,7 @@ function QuickReplies({ onSelect, hasMessages, isSkiller }: {
         <button
           key={r}
           onClick={() => onSelect(r)}
-          className="flex-shrink-0 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-[#26203f] bg-[#0d0a1a] text-[#b8b2cc] active:bg-[#241d40] active:border-[#c4b5fd] active:text-[#6c47ff] transition-all whitespace-nowrap"
+          className="flex-shrink-0 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-[#26203f] bg-[#0d0a1a] text-[#b8b2cc] active:bg-[#241d40] active:border-[#c4b5fd] active:text-[#7c3aed] transition-all whitespace-nowrap"
         >
           {r}
         </button>
@@ -575,7 +575,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-[#6c47ff] font-medium truncate">
+            <p className="text-[11px] text-[#7c3aed] font-medium truncate">
               {[
                 displayParticipant.role === "client" ? "Client"
                   : displayParticipant.skill ?? null,
@@ -587,7 +587,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowChatMenu(true)}
-            className="w-9 h-9 flex items-center justify-center text-[#9d97b5] active:text-[#6c47ff] transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-[#9d97b5] active:text-[#7c3aed] transition-colors"
           >
             <MoreVertical size={18} />
           </button>
@@ -631,7 +631,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             if (msg.isSystem) {
               return (
                 <div key={msg.id} className="flex justify-center my-1">
-                  <span className="text-[11px] font-semibold text-[#6c47ff] bg-[#f0ecff] px-3 py-1.5 rounded-full border border-[#ddd5ff]">
+                  <span className="text-[11px] font-semibold text-[#7c3aed] bg-[#f0ecff] px-3 py-1.5 rounded-full border border-[#ddd5ff]">
                     {msg.text}
                   </span>
                 </div>
@@ -695,7 +695,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                           ? "text-white rounded-br-sm"
                           : "bg-[#16122a] text-[#ffffff] rounded-bl-sm shadow-sm border border-[#26203f]"
                       } ${msg.failed ? "opacity-60" : ""}`}
-                      style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #6c47ff, #8b6af5)", userSelect: "none" } : { userSelect: "none" }}
+                      style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #7c3aed, #8b6af5)", userSelect: "none" } : { userSelect: "none" }}
                     >
                       {msg.text}
                     </div>
@@ -708,8 +708,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                   {msg.time}
                   {msg.from === "me" && !msg.failed && (
                     <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="ml-0.5 flex-shrink-0">
-                      <path d="M1 4l2.5 2.5L8 1" stroke="#6c47ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M5.5 4l2.5 2.5L13 1" stroke="#6c47ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M1 4l2.5 2.5L8 1" stroke="#7c3aed" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M5.5 4l2.5 2.5L13 1" stroke="#7c3aed" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   )}
                 </span>
@@ -723,8 +723,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
         {/* ── Job done status cards — inline in scroll flow ── */}
         <div ref={jobCardRef}>
         {isSkiller && jobStatus === "requested" && (
-          <div className="mx-2 mt-2 bg-[#1c1733] rounded-2xl border border-[#6c47ff]/20 px-4 py-3 flex items-center gap-3">
-            <Loader2 size={18} className="text-[#6c47ff] flex-shrink-0 animate-spin" />
+          <div className="mx-2 mt-2 bg-[#1c1733] rounded-2xl border border-[#7c3aed]/20 px-4 py-3 flex items-center gap-3">
+            <Loader2 size={18} className="text-[#7c3aed] flex-shrink-0 animate-spin" />
             <div>
               <p className="text-sm font-bold text-[#ffffff]">Job done request sent</p>
               <p className="text-xs text-[#9d97b5]">Waiting for {displayParticipant.displayName} to confirm…</p>
@@ -744,7 +744,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             <div className="flex border-t border-[#26203f]">
               <button className="flex-1 py-3 text-sm font-semibold text-[#9d97b5] active:bg-white/10 transition-colors" onClick={handleClientDecline}>Decline</button>
               <div className="w-px bg-[#26203f]" />
-              <button className="flex-1 py-3 text-sm font-bold text-[#6c47ff] active:bg-[#1c1733] transition-colors" onClick={handleClientConfirm}>Confirm job done</button>
+              <button className="flex-1 py-3 text-sm font-bold text-[#7c3aed] active:bg-[#1c1733] transition-colors" onClick={handleClientConfirm}>Confirm job done</button>
             </div>
           </div>
         )}
@@ -773,7 +773,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
               <p className="text-sm font-bold text-[#ffffff]">Job confirmed!</p>
               <p className="text-xs text-[#9d97b5]">Share your experience with the community.</p>
             </div>
-            <button className="flex-shrink-0 text-xs font-bold text-white px-3 py-1.5 rounded-xl" style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)" }} onClick={() => setShowFeedback(true)}>Rate</button>
+            <button className="flex-shrink-0 text-xs font-bold text-white px-3 py-1.5 rounded-xl" style={{ background: "linear-gradient(135deg,#7c3aed,#8b6af5)" }} onClick={() => setShowFeedback(true)}>Rate</button>
           </div>
         )}
 
@@ -792,7 +792,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
               if (msg.isSystem) {
                 return (
                   <div key={msg.id} className="flex justify-center my-1">
-                    <span className="text-[11px] font-semibold text-[#6c47ff] bg-[#f0ecff] px-3 py-1.5 rounded-full border border-[#ddd5ff]">
+                    <span className="text-[11px] font-semibold text-[#7c3aed] bg-[#f0ecff] px-3 py-1.5 rounded-full border border-[#ddd5ff]">
                       {msg.text}
                     </span>
                   </div>
@@ -829,7 +829,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                               ? "text-white rounded-br-sm"
                               : "bg-[#16122a] text-[#ffffff] rounded-bl-sm shadow-sm border border-[#26203f]"
                           } ${msg.failed ? "opacity-60" : ""}`}
-                          style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #6c47ff, #8b6af5)", userSelect: "none" } : { userSelect: "none" }}
+                          style={msg.from === "me" ? { background: msg.failed ? "#a0a0a0" : "linear-gradient(135deg, #7c3aed, #8b6af5)", userSelect: "none" } : { userSelect: "none" }}
                         >
                           {msg.text}
                         </div>
@@ -842,8 +842,8 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                       {msg.time}
                       {msg.from === "me" && !msg.failed && (
                         <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="ml-0.5 flex-shrink-0">
-                          <path d="M1 4l2.5 2.5L8 1" stroke="#6c47ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M5.5 4l2.5 2.5L13 1" stroke="#6c47ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M1 4l2.5 2.5L8 1" stroke="#7c3aed" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M5.5 4l2.5 2.5L13 1" stroke="#7c3aed" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       )}
                     </span>
@@ -869,7 +869,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
       {showScrollBtn && (
         <button
           onClick={() => bottomRef.current?.scrollIntoView({ behavior: "smooth" })}
-          className="absolute bottom-[160px] right-4 z-30 w-9 h-9 rounded-full bg-[#16122a] shadow-lg border border-[#26203f] flex items-center justify-center text-[#6c47ff] active:scale-95 transition-transform"
+          className="absolute bottom-[160px] right-4 z-30 w-9 h-9 rounded-full bg-[#16122a] shadow-lg border border-[#26203f] flex items-center justify-center text-[#7c3aed] active:scale-95 transition-transform"
         >
           <ChevronDown size={18} />
         </button>
@@ -881,7 +881,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           {canRequestJobDone ? (
             <button
               onClick={handleRequestJobDone}
-              className="w-full h-10 rounded-2xl font-semibold text-xs border-2 border-[#6c47ff]/30 text-[#6c47ff] flex items-center justify-center gap-2 bg-[#1c1733] transition-all active:scale-[0.98]"
+              className="w-full h-10 rounded-2xl font-semibold text-xs border-2 border-[#7c3aed]/30 text-[#7c3aed] flex items-center justify-center gap-2 bg-[#1c1733] transition-all active:scale-[0.98]"
             >
               <CheckCircle size={14} />
               Mark job done
@@ -910,11 +910,11 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
               className="flex-shrink-0 whitespace-nowrap"
               style={{
                 borderRadius: 10,
-                border: "1px solid #6c47ff",
+                border: "1px solid #7c3aed",
                 background: "transparent",
                 padding: "8px 14px",
                 fontSize: 13,
-                color: "#6c47ff",
+                color: "#7c3aed",
               }}
             >
               {opener}
@@ -943,7 +943,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             e.target.value = "";
           }}
         />
-        <button type="button" onClick={() => attachRef.current?.click()} className="text-[#9d97b5] flex-shrink-0 active:text-[#6c47ff] transition-colors">
+        <button type="button" onClick={() => attachRef.current?.click()} className="text-[#9d97b5] flex-shrink-0 active:text-[#7c3aed] transition-colors">
           <Paperclip size={20} />
         </button>
         <input
@@ -954,12 +954,12 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessageWithTracking(); } }}
           placeholder="Message..."
           autoComplete="off"
-          className="flex-1 bg-[#1c1733] rounded-2xl px-4 py-2.5 min-h-[40px] text-sm text-[#ffffff] placeholder-[#6f6889] focus:outline-none focus:ring-2 focus:ring-[#6c47ff]/30"
+          className="flex-1 bg-[#1c1733] rounded-2xl px-4 py-2.5 min-h-[40px] text-sm text-[#ffffff] placeholder-[#6f6889] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/30"
         />
         <button type="button" onClick={sendMessageWithTracking}
           disabled={!inputText.trim() || sending}
           className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0 transition-opacity disabled:opacity-40"
-          style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}>
+          style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}>
           <Send size={16} />
         </button>
       </div>
@@ -976,7 +976,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             </div>
             <button className="w-full flex items-center gap-4 px-5 py-4 text-[#ffffff] text-sm font-medium active:bg-[#0d0a1a]" onClick={() => { setShowChatMenu(false); onNavigate("client-profile"); }}>
               <div className="w-9 h-9 rounded-full bg-[#241d40] flex items-center justify-center flex-shrink-0">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" /></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" /></svg>
               </div>
               View Profile
             </button>
@@ -984,13 +984,13 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
             <button className="w-full flex items-center gap-4 px-5 py-4 text-[#ffffff] text-sm font-medium active:bg-[#0d0a1a]" onClick={() => setShowChatMenu(false)}>
               <div className="w-9 h-9 rounded-full bg-[#1c1733] flex items-center justify-center flex-shrink-0"><Bell size={16} className="text-[#9d97b5]" /></div>
               Mute Notifications
-              <span className="ml-auto text-[10px] font-bold text-white bg-[#6c47ff] px-2 py-0.5 rounded-full">Soon</span>
+              <span className="ml-auto text-[10px] font-bold text-white bg-[#7c3aed] px-2 py-0.5 rounded-full">Soon</span>
             </button>
             <div className="h-px bg-[#1c1733] mx-5" />
             <button className="w-full flex items-center gap-4 px-5 py-4 text-red-500 text-sm font-medium active:bg-red-500/10" onClick={() => setShowChatMenu(false)}>
               <div className="w-9 h-9 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0"><Flag size={16} className="text-red-400" /></div>
               Report Conversation
-              <span className="ml-auto text-[10px] font-bold text-white bg-[#6c47ff] px-2 py-0.5 rounded-full">Soon</span>
+              <span className="ml-auto text-[10px] font-bold text-white bg-[#7c3aed] px-2 py-0.5 rounded-full">Soon</span>
             </button>
             <div className="h-px bg-[#1c1733] mx-5" />
             <button
@@ -1082,11 +1082,11 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                     <button key={key} onClick={() => setRating(key)}
                       className={`flex-1 flex flex-col items-center gap-2 py-4 px-1 rounded-2xl border-2 transition-all ${
                         rating === key
-                          ? key === "not_satisfied" ? "border-red-500/30 bg-red-500/10" : "border-[#6c47ff] bg-[#1c1733]"
+                          ? key === "not_satisfied" ? "border-red-500/30 bg-red-500/10" : "border-[#7c3aed] bg-[#1c1733]"
                           : "border-[#26203f] bg-[#16122a]"
                       }`}>
                       <span className="text-3xl leading-none">{emoji}</span>
-                      <span className={`text-[11px] font-semibold text-center leading-tight whitespace-pre-line ${rating === key ? key === "not_satisfied" ? "text-red-500" : "text-[#6c47ff]" : "text-[#b8b2cc]"}`}>{label}</span>
+                      <span className={`text-[11px] font-semibold text-center leading-tight whitespace-pre-line ${rating === key ? key === "not_satisfied" ? "text-red-500" : "text-[#7c3aed]" : "text-[#b8b2cc]"}`}>{label}</span>
                     </button>
                   ))}
                 </div>
@@ -1097,7 +1097,7 @@ export default function ChatScreen({ onNavigate }: ChatScreenProps) {
                 <div className="px-5 pb-8">
                   <button onClick={handleSubmitFeedback} disabled={rating === null || submitting}
                     className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-                    style={{ background: "linear-gradient(135deg, #6c47ff, #7c5ce7)" }}>
+                    style={{ background: "linear-gradient(135deg, #7c3aed, #7c5ce7)" }}>
                     {submitting ? <><Loader2 size={18} className="animate-spin" /> Submitting…</> : "Submit Feedback"}
                   </button>
                   {rating === null && <p className="text-center text-xs text-[#6f6889] mt-2">Select an option above to continue</p>}

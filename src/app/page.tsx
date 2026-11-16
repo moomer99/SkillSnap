@@ -152,7 +152,7 @@ function SkillSnapRouter() {
       style={{ background: "var(--ss-bg)" }}
     >
       <img src="/skillsnap-icon.svg" alt="SkillSnap" width={64} height={64} className="mb-4" />
-      <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
+      <div className="w-6 h-6 rounded-full border-2 border-[#7c3aed] border-t-transparent animate-spin" />
     </div>
   ) : null;
 
@@ -242,7 +242,7 @@ class ErrorBoundary extends React.Component<
           <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", maxWidth: "400px", textAlign: "center", wordBreak: "break-word" }}>{this.state.error}</div>
           <button
             onClick={() => window.location.reload()}
-            style={{ padding: "10px 24px", borderRadius: "10px", background: "#6c47ff", color: "white", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 600 }}
+            style={{ padding: "10px 24px", borderRadius: "10px", background: "#7c3aed", color: "white", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 600 }}
           >
             Reload
           </button>

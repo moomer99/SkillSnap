@@ -18,7 +18,7 @@ export const contentType = "image/png";
 export const alt = "SkillSnap profile";
 
 const BG = "#0d0a1a";
-const PURPLE = "#6c47ff";
+const PURPLE = "#7c3aed";
 const MUTED = "#a1a1aa";
 
 // Poppins is the site's display font (layout.tsx). Satori can't read the woff2

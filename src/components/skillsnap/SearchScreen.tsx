@@ -87,7 +87,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
         username: (row.username as string) ?? "",
         displayName: (row.display_name as string) ?? "User",
         avatarUrl: (row.avatar_url as string) ?? undefined,
-        avatarGradient: (row.avatar_gradient as string) ?? "linear-gradient(135deg, #6c47ff, #a78bfa)",
+        avatarGradient: (row.avatar_gradient as string) ?? "linear-gradient(135deg, #7c3aed, #a78bfa)",
         avatarInitial: (row.avatar_initial as string) ?? ((row.display_name as string)?.[0] ?? "U"),
         location: (row.location as string) ?? "",
         bio: (row.bio as string) ?? "",
@@ -168,7 +168,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
               username: (row.username as string) ?? "",
               displayName: (row.display_name as string) ?? "User",
               avatarUrl: (row.avatar_url as string) ?? undefined,
-              avatarGradient: (row.avatar_gradient as string) ?? "linear-gradient(135deg, #6c47ff, #a78bfa)",
+              avatarGradient: (row.avatar_gradient as string) ?? "linear-gradient(135deg, #7c3aed, #a78bfa)",
               avatarInitial: (row.avatar_initial as string) ?? ((row.display_name as string)?.[0] ?? "U"),
               location: (row.location as string) ?? "",
               bio: (row.bio as string) ?? "",
@@ -236,7 +236,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
               style={
                 filter === tab
-                  ? { background: "#6c47ff", color: "white" }
+                  ? { background: "#7c3aed", color: "white" }
                   : { background: "#1c1733", color: "#9d97b5" }
               }
             >
@@ -277,7 +277,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
                   <h3 className="text-sm font-bold text-[#ffffff]">Recent</h3>
                   <button
                     onClick={() => { clearRecent(); setRecentSearches([]); }}
-                    className="text-xs font-semibold text-[#6c47ff] active:opacity-70"
+                    className="text-xs font-semibold text-[#7c3aed] active:opacity-70"
                   >
                     Clear
                   </button>
@@ -350,7 +350,7 @@ export default function SearchScreen({ onNavigate }: SearchScreenProps) {
               <>
                 <p className="text-xs text-[#6f6889] font-medium mb-3">
                   {results.length} result{results.length !== 1 ? "s" : ""} for&nbsp;
-                  <span className="text-[#6c47ff] font-semibold">
+                  <span className="text-[#7c3aed] font-semibold">
                     "{activeSkill ?? query.trim()}"
                   </span>
                 </p>
@@ -436,7 +436,7 @@ function NoResults({ query, onClear }: { query: string; onClear: () => void }) {
   return (
     <div className="flex flex-col items-center py-16 text-center px-6">
       <div className="w-16 h-16 rounded-full bg-[#241d40] flex items-center justify-center mb-4">
-        <Search size={24} className="text-[#6c47ff]" />
+        <Search size={24} className="text-[#7c3aed]" />
       </div>
       <p className="text-base font-bold text-[#ffffff] mb-1">No results for "{query}"</p>
       <p className="text-sm text-[#9d97b5] mb-5 leading-relaxed">
@@ -444,7 +444,7 @@ function NoResults({ query, onClear }: { query: string; onClear: () => void }) {
       </p>
       <button
         onClick={onClear}
-        className="px-5 py-2.5 rounded-full text-sm font-semibold text-[#6c47ff] border border-[#6c47ff] active:bg-[#241d40] transition-colors"
+        className="px-5 py-2.5 rounded-full text-sm font-semibold text-[#7c3aed] border border-[#7c3aed] active:bg-[#241d40] transition-colors"
       >
         Clear search
       </button>

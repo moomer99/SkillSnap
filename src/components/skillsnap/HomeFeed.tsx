@@ -289,7 +289,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
           >
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+              style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
             >
               <Navigation size={16} color="white" />
             </div>
@@ -348,7 +348,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
           <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
             <div
               className="w-20 h-20 rounded-3xl mb-5 flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #a78bfa)" }}
+              style={{ background: "linear-gradient(135deg, #7c3aed, #a78bfa)" }}
             >
               <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
                 <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="white" strokeWidth="2.5" fill="none" />
@@ -363,7 +363,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
               <button
                 onClick={() => setShowLocationPicker(true)}
                 className="w-full h-12 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2"
-                style={{ background: "var(--ss-purple)", boxShadow: "0 4px 16px rgba(108,71,255,0.35)" }}
+                style={{ background: "var(--ss-purple)", boxShadow: "0 4px 16px rgba(124, 58, 237,0.35)" }}
               >
                 <Navigation size={15} />
                 Set My Location
@@ -414,7 +414,7 @@ export default function HomeFeed({ onNavigate, registerScrollToTop }: HomeFeedPr
             <div ref={sentinelRef} className="w-full h-1" />
             {loadingMore && (
               <div className="flex justify-center py-6">
-                <div className="w-6 h-6 rounded-full border-2 border-[#6c47ff] border-t-transparent animate-spin" />
+                <div className="w-6 h-6 rounded-full border-2 border-[#7c3aed] border-t-transparent animate-spin" />
               </div>
             )}
             {!hasMore && filteredPosts.length > 0 && (
@@ -1328,7 +1328,7 @@ function FeedCard({
             </p>
             {editMode === "caption" && (
               <textarea
-                className="w-full rounded-2xl px-4 py-3 text-[14px] text-white resize-none outline-none focus:border-[#6c47ff]"
+                className="w-full rounded-2xl px-4 py-3 text-[14px] text-white resize-none outline-none focus:border-[#7c3aed]"
                 style={{ background: "var(--ss-surface-2)", border: "1px solid var(--ss-line)" }}
                 rows={4} value={editCaption} onChange={(e) => setEditCaption(e.target.value)}
               />
@@ -1362,7 +1362,7 @@ function FeedCard({
             )}
             {editMode === "location" && (
               <input
-                className="w-full rounded-2xl px-4 py-3 text-[14px] text-white outline-none focus:border-[#6c47ff]"
+                className="w-full rounded-2xl px-4 py-3 text-[14px] text-white outline-none focus:border-[#7c3aed]"
                 style={{ background: "var(--ss-surface-2)", border: "1px solid var(--ss-line)" }}
                 value={editLocation} onChange={(e) => setEditLocation(e.target.value)} placeholder="e.g. Sydney, NSW"
               />

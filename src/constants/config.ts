@@ -87,8 +87,8 @@ export const JOBS_DONE_CONFIG = {
 
 // Brand colors (used in dynamic styles)
 export const BRAND = {
-  PRIMARY: "#6c47ff",
-  PRIMARY_DARK: "#5b3dd8",
+  PRIMARY: "#7c3aed",
+  PRIMARY_DARK: "#6d28d9",
   PRIMARY_LIGHT: "#8b6af5",
   PRIMARY_BG: "#ede9fe",
   SURFACE: "#f8f7f5",

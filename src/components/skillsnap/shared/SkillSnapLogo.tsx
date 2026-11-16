@@ -8,7 +8,7 @@ interface LogoProps {
   dark?: boolean;
   /**
    * Render the brand-purple "any-surface" artwork instead of the dark/light
-   * pair. #6c47ff passes WCAG on both #0d0a1a (3.70) and #f8f7f5 (4.92), so it
+   * pair. #7c3aed passes WCAG on both #0d0a1a (3.70) and #f8f7f5 (4.92), so it
    * stays legible without knowing the surface — use it on theme-aware surfaces
    * (e.g. the legal pages) where `dark` can't be pinned. Takes precedence over `dark`.
    */
@@ -35,7 +35,7 @@ const ICON_RATIO = 863 / 907; // 0.9515
 
 const INK = "#0d0a1a"; // solid ink: whole wordmark on light, the S on light marks
 const WHITE = "#ffffff";
-const BRAND = "#6c47ff"; // any-surface: theme-proof, passes on both backgrounds
+const BRAND = "#7c3aed"; // any-surface: theme-proof, passes on both backgrounds
 
 /** Solid fill for the letters (wordmark) / the S (mark) per tone. */
 function inkFor(tone: Tone) {

@@ -20,7 +20,7 @@ export default function MessageThreadItem({ thread, onClick, isOnline = false }:
       <div className="relative flex-shrink-0">
         <UserAvatar user={participant} size="md" />
         {hasUnread ? (
-          <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-[#6c47ff] flex items-center justify-center">
+          <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-[#7c3aed] flex items-center justify-center">
             <span className="text-[9px] text-white font-bold">{unreadCount}</span>
           </div>
         ) : isOnline ? (
@@ -33,7 +33,7 @@ export default function MessageThreadItem({ thread, onClick, isOnline = false }:
           <span className={`text-sm font-semibold text-[#ffffff] ${hasUnread ? "font-bold" : ""}`}>
             {participant.displayName}
           </span>
-          <span className={`text-[11px] flex-shrink-0 ml-2 ${hasUnread ? "text-[#6c47ff] font-semibold" : "text-[#6f6889]"}`}>
+          <span className={`text-[11px] flex-shrink-0 ml-2 ${hasUnread ? "text-[#7c3aed] font-semibold" : "text-[#6f6889]"}`}>
             {lastMessageTime}
           </span>
         </div>

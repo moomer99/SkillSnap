@@ -62,7 +62,7 @@ function useSuggestedPros(excludeId?: string): SuggestedPro[] {
                 location: p.location,
                 jobsDone: p.jobs_done ?? 0,
                 avatarUrl: p.avatar_url,
-                avatarGradient: p.avatar_gradient ?? "linear-gradient(135deg,#6c47ff,#a78bfa)",
+                avatarGradient: p.avatar_gradient ?? "linear-gradient(135deg,#7c3aed,#a78bfa)",
                 avatarInitial: p.avatar_initial ?? displayName.charAt(0).toUpperCase(),
               };
             })

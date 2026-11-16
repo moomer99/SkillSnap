@@ -236,7 +236,7 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
             <button
               onClick={onDownload}
               className="h-10 px-5 rounded-full text-sm font-bold text-white transition-transform active:scale-95 hover:-translate-y-0.5"
-              style={{ background: "var(--ss-purple)", boxShadow: "0 4px 20px rgba(108,71,255,0.40)" }}
+              style={{ background: "var(--ss-purple)", boxShadow: "0 4px 20px rgba(124, 58, 237,0.40)" }}
             >
               Download App
             </button>
@@ -290,7 +290,7 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
             <button
               onClick={() => { setOpen(false); onDownload(); }}
               className="w-full py-4 rounded-2xl px-5 text-[15px] font-bold text-white text-left"
-              style={{ background: "var(--ss-purple)", boxShadow: "0 4px 20px rgba(108,71,255,0.40)" }}
+              style={{ background: "var(--ss-purple)", boxShadow: "0 4px 20px rgba(124, 58, 237,0.40)" }}
             >
               Download App
             </button>
@@ -305,7 +305,7 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
 // Colours inside the device are hardcoded dark on purpose: this is a picture
 // of the mobile app, which is dark-only, so it must not follow the web theme.
 function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
-  const gradient = pro?.cardGradient ?? "linear-gradient(160deg,#6c47ff,#2d1b69)";
+  const gradient = pro?.cardGradient ?? "linear-gradient(160deg,#7c3aed,#2d1b69)";
 
   return (
     <div className="relative flex items-center justify-center w-full">
@@ -317,7 +317,7 @@ function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
           width: "min(120%, 560px)",
           aspectRatio: "1",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(108,71,255,0.38) 0%, rgba(108,71,255,0.10) 45%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(124, 58, 237,0.38) 0%, rgba(124, 58, 237,0.10) 45%, transparent 70%)",
         }}
       />
 
@@ -330,7 +330,7 @@ function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
           padding: 10,
           background: "linear-gradient(160deg,#2a2145,#14102a)",
           border: "1px solid rgba(255,255,255,0.14)",
-          boxShadow: "0 30px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(108,71,255,0.18)",
+          boxShadow: "0 30px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(124, 58, 237,0.18)",
         }}
       >
         {/* Screen */}
@@ -379,7 +379,7 @@ function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
                 ) : (
                   <div
                     className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold border border-white/30"
-                    style={{ background: pro?.avatarGradient ?? "linear-gradient(160deg,#6c47ff,#a78bfa)" }}
+                    style={{ background: pro?.avatarGradient ?? "linear-gradient(160deg,#7c3aed,#a78bfa)" }}
                   >
                     {pro?.avatarInitial ?? "S"}
                   </div>
@@ -408,7 +408,7 @@ function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
 
               <div
                 className="h-7 rounded-xl flex items-center justify-center text-[10px] font-bold text-white"
-                style={{ background: "#6c47ff" }}
+                style={{ background: "#7c3aed" }}
               >
                 Connect
               </div>
@@ -420,7 +420,7 @@ function PhoneMockup({ pro }: { pro?: FeaturedPro }) {
             className="flex items-center justify-around py-2"
             style={{ background: "#16122a", borderTop: "1px solid rgba(255,255,255,0.10)" }}
           >
-            {["#6c47ff", "rgba(255,255,255,0.28)", "rgba(255,255,255,0.28)", "rgba(255,255,255,0.28)"].map((c, i) => (
+            {["#7c3aed", "rgba(255,255,255,0.28)", "rgba(255,255,255,0.28)", "rgba(255,255,255,0.28)"].map((c, i) => (
               <span key={i} style={{ width: 16, height: 16, borderRadius: 5, background: c }} />
             ))}
           </div>
@@ -484,7 +484,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
       <section className="relative overflow-hidden">
         {/* Ambient glows */}
         <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div style={{ position: "absolute", top: "-25%", left: "8%", width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.22) 0%, transparent 66%)" }} />
+          <div style={{ position: "absolute", top: "-25%", left: "8%", width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(124, 58, 237,0.22) 0%, transparent 66%)" }} />
           <div style={{ position: "absolute", bottom: "-20%", right: "-5%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle, rgba(167,139,250,0.12) 0%, transparent 70%)" }} />
         </div>
 
@@ -506,7 +506,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
               <FadeIn delay={80}>
                 <h1 className="font-extrabold tracking-tight leading-[1.04] text-[42px] sm:text-[56px] lg:text-[68px] mb-5">
                   Watch.{" "}
-                  <span style={{ background: "linear-gradient(90deg,#a78bfa,#6c47ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                  <span style={{ background: "linear-gradient(90deg,#a78bfa,#7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                     Trust.
                   </span>{" "}
                   Connect.
@@ -553,8 +553,8 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           <div
             className="flex items-center justify-center gap-2.5 text-center"
             style={{
-              background: "rgba(108,71,255,0.1)",
-              border: "1px solid rgba(108,71,255,0.2)",
+              background: "rgba(124, 58, 237,0.1)",
+              border: "1px solid rgba(124, 58, 237,0.2)",
               borderRadius: 8,
               padding: "12px 20px",
             }}
@@ -584,7 +584,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
               {
                 title: "Watch",
                 desc: "Short work videos from skilled pros near you",
-                color: "#6c47ff",
+                color: "#7c3aed",
                 icon: (
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                     <path d="M15 10l4.553-2.277A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
@@ -656,12 +656,12 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                 <div
                   aria-hidden
                   className="absolute top-0 right-0 pointer-events-none"
-                  style={{ width: 240, height: 240, background: "radial-gradient(circle at 100% 0%, rgba(108,71,255,0.28) 0%, transparent 65%)" }}
+                  style={{ width: 240, height: 240, background: "radial-gradient(circle at 100% 0%, rgba(124, 58, 237,0.28) 0%, transparent 65%)" }}
                 />
                 <div className="relative flex flex-col h-full">
                   <span
                     className="self-start text-[10px] font-bold tracking-[0.18em] uppercase px-2.5 py-1 rounded-full mb-4"
-                    style={{ background: "rgba(108,71,255,0.28)", color: "#c4b5fd" }}
+                    style={{ background: "rgba(124, 58, 237,0.28)", color: "#c4b5fd" }}
                   >
                     I&apos;m a
                   </span>
@@ -672,7 +672,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                   <ul className="flex flex-col gap-3 mb-8">
                     {["Upload video portfolios", "Appear in local discovery", "Get direct client messages", "Track jobs done and happy %"].map((f) => (
                       <li key={f} className="flex items-center gap-3">
-                        <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(108,71,255,0.22)", color: "var(--ss-purple-light)" }}>
+                        <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(124, 58, 237,0.22)", color: "var(--ss-purple-light)" }}>
                           <svg width="10" height="8" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         </span>
                         <span className="text-[14px] font-medium" style={{ color: "var(--ss-text)" }}>{f}</span>
@@ -682,7 +682,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                   <button
                     onClick={goToSignup}
                     className="mt-auto w-full py-4 rounded-2xl font-bold text-[15px] text-white flex items-center justify-center gap-2 transition-transform active:scale-[0.97] hover:-translate-y-0.5"
-                    style={{ background: "var(--ss-purple)", boxShadow: "0 6px 24px rgba(108,71,255,0.42)" }}
+                    style={{ background: "var(--ss-purple)", boxShadow: "0 6px 24px rgba(124, 58, 237,0.42)" }}
                   >
                     Join as a Pro <ArrowRight size={17} />
                   </button>
@@ -742,7 +742,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           theme === "dark"
             ? {
                 background: "linear-gradient(135deg, #0d0a1a 0%, #1a1035 100%)",
-                borderTop: "1px solid rgba(108,71,255,0.3)",
+                borderTop: "1px solid rgba(124, 58, 237,0.3)",
               }
             : {
                 background: "var(--ss-surface-3)",
@@ -756,7 +756,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           style={{
             background:
               theme === "dark"
-                ? "radial-gradient(circle at 50% 0%, rgba(108,71,255,0.22) 0%, transparent 60%)"
+                ? "radial-gradient(circle at 50% 0%, rgba(124, 58, 237,0.22) 0%, transparent 60%)"
                 : "radial-gradient(circle at 50% 0%, var(--ss-purple-soft) 0%, transparent 60%)",
           }}
         />

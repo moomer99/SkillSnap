@@ -42,7 +42,7 @@ function avatarPin(pin: MappableDiscoveryPin): L.DivIcon {
     height: "42px",
     padding: "2px",
     borderRadius: "9999px",
-    background: "#6c47ff",
+    background: "#7c3aed",
     boxShadow: "0 2px 10px rgba(0,0,0,0.45)",
     boxSizing: "border-box",
   } satisfies Partial<CSSStyleDeclaration>);
@@ -75,7 +75,7 @@ function avatarPin(pin: MappableDiscoveryPin): L.DivIcon {
     } satisfies Partial<CSSStyleDeclaration>);
     // Assigned separately so an invalid value from the DB is dropped by the
     // CSSOM instead of being concatenated into a style string
-    initial.style.background = pin.avatarGradient ?? pin.color ?? "#6c47ff";
+    initial.style.background = pin.avatarGradient ?? pin.color ?? "#7c3aed";
     ring.appendChild(initial);
   }
 

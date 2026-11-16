@@ -79,10 +79,10 @@
   --ss-text-dim: rgba(255, 255, 255, 0.40);
 
   /* Brand accent */
-  --ss-purple: #6c47ff;
+  --ss-purple: #7c3aed;
   --ss-purple-light: #a78bfa;
-  --ss-purple-soft: rgba(108, 71, 255, 0.16);
-  --ss-purple-border: rgba(108, 71, 255, 0.42);
+  --ss-purple-soft: rgba(124, 58, 237, 0.16);
+  --ss-purple-border: rgba(124, 58, 237, 0.42);
 
   /* Light surface — kept for the few inverted elements (white pill buttons) */
   --ss-light-surface: #f8f7f5;
@@ -100,7 +100,7 @@
   --card-foreground: var(--ss-text);
   --popover: var(--ss-surface);
   --popover-foreground: var(--ss-text);
-  --primary: #6c47ff;
+  --primary: #7c3aed;
   --primary-foreground: #ffffff;
   --secondary: var(--ss-surface-2);
   --secondary-foreground: #c4b5fd;
@@ -111,20 +111,20 @@
   --destructive: #ef4444;
   --border: var(--ss-line);
   --input: var(--ss-line);
-  --ring: #6c47ff;
-  --chart-1: #6c47ff;
+  --ring: #7c3aed;
+  --chart-1: #7c3aed;
   --chart-2: #a78bfa;
   --chart-3: #c4b5fd;
   --chart-4: #ddd6fe;
   --chart-5: #ede9fe;
   --sidebar: var(--ss-surface);
   --sidebar-foreground: var(--ss-text);
-  --sidebar-primary: #6c47ff;
+  --sidebar-primary: #7c3aed;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: var(--ss-surface-2);
   --sidebar-accent-foreground: #c4b5fd;
   --sidebar-border: var(--ss-line);
-  --sidebar-ring: #6c47ff;
+  --sidebar-ring: #7c3aed;
 
   color-scheme: dark;
 }
@@ -147,10 +147,10 @@ html.light {
   --ss-text-muted: rgba(26, 26, 26, 0.66);
   --ss-text-dim: rgba(26, 26, 26, 0.45);
 
-  --ss-purple: #6c47ff;
-  --ss-purple-light: #5b3dd8;
-  --ss-purple-soft: rgba(108, 71, 255, 0.10);
-  --ss-purple-border: rgba(108, 71, 255, 0.28);
+  --ss-purple: #7c3aed;
+  --ss-purple-light: #6d28d9;
+  --ss-purple-soft: rgba(124, 58, 237, 0.10);
+  --ss-purple-border: rgba(124, 58, 237, 0.28);
 
   --ss-light-surface: #1a1a1a;
 
@@ -159,9 +159,9 @@ html.light {
   --ss-card-tint: rgba(26, 26, 26, 0.03);
   --ss-card-pro: linear-gradient(150deg, #efeaff, #e3dbff);
 
-  --secondary-foreground: #5b3dd8;
-  --accent-foreground: #5b3dd8;
-  --sidebar-accent-foreground: #5b3dd8;
+  --secondary-foreground: #6d28d9;
+  --accent-foreground: #6d28d9;
+  --sidebar-accent-foreground: #6d28d9;
 
   color-scheme: light;
 }

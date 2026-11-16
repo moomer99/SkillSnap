@@ -249,7 +249,7 @@ export default function DiscoverScreen({ onNavigate }: DiscoverScreenProps) {
                   >
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+                      style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
                     >
                       <MapPin size={18} color="white" />
                     </div>
@@ -340,7 +340,7 @@ function MapFrame({ children }: { children: React.ReactNode }) {
       <div
         aria-hidden
         className="absolute pointer-events-none"
-        style={{ width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.22) 0%, transparent 68%)" }}
+        style={{ width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle, rgba(124, 58, 237,0.22) 0%, transparent 68%)" }}
       />
       <div className="relative flex flex-col items-center">{children}</div>
     </div>
@@ -407,7 +407,7 @@ function ProCard({
         ) : (
           <div
             className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl mb-2"
-            style={{ background: pin.avatarGradient ?? pin.color ?? "#6c47ff" }}
+            style={{ background: pin.avatarGradient ?? pin.color ?? "#7c3aed" }}
           >
             {pin.avatarInitial ?? initial}
           </div>

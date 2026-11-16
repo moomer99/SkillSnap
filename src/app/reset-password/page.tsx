@@ -134,7 +134,7 @@ export default function ResetPasswordPage() {
         <div style={{
           position: "absolute", top: "20%", left: "50%", transform: "translateX(-50%)",
           width: 400, height: 400, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(108,71,255,0.25) 0%, transparent 70%)"
+          background: "radial-gradient(circle, rgba(124, 58, 237,0.25) 0%, transparent 70%)"
         }} />
       </div>
 
@@ -224,7 +224,7 @@ export default function ResetPasswordPage() {
                 type="submit"
                 disabled={saving || !sessionReady || !checkPassword(password).valid || !confirm}
                 className="w-full h-14 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 mt-2"
-                style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 20px rgba(108,71,255,0.40)" }}
+                style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)", boxShadow: "0 4px 20px rgba(124, 58, 237,0.40)" }}
               >
                 {saving ? <Loader2 size={20} className="animate-spin" /> : "Update Password"}
               </button>

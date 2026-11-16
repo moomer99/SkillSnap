@@ -217,7 +217,7 @@ export default async function JoinPage() {
         >
           <span
             className="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center"
-            style={{ background: "rgba(108,71,255,0.28)", color: "#c4b5fd" }}
+            style={{ background: "rgba(124, 58, 237,0.28)", color: "#c4b5fd" }}
             aria-hidden
           >
             <HandHelping size={24} />
@@ -292,7 +292,7 @@ function PrimaryCta({ compact = false }: { compact?: boolean }) {
       <a
         href={SIGNUP_HREF}
         className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 min-h-[56px] px-8 rounded-2xl text-[16px] font-bold text-white transition-transform active:scale-[0.97] hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-        style={{ background: "var(--ss-purple)", boxShadow: "0 6px 24px rgba(108,71,255,0.42)", outlineColor: "var(--ss-purple-light)" }}
+        style={{ background: "var(--ss-purple)", boxShadow: "0 6px 24px rgba(124, 58, 237,0.42)", outlineColor: "var(--ss-purple-light)" }}
       >
         Create your profile
         <ArrowRight size={18} aria-hidden className="transition-transform group-hover:translate-x-1" />
@@ -322,7 +322,7 @@ function ProfilePreview({ featured }: { featured: Featured | null }) {
   const name = featured ? featured.profile.display_name || featured.profile.username : "Your name";
   const skill = featured?.profile.skill ?? "Your skill";
   const suburb = featured?.profile.location?.split(",")[0].trim() ?? "Your suburb";
-  const gradient = featured?.profile.avatar_gradient ?? "linear-gradient(135deg, #6c47ff, #a78bfa)";
+  const gradient = featured?.profile.avatar_gradient ?? "linear-gradient(135deg, #7c3aed, #a78bfa)";
   const thumb = featured?.post.thumbnail_url ?? null;
   const caption = featured?.post.caption ?? "Your work video goes here";
   const isVideo = featured ? featured.post.type === "video" : true;
@@ -374,7 +374,7 @@ function ProfilePreview({ featured }: { featured: Featured | null }) {
         </div>
         <span
           className="text-[12px] font-bold px-3 py-1.5 rounded-full text-white flex-shrink-0"
-          style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+          style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
         >
           Pro
         </span>
