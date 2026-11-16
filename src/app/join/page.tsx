@@ -27,6 +27,7 @@ import {
   type PublicPost,
 } from "@/lib/supabase/public";
 import { SUPPORT_EMAIL } from "@/constants/contact";
+import AppStoreButtons from "@/components/skillsnap/shared/AppStoreButtons";
 
 // Re-read the featured profile at most every 5 minutes (same as /@username).
 export const revalidate = 300;
@@ -296,15 +297,9 @@ function PrimaryCta({ compact = false }: { compact?: boolean }) {
         Create your profile
         <ArrowRight size={18} aria-hidden className="transition-transform group-hover:translate-x-1" />
       </a>
-      <p className="text-[13px] mt-3" style={{ color: "var(--ss-text-muted)" }}>
-        {/* /get is a redirect route, not a page — plain <a>, never <Link>. */}
-        {/* eslint-disable @next/next/no-html-link-for-pages */}
-        Opens the SkillSnap app in your phone&apos;s app store. On a computer? Get it for{" "}
-        <a href="/get?store=ios" className="underline underline-offset-2" style={{ color: "var(--ss-text-soft)" }}>iPhone</a>{" "}
-        or{" "}
-        <a href="/get?store=android" className="underline underline-offset-2" style={{ color: "var(--ss-text-soft)" }}>Android</a>.
-        {/* eslint-enable @next/next/no-html-link-for-pages */}
-      </p>
+      <div className="mt-4 flex justify-center sm:justify-start">
+        <AppStoreButtons variant="black" />
+      </div>
     </div>
   );
 }
