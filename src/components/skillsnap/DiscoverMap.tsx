@@ -1,10 +1,11 @@
 "use client";
 // ─────────────────────────────────────────────
-// SkillSnap — Discover map (Leaflet + CARTO dark tiles)
+// SkillSnap — Discover map (Leaflet + OpenStreetMap tiles)
 //
-// No API key: CARTO's dark basemap is served straight from their CDN over
-// OpenStreetMap data. Loaded client-side only, since Leaflet touches `window`
-// and `document` as soon as a map is constructed.
+// No API key: raw OpenStreetMap tiles, with a CSS filter on the tile pane
+// to keep the map's dark appearance (no CARTO). Loaded client-side only,
+// since Leaflet touches `window` and `document` as soon as a map is
+// constructed.
 // ─────────────────────────────────────────────
 import { useMemo, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -24,9 +25,9 @@ interface DiscoverMapProps {
 const INITIAL_CENTER: [number, number] = [-33.9175, 150.9215];
 const INITIAL_ZOOM = 11;
 
-const TILE_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+const TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 /**
  * Builds the pin as a real DOM node rather than an HTML string. Names, avatar
@@ -92,10 +93,12 @@ export default function DiscoverMap({ pins, connectingUserId, onConnect, onProfi
   const icons = useMemo(() => new Map(pins.map((p) => [p.id, avatarPin(p)])), [pins]);
 
   return (
-    <div
-      className="relative w-full overflow-hidden rounded-3xl"
-      style={{ height: "clamp(260px, 42vh, 460px)", border: "1px solid var(--ss-line)" }}
-    >
+    <>
+      <style>{`.ss-dark-map .leaflet-tile-pane { filter: invert(100%) hue-rotate(180deg) brightness(90%) contrast(85%); }`}</style>
+      <div
+        className="relative w-full overflow-hidden rounded-3xl ss-dark-map"
+        style={{ height: "clamp(260px, 42vh, 460px)", border: "1px solid var(--ss-line)" }}
+      >
       <MapContainer
         center={INITIAL_CENTER}
         zoom={INITIAL_ZOOM}
@@ -137,6 +140,7 @@ export default function DiscoverMap({ pins, connectingUserId, onConnect, onProfi
           </Marker>
         ))}
       </MapContainer>
-    </div>
+      </div>
+    </>
   );
 }
