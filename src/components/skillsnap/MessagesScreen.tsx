@@ -168,7 +168,7 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-xl font-bold text-[#ffffff]">Messages</h1>
           {threads.reduce((n, t) => n + t.unreadCount, 0) > 0 && (
-            <span className="text-xs font-bold bg-[#6c47ff] text-white px-2 py-0.5 rounded-full">
+            <span className="text-xs font-bold bg-[#7c3aed] text-white px-2 py-0.5 rounded-full">
               {threads.reduce((n, t) => n + t.unreadCount, 0)}
             </span>
           )}
@@ -194,7 +194,7 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
       {/* Notification permission banner */}
       {showNotifBanner && (
         <div className="mx-4 mt-3 mb-1 bg-[#1c1733] border border-[#c4b5fd] rounded-2xl px-4 py-3 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#6c47ff] flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-full bg-[#7c3aed] flex items-center justify-center flex-shrink-0">
             <Bell size={16} color="white" />
           </div>
           <div className="flex-1 min-w-0">
@@ -211,7 +211,7 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
             <button
               onClick={handleEnableNotifs}
               className="text-xs font-bold text-white px-3 py-1.5 rounded-full"
-              style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)" }}
+              style={{ background: "linear-gradient(135deg,#7c3aed,#8b6af5)" }}
             >
               Enable
             </button>
@@ -248,7 +248,7 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
             <div className="w-px bg-[#1c1733]" />
             <button
               disabled={processingId === req.jobId}
-              className="flex-1 py-2.5 text-sm font-bold text-[#6c47ff] active:bg-[#1c1733] flex items-center justify-center gap-1.5 disabled:opacity-40"
+              className="flex-1 py-2.5 text-sm font-bold text-[#7c3aed] active:bg-[#1c1733] flex items-center justify-center gap-1.5 disabled:opacity-40"
               onClick={() => handleConfirm(req)}
             >
               <CheckCircle size={14} /> Confirm ✓
@@ -277,7 +277,7 @@ export default function MessagesScreen({ onNavigate: _onNavigate }: MessagesScre
         ) : threads.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
             <div className="w-16 h-16 rounded-full bg-[#241d40] flex items-center justify-center mb-4">
-              <MessageSquare size={28} className="text-[#6c47ff]" />
+              <MessageSquare size={28} className="text-[#7c3aed]" />
             </div>
             <p className="text-sm font-semibold text-[#ffffff] mb-1">No messages yet</p>
             <p className="text-xs text-[#6f6889]">

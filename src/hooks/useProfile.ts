@@ -64,7 +64,7 @@ export function useProfile(variant: ProfileVariant) {
           id,
           username: "@user",
           displayName: "SkillSnap User",
-          avatarGradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+          avatarGradient: "linear-gradient(135deg, #7c3aed, #a78bfa)",
           avatarInitial: "S",
           location: "",
           bio: "",

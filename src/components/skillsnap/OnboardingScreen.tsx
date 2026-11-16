@@ -34,10 +34,10 @@ function SlideDiscover() {
           <stop offset="100%" stopColor="#7c3aed"/>
         </linearGradient>
         <filter id="d-drop" x="-30%" y="-30%" width="160%" height="160%">
-          <feDropShadow dx="3" dy="10" stdDeviation="16" floodColor="#6c47ff" floodOpacity="0.25"/>
+          <feDropShadow dx="3" dy="10" stdDeviation="16" floodColor="#7c3aed" floodOpacity="0.25"/>
         </filter>
       </defs>
-      <ellipse cx="90" cy="186" rx="50" ry="8" fill="#6c47ff" opacity="0.08"/>
+      <ellipse cx="90" cy="186" rx="50" ry="8" fill="#7c3aed" opacity="0.08"/>
       <rect x="118" y="126" width="52" height="22" rx="11" fill="url(#d-handle)" filter="url(#d-drop)" transform="rotate(45 118 126)"/>
       <circle cx="80" cy="88" r="62" fill="#7c3aed" filter="url(#d-drop)"/>
       <circle cx="80" cy="88" r="56" fill="#6d28d9"/>
@@ -89,17 +89,17 @@ function SlideLocal() {
       <defs>
         <radialGradient id="lc-pin" cx="35%" cy="20%" r="75%">
           <stop offset="0%" stopColor="#a78bfa"/>
-          <stop offset="100%" stopColor="#6c47ff"/>
+          <stop offset="100%" stopColor="#7c3aed"/>
         </radialGradient>
         <radialGradient id="lc-map" cx="50%" cy="50%" r="65%">
           <stop offset="0%" stopColor="#241d40"/>
           <stop offset="100%" stopColor="#2e2550"/>
         </radialGradient>
         <filter id="lc-drop" x="-40%" y="-40%" width="180%" height="180%">
-          <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#6c47ff" floodOpacity="0.28"/>
+          <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#7c3aed" floodOpacity="0.28"/>
         </filter>
       </defs>
-      <ellipse cx="100" cy="186" rx="52" ry="8" fill="#6c47ff" opacity="0.08"/>
+      <ellipse cx="100" cy="186" rx="52" ry="8" fill="#7c3aed" opacity="0.08"/>
       <circle cx="100" cy="94" r="76" fill="url(#lc-map)"/>
       <line x1="26" y1="70" x2="174" y2="70" stroke="#c4b5fd" strokeWidth="1" strokeDasharray="5 4" opacity="0.5"/>
       <line x1="26" y1="94" x2="174" y2="94" stroke="#c4b5fd" strokeWidth="1" strokeDasharray="5 4" opacity="0.5"/>
@@ -126,12 +126,12 @@ function SlideLocal() {
       </g>
       <g filter="url(#lc-drop)">
         <circle cx="100" cy="84" r="24" fill="url(#lc-pin)"/>
-        <path d="M100 108 L100 140" stroke="#6c47ff" strokeWidth="6" strokeLinecap="round"/>
-        <circle cx="100" cy="142" r="4" fill="#6c47ff" opacity="0.3"/>
+        <path d="M100 108 L100 140" stroke="#7c3aed" strokeWidth="6" strokeLinecap="round"/>
+        <circle cx="100" cy="142" r="4" fill="#7c3aed" opacity="0.3"/>
         <text x="100" y="91" textAnchor="middle" fill="white" fontSize="20" fontWeight="bold">★</text>
       </g>
-      <circle cx="100" cy="84" r="34" stroke="#6c47ff" strokeWidth="2" opacity="0.15" strokeDasharray="6 4"/>
-      <circle cx="100" cy="84" r="46" stroke="#6c47ff" strokeWidth="1.5" opacity="0.08" strokeDasharray="5 5"/>
+      <circle cx="100" cy="84" r="34" stroke="#7c3aed" strokeWidth="2" opacity="0.15" strokeDasharray="6 4"/>
+      <circle cx="100" cy="84" r="46" stroke="#7c3aed" strokeWidth="1.5" opacity="0.08" strokeDasharray="5 5"/>
     </svg>
   );
 }
@@ -261,7 +261,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
                   height: 240,
                   background: "rgba(255,255,255,0.55)",
                   backdropFilter: "blur(8px)",
-                  boxShadow: "0 8px 32px rgba(108,71,255,0.10)",
+                  boxShadow: "0 8px 32px rgba(124, 58, 237,0.10)",
                 }}
               >
                 {s.illustration}
@@ -290,7 +290,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
                 width: i === current ? 28 : 8,
                 height: 8,
                 borderRadius: 4,
-                background: i === current ? "#6c47ff" : "rgba(108,71,255,0.35)",
+                background: i === current ? "#7c3aed" : "rgba(124, 58, 237,0.35)",
                 transition: "width 0.3s ease, background 0.3s ease",
                 border: "none",
                 padding: 0,
@@ -307,7 +307,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
         {!isLast && (
           <button
             onClick={finish}
-            className="text-sm font-semibold text-[#6c47ff] px-3 py-1 rounded-full active:opacity-60 transition-opacity"
+            className="text-sm font-semibold text-[#7c3aed] px-3 py-1 rounded-full active:opacity-60 transition-opacity"
             style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(4px)" }}
           >
             Skip
@@ -328,7 +328,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
             <button
               onClick={finish}
               className="flex-[2] h-14 rounded-2xl font-bold text-base text-white active:scale-[0.98] transition-transform"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+              style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
             >
               Get Started
             </button>
@@ -337,7 +337,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
           <button
             onClick={next}
             className="w-full h-14 rounded-2xl font-bold text-base text-white active:scale-[0.98] transition-transform"
-            style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+            style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
           >
             Next
           </button>
@@ -352,7 +352,7 @@ export default function OnboardingScreen({ onNavigate }: OnboardingScreenProps) 
             <button
               onClick={next}
               className="flex-1 h-14 rounded-2xl font-bold text-base text-white active:scale-[0.98] transition-transform"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+              style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
             >
               Next
             </button>

@@ -29,8 +29,8 @@ export default function ConnectButton({
     <button
       onClick={onClick}
       disabled={loading}
-      className={`${fullWidth ? "w-full" : "px-5"} ${height} rounded-2xl font-semibold text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 ${className}`}
-      style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+      className={`${fullWidth ? "w-full" : "px-5"} ${height} rounded-full font-semibold text-white flex items-center justify-center gap-2 ss-cta disabled:opacity-70 ${className}`}
+      style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
     >
       {loading
         ? <Loader2 size={iconSize} className="animate-spin" />

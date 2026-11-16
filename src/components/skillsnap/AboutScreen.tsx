@@ -21,7 +21,7 @@ export default function AboutScreen({ onNavigate }: AboutScreenProps) {
         {/* Logo */}
         <div
           className="w-20 h-20 rounded-3xl flex items-center justify-center mb-5 shadow-lg"
-          style={{ background: "linear-gradient(135deg,#6c47ff,#a78bfa)" }}
+          style={{ background: "linear-gradient(135deg,#7c3aed,#a78bfa)" }}
         >
           <img src="/logo-icon.svg" alt="SkillSnap" className="w-12 h-12" />
         </div>
@@ -50,7 +50,7 @@ export default function AboutScreen({ onNavigate }: AboutScreenProps) {
           <a href="https://skillsnap.com.au" target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-between px-4 py-4 active:bg-[#0d0a1a] transition-colors">
             <span className="text-sm font-semibold text-[#ffffff]">Website</span>
-            <span className="text-xs text-[#6c47ff] font-semibold">skillsnap.com.au ↗</span>
+            <span className="text-xs text-[#7c3aed] font-semibold">skillsnap.com.au ↗</span>
           </a>
           <div className="h-px bg-[#1c1733]" />
           <button
@@ -58,7 +58,7 @@ export default function AboutScreen({ onNavigate }: AboutScreenProps) {
             className="w-full flex items-center justify-between px-4 py-4 active:bg-[#0d0a1a] transition-colors text-left"
           >
             <span className="text-sm font-semibold text-[#ffffff]">Contact</span>
-            <span className="text-xs text-[#6c47ff] font-semibold">Get in touch ↗</span>
+            <span className="text-xs text-[#7c3aed] font-semibold">Get in touch ↗</span>
           </button>
         </div>
 

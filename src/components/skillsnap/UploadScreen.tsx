@@ -149,7 +149,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#0d0a1a] gap-4 px-6">
         <div className="w-16 h-16 rounded-full bg-[#241d40] flex items-center justify-center">
-          <CheckCircle size={32} className="text-[#6c47ff]" />
+          <CheckCircle size={32} className="text-[#7c3aed]" />
         </div>
         <p className="text-base font-bold text-[#ffffff]">Published!</p>
         <p className="text-sm text-[#9d97b5]">Your work is now live on the feed</p>
@@ -185,7 +185,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
             >
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
                 style={{ background: "linear-gradient(135deg, #241d40, #1c1733)" }}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="18" height="18" rx="4"/>
                   <circle cx="8.5" cy="8.5" r="1.5"/>
                   <path d="M21 15l-5-5L5 21"/>
@@ -196,11 +196,11 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
                 <p className="text-xs text-[#6f6889]">Up to 5 files · MP4, MOV, JPG, PNG</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#241d40] text-xs font-semibold text-[#6c47ff]">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#241d40] text-xs font-semibold text-[#7c3aed]">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
                   Video
                 </span>
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#241d40] text-xs font-semibold text-[#6c47ff]">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#241d40] text-xs font-semibold text-[#7c3aed]">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                   Photo
                 </span>
@@ -259,7 +259,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
 
                 {/* Cover badge on main preview */}
                 {mainFileIndex === activePreviewIndex && (
-                  <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-[#6c47ff] text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                  <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-[#7c3aed] text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
                     ⭐ Cover
                   </div>
                 )}
@@ -272,7 +272,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
                     <button
                       onClick={() => setActivePreviewIndex(i)}
                       className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
-                        i === activePreviewIndex ? "border-[#6c47ff]" : "border-transparent"
+                        i === activePreviewIndex ? "border-[#7c3aed]" : "border-transparent"
                       }`}
                     >
                       {selectedFiles[i]?.type.startsWith("video/") ? (
@@ -288,7 +288,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
                       onClick={() => setMainFileIndex(i)}
                       className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center shadow-sm transition-all"
                       style={{
-                        background: mainFileIndex === i ? "#6c47ff" : "var(--ss-surface-2)",
+                        background: mainFileIndex === i ? "#7c3aed" : "var(--ss-surface-2)",
                         border: mainFileIndex === i ? "none" : "1.5px solid #26203f",
                       }}
                       title="Set as cover"
@@ -312,8 +312,8 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
                     }}
                     className="flex-shrink-0 w-16 h-16 rounded-xl border-2 border-dashed border-[#c4b5fd] flex flex-col items-center justify-center gap-0.5 active:bg-[#1c1733] transition-colors"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    <span className="text-[9px] font-bold text-[#6c47ff]">Add</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span className="text-[9px] font-bold text-[#7c3aed]">Add</span>
                   </button>
                 )}
               </div>
@@ -346,7 +346,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
             onChange={(e) => setCaption(e.target.value.slice(0, 150))}
             placeholder="Describe your work — what skill, what service, what result..."
             rows={3}
-            className="w-full bg-[#16122a] rounded-2xl border border-[#26203f] p-4 text-sm text-[#ffffff] placeholder-[#6f6889] resize-none outline-none focus:border-[#6c47ff] transition-colors leading-relaxed"
+            className="w-full bg-[#16122a] rounded-2xl border border-[#26203f] p-4 text-sm text-[#ffffff] placeholder-[#6f6889] resize-none outline-none focus:border-[#7c3aed] transition-colors leading-relaxed"
           />
           <p className="text-right text-xs text-[#6f6889] mt-1">{caption.length} / 150</p>
         </div>
@@ -355,8 +355,8 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
         <div>
           <label className="text-xs font-bold text-[#9d97b5] uppercase tracking-wider mb-2 block">Location</label>
           {locationEditing ? (
-            <div className="flex items-center bg-[#16122a] rounded-2xl border-2 border-[#6c47ff] px-4 h-12 gap-2.5">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex items-center bg-[#16122a] rounded-2xl border-2 border-[#7c3aed] px-4 h-12 gap-2.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
               </svg>
               <input
@@ -379,14 +379,14 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
               onClick={() => setLocationEditing(true)}
               className="w-full bg-[#16122a] rounded-2xl border border-[#26203f] px-4 h-12 flex items-center gap-2.5 active:bg-[#0d0a1a] transition-colors text-left"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
               </svg>
               <span className={`flex-1 text-sm font-medium ${location ? "text-[#ffffff]" : "text-[#6f6889]"}`}>
                 {location || "Enter location…"}
               </span>
               {location && location === profileLocation ? (
-                <span className="flex-shrink-0 text-[10px] text-[#6c47ff] font-semibold bg-[#241d40] px-2 py-0.5 rounded-full">Auto</span>
+                <span className="flex-shrink-0 text-[10px] text-[#7c3aed] font-semibold bg-[#241d40] px-2 py-0.5 rounded-full">Auto</span>
               ) : location ? (
                 <button
                   onClick={(e) => { e.stopPropagation(); setLocation(profileLocation); }}
@@ -416,7 +416,7 @@ export default function UploadScreen({ onNavigate }: UploadScreenProps) {
             onClick={handlePublish}
             disabled={loading || (!caption.trim() && selectedFiles.length === 0)}
             className="w-full h-14 rounded-2xl font-bold text-base text-white transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2.5"
-            style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: "0 4px 20px rgba(108,71,255,0.35)" }}
+            style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)", boxShadow: "0 4px 20px rgba(124, 58, 237,0.35)" }}
           >
             {loading ? (
               <><Loader2 size={20} className="animate-spin" /> Publishing…</>
@@ -487,7 +487,7 @@ function SocialImportTip() {
             {/* Step 1 */}
             <div className="flex gap-3 items-start">
               <div className="w-7 h-7 rounded-full bg-[#241d40] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[11px] font-extrabold text-[#6c47ff]">1</span>
+                <span className="text-[11px] font-extrabold text-[#7c3aed]">1</span>
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-[#ffffff]">Open TikTok or Instagram</p>
@@ -498,7 +498,7 @@ function SocialImportTip() {
             {/* Step 2 */}
             <div className="flex gap-3 items-start">
               <div className="w-7 h-7 rounded-full bg-[#241d40] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[11px] font-extrabold text-[#6c47ff]">2</span>
+                <span className="text-[11px] font-extrabold text-[#7c3aed]">2</span>
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-[#ffffff]">Save to your camera roll</p>
@@ -510,11 +510,11 @@ function SocialImportTip() {
 
             {/* Step 3 */}
             <div className="flex gap-3 items-start">
-              <div className="w-7 h-7 rounded-full bg-[#6c47ff] flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-7 h-7 rounded-full bg-[#7c3aed] flex items-center justify-center flex-shrink-0 mt-0.5">
                 <Download size={12} color="white" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-[#6c47ff]">Upload Video above</p>
+                <p className="text-sm font-semibold text-[#7c3aed]">Upload Video above</p>
                 <p className="text-xs text-[#9d97b5] mt-0.5 leading-relaxed">Tap <span className="font-semibold text-[#ffffff]">Upload Video</span> above and choose it from your gallery.</p>
               </div>
             </div>
@@ -523,7 +523,7 @@ function SocialImportTip() {
           {/* Tip pill */}
           <div className="mt-4 flex items-center gap-2 bg-[#1c1733] border border-[#e9e3ff] rounded-xl px-3 py-2.5">
             <span className="text-base leading-none">💡</span>
-            <p className="text-xs text-[#6c47ff] font-medium leading-snug">
+            <p className="text-xs text-[#7c3aed] font-medium leading-snug">
               Tip: TikTok watermarks are fine — clients love seeing your real content.
             </p>
           </div>

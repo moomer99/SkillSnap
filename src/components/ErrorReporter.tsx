@@ -128,7 +128,7 @@ export default function ErrorReporter({ error, reset }: ReporterProps) {
             </details>
             <button
               onClick={reset}
-              className="mt-4 px-4 py-2 bg-[#6c47ff] text-white rounded-xl text-sm font-semibold"
+              className="mt-4 px-4 py-2 bg-[#7c3aed] text-white rounded-xl text-sm font-semibold"
             >
               Try again
             </button>

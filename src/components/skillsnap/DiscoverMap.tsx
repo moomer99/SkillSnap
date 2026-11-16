@@ -42,8 +42,8 @@ function avatarPin(pin: MappableDiscoveryPin): L.DivIcon {
     height: "42px",
     padding: "2px",
     borderRadius: "9999px",
-    background: "#6c47ff",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.45)",
+    background: "#7c3aed",
+    boxShadow: "0 0 0 3px rgba(124, 58, 237, 0.28), 0 2px 10px rgba(0,0,0,0.45)",
     boxSizing: "border-box",
   } satisfies Partial<CSSStyleDeclaration>);
 
@@ -75,7 +75,7 @@ function avatarPin(pin: MappableDiscoveryPin): L.DivIcon {
     } satisfies Partial<CSSStyleDeclaration>);
     // Assigned separately so an invalid value from the DB is dropped by the
     // CSSOM instead of being concatenated into a style string
-    initial.style.background = pin.avatarGradient ?? pin.color ?? "#6c47ff";
+    initial.style.background = pin.avatarGradient ?? pin.color ?? "#7c3aed";
     ring.appendChild(initial);
   }
 
@@ -96,7 +96,7 @@ export default function DiscoverMap({ pins, connectingUserId, onConnect, onProfi
     <>
       <style>{`.ss-dark-map .leaflet-tile-pane { filter: invert(100%) hue-rotate(180deg) brightness(90%) contrast(85%); }`}</style>
       <div
-        className="relative w-full overflow-hidden rounded-3xl ss-dark-map"
+        className="relative w-full overflow-hidden rounded-2xl ss-dark-map"
         style={{ height: "clamp(260px, 42vh, 460px)", border: "1px solid var(--ss-line)" }}
       >
       <MapContainer

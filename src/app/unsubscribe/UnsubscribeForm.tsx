@@ -140,7 +140,7 @@ export default function UnsubscribeForm({ initialEmail }: { initialEmail?: strin
                 value={r}
                 checked={reason === r}
                 onChange={() => setReason(r)}
-                className="accent-[#6c47ff] w-4 h-4 flex-shrink-0"
+                className="accent-[#7c3aed] w-4 h-4 flex-shrink-0"
               />
               {r}
             </label>

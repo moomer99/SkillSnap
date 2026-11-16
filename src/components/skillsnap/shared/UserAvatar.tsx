@@ -64,7 +64,7 @@ export default function UserAvatar({
         user.avatarInitial
       )}
       {showVerified && user.isVerified && (
-        <span className={`absolute ${BADGE_SIZE_MAP[size]} rounded-full bg-[#6c47ff] flex items-center justify-center ring-2 ring-white z-10`}>
+        <span className={`absolute ${BADGE_SIZE_MAP[size]} rounded-full bg-[#7c3aed] flex items-center justify-center ring-2 ring-white z-10`}>
           <svg width="8" height="6" viewBox="0 0 8 6" fill="white">
             <path d="M1 3l2 2 4-4" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
           </svg>

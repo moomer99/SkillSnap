@@ -84,10 +84,10 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
           <div className="px-4 py-4 flex items-center gap-3">
             <div style={{
               width: 44, height: 44, borderRadius: 13,
-              background: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+              background: "linear-gradient(135deg, #7c3aed, #a78bfa)",
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0,
-              boxShadow: "0 0 20px rgba(108,71,255,0.5)"
+              boxShadow: "0 0 20px rgba(124, 58, 237,0.5)"
             }}>
               <Zap size={22} fill="white" color="white" />
             </div>
@@ -114,7 +114,7 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
           </div>
           <div style={{
             height: 3,
-            background: "linear-gradient(90deg, #6c47ff, #a78bfa, #f472b6, #6c47ff)",
+            background: "linear-gradient(90deg, #7c3aed, #a78bfa, #f472b6, #7c3aed)",
             backgroundSize: "200% 100%",
           }} />
         </button>
@@ -129,7 +129,7 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
             <p className="font-bold text-[#ffffff] text-sm truncate">{user.displayName}</p>
             <p className="text-xs text-[#9d97b5] truncate">{user.username}</p>
           </div>
-          <div className="flex items-center gap-1 text-xs font-semibold text-[#6c47ff]">
+          <div className="flex items-center gap-1 text-xs font-semibold text-[#7c3aed]">
             Edit <ChevronRight size={14} />
           </div>
         </div>
@@ -184,7 +184,7 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
         <SectionHeader title="Support" />
         <SettingsGroup>
           <SettingsRow
-            icon={<HelpCircle size={16} className="text-[#6c47ff]" />}
+            icon={<HelpCircle size={16} className="text-[#7c3aed]" />}
             iconBg="#241d40"
             label="Help & FAQ"
             onPress={() => onNavigate("help")}
@@ -216,11 +216,11 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
         <SectionHeader title="Account Actions" />
         <SettingsGroup>
           <SettingsRow
-            icon={<LogOut size={16} className="text-[#6c47ff]" />}
+            icon={<LogOut size={16} className="text-[#7c3aed]" />}
             iconBg="#241d40"
             label="Log Out"
             onPress={() => setShowLogoutConfirm(true)}
-            labelColor="#6c47ff"
+            labelColor="#7c3aed"
           />
           <Divider />
           <SettingsRow
@@ -240,7 +240,7 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
         <BottomSheet onClose={() => setShowLogoutConfirm(false)}>
           <div className="flex flex-col items-center text-center px-2 pb-2">
             <div className="w-14 h-14 rounded-full bg-[#241d40] flex items-center justify-center mb-4">
-              <LogOut size={24} className="text-[#6c47ff]" />
+              <LogOut size={24} className="text-[#7c3aed]" />
             </div>
             <h3 className="font-bold text-[#ffffff] text-lg mb-1">Log out?</h3>
             <p className="text-sm text-[#9d97b5] mb-6 leading-relaxed">
@@ -250,7 +250,7 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
               onClick={handleLogout}
               disabled={loggingOut}
               className="w-full h-13 rounded-2xl font-bold text-base text-white mb-3 flex items-center justify-center gap-2 disabled:opacity-60"
-              style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)", height: 52 }}
+              style={{ background: "linear-gradient(135deg,#7c3aed,#8b6af5)", height: 52 }}
             >
               {loggingOut ? <><Loader2 size={18} className="animate-spin" /> Logging out…</> : "Log Out"}
             </button>
@@ -366,7 +366,7 @@ function ChangePasswordSheet({ onClose, userEmail }: { onClose: () => void; user
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-12 px-4 rounded-2xl border border-[#26203f] bg-[#0d0a1a] text-sm text-[#ffffff] outline-none focus:border-[#6c47ff] transition-colors"
+              className="w-full h-12 px-4 rounded-2xl border border-[#26203f] bg-[#0d0a1a] text-sm text-[#ffffff] outline-none focus:border-[#7c3aed] transition-colors"
             />
           </div>
           {error && <p className="text-xs text-red-500 mb-3 text-center">{error}</p>}
@@ -374,7 +374,7 @@ function ChangePasswordSheet({ onClose, userEmail }: { onClose: () => void; user
             onClick={handleSend}
             disabled={sending}
             className="w-full rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 disabled:opacity-60"
-            style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)", height: 52 }}
+            style={{ background: "linear-gradient(135deg,#7c3aed,#8b6af5)", height: 52 }}
           >
             {sending ? <><Loader2 size={18} className="animate-spin" /> Sending…</> : "Send Reset Link"}
           </button>
@@ -433,7 +433,7 @@ function SettingsRow({ icon, iconBg, label, value, valueColor, onPress, badge, h
         {hint && <p className="text-xs text-[#6f6889] mt-0.5">{hint}</p>}
       </div>
       {badge && (
-        <span className="text-[10px] font-bold text-white bg-[#6c47ff] px-2 py-0.5 rounded-full flex-shrink-0">
+        <span className="text-[10px] font-bold text-white bg-[#7c3aed] px-2 py-0.5 rounded-full flex-shrink-0">
           {badge}
         </span>
       )}

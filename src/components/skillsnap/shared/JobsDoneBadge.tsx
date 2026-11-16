@@ -69,14 +69,14 @@ export default function JobsDoneBadge({
               <div className="flex items-center gap-2">
                 <div className="w-9 h-9 rounded-xl bg-[#241d40] flex items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                    stroke="#6c47ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="7" width="20" height="14" rx="2" />
                     <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
                   </svg>
                 </div>
                 <div>
                   <h3 className="font-bold text-sm text-[#ffffff]">Jobs Done</h3>
-                  <p className="text-xs text-[#6c47ff] font-semibold">{count} verified</p>
+                  <p className="text-xs text-[#7c3aed] font-semibold">{count} verified</p>
                 </div>
               </div>
               <button onClick={() => setOpen(false)} className="text-[#6f6889] p-1">
@@ -91,7 +91,7 @@ export default function JobsDoneBadge({
             </p>
 
             <div className="mt-4 flex items-center gap-2 bg-[#0d0a1a] rounded-2xl px-4 py-3">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c47ff"
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed"
                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
@@ -101,7 +101,7 @@ export default function JobsDoneBadge({
             <button
               onClick={() => setOpen(false)}
               className="w-full h-11 rounded-2xl font-semibold text-sm text-white mt-4 transition-all active:scale-[0.98]"
-              style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)" }}
+              style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)" }}
             >
               Got it
             </button>

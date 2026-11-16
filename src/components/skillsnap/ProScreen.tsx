@@ -56,7 +56,7 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
           <ArrowLeft size={20} />
         </button>
         <span className="text-white/80 text-sm font-semibold flex-1">SkillSnap Pro Plus</span>
-        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(108,71,255,0.25)", color: "#a78bfa", border: "1px solid rgba(167,139,250,0.3)" }}>
+        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(124, 58, 237,0.25)", color: "#a78bfa", border: "1px solid rgba(167,139,250,0.3)" }}>
           Coming Soon
         </span>
       </header>
@@ -66,13 +66,13 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
         {/* Hero */}
         <div className="relative px-5 pt-4 pb-10 overflow-hidden">
           {/* Glow blobs */}
-          <div style={{ position: "absolute", top: -60, left: -60, width: 260, height: 260, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,71,255,0.35) 0%, transparent 70%)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", top: -60, left: -60, width: 260, height: 260, borderRadius: "50%", background: "radial-gradient(circle, rgba(124, 58, 237,0.35) 0%, transparent 70%)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", top: 20, right: -80, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, rgba(167,139,250,0.2) 0%, transparent 70%)", pointerEvents: "none" }} />
 
           {/* Badge */}
           <div className="flex justify-center mb-6">
             <div style={{ position: "relative", display: "inline-flex" }}>
-              <div style={{ width: 80, height: 80, borderRadius: 24, background: "linear-gradient(135deg, #6c47ff 0%, #a78bfa 100%)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 40px rgba(108,71,255,0.5)" }}>
+              <div style={{ width: 80, height: 80, borderRadius: 24, background: "linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 40px rgba(124, 58, 237,0.5)" }}>
                 <Zap size={36} fill="white" color="white" />
               </div>
               <div style={{ position: "absolute", top: -6, right: -6, width: 24, height: 24, borderRadius: "50%", background: "linear-gradient(135deg, #fbbf24, #f59e0b)", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #0d0a1a" }}>
@@ -82,7 +82,7 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
           </div>
 
           <h1 className="text-white text-center font-extrabold text-3xl mb-3 tracking-tight">
-            SkillSnap <span style={{ background: "linear-gradient(90deg, #a78bfa, #6c47ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Pro Plus</span>
+            SkillSnap <span style={{ background: "linear-gradient(90deg, #a78bfa, #7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Pro Plus</span>
           </h1>
           <p className="text-white/50 text-center text-sm leading-relaxed max-w-xs mx-auto">
             Get discovered and hired faster. Pro tools built for skilled workers who are serious about growing.
@@ -90,7 +90,7 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
 
           {/* Pulse dot */}
           <div className="flex items-center justify-center gap-2 mt-5">
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#6c47ff", animation: "pulse 1.5s infinite" }} />
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#7c3aed", animation: "pulse 1.5s infinite" }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: "#a78bfa", letterSpacing: 1 }}>LAUNCHING SOON</span>
           </div>
         </div>
@@ -163,8 +163,8 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
                 <p style={{ fontSize: 22, fontWeight: 800, color: "#fff" }}>$9<span style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.4)" }}>/mo</span></p>
                 <p style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>Cancel anytime</p>
               </div>
-              <div style={{ flex: 1, background: "linear-gradient(135deg, rgba(108,71,255,0.2), rgba(167,139,250,0.1))", border: "1px solid rgba(108,71,255,0.4)", borderRadius: 16, padding: "14px 12px", textAlign: "center", position: "relative" }}>
-                <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(90deg, #6c47ff, #a78bfa)", color: "#fff", fontSize: 9, fontWeight: 700, padding: "2px 10px", borderRadius: 99 }}>
+              <div style={{ flex: 1, background: "linear-gradient(135deg, rgba(124, 58, 237,0.2), rgba(167,139,250,0.1))", border: "1px solid rgba(124, 58, 237,0.4)", borderRadius: 16, padding: "14px 12px", textAlign: "center", position: "relative" }}>
+                <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(90deg, #7c3aed, #a78bfa)", color: "#fff", fontSize: 9, fontWeight: 700, padding: "2px 10px", borderRadius: 99 }}>
                   BEST VALUE
                 </div>
                 <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginBottom: 6 }}>Yearly</p>
@@ -192,7 +192,7 @@ export default function ProScreen({ onNavigate }: ProScreenProps) {
             <>
               <button
                 onClick={handleNotify}
-                style={{ width: "100%", height: 54, borderRadius: 16, background: "linear-gradient(135deg, #6c47ff, #8b6af5)", color: "#fff", fontWeight: 800, fontSize: 16, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 4px 24px rgba(108,71,255,0.4)" }}
+                style={{ width: "100%", height: 54, borderRadius: 16, background: "linear-gradient(135deg, #7c3aed, #8b6af5)", color: "#fff", fontWeight: 800, fontSize: 16, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 4px 24px rgba(124, 58, 237,0.4)" }}
               >
                 <Zap size={18} fill="white" color="white" />
                 Notify Me at Launch

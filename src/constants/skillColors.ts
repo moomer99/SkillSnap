@@ -58,7 +58,7 @@ const CATEGORY_COLORS: Record<SkillCategory, string> = {
 
 /** The fallback set, for the custom skills EditProfile allows. */
 const FALLBACK_COLORS = [
-  '#6c47ff',
+  '#7c3aed',
   '#0f6f68',
   '#be185d',
   '#c2410c',
@@ -80,7 +80,7 @@ function hashToIndex(value: string, buckets: number): number {
 
 export function skillColor(skill: string | null | undefined): string {
   const value = (skill ?? '').trim()
-  if (!value) return '#6c47ff'
+  if (!value) return '#7c3aed'
 
   const known = SKILL_COLORS[value]
   if (known) return known

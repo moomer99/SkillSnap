@@ -9,7 +9,7 @@ const [marcus, priya, jake, sam, ana] = MOCK_USERS;
 
 // Vivid gradient palette — used as thumbnail placeholders
 const THUMB_GRADIENTS = [
-  "linear-gradient(160deg, #6c47ff 0%, #a855f7 60%, #ec4899 100%)",
+  "linear-gradient(160deg, #7c3aed 0%, #a855f7 60%, #ec4899 100%)",
   "linear-gradient(160deg, #0ea5e9 0%, #6366f1 60%, #8b5cf6 100%)",
   "linear-gradient(160deg, #f59e0b 0%, #ef4444 60%, #ec4899 100%)",
   "linear-gradient(160deg, #10b981 0%, #0ea5e9 60%, #6366f1 100%)",

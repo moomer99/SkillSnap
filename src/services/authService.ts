@@ -50,7 +50,7 @@ function mapProfile(profile: Record<string, unknown>): User {
       username: (profile.username as string) ?? "",
       displayName: (profile.display_name as string) ?? "User",
       avatarUrl: (profile.avatar_url as string | null) ?? undefined,
-      avatarGradient: (profile.avatar_gradient as string) ?? "linear-gradient(135deg, #6c47ff, #a78bfa)",
+      avatarGradient: (profile.avatar_gradient as string) ?? "linear-gradient(135deg, #7c3aed, #a78bfa)",
       avatarInitial: (profile.avatar_initial as string) ?? "U",
       location: (profile.location as string) ?? "",
       lat: (profile.lat as number | null) ?? undefined,
@@ -78,7 +78,7 @@ function mapProfile(profile: Record<string, unknown>): User {
       username: (profile.username as string) ?? "",
       displayName: (profile.display_name as string) ?? "User",
       avatarUrl: undefined,
-      avatarGradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+      avatarGradient: "linear-gradient(135deg, #7c3aed, #a78bfa)",
       avatarInitial: "U",
       location: "",
       lat: undefined,
@@ -162,7 +162,7 @@ async function ensureProfile(authUser: SupabaseUser): Promise<User | null> {
       display_name: displayName,
       avatar_url: avatarUrl,
       avatar_initial: avatarInitial,
-      avatar_gradient: "linear-gradient(135deg, #6c47ff, #a78bfa)",
+      avatar_gradient: "linear-gradient(135deg, #7c3aed, #a78bfa)",
     })
     // INSERT ... RETURNING comes from the base table, so it uses the own-row
     // list; a brand-new profile has no coordinates to fetch yet.

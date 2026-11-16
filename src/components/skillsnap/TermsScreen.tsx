@@ -80,12 +80,12 @@ export default function TermsScreen({ onNavigate }: TermsScreenProps) {
           <p>SkillSnap Australia · Sydney, NSW, Australia</p>
         </Section>
 
-        <div className="mt-4 mb-8 rounded-2xl p-4 text-center" style={{ background: "linear-gradient(135deg,#241d40,#1c1733)", border: "1.5px solid rgba(108,71,255,0.15)" }}>
+        <div className="mt-4 mb-8 rounded-2xl p-4 text-center" style={{ background: "linear-gradient(135deg,#241d40,#1c1733)", border: "1.5px solid rgba(124, 58, 237,0.15)" }}>
           <p className="text-xs text-[#9d97b5]">Questions about our terms or privacy policy?</p>
           <button
             onClick={() => onNavigate("contact")}
             className="mt-2 px-5 py-2 rounded-xl font-bold text-sm text-white"
-            style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)" }}
+            style={{ background: "linear-gradient(135deg,#7c3aed,#8b6af5)" }}
           >
             Contact Us
           </button>

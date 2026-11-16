@@ -60,7 +60,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             style={{
               background:
                 t.type === "coming-soon"
-                  ? "linear-gradient(135deg, #6c47ff, #8b6af5)"
+                  ? "linear-gradient(135deg, #7c3aed, #8b6af5)"
                   : t.type === "success"
                   ? "#16a34a"
                   : "#ffffff",

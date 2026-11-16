@@ -64,7 +64,7 @@ export default function RoleSetupScreen() {
           gap: 16,
           padding: "16px 20px",
           borderRadius: 16,
-          border: `2px solid ${isSelected ? "#6c47ff" : "#26203f"}`,
+          border: `2px solid ${isSelected ? "#7c3aed" : "#26203f"}`,
           background: isSelected ? "var(--ss-surface-3)" : "var(--ss-surface-2)",
           cursor: "pointer",
           transition: "all 0.12s",
@@ -73,7 +73,7 @@ export default function RoleSetupScreen() {
       >
         <span style={{ fontSize: 26, flexShrink: 0 }}>{PSEUDO_ICONS[cat] ?? skillEmoji(cat) ?? "🛠️"}</span>
         <div style={{ flex: 1 }}>
-          <p style={{ fontWeight: 700, fontSize: 15, color: isSelected ? "#6c47ff" : "#ffffff" }}>
+          <p style={{ fontWeight: 700, fontSize: 15, color: isSelected ? "#7c3aed" : "#ffffff" }}>
             {cat === CLIENT_OPTION ? "I'm a Client" : cat === OTHER_OPTION ? "Something else…" : cat}
           </p>
           <p style={{ fontSize: 12, color: "#9d97b5", marginTop: 2 }}>
@@ -84,8 +84,8 @@ export default function RoleSetupScreen() {
         </div>
         <div style={{
           width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
-          border: `2px solid ${isSelected ? "#6c47ff" : "#26203f"}`,
-          background: isSelected ? "#6c47ff" : "transparent",
+          border: `2px solid ${isSelected ? "#7c3aed" : "#26203f"}`,
+          background: isSelected ? "#7c3aed" : "transparent",
           display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           {isSelected && <span style={{ color: "white", fontSize: 12, fontWeight: 700 }}>✓</span>}
@@ -129,7 +129,7 @@ export default function RoleSetupScreen() {
               value={customSkill}
               onChange={(e) => setCustomSkill(e.target.value.slice(0, 40))}
               placeholder="e.g. Barber"
-              className="w-full bg-[#16122a] rounded-2xl border-2 border-[#6c47ff] px-4 h-12 text-sm text-[#ffffff] placeholder-[#6f6889] outline-none"
+              className="w-full bg-[#16122a] rounded-2xl border-2 border-[#7c3aed] px-4 h-12 text-sm text-[#ffffff] placeholder-[#6f6889] outline-none"
             />
             {/* Hint, not a rule. The old placeholder listed three trades and
                 read as an invitation to enter several. Continue is unchanged:
@@ -147,7 +147,7 @@ export default function RoleSetupScreen() {
           onClick={handleContinue}
           disabled={!canContinue || saving}
           className="w-full h-14 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-40"
-          style={{ background: "linear-gradient(135deg, #6c47ff, #8b6af5)", boxShadow: canContinue ? "0 4px 16px rgba(108,71,255,0.30)" : "none" }}
+          style={{ background: "linear-gradient(135deg, #7c3aed, #8b6af5)", boxShadow: canContinue ? "0 4px 16px rgba(124, 58, 237,0.30)" : "none" }}
         >
           {saving ? <><Loader2 size={20} className="animate-spin" /> Saving…</> : "Continue"}
         </button>

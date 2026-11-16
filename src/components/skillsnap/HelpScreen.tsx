@@ -45,7 +45,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
         <span className="font-semibold text-sm text-[#ffffff] pr-3 leading-snug">{q}</span>
         <ChevronDown
           size={16}
-          className="text-[#6c47ff] flex-shrink-0 transition-transform duration-200"
+          className="text-[#7c3aed] flex-shrink-0 transition-transform duration-200"
           style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
         />
       </button>
@@ -74,13 +74,13 @@ export default function HelpScreen({ onNavigate }: HelpScreenProps) {
           <FAQItem key={faq.q} q={faq.q} a={faq.a} />
         ))}
 
-        <div className="mt-4 rounded-2xl p-4 text-center" style={{ background: "linear-gradient(135deg,#241d40,#1c1733)", border: "1.5px solid rgba(108,71,255,0.15)" }}>
+        <div className="mt-4 rounded-2xl p-4 text-center" style={{ background: "linear-gradient(135deg,#241d40,#1c1733)", border: "1.5px solid rgba(124, 58, 237,0.15)" }}>
           <p className="text-sm font-semibold text-[#ffffff] mb-1">Still need help?</p>
           <p className="text-xs text-[#9d97b5] mb-3">Our team usually responds within 24 hours.</p>
           <button
             onClick={() => onNavigate("contact")}
             className="px-5 py-2.5 rounded-xl font-bold text-sm text-white"
-            style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)" }}
+            style={{ background: "linear-gradient(135deg,#7c3aed,#8b6af5)" }}
           >
             Contact Us
           </button>

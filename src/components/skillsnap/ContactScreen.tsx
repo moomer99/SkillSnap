@@ -61,7 +61,7 @@ export default function ContactScreen({ onNavigate }: ContactScreenProps) {
             <button
               onClick={() => onNavigate("settings")}
               className="px-6 py-3 rounded-2xl font-bold text-sm text-white"
-              style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)" }}
+              style={{ background: "linear-gradient(135deg,#7c3aed,#8b6af5)" }}
             >
               Back to Settings
             </button>
@@ -79,7 +79,7 @@ export default function ContactScreen({ onNavigate }: ContactScreenProps) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
-                  className="w-full h-12 px-4 rounded-2xl border border-[#26203f] bg-[#16122a] text-sm text-[#ffffff] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
+                  className="w-full h-12 px-4 rounded-2xl border border-[#26203f] bg-[#16122a] text-sm text-[#ffffff] outline-none focus:border-[#7c3aed] transition-colors placeholder-[#6f6889]"
                 />
               </div>
               <div>
@@ -89,7 +89,7 @@ export default function ContactScreen({ onNavigate }: ContactScreenProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="w-full h-12 px-4 rounded-2xl border border-[#26203f] bg-[#16122a] text-sm text-[#ffffff] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889]"
+                  className="w-full h-12 px-4 rounded-2xl border border-[#26203f] bg-[#16122a] text-sm text-[#ffffff] outline-none focus:border-[#7c3aed] transition-colors placeholder-[#6f6889]"
                 />
               </div>
               <div>
@@ -99,7 +99,7 @@ export default function ContactScreen({ onNavigate }: ContactScreenProps) {
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="How can we help?"
                   rows={5}
-                  className="w-full px-4 py-3 rounded-2xl border border-[#26203f] bg-[#16122a] text-sm text-[#ffffff] outline-none focus:border-[#6c47ff] transition-colors placeholder-[#6f6889] resize-none"
+                  className="w-full px-4 py-3 rounded-2xl border border-[#26203f] bg-[#16122a] text-sm text-[#ffffff] outline-none focus:border-[#7c3aed] transition-colors placeholder-[#6f6889] resize-none"
                 />
               </div>
               {error && <p className="text-xs text-red-500 text-center">{error}</p>}
@@ -107,7 +107,7 @@ export default function ContactScreen({ onNavigate }: ContactScreenProps) {
                 type="submit"
                 disabled={sending}
                 className="w-full h-13 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 disabled:opacity-60 mt-2"
-                style={{ background: "linear-gradient(135deg,#6c47ff,#8b6af5)", height: 52 }}
+                style={{ background: "linear-gradient(135deg,#7c3aed,#8b6af5)", height: 52 }}
               >
                 {sending ? "Sending…" : "Send Message"}
               </button>
