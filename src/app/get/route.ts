@@ -41,7 +41,7 @@ export function GET(request: Request) {
     // Desktop, bots, no UA, Android before Play is live. Also iPadOS 13+,
     // which reports itself as Macintosh — undetectable reliably, so it gets
     // the landing page rather than a guess.
-    target = landing;
+    target = new URL(APP_STORE_URL);
   }
 
   return new Response(null, {

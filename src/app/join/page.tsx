@@ -228,7 +228,7 @@ export default async function JoinPage() {
             </h2>
             <p className="text-[14px] sm:text-[15px] leading-relaxed" style={{ color: "var(--ss-text-soft)" }}>
               I&apos;m Mo, I built SkillSnap. For early members I&apos;ll help set up your profile and
-              first post — send me the videos you already have and I&apos;ll walk you through it.
+              first post — email me and I&apos;ll walk you through it.
             </p>
           </div>
           <a
