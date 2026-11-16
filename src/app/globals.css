@@ -219,6 +219,37 @@ html.light {
 }
 .leaflet-bar a:hover { background: var(--ss-surface-2); }
 
+/* Pins lift on hover so the map reads as interactive, not a static image. */
+.ss-map-pin > div { transition: transform 150ms ease, box-shadow 150ms ease; }
+.ss-map-pin:hover > div {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.32), 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Interaction polish ──
+   .ss-cta is the primary call-to-action treatment: a small lift and a deeper
+   purple glow on hover, a press-in on click, and a visible keyboard ring. It
+   owns transform, so do not pair it with Tailwind translate/scale hover
+   utilities on the same element. */
+.ss-cta {
+  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+}
+.ss-cta:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 32px rgba(124, 58, 237, 0.55) !important;
+  filter: brightness(1.06);
+}
+.ss-cta:active { transform: scale(0.98); }
+.ss-cta:disabled { transform: none; filter: none; }
+.ss-cta:focus-visible {
+  outline: 2px solid var(--ss-purple-light);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ss-cta, .ss-map-pin > div { transition: none; }
+  .ss-cta:hover, .ss-cta:active, .ss-map-pin:hover > div { transform: none; }
+}
+
 /* No .dark override — :root is already the dark palette and the web app
    ships dark-only. Keeping the block would make `dark:` variants diverge
    from the base theme for no benefit. */
@@ -227,6 +258,15 @@ html.light {
   * {
     @apply border-border outline-ring/50;
     box-sizing: border-box;
+  }
+  /* Default 150ms ease for colour-type changes on anything interactive, so
+     hover and focus states never snap. Deliberately excludes transform and
+     opacity: framer-motion drives those per frame and a CSS transition on top
+     makes its animations lag. In the base layer so Tailwind transition
+     utilities still win where a component sets its own. */
+  button, a, [role="button"], input, textarea, select {
+    transition: color 150ms ease, background-color 150ms ease,
+      border-color 150ms ease, box-shadow 150ms ease;
   }
   html, body {
     margin: 0;

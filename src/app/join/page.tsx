@@ -116,7 +116,7 @@ export default async function JoinPage() {
     >
       {/* ── Top bar ── */}
       <nav style={{ borderBottom: "1px solid var(--ss-line)" }}>
-        <div className="mx-auto w-full max-w-[1040px] px-4 sm:px-8 h-16 flex items-center justify-between">
+        <div className="mx-auto w-full max-w-[1040px] px-5 sm:px-8 h-16 flex items-center justify-between">
           <Link href="/" aria-label="SkillSnap home">
             <SkillSnapLogo variant="full" size="sm" dark />
           </Link>
@@ -130,9 +130,9 @@ export default async function JoinPage() {
         </div>
       </nav>
 
-      <div className="mx-auto w-full max-w-[1040px] px-4 sm:px-8">
+      <div className="mx-auto w-full max-w-[1040px] px-5 sm:px-8">
         {/* ── Hero + preview ── */}
-        <section className="py-10 sm:py-16 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-14 items-center">
+        <section className="py-12 sm:py-20 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-14 items-center">
           <div>
             <p
               className="text-[11px] font-bold tracking-[0.18em] uppercase"
@@ -175,8 +175,8 @@ export default async function JoinPage() {
         </section>
 
         {/* ── How it works ── */}
-        <section className="py-12 sm:py-16" style={{ borderTop: "1px solid var(--ss-line)" }} aria-labelledby="how">
-          <h2 id="how" className="text-[26px] sm:text-[32px] font-extrabold leading-tight mb-8">
+        <section className="py-14 sm:py-20" style={{ borderTop: "1px solid var(--ss-line)" }} aria-labelledby="how">
+          <h2 id="how" className="text-[26px] sm:text-[32px] font-extrabold leading-tight mb-8 sm:mb-10">
             Three steps to your first post
           </h2>
           <ol className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -187,7 +187,7 @@ export default async function JoinPage() {
             ].map(({ Icon, title, desc }, i) => (
               <li
                 key={title}
-                className="rounded-3xl p-6"
+                className="rounded-2xl p-6 sm:p-7"
                 style={{ background: "var(--ss-card-tint)", border: "1px solid var(--ss-line)" }}
               >
                 <div className="flex items-center gap-3 mb-3">
@@ -211,7 +211,7 @@ export default async function JoinPage() {
 
         {/* ── Setup help ── */}
         <section
-          className="mb-12 sm:mb-16 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row gap-5 sm:items-center"
+          className="mb-14 sm:mb-20 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row gap-5 sm:items-center"
           style={{ background: "var(--ss-card-pro)", border: "1px solid var(--ss-purple-border)" }}
           aria-labelledby="help"
         >
@@ -233,7 +233,7 @@ export default async function JoinPage() {
           </div>
           <a
             href={SETUP_HELP_MAILTO}
-            className="inline-flex items-center justify-center min-h-[44px] px-5 rounded-2xl text-[14px] font-semibold underline-offset-4 hover:underline"
+            className="inline-flex items-center justify-center min-h-[44px] px-6 rounded-full text-[14px] font-semibold underline-offset-4 hover:underline"
             style={{ color: "var(--ss-purple-light)", border: "1px solid var(--ss-purple-border)" }}
           >
             Email me for setup help
@@ -241,8 +241,8 @@ export default async function JoinPage() {
         </section>
 
         {/* ── Straight answers ── */}
-        <section className="pb-12 sm:pb-16" aria-labelledby="faq">
-          <h2 id="faq" className="text-[22px] sm:text-[26px] font-extrabold mb-5">Straight answers</h2>
+        <section className="pb-14 sm:pb-20" aria-labelledby="faq">
+          <h2 id="faq" className="text-[22px] sm:text-[26px] font-extrabold mb-6 sm:mb-8">Straight answers</h2>
           <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6 max-w-[880px]">
             <Faq q="Does it cost anything?">
               No. SkillSnap is free for pros and for clients, and there are no booking fees.
@@ -263,7 +263,7 @@ export default async function JoinPage() {
         </section>
 
         {/* ── Closing CTA (same single destination) ── */}
-        <section className="pb-16 text-center">
+        <section className="py-14 sm:py-20 text-center" style={{ borderTop: "1px solid var(--ss-line)" }}>
           <h2 className="text-[24px] sm:text-[30px] font-extrabold mb-2">Ready to show your work?</h2>
           <div className="flex justify-center">
             <PrimaryCta compact />
@@ -272,7 +272,7 @@ export default async function JoinPage() {
       </div>
 
       <footer style={{ borderTop: "1px solid var(--ss-line)" }}>
-        <div className="mx-auto w-full max-w-[1040px] px-4 sm:px-8 py-6 flex flex-wrap gap-x-5 gap-y-2 text-[13px]" style={{ color: "var(--ss-text-dim)" }}>
+        <div className="mx-auto w-full max-w-[1040px] px-5 sm:px-8 py-8 flex flex-wrap gap-x-5 gap-y-2 text-[13px]" style={{ color: "var(--ss-text-dim)" }}>
           <span>SkillSnap · Sydney, NSW</span>
           <Link href="/help" className="hover:underline">Help</Link>
           <Link href="/privacy" className="hover:underline">Privacy</Link>
@@ -291,8 +291,8 @@ function PrimaryCta({ compact = false }: { compact?: boolean }) {
     <div className={compact ? "mt-5" : "mt-7"}>
       <a
         href={SIGNUP_HREF}
-        className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 min-h-[56px] px-8 rounded-2xl text-[16px] font-bold text-white transition-transform active:scale-[0.97] hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-        style={{ background: "var(--ss-purple)", boxShadow: "0 6px 24px rgba(124, 58, 237,0.42)", outlineColor: "var(--ss-purple-light)" }}
+        className="ss-cta group inline-flex w-full sm:w-auto items-center justify-center gap-2 min-h-[56px] px-8 rounded-full text-[16px] font-bold text-white"
+        style={{ background: "var(--ss-purple)", boxShadow: "0 6px 24px rgba(124, 58, 237,0.42)" }}
       >
         Create your profile
         <ArrowRight size={18} aria-hidden className="transition-transform group-hover:translate-x-1" />
@@ -329,7 +329,7 @@ function ProfilePreview({ featured }: { featured: Featured | null }) {
 
   const card = (
     <div
-      className="w-full max-w-[340px] mx-auto rounded-3xl overflow-hidden"
+      className="w-full max-w-[340px] mx-auto rounded-2xl overflow-hidden"
       style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line-strong)", boxShadow: "0 24px 60px rgba(0,0,0,0.45)" }}
     >
       <div className="relative aspect-[4/5]" style={{ background: featured?.post.thumbnail_gradient ?? gradient }}>
@@ -390,7 +390,7 @@ function ProfilePreview({ featured }: { featured: Featured | null }) {
       {real && featured ? (
         <Link
           href={`/@${featured.profile.username}`}
-          className="block rounded-3xl transition-transform hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
+          className="block rounded-2xl transition-transform duration-150 hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
           aria-label={`View ${name}'s profile on SkillSnap`}
         >
           {card}

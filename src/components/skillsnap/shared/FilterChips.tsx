@@ -21,7 +21,7 @@ export default function FilterChips<T extends string>({
         <button
           key={chip}
           onClick={() => onSelect(chip)}
-          className={`flex-shrink-0 px-3.5 h-8 rounded-full text-xs font-semibold transition-all ${
+          className={`flex-shrink-0 px-3.5 h-8 rounded-full text-xs font-semibold transition-all duration-150 ${
             active === chip
               ? "bg-[#7c3aed] text-white"
               : "bg-[#1c1733] text-[#9d97b5]"

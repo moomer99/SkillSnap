@@ -235,7 +235,7 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
             <ThemeToggle />
             <button
               onClick={onDownload}
-              className="h-10 px-5 rounded-full text-sm font-bold text-white transition-transform active:scale-95 hover:-translate-y-0.5"
+              className="ss-cta h-10 px-5 rounded-full text-sm font-bold text-white"
               style={{ background: "var(--ss-purple)", boxShadow: "0 4px 20px rgba(124, 58, 237,0.40)" }}
             >
               Download App
@@ -282,14 +282,14 @@ function LandingNav({ onBrowse, onDownload }: { onBrowse: () => void; onDownload
 
             <button
               onClick={() => { setOpen(false); onBrowse(); }}
-              className="w-full py-4 rounded-2xl text-left px-5 text-[15px] font-semibold mb-3"
+              className="w-full py-4 rounded-full text-left px-6 text-[15px] font-semibold mb-3"
               style={{ background: "var(--ss-surface)", border: "1px solid var(--ss-line)", color: "var(--ss-text)" }}
             >
               Browse Pros
             </button>
             <button
               onClick={() => { setOpen(false); onDownload(); }}
-              className="w-full py-4 rounded-2xl px-5 text-[15px] font-bold text-white text-left"
+              className="ss-cta w-full py-4 rounded-full px-6 text-[15px] font-bold text-white text-left"
               style={{ background: "var(--ss-purple)", boxShadow: "0 4px 20px rgba(124, 58, 237,0.40)" }}
             >
               Download App
@@ -488,7 +488,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           <div style={{ position: "absolute", bottom: "-20%", right: "-5%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle, rgba(167,139,250,0.12) 0%, transparent 70%)" }} />
         </div>
 
-        <div className={`${CONTAINER} relative py-14 sm:py-20 lg:py-0 lg:min-h-[calc(100vh-4rem)] flex items-center`}>
+        <div className={`${CONTAINER} relative py-16 sm:py-24 lg:py-0 lg:min-h-[calc(100vh-4rem)] flex items-center`}>
           <div className="w-full grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-10 items-center">
 
             {/* Copy */}
@@ -527,7 +527,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
 
                   <button
                     onClick={goToFeed}
-                    className="group inline-flex items-center gap-2 h-12 px-6 rounded-2xl text-[15px] font-bold transition-all active:scale-[0.97] hover:opacity-80"
+                    className="group inline-flex items-center gap-2 h-12 px-6 rounded-full text-[15px] font-bold transition-all duration-150 active:scale-[0.97] hover:opacity-80"
                     style={{ border: "1px solid var(--ss-line-strong)" }}
                   >
                     Browse Pros
@@ -615,7 +615,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
             ].map(({ title, desc, color, icon }, i) => (
               <FadeIn key={title} delay={i * 100}>
                 <div
-                  className="h-full p-6 sm:p-7 rounded-3xl transition-transform hover:-translate-y-1"
+                  className="h-full p-6 sm:p-8 rounded-2xl transition-transform duration-150 hover:-translate-y-1"
                   style={{ background: "var(--ss-card-tint)", border: "1px solid var(--ss-line)" }}
                 >
                   <div
@@ -650,7 +650,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
             {/* Pro */}
             <FadeIn delay={60}>
               <div
-                className="relative h-full flex flex-col overflow-hidden rounded-3xl p-6 sm:p-8"
+                className="relative h-full flex flex-col overflow-hidden rounded-2xl p-6 sm:p-8"
                 style={{ background: "var(--ss-card-pro)", border: "1px solid var(--ss-purple-border)" }}
               >
                 <div
@@ -681,7 +681,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                   </ul>
                   <button
                     onClick={goToSignup}
-                    className="mt-auto w-full py-4 rounded-2xl font-bold text-[15px] text-white flex items-center justify-center gap-2 transition-transform active:scale-[0.97] hover:-translate-y-0.5"
+                    className="ss-cta mt-auto w-full py-4 rounded-full font-bold text-[15px] text-white flex items-center justify-center gap-2"
                     style={{ background: "var(--ss-purple)", boxShadow: "0 6px 24px rgba(124, 58, 237,0.42)" }}
                   >
                     Join as a Pro <ArrowRight size={17} />
@@ -693,7 +693,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
             {/* Client */}
             <FadeIn delay={120}>
               <div
-                className="relative h-full flex flex-col overflow-hidden rounded-3xl p-6 sm:p-8"
+                className="relative h-full flex flex-col overflow-hidden rounded-2xl p-6 sm:p-8"
                 style={{ background: "var(--ss-card-tint)", border: "1px solid var(--ss-line)" }}
               >
                 <div className="relative flex flex-col h-full">
@@ -719,7 +719,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                   </ul>
                   <button
                     onClick={goToFeed}
-                    className="mt-auto w-full py-4 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all active:scale-[0.97] hover:opacity-80"
+                    className="mt-auto w-full py-4 rounded-full font-bold text-[15px] flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.97] hover:opacity-80"
                     style={{ border: "1px solid var(--ss-line-strong)", background: "var(--ss-card-tint)", color: "var(--ss-text)" }}
                   >
                     Find Local Pros <ArrowRight size={17} />
@@ -737,7 +737,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           it; text and buttons switch to their on-light variants. */}
       <section
         id="download"
-        className="relative overflow-hidden py-16 sm:py-20"
+        className="relative overflow-hidden py-16 sm:py-24"
         style={
           theme === "dark"
             ? {
